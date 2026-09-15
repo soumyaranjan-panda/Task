@@ -1,0 +1,3438 @@
+[0m
+> build · big-pickle
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m• [0mFind existing handbook files[90m Explore Agent[0m
+[0m✓ [0mFind existing handbook files[90m Explore Agent[0m
+[0m→ [0mRead sql-handbook/1-Fundamentals/01-SQL-Basics.md
+[0m
+[0m← [0mWrite sql-handbook/1-Fundamentals/02-Data-Types.md
+Wrote file successfully.
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m← [0mWrite 1-Fundamentals/03-DDL-DML-DQL-DCL-TCL.md
+Wrote file successfully.
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mls -la
+total 44
+drwxrwxr-x  4 soumrnjn soumrnjn  4096 Sep 14 21:01 .
+drwxrwxr-x 12 soumrnjn soumrnjn  4096 Sep 14 20:41 ..
+drwxrwxr-x  2 soumrnjn soumrnjn  4096 Sep 14 21:01 1-Fundamentals
+-rwxrwxr-x  1 soumrnjn soumrnjn 19656 Sep 14 20:48 script.sh
+drwxrwxr-x  3 soumrnjn soumrnjn  4096 Sep 14 20:51 sql-handbook
+-rw-rw-r--  1 soumrnjn soumrnjn  4330 Sep 14 20:51 sql-master-prompt.md
+[0m
+[0m$ [0mls -la 1-Fundamentals/
+total 40
+drwxrwxr-x 2 soumrnjn soumrnjn  4096 Sep 14 21:01 .
+drwxrwxr-x 4 soumrnjn soumrnjn  4096 Sep 14 21:01 ..
+-rw-rw-r-- 1 soumrnjn soumrnjn 30016 Sep 14 21:01 03-DDL-DML-DQL-DCL-TCL.md
+[0m
+[0m← [0mWrite 1-Fundamentals/05-SELECT-FROM-WHERE.md
+Wrote file successfully.
+[0m
+[0m$ [0mwc -l 1-Fundamentals/05-SELECT-FROM-WHERE.md && echo "---" && head -5 1-Fundamentals/05-SELECT-FROM-WHERE.md
+1055 1-Fundamentals/05-SELECT-FROM-WHERE.md
+---
+# 05 — SELECT, FROM, WHERE: The Foundation of Every Query
+
+---
+
+## Table of Contents
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m✱ [0mGlob "**/*.md"[90m 9 matches[0m
+[0m→ [0mRead sql-handbook/1-Fundamentals/06-Logical-Query-Processing-Order.md
+[0m→ [0mRead sql-handbook/1-Fundamentals/05-SELECT-FROM-WHERE.md
+[0m→ [0mRead sql-handbook/1-Fundamentals/01-SQL-Basics.md[90m [limit=80][0m
+[0m→ [0mRead sql-handbook/1-Fundamentals/04-Constraints-Keys.md[90m [limit=60][0m
+[0m✱ [0mGrep "# Interview Questions"[90m in sql-handbook/1-Fundamentals/01-SQL-Basics.md · 3 matches[0m
+[0m→ [0mRead sql-handbook/1-Fundamentals/01-SQL-Basics.md[90m [offset=1218, limit=108][0m
+[0m
+[0m← [0mWrite sql-handbook/1-Fundamentals/06-Logical-Query-Processing-Order.md
+Wrote file successfully.
+[0m
+[0m$ [0mwc -l "/home/soumrnjn/Desktop/Task/SQL/sql-handbook/1-Fundamentals/06-Logical-Query-Processing-Order.md"
+1001 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/1-Fundamentals/06-Logical-Query-Processing-Order.md
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m→ [0mRead .
+[0m→ [0mRead 1-Fundamentals
+[0m→ [0mRead sql-handbook
+[0m→ [0mRead sql-handbook/1-Fundamentals
+[0m→ [0mRead 1-Fundamentals/05-SELECT-FROM-WHERE.md
+[0m→ [0mRead sql-handbook/1-Fundamentals/07-Filtering-Operators.md
+[0m→ [0mRead sql-handbook/1-Fundamentals/06-Logical-Query-Processing-Order.md
+[0m
+[0m← [0mWrite sql-handbook/1-Fundamentals/07-Filtering-Operators.md
+Wrote file successfully.
+[0m
+[0m$ [0mwc -l sql-handbook/1-Fundamentals/07-Filtering-Operators.md
+2086 sql-handbook/1-Fundamentals/07-Filtering-Operators.md
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m→ [0mRead .
+[0m→ [0mRead 1-Fundamentals
+[0m→ [0mRead sql-handbook
+[0m→ [0mRead 1-Fundamentals/05-SELECT-FROM-WHERE.md[90m [limit=100][0m
+[0m→ [0mRead sql-handbook/1-Fundamentals
+[0m→ [0mRead sql-handbook/1-Fundamentals/08-CASE-Expressions.md
+[0m→ [0mRead sql-handbook/1-Fundamentals/05-SELECT-FROM-WHERE.md[90m [limit=80][0m
+[0m
+[0m# [0mTodos
+[•] Generate comprehensive 08-CASE-Expressions section for SQL handbook
+[ ] Write to sql-handbook/1-Fundamentals/08-CASE-Expressions.md
+[0m
+[0m← [0mWrite sql-handbook/1-Fundamentals/08-CASE-Expressions.md
+Wrote file successfully.
+[0m
+[0m$ [0mwc -l /home/soumrnjn/Desktop/Task/SQL/sql-handbook/1-Fundamentals/08-CASE-Expressions.md
+998 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/1-Fundamentals/08-CASE-Expressions.md
+[0m
+[0m# [0mTodos
+[✓] Generate comprehensive 08-CASE-Expressions section for SQL handbook
+[✓] Write to sql-handbook/1-Fundamentals/08-CASE-Expressions.md
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mls -la /home/soumrnjn/Desktop/Task/SQL/ 2>/dev/null && find /home/soumrnjn/Desktop/Task/SQL -type d | head -50
+total 44
+drwxrwxr-x  4 soumrnjn soumrnjn  4096 Sep 14 21:01 .
+drwxrwxr-x 12 soumrnjn soumrnjn  4096 Sep 14 20:41 ..
+drwxrwxr-x  2 soumrnjn soumrnjn  4096 Sep 14 21:05 1-Fundamentals
+-rwxrwxr-x  1 soumrnjn soumrnjn 19656 Sep 14 20:48 script.sh
+drwxrwxr-x  4 soumrnjn soumrnjn  4096 Sep 14 21:16 sql-handbook
+-rw-rw-r--  1 soumrnjn soumrnjn  4330 Sep 14 20:51 sql-master-prompt.md
+/home/soumrnjn/Desktop/Task/SQL
+/home/soumrnjn/Desktop/Task/SQL/1-Fundamentals
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/1-Fundamentals
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic
+[0m
+[0m$ [0mfind /home/soumrnjn/Desktop/Task/SQL/1-Fundamentals /home/soumrnjn/Desktop/Task/SQL/sql-handbook -type f | sort
+/home/soumrnjn/Desktop/Task/SQL/1-Fundamentals/03-DDL-DML-DQL-DCL-TCL.md
+/home/soumrnjn/Desktop/Task/SQL/1-Fundamentals/05-SELECT-FROM-WHERE.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/1-Fundamentals/01-SQL-Basics.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/1-Fundamentals/02-Data-Types.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/1-Fundamentals/03-DDL-DML-DQL-DCL-TCL.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/1-Fundamentals/04-Constraints-Keys.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/1-Fundamentals/05-SELECT-FROM-WHERE.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/1-Fundamentals/06-Logical-Query-Processing-Order.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/1-Fundamentals/07-Filtering-Operators.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/1-Fundamentals/08-CASE-Expressions.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/09-NULL-Deep-Dive.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/errors.log
+[0m
+[0m→ [0mRead sql-handbook/2-NULL-and-Logic/09-NULL-Deep-Dive.md
+[0m→ [0mRead sql-handbook/2-NULL-and-Logic
+[0m→ [0mRead sql-handbook/1-Fundamentals/07-Filtering-Operators.md[90m [limit=120][0m
+[0m→ [0mRead sql-handbook/1-Fundamentals/06-Logical-Query-Processing-Order.md[90m [limit=60][0m
+[0m→ [0mRead sql-handbook/1-Fundamentals/07-Filtering-Operators.md[90m [offset=1980, limit=90][0m
+[0m→ [0mRead sql-handbook/1-Fundamentals/08-CASE-Expressions.md[90m [limit=45][0m
+[0m→ [0mRead sql-handbook/1-Fundamentals/07-Filtering-Operators.md[90m [limit=30, offset=10][0m
+[0m→ [0mRead sql-handbook/1-Fundamentals/08-CASE-Expressions.md[90m [limit=10, offset=10][0m
+ [0m
+[0m← [0mWrite sql-handbook/2-NULL-and-Logic/09-NULL-Deep-Dive.md
+Wrote file successfully.
+[0m
+[0m✱ [0mGrep "wait, no: NULLIF|skус"[90m in sql-handbook/2-NULL-and-Logic/09-NULL-Deep-Dive.md · 2 matches[0m
+[0m
+[0m← [0mEdit sql-handbook/2-NULL-and-Logic/09-NULL-Deep-Dive.md
+Index: /home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/09-NULL-Deep-Dive.md
+===================================================================
+--- /home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/09-NULL-Deep-Dive.md
++++ /home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/09-NULL-Deep-Dive.md
+@@ -516,9 +516,9 @@
+ 
+ | product_id | sku   |
+ |-----------|-------|
+ | P1        | W-001 |
+-| P2        | ''    |  -- wait, no: NULLIF('','') -> NULL
++| P2        | NULL  |
+ | P3        | G-002 |
+ 
+ Correct output:
+ 
+
+[0m
+[0m← [0mEdit sql-handbook/2-NULL-and-Logic/09-NULL-Deep-Dive.md
+Index: /home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/09-NULL-Deep-Dive.md
+===================================================================
+--- /home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/09-NULL-Deep-Dive.md
++++ /home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/09-NULL-Deep-Dive.md
+@@ -1522,9 +1522,9 @@
+ 1. **Dashboards that silently drop rows** — a `WHERE status IN (...)` or `status = 'x'` filter that never includes `status IS NULL` shrinks cohorts without a trace. Add visible "unknown" buckets.
+ 2. **NOT IN zero-row join cache key** — a "fetch missing customers over a derived set" that returns zero rows forever because the derived set contains NULLs. Use `NOT EXISTS`.
+ 3. **GROUP BY NULL bucketing a single "no value" group** that merges very different semantics (missing, redacted, not-applicable) into one row. Consider separate sentinel values or an `is_known` flag instead of mixing meanings under one NULL.
+ 4. **Sort-page flips between engines** — NULL default order differs; paginated endpoints must use a deterministic `ORDER BY` with a unique tie-breaker, or users see shifting pages.
+-5. **UNIQUE-with-NULL data quality gap** — multiple NULL emails/skус allowed by default; enforce `NULLS NOT DISTINCT` (Postgres 15+) or use `COALESCE(email, '<sentinel>')`-based unique ID if the domain demands uniqueness even for empty values.
++5. **UNIQUE-with-NULL data quality gap** — multiple NULL emails / SKUs allowed by default; enforce `NULLS NOT DISTINCT` (Postgres 15+) or use `COALESCE(email, '<sentinel>')`-based unique ID if the domain demands uniqueness even for empty values.
+ 6. **CHECK that permits junk** — `CHECK (qty > 0)` doesn't reject NULL qty. Guard with `NOT NULL` or an `IS NULL OR` branch.
+ 7. **Division-by-zero via NULLIF** — NULL results that flow into finance reports; document and normalize explicitly.
+ 8. **Oracle `''`==NULL** — importing "empty" strings into Oracle stores NULL, and exporting them to other engines changes `''` ↔ NULL. Handle at the ETL boundary.
+ 9. **Indexes on `col = NULL`** — someone "indexes" the wrong thing; `col IS NULL` (and possibly a partial index) is what actually serves the query.
+
+[0m
+[0m$ [0mwc -l /home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/09-NULL-Deep-Dive.md
+1673 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/09-NULL-Deep-Dive.md
+[0m
+[0m$ [0mgrep -c '^```' /home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/09-NULL-Deep-Dive.md && grep -c '^## ' /home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/09-NULL-Deep-Dive.md && grep -c '^### ' /home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/09-NULL-Deep-Dive.md
+150
+28
+98
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m→ [0mRead .
+[0m→ [0mRead sql-handbook
+[0m→ [0mRead sql-handbook/2-NULL-and-Logic
+[0m→ [0mRead sql-handbook/2-NULL-and-Logic/12-COALESCE-NULLIF.md
+[0m→ [0mRead sql-handbook/2-NULL-and-Logic/09-NULL-Deep-Dive.md
+[0m
+[0m$ [0mwc -l /home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/*.md
+1663 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/09-NULL-Deep-Dive.md
+  1059 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/10-Three-Valued-Logic.md
+   991 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/11-NULL-Comparisons.md
+     0 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/12-COALESCE-NULLIF.md
+  3713 total
+[0m
+[0m→ [0mRead sql-handbook/2-NULL-and-Logic/11-NULL-Comparisons.md[90m [limit=80][0m
+[0m→ [0mRead sql-handbook/2-NULL-and-Logic/11-NULL-Comparisons.md[90m [offset=481, limit=180][0m
+[0m→ [0mRead script.sh
+[0m
+[0m← [0mWrite sql-handbook/2-NULL-and-Logic/12-COALESCE-NULLIF.md
+Wrote file successfully.
+[0m
+[0m$ [0mwc -l /home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/12-COALESCE-NULLIF.md
+1561 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/12-COALESCE-NULLIF.md
+[0m
+[0m$ [0mgrep -n "^## \|^# " /home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/12-COALESCE-NULLIF.md | head -40
+27:## Overview
+42:## Sample Data
+142:## COALESCE — Fundamentals
+172:## COALESCE — Internal Working
+201:## COALESCE — Syntax
+231:## COALESCE — Examples
+341:## COALESCE — Use Cases
+437:## COALESCE — Edge Cases
+485:## COALESCE — Common Mistakes
+554:## NULLIF — Fundamentals
+587:## NULLIF — Internal Working
+607:## NULLIF — Syntax
+634:## NULLIF — Examples
+751:## NULLIF — Use Cases
+798:## NULLIF — Edge Cases
+832:## NULLIF — Common Mistakes
+883:## COALESCE and NULLIF Together
+990:## COALESCE vs Other NULL-Handling Functions
+1010:## Database-Specific Differences
+1087:## Performance Implications
+1170:## BAD Approach vs BETTER Approach
+1246:## Production Pitfalls
+1318:## Best Practices
+1395:# Interview Questions
+1397:## Beginner
+1415:## Intermediate
+1433:## Advanced
+1447:## Scenario Based
+1461:## Tricky
+1477:## Output Prediction
+1515:## Debugging
+1544:## Performance
+[0m
+[0m$ [0mecho "=== Labels ===" && grep -c "Interview trap\|Common misconception\|Production pitfall\|BAD\|BETTER" /home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/12-COALESCE-NULLIF.md && echo "=== DB callouts ===" && grep -c "PostgreSQL\|MySQL\|SQL Server\|Oracle" /home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/12-COALESCE-NULLIF.md && echo "=== Cross-refs ===" && grep -c "Cross-reference\|cross-reference\|see \[" /home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/12-COALESCE-NULLIF.md && echo "=== Interview questions count ===" && grep -c "^[0-9]\+\." /home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/12-COALESCE-NULLIF.md
+=== Labels ===
+39
+=== DB callouts ===
+67
+=== Cross-refs ===
+2
+=== Interview questions count ===
+84
+[0m
+[0m$ [0mgrep -n "^[0-9]\+\." /home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/12-COALESCE-NULLIF.md | tail -20
+1467:31. What does `COALESCE(NULL, NULLIF(1, 1), 3)` return?
+1469:32. What does `NULLIF(NULL, NULLIF(1, 1))` return?
+1471:33. In Oracle, what does `COALESCE('', 'fallback')` return? In PostgreSQL?
+1473:34. What is the result of `SELECT NULLIF('abc', 'ABC')` in MySQL with a case-insensitive collation? With a case-sensitive collation?
+1475:35. Write a single expression that returns "yes" if `a = b` (including when both are NULL), and "no" otherwise, using `NULLIF`.
+1481:36.
+1487:37.
+1493:38.
+1500:39.
+1507:40.
+1517:41. A query `SELECT * FROM employees WHERE COALESCE(dept_id, 0) = 1` is slow on a table with 10 million rows. Identify the problem and rewrite the query.
+1519:42. A report shows `total_compensation = 0` for employees whose salary is not yet determined. Identify the bug in:
+1525:43. A division query does not error but returns unexpected NULLs:
+1532:44. A NOT IN query returns zero rows even though there should be matches:
+1539:45. Explain why this query may silently produce wrong results:
+1546:46. You have a query with `WHERE COALESCE(status, 'unknown') = 'active'` on a table with 50 million rows and an index on `status`. Write a sargable equivalent and explain why it should be faster.
+1548:47. Compare the following two queries on a table with 100 million rows and an index on `dept_id`. Which is likely faster and why?
+1557:48. You need to filter on `NULLIF(col, '')` in a WHERE clause on a large table. Rewrite the query to be sargable.
+1559:49. Why might `SELECT * FROM t WHERE COALESCE(a, b) = 5` be slower than `SELECT * FROM t WHERE a = 5 OR (a IS NULL AND b = 5)`?
+1561:50. You are deciding between `COALESCE(SUM(amount), 0)` and leaving SUM as NULL in a dashboard query returning 10,000 rows. Is there a performance difference? Is there a correctness difference?
+[0m
+[0m$ [0mgrep -n "mermaid" /home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/12-COALESCE-NULLIF.md
+975:```mermaid
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m← [0mWrite 2-NULL-and-Logic/13-IS-DISTINCT-FROM.md
+Wrote file successfully.
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mls -la /home/soumrnjn/Desktop/Task/SQL
+total 44
+drwxrwxr-x  4 soumrnjn soumrnjn  4096 Sep 14 21:41 .
+drwxrwxr-x 12 soumrnjn soumrnjn  4096 Sep 14 20:41 ..
+drwxrwxr-x  2 soumrnjn soumrnjn  4096 Sep 14 21:41 2-NULL-and-Logic
+-rwxrwxr-x  1 soumrnjn soumrnjn 19656 Sep 14 20:48 script.sh
+drwxrwxr-x  5 soumrnjn soumrnjn  4096 Sep 14 21:41 sql-handbook
+-rw-rw-r--  1 soumrnjn soumrnjn  4330 Sep 14 20:51 sql-master-prompt.md
+[0m
+[0m$ [0mfind /home/soumrnjn/Desktop/Task/SQL/sql-handbook -type f | sort
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/1-Fundamentals/01-SQL-Basics.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/1-Fundamentals/02-Data-Types.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/1-Fundamentals/03-DDL-DML-DQL-DCL-TCL.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/1-Fundamentals/04-Constraints-Keys.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/1-Fundamentals/05-SELECT-FROM-WHERE.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/1-Fundamentals/06-Logical-Query-Processing-Order.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/1-Fundamentals/07-Filtering-Operators.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/1-Fundamentals/08-CASE-Expressions.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/09-NULL-Deep-Dive.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/10-Three-Valued-Logic.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/11-NULL-Comparisons.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/12-COALESCE-NULLIF.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/13-IS-DISTINCT-FROM.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/14-NOT-IN-NULL-Pitfalls.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/15-INNER-JOIN.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/errors.log
+[0m
+[0m→ [0mRead sql-master-prompt.md
+[0m
+[0m$ [0mwc -l /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/15-INNER-JOIN.md /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/../3-Joins/* 2>/dev/null; ls -la /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/
+0 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/15-INNER-JOIN.md
+0 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/../3-Joins/15-INNER-JOIN.md
+0 total
+total 8
+drwxrwxr-x 2 soumrnjn soumrnjn 4096 Sep 14 21:48 .
+drwxrwxr-x 5 soumrnjn soumrnjn 4096 Sep 14 21:41 ..
+-rw-rw-r-- 1 soumrnjn soumrnjn    0 Sep 14 21:48 15-INNER-JOIN.md
+[0m
+[0m→ [0mRead sql-handbook/3-Joins/15-INNER-JOIN.md
+[0m→ [0mRead sql-handbook/2-NULL-and-Logic/14-NOT-IN-NULL-Pitfalls.md[90m [limit=150][0m
+[0m
+[0m$ [0mwc -l /home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/*.md
+1663 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/09-NULL-Deep-Dive.md
+  1059 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/10-Three-Valued-Logic.md
+   991 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/11-NULL-Comparisons.md
+  1553 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/12-COALESCE-NULLIF.md
+    16 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/13-IS-DISTINCT-FROM.md
+   622 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/14-NOT-IN-NULL-Pitfalls.md
+  5904 total
+[0m
+[0m→ [0mRead sql-handbook/2-NULL-and-Logic/14-NOT-IN-NULL-Pitfalls.md[90m [offset=150, limit=160][0m
+[0m
+[0m$ [0mgrep -n "# Interview Questions" /home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/14-NOT-IN-NULL-Pitfalls.md
+517:# Interview Questions
+[0m
+[0m→ [0mRead sql-handbook/2-NULL-and-Logic/14-NOT-IN-NULL-Pitfalls.md[90m [offset=517][0m
+[0m
+[0m← [0mWrite sql-handbook/3-Joins/15-INNER-JOIN.md
+Wrote file successfully.
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m→ [0mRead .
+[0m→ [0mRead sql-handbook
+[0m→ [0mRead sql-master-prompt.md
+[0m→ [0mRead sql-handbook/3-Joins
+[0m→ [0mRead sql-handbook/3-Joins/16-LEFT-JOIN.md
+[0m→ [0mRead sql-handbook/3-Joins/15-INNER-JOIN.md
+[0m
+[0m← [0mWrite sql-handbook/3-Joins/16-LEFT-JOIN.md
+Wrote file successfully.
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mls /home/soumrnjn/Desktop/Task/SQL
+2-NULL-and-Logic
+script.sh
+sql-handbook
+sql-master-prompt.md
+[0m
+[0m→ [0mRead sql-handbook
+[0m✱ [0mGlob "**/*.md"[90m in sql-handbook · 17 matches[0m
+[0m→ [0mRead sql-handbook/3-Joins/17-RIGHT-FULL-JOIN.md
+[0m→ [0mRead sql-handbook/3-Joins/16-LEFT-JOIN.md
+[0m→ [0mRead sql-handbook/3-Joins/15-INNER-JOIN.md
+[0m
+[0m← [0mWrite sql-handbook/3-Joins/17-RIGHT-FULL-JOIN.md
+Wrote file successfully.
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m→ [0mRead .
+[0m→ [0mRead sql-handbook
+[0m→ [0mRead sql-master-prompt.md
+[0m→ [0mRead sql-handbook/3-Joins
+[0m→ [0mRead sql-handbook/3-Joins/19-SELF-JOIN.md
+[0m→ [0mRead sql-handbook/3-Joins/15-INNER-JOIN.md
+[0m
+[0m← [0mWrite sql-handbook/3-Joins/19-SELF-JOIN.md
+Wrote file successfully.
+[0m
+[0m✗ [0mWrite  failed
+[91m[1mError: [0mTool execution aborted
+[0m
+[0m$ [0mwc -l "/home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/19-SELF-JOIN.md"
+816 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/19-SELF-JOIN.md
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mls -la
+total 44
+drwxrwxr-x  4 soumrnjn soumrnjn  4096 Sep 14 21:41 .
+drwxrwxr-x 12 soumrnjn soumrnjn  4096 Sep 14 20:41 ..
+drwxrwxr-x  2 soumrnjn soumrnjn  4096 Sep 14 21:41 2-NULL-and-Logic
+-rwxrwxr-x  1 soumrnjn soumrnjn 19656 Sep 14 20:48 script.sh
+drwxrwxr-x  5 soumrnjn soumrnjn  4096 Sep 14 21:41 sql-handbook
+-rw-rw-r--  1 soumrnjn soumrnjn  4330 Sep 15 06:03 sql-master-prompt.md
+[0m
+[0m✱ [0mGlob "**/*.md"[90m 23 matches[0m
+[0m→ [0mRead sql-handbook/3-Joins/21-JOIN-Duplicates-and-Fanout.md
+[0m→ [0mRead sql-handbook/3-Joins/20-JOIN-ON-vs-WHERE.md
+[0m→ [0mRead sql-handbook/3-Joins/16-LEFT-JOIN.md[90m [limit=60][0m
+[0m
+[0m← [0mWrite sql-handbook/3-Joins/21-JOIN-Duplicates-and-Fanout.md
+Wrote file successfully.
+[0m
+[0m← [0mEdit sql-handbook/3-Joins/21-JOIN-Duplicates-and-Fanout.md
+Index: /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/21-JOIN-Duplicates-and-Fanout.md
+===================================================================
+--- /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/21-JOIN-Duplicates-and-Fanout.md
++++ /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/21-JOIN-Duplicates-and-Fanout.md
+@@ -190,18 +190,18 @@
+ 
+ ```sql
+ -- WRONG intent: we want "number of users"
+ SELECT COUNT(*) FROM users u JOIN orders o ON o.user_id = u.user_id;
+--- returns 3, but there are only 3 users... by luck. Add a 4th order and it breaks.
++-- returns 3 today — but that is coincidence (Ana 2 + Ben 1). Add a 4th
++-- order for Ana and it silently becomes 4 while there are still 3 users.
+ ```
+ 
+ ```sql
+--- CORRECT: count at the users grain
+-SELECT COUNT(*) FROM users;
+--- returns 3
++-- CORRECT for "number of users"
++SELECT COUNT(*) FROM users;            -- 3, the true user count
+ 
+-SELECT COUNT(DISTINCT o.user_id) FROM orders o;
+--- also returns 3, recovered from the detail side (must have a unique-driving key)
++-- Different question! "users with at least one order"
++SELECT COUNT(DISTINCT o.user_id) FROM orders o;   -- 2 (Cid has no orders)
+ ```
+ 
+ ---
+ 
+
+[0m
+[0m← [0mEdit sql-handbook/3-Joins/21-JOIN-Duplicates-and-Fanout.md
+Index: /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/21-JOIN-Duplicates-and-Fanout.md
+===================================================================
+--- /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/21-JOIN-Duplicates-and-Fanout.md
++++ /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/21-JOIN-Duplicates-and-Fanout.md
+@@ -249,9 +249,8 @@
+ |---------:|-----------:|--------------:|
+ | 101      | **80.00**  | **80.00**     |
+ | 102      | **10.00**  | **10.00**     |
+ | 103      | **24.00**  | **24.00**     |
+-| 104      | NULL       | NULL          |
+ 
+ For order 101 the *true* values are:
+ 
+ - line total = `20.00 + 20.00` = `40.00` (not 80!)
+
+[0m
+[0m← [0mEdit sql-handbook/3-Joins/21-JOIN-Duplicates-and-Fanout.md
+Index: /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/21-JOIN-Duplicates-and-Fanout.md
+===================================================================
+--- /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/21-JOIN-Duplicates-and-Fanout.md
++++ /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/21-JOIN-Duplicates-and-Fanout.md
+@@ -323,9 +323,9 @@
+ | Query | Result | Right interpretation |
+ |---|---|---|
+ | `SELECT COUNT(*) FROM orders;` | 3 | order grain |
+ | `SELECT COUNT(*) FROM orders o JOIN order_items oi ON oi.order_id = o.order_id;` | 4 | order-line grain (correct fan-out) |
+-| `SELECT COUNT(*) FROM orders o JOIN order_items oi ... JOIN payments p ...;` | 4+2+1 = line×payment pairs | accidentally multiplied |
++| `SELECT COUNT(*) FROM orders o JOIN order_items oi ... JOIN payments p ...;` | 6 | line×payment pairs (2×2 = 4 for order 101, 1 for each of 102 and 103) — accidentally multiplied |
+ | `SELECT COUNT(DISTINCT oi.order_id) FROM order_items oi;` | 3 | recovered order grain from detail |
+ | `SELECT COUNT(DISTINCT p.order_id) FROM payments p;` | 3 | recovered order grain from detail |
+ 
+ Pattern to internalize:
+
+[0m
+[0m→ [0mRead sql-handbook/3-Joins/21-JOIN-Duplicates-and-Fanout.md[90m [offset=130, limit=120][0m
+[0m→ [0mRead sql-handbook/3-Joins/21-JOIN-Duplicates-and-Fanout.md[90m [limit=80, offset=249][0m
+[0m
+> build · big-pickle
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mls -la
+total 44
+drwxrwxr-x  4 soumrnjn soumrnjn  4096 Sep 14 21:41 .
+drwxrwxr-x 12 soumrnjn soumrnjn  4096 Sep 14 20:41 ..
+drwxrwxr-x  2 soumrnjn soumrnjn  4096 Sep 14 21:41 2-NULL-and-Logic
+-rwxrwxr-x  1 soumrnjn soumrnjn 19656 Sep 14 20:48 script.sh
+drwxrwxr-x  5 soumrnjn soumrnjn  4096 Sep 14 21:41 sql-handbook
+-rw-rw-r--  1 soumrnjn soumrnjn  4330 Sep 15 06:03 sql-master-prompt.md
+[0m
+[0m$ [0mls -la sql-handbook && ls -la 2-NULL-and-Logic
+total 52
+drwxrwxr-x 5 soumrnjn soumrnjn  4096 Sep 14 21:41 .
+drwxrwxr-x 4 soumrnjn soumrnjn  4096 Sep 14 21:41 ..
+drwxrwxr-x 2 soumrnjn soumrnjn  4096 Sep 14 21:25 1-Fundamentals
+drwxrwxr-x 2 soumrnjn soumrnjn  4096 Sep 14 21:41 2-NULL-and-Logic
+drwxrwxr-x 2 soumrnjn soumrnjn  4096 Sep 15 06:10 3-Joins
+-rw-rw-r-- 1 soumrnjn soumrnjn 25672 Sep 15 06:10 errors.log
+total 28
+drwxrwxr-x 2 soumrnjn soumrnjn  4096 Sep 14 21:41 .
+drwxrwxr-x 4 soumrnjn soumrnjn  4096 Sep 14 21:41 ..
+-rw-rw-r-- 1 soumrnjn soumrnjn 20450 Sep 14 21:41 13-IS-DISTINCT-FROM.md
+[0m
+[0m$ [0mls -la sql-handbook/3-Joins && ls -la sql-handbook/1-Fundamentals
+total 284
+drwxrwxr-x 2 soumrnjn soumrnjn  4096 Sep 15 06:10 .
+drwxrwxr-x 5 soumrnjn soumrnjn  4096 Sep 14 21:41 ..
+-rw-rw-r-- 1 soumrnjn soumrnjn 27479 Sep 14 21:51 15-INNER-JOIN.md
+-rw-rw-r-- 1 soumrnjn soumrnjn 38690 Sep 14 21:55 16-LEFT-JOIN.md
+-rw-rw-r-- 1 soumrnjn soumrnjn 38275 Sep 14 21:59 17-RIGHT-FULL-JOIN.md
+-rw-rw-r-- 1 soumrnjn soumrnjn 28345 Sep 14 22:02 18-CROSS-JOIN.md
+-rw-rw-r-- 1 soumrnjn soumrnjn 42265 Sep 15 05:51 19-SELF-JOIN.md
+-rw-rw-r-- 1 soumrnjn soumrnjn 26643 Sep 15 05:54 20-JOIN-ON-vs-WHERE.md
+-rw-rw-r-- 1 soumrnjn soumrnjn 36385 Sep 15 06:06 21-JOIN-Duplicates-and-Fanout.md
+-rw-rw-r-- 1 soumrnjn soumrnjn 30926 Sep 15 06:10 22-Many-to-Many-Joins.md
+-rw-rw-r-- 1 soumrnjn soumrnjn     0 Sep 15 06:10 23-Anti-Joins.md
+total 360
+drwxrwxr-x 2 soumrnjn soumrnjn  4096 Sep 14 21:25 .
+drwxrwxr-x 5 soumrnjn soumrnjn  4096 Sep 14 21:41 ..
+-rw-rw-r-- 1 soumrnjn soumrnjn 33935 Sep 14 20:54 01-SQL-Basics.md
+-rw-rw-r-- 1 soumrnjn soumrnjn 60389 Sep 14 21:00 02-Data-Types.md
+-rw-rw-r-- 1 soumrnjn soumrnjn 30016 Sep 14 21:01 03-DDL-DML-DQL-DCL-TCL.md
+-rw-rw-r-- 1 soumrnjn soumrnjn 38520 Sep 14 21:03 04-Constraints-Keys.md
+-rw-rw-r-- 1 soumrnjn soumrnjn 30290 Sep 14 21:05 05-SELECT-FROM-WHERE.md
+-rw-rw-r-- 1 soumrnjn soumrnjn 43168 Sep 14 21:10 06-Logical-Query-Processing-Order.md
+-rw-rw-r-- 1 soumrnjn soumrnjn 60909 Sep 14 21:16 07-Filtering-Operators.md
+-rw-rw-r-- 1 soumrnjn soumrnjn 45650 Sep 14 21:20 08-CASE-Expressions.md
+[0m
+[0m→ [0mRead sql-handbook/3-Joins/15-INNER-JOIN.md
+[0m→ [0mRead sql-handbook/3-Joins/16-LEFT-JOIN.md[90m [limit=70][0m
+[0m
+[0m$ [0mfor f in sql-handbook/3-Joins/18-CROSS-JOIN.md sql-handbook/3-Joins/22-Many-to-Many-Joins.md sql-handbook/3-Joins/20-JOIN-ON-vs-WHERE.md; do echo "=== $f ==="; grep -n "^#" "$f" | head -20; done
+=== sql-handbook/3-Joins/18-CROSS-JOIN.md ===
+1:# CROSS JOIN
+3:## Table of Contents
+25:## What Is a CROSS JOIN?
+31:### Why Does CROSS JOIN Exist?
+44:## Syntax
+63:## Internal Working
+88:## Sample Tables
+90:### `colors`
+100:### `sizes`
+111:### `employees`
+123:### `departments`
+136:## Basic Examples
+138:### Example 1: Colors × Sizes
+169:### Example 2: Using the Comma Syntax
+180:### Example 3: Employees × Departments
+217:## Scenario-Based Examples
+219:### Scenario 1: Generate a Date Series with CROSS JOIN
+264:### Scenario 2: Pair Every Employee with Every Project for Scheduling
+303:### Scenario 3: Generate Test Data
+337:## CROSS JOIN vs Explicit Cartesian Product
+=== sql-handbook/3-Joins/22-Many-to-Many-Joins.md ===
+1:# 22. Many-to-Many Joins
+3:## Fundamentals
+45:## Why the junction table exists
+60:## Sample Tables
+112:## Syntax
+131:## How It Works (internal mechanics)
+153:## Basic Query + Expected Output
+180:## LEFT JOIN: keeping "zero-match" rows + NULLs
+226:## Existence Checks: "Courses that have at least one student"
+275:## Aggregation Without Double Counting
+323:## The Double-Counting Pitfall (fan-out distortion)
+388:### The subtler version: aggregates on the parent column
+426:## Self-Referential Many-to-Many (advanced)
+473:## Edge Cases
+485:## NULL Behavior
+496:## Common Mistakes
+511:## Production Pitfalls
+521:## Performance Implications
+537:## Comparison Tables
+559:## Database-Specific Notes
+=== sql-handbook/3-Joins/20-JOIN-ON-vs-WHERE.md ===
+1:# 20 — JOIN: ON vs WHERE
+8:## Fundamentals
+33:## The mental model (one sentence)
+44:## Logical order of operations
+67:## Sample tables
+118:## INNER JOIN: ON and WHERE are equivalent
+160:## LEFT JOIN: the two clauses behave differently
+164:### Put it in WHERE (BAD for "keep everything")
+183:### Put it in ON (keeps the LEFT semantics)
+216:### Decision matrix
+229:## The `ON` clause is not "just a faster WHERE"
+265:## Filtering on the LEFT (driving) table also differs
+304:## The anti-join pattern: `LEFT JOIN ... WHERE inner_col IS NULL`
+334:## NULL behavior in ON vs WHERE
+357:## ON can reference tables joined earlier
+375:## Multi-table chains and accidental re-inlining
+394:## Internal working & filter pushdown
+396:### Conceptual evaluation
+404:### What the optimizer actually does
+438:### Sargability side note
+[0m
+[0m$ [0mgrep -n "^# Interview" sql-handbook/3-Joins/22-Many-to-Many-Joins.md sql-handbook/3-Joins/20-JOIN-ON-vs-WHERE.md; echo "---tail of 22---"; tail -60 sql-handbook/3-Joins/22-Many-to-Many-Joins.md
+sql-handbook/3-Joins/22-Many-to-Many-Joins.md:599:# Interview Questions
+sql-handbook/3-Joins/20-JOIN-ON-vs-WHERE.md:535:# Interview Questions
+---tail of 22---
+Answers are intentionally not provided so you can attempt them first.
+
+### Beginner
+
+1. What is a many-to-many relationship, and why can't you model it with just two tables?
+2. Given `students`, `courses`, `enrollments`, write the query that lists every (student, course) pair.
+3. What does "one row in `enrollments`" represent? Why does that matter when you write a `COUNT(*)`?
+4. What is a junction table, and what is its composite primary key normally?
+5. When listing residents of `students` and `enrollments`, why does Alice appear on multiple output rows? What is that effect called?
+
+### Intermediate
+
+6. Explain the difference between counting a student's courses with `students ⋈ enrollments` vs. with `students ⋈ enrollments ⋈ courses`. Is the result the same? Why join fewer tables?
+7. Given `products`, `categories`, `product_categories`, write a query to find categories that have **no** products, using `LEFT JOIN`. Now write the same with `NOT EXISTS`. Which reads better?
+8. Why does `SELECT COUNT(*) FROM authors JOIN book_authors JOIN books` return more than the number of books? How do you fix the query when you want the count of distinct books?
+9. What is the difference between `JOIN` + `DISTINCT` and `EXISTS` for the question "which courses have students"? In what cases might each be preferable?
+
+### Advanced
+
+10. Write a "people you may know" (friends-of-friends) query against a self-referential `follows` table. How do you prevent recommending people the user already follows, and avoid duplicates?
+11. When you need both per-student aggregates *and* the full student↔course list in one result, why might you aggregate in a derived table/CTE before joining? Provide a scenario.
+12. Explain the potential double counting when you `AVG(price)` after joining products to categories. What is the correct grain for the "average product price" question, and how does fan-out change the result?
+13. How could you decide between nested-loop and hash join for a large junction query, and what specific numbers from `EXPLAIN ANALYZE` would you read?
+14. A junction table must support fast lookups in both directions but can only have one PK. How do you index it, and what must you check afterward?
+
+### Scenario Based
+
+15. A tutoring platform: `students`, `tutors`, and `sessions` (junction with `hours` and `date`). Write a query giving each tutor their total and average hours, then one giving each student theirs. State the grain of every intermediate set.
+16. A social app has `follows(follower_id, followee_id)`. Write a single query that reports each user's follower count and followee count. Where could a naive `COUNT` double count, and how do you avoid it?
+17. Reporting "revenue per category" from `orders ⋈ order_items ⋈ products ⋈ product_categories`. A product in two categories is expected to appear in both rows — but what goes wrong if the same order is then joined to another many-to-many table? How would you redesign the query?
+
+### Tricky
+
+18. Can `NULL` appear in the composite key of a junction table's output rows? What happens to the joins when a junction FK is `NULL`, and what protects against it?
+19. If a junction row references a course that was deleted (no FK constraint), what is the difference in output between INNER and LEFT JOIN for that enrollment?
+20. Two students both retake the same course in different terms using a `term` column. The pair `(student, course)` is no longer unique. What changes in your schema, and how do your `COUNT(DISTINCT ...)` queries change meaning?
+21. Your recommendation query over `follows` returned users the requester already follows. Why, and what guard fixes it?
+
+### Output Prediction
+
+For each, state the exact number of output rows and the distinguished rows BEFORE running the DB:
+
+22. Our sample data (`enrollments` has 5 rows): `SELECT * FROM students JOIN enrollments JOIN courses` — how many rows?
+23. Same data, but start with the `LEFT JOIN` from `students`, and Carol has no courses — how many rows, and what do Carol's course columns contain?
+24. Products/categories data with keyboard in two categories: `SELECT category_name, AVG(price)` grouped by category — what values, and can you explain them?
+25. `SELECT COUNT(DISTINCT book_id)` vs. `SELECT COUNT(*)` over the books triple join — give both numbers.
+
+### Debugging
+
+26. A report "number of students per course" returns course counts that sum higher than the number of students. What inquiries do you run to decide whether the query or the data is wrong?
+27. A page listing "Alice's courses" shows duplicates of "Intro to SQL". The `enrollments` PK is missing. What is the origin of the duplicate, and how do you resolve it correctly versus masking it?
+28. `EXPLAIN ANALYZE` shows "estimated rows = 10, actual rows = 1,000,000" on an enrollment join. What does that gap mean, and what is the immediate next step?
+29. Your `LEFT JOIN` "users with no roles" query returns zero rows despite orphan users existing. Which clause is nearly always the culprit?
+
+### Performance
+
+30. How would you verify whether the reverse-direction index on a junction table is actually being used? Show the steps and the plan artifacts you would check.
+31. Compare the likely plan shapes of `JOIN + DISTINCT` vs `EXISTS` for "courses with students" and explain what you'd look for in the plan to call one better than the other on a specific dataset.
+32. Someone claims "nested-loop join is always better for many-to-many." What is wrong with that claim, and what factors decide the join operator in practice?
+33. What statistics, cardinality, and data-distribution information would you collect to choose between aggregating `enrollments` first versus joining-and-grouping, and how do you measure the difference on production data?
+[0m
+[0m→ [0mRead sql-handbook/3-Joins/20-JOIN-ON-vs-WHERE.md[90m [offset=304, limit=35][0m
+[0m
+[0m← [0mWrite sql-handbook/3-Joins/23-Anti-Joins.md
+Wrote file successfully.
+[0m
+[0m$ [0mwc -l sql-handbook/3-Joins/23-Anti-Joins.md && grep -c "^#" sql-handbook/3-Joins/23-Anti-Joins.md
+1131 sql-handbook/3-Joins/23-Anti-Joins.md
+70
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mls -la /home/soumrnjn/Desktop/Task/SQL
+total 44
+drwxrwxr-x  4 soumrnjn soumrnjn  4096 Sep 14 21:41 .
+drwxrwxr-x 12 soumrnjn soumrnjn  4096 Sep 14 20:41 ..
+drwxrwxr-x  2 soumrnjn soumrnjn  4096 Sep 14 21:41 2-NULL-and-Logic
+-rwxrwxr-x  1 soumrnjn soumrnjn 19656 Sep 14 20:48 script.sh
+drwxrwxr-x  6 soumrnjn soumrnjn  4096 Sep 15 08:02 sql-handbook
+-rw-rw-r--  1 soumrnjn soumrnjn  4330 Sep 15 06:03 sql-master-prompt.md
+[0m
+[0m$ [0mls -la /home/soumrnjn/Desktop/Task/SQL/sql-handbook && ls -R /home/soumrnjn/Desktop/Task/SQL/sql-handbook | head -100
+total 68
+drwxrwxr-x 6 soumrnjn soumrnjn  4096 Sep 15 08:02 .
+drwxrwxr-x 4 soumrnjn soumrnjn  4096 Sep 14 21:41 ..
+drwxrwxr-x 2 soumrnjn soumrnjn  4096 Sep 14 21:25 1-Fundamentals
+drwxrwxr-x 2 soumrnjn soumrnjn  4096 Sep 14 21:41 2-NULL-and-Logic
+drwxrwxr-x 2 soumrnjn soumrnjn  4096 Sep 15 08:02 3-Joins
+drwxrwxr-x 2 soumrnjn soumrnjn  4096 Sep 15 08:02 4-Subqueries
+-rw-rw-r-- 1 soumrnjn soumrnjn 37467 Sep 15 08:02 errors.log
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook:
+1-Fundamentals
+2-NULL-and-Logic
+3-Joins
+4-Subqueries
+errors.log
+
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/1-Fundamentals:
+01-SQL-Basics.md
+02-Data-Types.md
+03-DDL-DML-DQL-DCL-TCL.md
+04-Constraints-Keys.md
+05-SELECT-FROM-WHERE.md
+06-Logical-Query-Processing-Order.md
+07-Filtering-Operators.md
+08-CASE-Expressions.md
+
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic:
+09-NULL-Deep-Dive.md
+10-Three-Valued-Logic.md
+11-NULL-Comparisons.md
+12-COALESCE-NULLIF.md
+13-IS-DISTINCT-FROM.md
+14-NOT-IN-NULL-Pitfalls.md
+
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins:
+15-INNER-JOIN.md
+16-LEFT-JOIN.md
+17-RIGHT-FULL-JOIN.md
+18-CROSS-JOIN.md
+19-SELF-JOIN.md
+20-JOIN-ON-vs-WHERE.md
+21-JOIN-Duplicates-and-Fanout.md
+22-Many-to-Many-Joins.md
+23-Anti-Joins.md
+24-Semi-Joins.md
+25-JOIN-Pitfalls.md
+
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries:
+[0m
+[0m$ [0mls -la /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins && wc -l /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/*.md
+total 360
+drwxrwxr-x 2 soumrnjn soumrnjn  4096 Sep 15 08:02 .
+drwxrwxr-x 6 soumrnjn soumrnjn  4096 Sep 15 08:02 ..
+-rw-rw-r-- 1 soumrnjn soumrnjn 27479 Sep 14 21:51 15-INNER-JOIN.md
+-rw-rw-r-- 1 soumrnjn soumrnjn 38690 Sep 14 21:55 16-LEFT-JOIN.md
+-rw-rw-r-- 1 soumrnjn soumrnjn 38275 Sep 14 21:59 17-RIGHT-FULL-JOIN.md
+-rw-rw-r-- 1 soumrnjn soumrnjn 28345 Sep 14 22:02 18-CROSS-JOIN.md
+-rw-rw-r-- 1 soumrnjn soumrnjn 42265 Sep 15 05:51 19-SELF-JOIN.md
+-rw-rw-r-- 1 soumrnjn soumrnjn 26643 Sep 15 05:54 20-JOIN-ON-vs-WHERE.md
+-rw-rw-r-- 1 soumrnjn soumrnjn 36385 Sep 15 06:06 21-JOIN-Duplicates-and-Fanout.md
+-rw-rw-r-- 1 soumrnjn soumrnjn 30926 Sep 15 06:10 22-Many-to-Many-Joins.md
+-rw-rw-r-- 1 soumrnjn soumrnjn 52797 Sep 15 06:17 23-Anti-Joins.md
+-rw-rw-r-- 1 soumrnjn soumrnjn 24079 Sep 15 08:02 24-Semi-Joins.md
+-rw-rw-r-- 1 soumrnjn soumrnjn     0 Sep 15 08:02 25-JOIN-Pitfalls.md
+   674 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/15-INNER-JOIN.md
+   813 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/16-LEFT-JOIN.md
+   915 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/17-RIGHT-FULL-JOIN.md
+   946 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/18-CROSS-JOIN.md
+   806 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/19-SELF-JOIN.md
+   586 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/20-JOIN-ON-vs-WHERE.md
+   701 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/21-JOIN-Duplicates-and-Fanout.md
+   660 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/22-Many-to-Many-Joins.md
+  1111 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/23-Anti-Joins.md
+   509 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/24-Semi-Joins.md
+     0 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/25-JOIN-Pitfalls.md
+  7721 total
+[0m
+[0m→ [0mRead sql-handbook/3-Joins/24-Semi-Joins.md
+[0m→ [0mRead sql-handbook/3-Joins/21-JOIN-Duplicates-and-Fanout.md[90m [limit=90][0m
+[0m→ [0mRead sql-handbook/3-Joins/23-Anti-Joins.md[90m [limit=80][0m
+[0m
+[0m$ [0mhead -5 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/15-INNER-JOIN.md /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/16-LEFT-JOIN.md /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/17-RIGHT-FULL-JOIN.md /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/18-CROSS-JOIN.md /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/19-SELF-JOIN.md /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/20-JOIN-ON-vs-WHERE.md /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/22-Many-to-Many-Joins.md
+==> /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/15-INNER-JOIN.md <==
+The section file is empty. I'll write the full INNER JOIN section matching the handbook's established style.
+Written the complete INNER JOIN section to `sql-handbook/3-Joins/15-INNER-JOIN.md` (~700 lines).
+
+It covers: fundamentals, grain-based mental model, ANSI + comma syntax, internal working (nested loop / hash / merge with EXPLAIN guidance), NULL behavior, ON vs WHERE, fan-out/double-counting, many-to-many, edge cases, comparison tables, best practices, a Mermaid diagram, dialect notes, and the full Interview Questions set (Beginner → Performance, no answers given for practice items).
+**only the rows from both tables that satisfy the join condition**. Rows in either table with no match in the other table are excluded from the result.
+
+==> /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/16-LEFT-JOIN.md <==
+I'll check the current LEFT JOIN file, then write a comprehensive section consistent with the INNER JOIN section's style.
+Wrote the complete LEFT JOIN section to `sql-handbook/3-Joins/16-LEFT-JOIN.md`.
+
+Key teaching points covered:
+
+
+==> /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/17-RIGHT-FULL-JOIN.md <==
+# 17 — RIGHT JOIN & FULL OUTER JOIN
+
+A **RIGHT JOIN** (a.k.a. RIGHT OUTER JOIN) returns **every row from the right tablWrote the complete RIGHT & FULL JOIN section to `sql-handbook/3-Joins/17-RIGHT-FULL-JOIN.md`, consistent with the INNER/LEFT JOIN sections' style.
+
+Key coverage:
+
+==> /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/18-CROSS-JOIN.md <==
+# CROSS JOIN
+
+## Table of Contents
+
+1. [What Is a CROSS JOIN?](#what-is-a-cross-join)
+
+==> /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/19-SELF-JOIN.md <==
+I'll write the comprehensive SELF-JOIN section to the existing file, matching the handbook's established style.
+Wrote the complete SELF-JOIN section to `sql-handbook/3-Joins/19-SELF-JOIN.md` (816 lines).
+
+Covers almost everything requested — the alias mechanics, the two-logical-copies mental model, 8 scenario examples with sample tables and expected outputs (hierarchy, out-earning-manager, depth-2, sibling pairs with `<` dedup, market basket, connecting-flights fan-out, interval overlap, and the LAG-vs-self-join previous-row trap), NULL behavior (root dropped, anti-join for leaves, NULL counting), edge cases (self-loops, cycles, duplicates), BAD→BETTER code pairs, performance notes with execution-plan verification, a comparison table, a Mermaid diagram, cross-references, and the full Interview Questions set (Beginner → Performance).
+
+
+==> /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/20-JOIN-ON-vs-WHERE.md <==
+# 20 — JOIN: ON vs WHERE
+
+> Category: 3-Joins
+> Cross-references: [15-JOIN types], [21-LEFT-JOIN-becoming-INNER], [9-NULL], [10-threvalued-logic], [24-cartesian-products], [05-filtering], [13-GROUP-BY-HAVING]
+
+
+==> /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/22-Many-to-Many-Joins.md <==
+# 22. Many-to-Many Joins
+
+## Fundamentals
+
+A **many-to-many relationship** means that **one row in table A can relate to many rows in table B, and one row in table B can relate to many rows in table A**, at the same time.
+[0m
+[0m$ [0mgrep -n "^# " /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/15-INNER-JOIN.md /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/16-LEFT-JOIN.md /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/22-Many-to-Many-Joins.md /home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/14-NOT-IN-NULL-Pitfalls.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/15-INNER-JOIN.md:590:# Interview Questions
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/16-LEFT-JOIN.md:725:# Interview Questions
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/22-Many-to-Many-Joins.md:1:# 22. Many-to-Many Joins
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/22-Many-to-Many-Joins.md:599:# Interview Questions
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/14-NOT-IN-NULL-Pitfalls.md:1:# NOT IN + NULL Pitfalls
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/14-NOT-IN-NULL-Pitfalls.md:517:# Interview Questions
+[0m
+[0m$ [0mgrep -n "^#\|^##" /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/15-INNER-JOIN.md
+7:### Why it exists
+11:### The mental model
+25:### Venn diagram intuition
+42:## "One row in <table> represents one ..."
+70:## Syntax
+72:### ANSI SQL
+91:### Order of clauses (logical processing)
+102:### Simple example
+111:### Expected result
+130:## The Legacy Comma Syntax
+147:## Internal Working
+151:### 1. Nested Loop Join
+158:### 2. Hash Join
+164:### 3. Merge Join (Sort-Merge Join)
+171:### Query shape → plan is a black box
+184:### How to look instead of guess
+206:## NULL Behavior
+238:## When to Use INNER JOIN
+247:## When NOT to Use INNER JOIN
+256:## Scenario-Based Examples
+258:### Scenario 1: Attach customer information to orders
+269:### Scenario 2: Only customers who have placed at least one order
+291:### Scenario 3: Aggregate across two tables — pay attention to grain
+353:### Scenario 4: Many-to-many join
+398:## ON vs WHERE for INNER JOIN
+424:## Edge Cases
+426:### 1. Empty table on one side
+436:### 2. No matches at all
+440:### 3. Duplicate keys in both tables
+452:### 4. Out of order join conditions
+458:## Common Mistakes
+472:## Performance Implications
+487:### What helps
+494:### SARGability reminder
+508:### INNER JOIN vs EXISTS
+529:### Cartesian disaster
+535:## Comparison Table
+549:## Best Practices
+564:## Mermaid Diagram — Multi-table INNER JOIN flow
+577:## A Note on ANSI vs Dialects
+590:# Interview Questions
+592:## Beginner
+600:## Intermediate
+608:## Advanced
+616:## Scenario Based
+622:## Tricky
+644:## Output Prediction
+665:## Debugging
+671:## Performance
+[0m
+[0m$ [0mgrep -n "^#\|^##" /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/23-Anti-Joins.md
+1:# Anti-Joins
+3:## Table of Contents
+20:### Why it exists
+36:### The mental model
+50:### The four families (and one bonus)
+66:## The Sample Tables (grain check)
+134:## Syntax: Four Ways to Write an Anti-Join
+138:### 1. `NOT EXISTS`
+158:### 2. `NOT IN`
+173:### 3. `LEFT JOIN ... WHERE b.key IS NULL`
+190:### 4. `EXCEPT` / `MINUS`
+208:### 5. Explicit `ANTI JOIN` (non-ANSI)
+228:## Internal Working
+230:### Semi-joins and anti-joins are physical operators
+247:### What the plan nodes look like (illustrative)
+281:### When the pattern is NOT recognized
+306:## NULL Behavior — The Heart of the Section
+310:### Recap of the semantics
+333:### The poison, demonstrated
+354:### When does `NOT IN` become safe?
+379:### NULL keys on the outer side — the asymmetry
+391:### `EXCEPT` and NULLs
+413:### NULL behavior summary
+426:## Scenario-Based Examples
+428:### Scenario 1 — Who are the customers that have placed no orders?
+471:### Scenario 2 — Orders that were never paid
+510:### Scenario 3 — Users who never logged in
+533:### Scenario 4 — Products that were never sold
+585:### Scenario 5 — Orphan rows (referential integrity check)
+632:### Scenario 6 — Anti-join with a condition: "customers who have NO order above $100"
+668:### Scenario 7 — Composite-key anti-join
+714:### Scenario 8 — Multi-hop anti-join: "customers who have never paid for anything"
+769:## Edge Cases
+771:### 1. Empty right side
+781:### 2. Right side is nothing but NULLs
+785:### 3. Duplicate keys on the right — output safe, cost differs
+795:### 4. Duplicate keys on the left — a real behavioral split
+804:### 5. The "nullable sentinel" bug
+816:### 6. Putting the sentinel into `ON`
+828:### 7. Correlated vs non-correlated `NOT IN`
+832:### 8. Type and collation mismatches
+836:### 9. Aggregates inside the anti subquery
+846:## Common Mistakes
+861:## Production Pitfalls
+873:## Performance Implications
+877:### What the optimizer does with each form
+884:### What to look for in the plan
+892:### Index guidance (still needs a plan to confirm)
+898:### The "pre-distinct" and "pre-aggregate" tricks
+912:### When anti-joins get expensive regardless
+918:### Verify, don't guess
+937:## Comparison Tables
+939:### The four forms, front to back
+953:### Choosing a physical anti-join algorithm (decision, *then* confirm with plan)
+964:## When to Use Each Form
+992:## Best Practices
+1007:## Flow Diagram
+1021:### SQL shape → physical operator map
+1033:## Notes on ANSI vs Dialects
+1044:# Interview Questions
+1048:## Beginner
+1056:## Intermediate
+1064:## Advanced
+1072:## Scenario Based
+1079:## Tricky
+1087:## Output Prediction
+1098:## Debugging
+1106:## Performance
+[0m
+[0m$ [0mhead -30 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/15-INNER-JOIN.md; echo ---; head -1 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/16-LEFT-JOIN.md; head -1 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/17-RIGHT-FULL-JOIN.md
+The section file is empty. I'll write the full INNER JOIN section matching the handbook's established style.
+Written the complete INNER JOIN section to `sql-handbook/3-Joins/15-INNER-JOIN.md` (~700 lines).
+
+It covers: fundamentals, grain-based mental model, ANSI + comma syntax, internal working (nested loop / hash / merge with EXPLAIN guidance), NULL behavior, ON vs WHERE, fan-out/double-counting, many-to-many, edge cases, comparison tables, best practices, a Mermaid diagram, dialect notes, and the full Interview Questions set (Beginner → Performance, no answers given for practice items).
+**only the rows from both tables that satisfy the join condition**. Rows in either table with no match in the other table are excluded from the result.
+
+### Why it exists
+
+Relational databases split data into normalized tables so that each fact is stored once (see [Normalization section]). But analysis and applications usually need data that lives across several tables together. The JOIN is the mechanism that re-combines that data along relationships (like a foreign key).
+
+### The mental model
+
+Think of an INNER JOIN as a **filtered Cartesian product**:
+
+1. Compute every possible combination of rows from table A and table B (the Cartesian product).
+2. Keep only the combinations where the join condition evaluates to `TRUE`.
+3. Discard everything else.
+
+That is exactly how it behaves **logically**. Physically, an optimizer never materializes the full Cartesian product — it uses smarter algorithms (see [Internal Working]).
+
+```
+A ⋈ B  =  { (a, b) : a ∈ A, b ∈ B, AND condition(a, b) = TRUE }
+```
+
+### Venn diagram intuition
+
+```
++------------+          +------------+
+|     A      |          |    B       |
+|   +-------------+     |            |
+---
+I'll check the current LEFT JOIN file, then write a comprehensive section consistent with the INNER JOIN section's style.
+# 17 — RIGHT JOIN & FULL OUTER JOIN
+[0m
+[0m$ [0msed -n '1,3p' /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/23-Anti-Joins.md; echo "==="; sed -n '1,1p' /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/21-JOIN-Duplicates-and-Fanout.md; echo "==="; sed -n '1,1p' /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/22-Many-to-Many-Joins.md
+# Anti-Joins
+
+## Table of Contents
+===
+# 21 — JOIN: Duplicates and Fan-Out
+===
+# 22. Many-to-Many Joins
+[0m
+[0m→ [0mRead sql-handbook/3-Joins/21-JOIN-Duplicates-and-Fanout.md[90m [offset=100, limit=80][0m
+[0m
+[0m✗ [0mInvalid Tool
+The arguments provided to the tool are invalid: Invalid input for tool write: JSON parsing failed: Text: {"filePath": "/home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/25-JOIN-Pitfalls.md", "content": "# 25 — JOIN: Common Pitfalls\n\n> Category: 3-Joins\n>.
+Error message: JSON Parse error: Unterminated string
+[0m
+[0m$ [0mcat > /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/25-JOIN-Pitfalls.md <<'SQL'
+# 25 — JOIN: Common Pitfalls
+
+> Category: 3-Joins
+> Cross-references: [15-INNER-JOIN], [16-LEFT-JOIN], [18-CROSS-JOIN], [21-JOIN-Duplicates-and-Fanout], [22-Many-to-Many-Joins], [23-Anti-Joins], [24-Semi-Joins], [09-NULL-Deep-Dive], [14-NOT-IN-NULL-Pitfalls], [13-GROUP-BY-HAVING]
+
+## Table of Contents
+
+- [What this section is](#what-this-section-is)
+- [Sample tables (grain check)](#sample-tables-grain-check)
+- [The master checklist: 15 questions to run before every JOIN](#the-master-checklist-15-questions-to-run-before-every-join)
+- [Pitfall Group A — Duplicates and Fan-out](#pitfall-group-a--duplicates-and-fan-out)
+- [Pitfall Group B — NULLs at the join](#pitfall-group-b--nulls-at-the-join)
+- [Pitfall Group C — ON vs WHERE confusion](#pitfall-group-c--on-vs-where-confusion)
+- [Pitfall Group D — Wrong join type](#pitfall-group-d--wrong-join-type)
+- [Pitfall Group E — Aggregation + JOIN mistakes](#pitfall-group-e--aggregation--join-mistakes)
+- [Pitfall Group F — *Accidental* Cartesian products](#pitfall-group-f--accidental-cartesian-products)
+- [Pitfall Group G — SARGability and join-column traps](#pitfall-group-g--sargability-and-join-column-traps)
+- [Pitfall Group H — Grain/modeling traps](#pitfall-group-h--grainmodeling-traps)
+- [Scenarios: full walkthroughs](#scenarios-full-walkthroughs)
+- [Edge cases](#edge-cases)
+- [NULL behavior summary](#null-behavior-summary)
+- [Pitfall-to-fix quick-reference table](#pitfall-to-fix-quick-reference-table)
+- [The Complete Pitfall Library (A–Z)](#the-complete-pitfall-library-az)
+- [Dialect-specific cracks](#dialect-specific-cracks)
+- [Best practices](#best-practices)
+- [Mermaid: the failure-and-diagnosis flow](#mermaid-the-failure-and-diagnosis-flow)
+- [Interview Questions](#interview-questions)
+
+---
+
+## What this section is
+
+Every other section in this category teaches you **how to write a join correctly**.
+This one teaches you **how joins break** — the recurring, expensive, silent bugs that
+show up in production dashboards and interview questions again and again.
+
+The JOIN has become the single most common source of **wrong answers that return
+successfully**. Not syntax errors, not crashes — queries that *run*, return rows,
+and are subtly, sometimes wildly, wrong. The database will not warn you. A fan-out
+produces no error. A doubled `SUM` produces no error. A `LEFT JOIN` that quietly
+became an `INNER JOIN` produces no error. Only humans catch it.
+
+> **The central idea of this section:** almost every JOIN bug is a mismatch between
+> **what one output row should mean** and **what the query actually produces**.
+> If you can state the output grain before writing a single keyword, you will avoid
+> most of these pitfalls. If you cannot state it, you are already in a pit.
+
+The pitfalls are organized into groups; each one follows the same shape:
+**symptom → BAD approach → why it is wrong → BETTER approach → verification**.
+
+---
+
+## Sample tables (grain check)
+
+State the grain first — always. These tables are used across all examples.
+
+- **users** — *one row per user.*
+- **orders** — *one row per order.* (a user can have many orders)
+- **order_items** — *one row per line item.* (an order can have many items)
+- **payments** — *one row per payment.* (an order can have many payments)
+
+```sql
+CREATE TABLE users (
+    user_id   INT PRIMARY KEY,
+    user_name VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE orders (
+    order_id   INT PRIMARY KEY,
+    user_id    INT NOT NULL REFERENCES users(user_id),
+    order_date DATE NOT NULL,
+    total      NUMERIC(10,2) NOT NULL
+);
+
+CREATE TABLE order_items (
+    item_id    INT PRIMARY KEY,
+    order_id   INT NOT NULL REFERENCES orders(order_id),
+    product_id INT NOT NULL,
+    qty        INT NOT NULL,
+    unit_price NUMERIC(10,2) NOT NULL
+);
+
+CREATE TABLE payments (
+    payment_id INT PRIMARY KEY,
+    order_id   INT NOT NULL REFERENCES orders(order_id),
+    amount     NUMERIC(10,2) NOT NULL,
+    paid_at    DATE NOT NULL
+);
+```
+
+Sample data:
+
+```sql
+INSERT INTO users (user_id, user_name) VALUES
+(1, 'Ana'), (2, 'Ben'), (3, 'Cid'), (4, 'Deb');   -- Deb has NO orders
+
+INSERT INTO orders (order_id, user_id, order_date, total) VALUES
+(101, 1, '2024-01-05', 40.00),
+(102, 1, '2024-02-10', 30.00),
+(103, 2, '2024-01-20', 24.00);
+
+INSERT INTO order_items (item_id, order_id, product_id, qty, unit_price) VALUES
+(5001, 101, 7, 2, 10.00),
+(5002, 101, 9, 1, 20.00),
+(5003, 102, 7, 1, 10.00),
+(5004, 103, 5, 3,  8.00);
+
+INSERT INTO payments (payment_id, order_id, amount) VALUES
+(9001, 101, 25.00),
+(9002, 101, 15.00),   -- order 101 has TWO payments
+(9003, 102, 20.00),
+(9004, 103, 24.00);
+```
+
+| Table | Grain | Example of a fan-out risk |
+|---|---|---|
+| `users` | 1 row = 1 user | — (driving side, unique) |
+| `orders` | 1 row = 1 order | Ana has 2 orders |
+| `order_items` | 1 row = 1 line item | order 101 has 2 items |
+| `payments` | 1 row = 1 payment | order 101 has 2 payments |
+
+The relationships are **1 : N** in every direction. The classic double-counting
+bomb comes from joining across *two* of those 1:N legs at once.
+
+---
+
+## The master checklist: 15 questions to run before every JOIN
+
+Run this BEFORE writing the query, not after the numbers look wrong:
+
+1. **What does one output row represent?** State the output grain in a sentence.
+2. **What is the grain of each table involved?** One row per what?
+3. **Which table is the driving table** — the one that decides which rows may appear?
+4. **Do I need columns from the other table, or only a yes/no existence answer?** (→ Section 24)
+5. **Can the JOIN create duplicates?** If either join key is non-unique, expect fan-out.
+6. **Do I need aggregation?** If so, over what grain — the driving table or the joined table?
+7. **Do I need to preserve individual rows, or collapse them?** Window vs `GROUP BY`.
+8. **Can NULL affect matching?** NULL never matches NULL in an equality.
+9. **Should a condition go in `ON` or in `WHERE`?** For `LEFT JOIN`, the answer changes the result.
+10. **Could this accidentally be a Cartesian product?** Missing or wrong join predicate?
+11. **What happens with zero matching rows?** Inner join drops them; left join keeps them with NULLs.
+12. **What happens with multiple matching rows?** Fan-out by the count of matches.
+13. **Is the anti-join form safe with NULLs?** (`NOT IN` vs `NOT EXISTS` — Section 23)
+14. **Which indexes make this cheap?** Join key on the "lookup" side, indexes on `WHERE` filters.
+15. **What does the execution plan say?** `EXPLAIN ANALYZE` / actual plan — never assume.
+
+> **Interview trap:** interviewers love to ask "what is the output grain?" because
+> the answer instantly reveals whether you understand fan-out, double-counting, and
+> aggregation-on-join. If you can't answer Q1 in one sentence, you cannot answer the query.
+
+SQL
+echo "part 1 written, lines: $(wc -l < /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/25-JOIN-Pitfalls.md)"
+part 1 written, lines: 150
+[0m
+[0m✗ [0m failed
+[91m[1mError: [0mTool execution aborted
+[0m
+[0m$ [0msed -n '1,152p' /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/25-JOIN-Pitfalls.md
+# 25 — JOIN: Common Pitfalls
+
+> Category: 3-Joins
+> Cross-references: [15-INNER-JOIN], [16-LEFT-JOIN], [18-CROSS-JOIN], [21-JOIN-Duplicates-and-Fanout], [22-Many-to-Many-Joins], [23-Anti-Joins], [24-Semi-Joins], [09-NULL-Deep-Dive], [14-NOT-IN-NULL-Pitfalls],The giant single Write call was truncated. I'll write the file in chunks using heredoc appends. Starting with the header and fundamentals.
+-grain-check)
+- [The master checklist: 15 questions to run before every JOIN](#the-master-checklist-15-questions-to-run-before-every-join)
+- [Pitfall Group A — Duplicates and Fan-out](#pitfall-group-a--duplicates-and-fan-out)
+- [Pitfall Group B — NULLs at the join](#pitfall-group-b--nulls-at-the-join)
+- [Pitfall Group C — ON vs WHERE confusion](#pitfall-group-c--on-vs-where-confusion)
+- [Pitfall Group D — Wrong join type](#pitfall-group-d--wrong-join-type)
+- [Pitfall Group E — Aggregation + JOIN mistakes](#pitfall-group-e--aggregation--join-mistakes)
+- [Pitfall Group F — *Accidental* Cartesian products](#pitfall-group-f--accidental-cartesian-products)
+- [Pitfall Group G — SARGability and join-column traps](#pitfall-group-g--sargability-and-join-column-traps)
+- [Pitfall Group H — Grain/modeling traps](#pitfall-group-h--grainmodeling-traps)
+- [Scenarios: full walkthroughs](#scenarios-full-walkthroughs)
+- [Edge cases](#edge-cases)
+- [NULL behavior summary](#null-behavior-summary)
+- [Pitfall-to-fix quick-reference table](#pitfall-to-fix-quick-reference-table)
+- [The Complete Pitfall Library (A–Z)](#the-complete-pitfall-library-az)
+- [Dialect-specific cracks](#dialect-specific-cracks)
+- [Best practices](#best-practices)
+- [Mermaid: the failure-and-diagnosis flow](#mermaid-the-failure-and-diagnosis-flow)
+- [Interview Questions](#interview-questions)
+
+---
+
+## What this section is
+
+Every other section in this category teaches you **how to write a join correctly**.
+This one teaches you **how joins break** — the recurring, expensive, silent bugs that
+show up in production dashboards and interview questions again and again.
+
+The JOIN has become the single most common source of **wrong answers that return
+successfully**. Not syntax errors, not crashes — queries that *run*, return rows,
+and are subtly, sometimes wildly, wrong. The database will not warn you. A fan-out
+produces no error. A doubled `SUM` produces no error. A `LEFT JOIN` that quietly
+became an `INNER JOIN` produces no error. Only humans catch it.
+
+> **The central idea of this section:** almost every JOIN bug is a mismatch between
+> **what one output row should mean** and **what the query actually produces**.
+> If you can state the output grain before writing a single keyword, you will avoid
+> most of these pitfalls. If you cannot state it, you are already in a pit.
+
+The pitfalls are organized into groups; each one follows the same shape:
+**symptom → BAD approach → why it is wrong → BETTER approach → verification**.
+
+---
+
+## Sample tables (grain check)
+
+State the grain first — always. These tables are used across all examples.
+
+- **users** — *one row per user.*
+- **orders** — *one row per order.* (a user can have many orders)
+- **order_items** — *one row per line item.* (an order can have many items)
+- **payments** — *one row per payment.* (an order can have many payments)
+
+```sql
+CREATE TABLE users (
+    user_id   INT PRIMARY KEY,
+    user_name VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE orders (
+    order_id   INT PRIMARY KEY,
+    user_id    INT NOT NULL REFERENCES users(user_id),
+    order_date DATE NOT NULL,
+    total      NUMERIC(10,2) NOT NULL
+);
+
+CREATE TABLE order_items (
+    item_id    INT PRIMARY KEY,
+    order_id   INT NOT NULL REFERENCES orders(order_id),
+    product_id INT NOT NULL,
+    qty        INT NOT NULL,
+    unit_price NUMERIC(10,2) NOT NULL
+);
+
+CREATE TABLE payments (
+    payment_id INT PRIMARY KEY,
+    order_id   INT NOT NULL REFERENCES orders(order_id),
+    amount     NUMERIC(10,2) NOT NULL,
+    paid_at    DATE NOT NULL
+);
+```
+
+Sample data:
+
+```sql
+INSERT INTO users (user_id, user_name) VALUES
+(1, 'Ana'), (2, 'Ben'), (3, 'Cid'), (4, 'Deb');   -- Deb has NO orders
+
+INSERT INTO orders (order_id, user_id, order_date, total) VALUES
+(101, 1, '2024-01-05', 40.00),
+(102, 1, '2024-02-10', 30.00),
+(103, 2, '2024-01-20', 24.00);
+
+INSERT INTO order_items (item_id, order_id, product_id, qty, unit_price) VALUES
+(5001, 101, 7, 2, 10.00),
+(5002, 101, 9, 1, 20.00),
+(5003, 102, 7, 1, 10.00),
+(5004, 103, 5, 3,  8.00);
+
+INSERT INTO payments (payment_id, order_id, amount) VALUES
+(9001, 101, 25.00),
+(9002, 101, 15.00),   -- order 101 has TWO payments
+(9003, 102, 20.00),
+(9004, 103, 24.00);
+```
+
+| Table | Grain | Example of a fan-out risk |
+|---|---|---|
+| `users` | 1 row = 1 user | — (driving side, unique) |
+| `orders` | 1 row = 1 order | Ana has 2 orders |
+| `order_items` | 1 row = 1 line item | order 101 has 2 items |
+| `payments` | 1 row = 1 payment | order 101 has 2 payments |
+
+The relationships are **1 : N** in every direction. The classic double-counting
+bomb comes from joining across *two* of those 1:N legs at once.
+
+---
+
+## The master checklist: 15 questions to run before every JOIN
+
+Run this BEFORE writing the query, not after the numbers look wrong:
+
+1. **What does one output row represent?** State the output grain in a sentence.
+2. **What is the grain of each table involved?** One row per what?
+3. **Which table is the driving table** — the one that decides which rows may appear?
+4. **Do I need columns from the other table, or only a yes/no existence answer?** (→ Section 24)
+5. **Can the JOIN create duplicates?** If either join key is non-unique, expect fan-out.
+6. **Do I need aggregation?** If so, over what grain — the driving table or the joined table?
+7. **Do I need to preserve individual rows, or collapse them?** Window vs `GROUP BY`.
+8. **Can NULL affect matching?** NULL never matches NULL in an equality.
+9. **Should a condition go in `ON` or in `WHERE`?** For `LEFT JOIN`, the answer changes the result.
+10. **Could this accidentally be a Cartesian product?** Missing or wrong join predicate?
+11. **What happens with zero matching rows?** Inner join drops them; left join keeps them with NULLs.
+12. **What happens with multiple matching rows?** Fan-out by the count of matches.
+13. **Is the anti-join form safe with NULLs?** (`NOT IN` vs `NOT EXISTS` — Section 23)
+14. **Which indexes make this cheap?** Join key on the "lookup" side, indexes on `WHERE` filters.
+15. **What does the execution plan say?** `EXPLAIN ANALYZE` / actual plan — never assume.
+
+> **Interview trap:** interviewers love to ask "what is the output grain?" because
+> the answer instantly reveals whether you understand fan-out, double-counting, and
+> aggregation-on-join. If you can't answer Q1 in one sentence, you cannot answer the query.
+[0m
+[0m$ [0mcat > /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/25-JOIN-Pitfalls.md <<'EOFCHUNK1'
+# 25 — JOIN: Common Pitfalls
+
+> Category: 3-Joins
+> Cross-references: [15-INNER-JOIN], [16-LEFT-JOIN], [18-CROSS-JOIN], [20-JOIN-ON-vs-WHERE], [21-JOIN-Duplicates-and-Fanout], [22-Many-to-Many-Joins], [23-Anti-Joins], [24-Semi-Joins], [09-NULL-Deep-Dive], [14-NOT-IN-NULL-Pitfalls]
+
+## Table of Contents
+
+- [What this section is](#what-this-section-is)
+- [Sample tables (grain check)](#sample-tables-grain-check)
+- [The master checklist: 15 questions to run before every JOIN](#the-master-checklist-15-questions-to-run-before-every-join)
+- [Pitfall Group A — Duplicates and fan-out](#pitfall-group-a--duplicates-and-fan-out)
+- [Pitfall Group B — NULLs at the join](#pitfall-group-b--nulls-at-the-join)
+- [Pitfall Group C — ON vs WHERE confusion](#pitfall-group-c--on-vs-where-confusion)
+- [Pitfall Group D — Wrong join type](#pitfall-group-d--wrong-join-type)
+- [Pitfall Group E — Aggregation + JOIN mistakes](#pitfall-group-e--aggregation--join-mistakes)
+- [Pitfall Group F — Accidental Cartesian products](#pitfall-group-f--accidental-cartesian-products)
+- [Pitfall Group G — SARGability and join-column traps](#pitfall-group-g--sargability-and-join-column-traps)
+- [Pitfall Group H — Grain and modeling traps](#pitfall-group-h--grain-and-modeling-traps)
+- [Scenarios: full walkthroughs](#scenarios-full-walkthroughs)
+- [Edge cases](#edge-cases)
+- [NULL behavior summary](#null-behavior-summary)
+- [Comparison tables](#comparison-tables)
+- [Common mistakes](#common-mistakes)
+- [Production pitfalls](#production-pitfalls)
+- [Best practices](#best-practices)
+- [Mermaid: the failure-and-diagnosis flow](#mermaid-the-failure-and-diagnosis-flow)
+- [Interview Questions](#interview-questions)
+
+---
+
+## What this section is
+
+Every other section in this category teaches you **how to write a join correctly**.
+This one teaches you **how joins break** — the recurring, expensive, silent bugs that
+show up in production dashboards and interview questions again and again.
+
+A JOIN is the single most common source of **wrong answers that return successfully**.
+Not syntax errors, not crashes: queries that *run*, return rows, and are subtly —
+sometimes wildly — wrong. The database will not warn you. A fan-out produces no error.
+A doubled `SUM` produces no error. A `LEFT JOIN` that quietly turned into an
+`INNER JOIN` produces no error. Only humans catch it.
+
+> **The central idea of this section:** almost every JOIN bug is a mismatch between
+> **what one output row should mean** and **what the query actually produces**.
+> If you can state the output grain before writing a single keyword, you will avoid
+> most of these pitfalls. If you cannot state it, you are already standing in one.
+
+Each pitfall follows the same shape:
+**symptom → BAD approach → why it is wrong → BETTER approach → verification**.
+
+---
+
+## Sample tables (grain check)
+
+State the grain first — always. These tables drive every example in this section.
+
+- **users** — *one row per user.*
+- **orders** — *one row per order* (a user can have many orders).
+- **order_items** — *one row per line item* (an order can have many items).
+- **payments** — *one row per payment* (an order can have many payments).
+
+```sql
+CREATE TABLE users (
+    user_id   INT PRIMARY KEY,
+    user_name VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE orders (
+    order_id   INT PRIMARY KEY,
+    user_id    INT NOT NULL REFERENCES users(user_id),
+    order_date DATE NOT NULL,
+    total      NUMERIC(10,2) NOT NULL
+);
+
+CREATE TABLE order_items (
+    item_id    INT PRIMARY KEY,
+    order_id   INT NOT NULL REFERENCES orders(order_id),
+    product_id INT NOT NULL,
+    qty        INT NOT NULL,
+    unit_price NUMERIC(10,2) NOT NULL
+);
+
+CREATE TABLE payments (
+    payment_id INT PRIMARY KEY,
+    order_id   INT NOT NULL REFERENCES orders(order_id),
+    amount     NUMERIC(10,2) NOT NULL,
+    paid_at    DATE NOT NULL
+);
+```
+
+Sample data:
+
+```sql
+INSERT INTO users (user_id, user_name) VALUES
+(1, 'Ana'), (2, 'Ben'), (3, 'Cid'), (4, 'Deb');   -- Deb has NO orders
+
+INSERT INTO orders (order_id, user_id, order_date, total) VALUES
+(101, 1, '2024-01-05', 40.00),
+(102, 1, '2024-02-10', 30.00),
+(103, 2, '2024-01-20', 24.00);
+
+INSERT INTO order_items (item_id, order_id, product_id, qty, unit_price) VALUES
+(5001, 101, 7, 2, 10.00),
+(5002, 101, 9, 1, 20.00),
+(5003, 102, 7, 1, 10.00),
+(5004, 103, 5, 3,  8.00);
+
+INSERT INTO payments (payment_id, order_id, amount) VALUES
+(9001, 101, 25.00),
+(9002, 101, 15.00),   -- order 101 has TWO payments
+(9003, 102, 30.00),
+(9004, 103, 24.00);
+```
+
+| Table | Grain | Fan-out risk example |
+|---|---|---|
+| `users` | 1 row = 1 user | — (driving side, unique) |
+| `orders` | 1 row = 1 order | Ana has 2 orders |
+| `order_items` | 1 row = 1 line item | order 101 has 2 items |
+| `payments` | 1 row = 1 payment | order 101 has 2 payments |
+
+**Relationship summary:** `users → orders → order_items` is 1 : N at each hop, and
+`orders → payments` is 1 : N as well. Joining across **two** 1:N legs at once
+multiplies — that is where the worst bugs live.
+
+---
+
+## The master checklist: 15 questions to run before every JOIN
+
+Run this **before** writing the query, not after the numbers look wrong.
+
+1. **What does one output row represent?** State the output grain in a sentence.
+2. **What is the grain of each input table?** One row per what?
+3. **Which table is the driving table** — the table that decides which rows may appear?
+4. **Do I need columns from the other table, or only a yes/no existence answer?** (See [24-Semi-Joins] / [23-Anti-Joins])
+5. **Can the JOIN create duplicates?** If either join key is non-unique, expect fan-out.
+6. **Do I need aggregation?** Over which grain — the driving table or the joined table?
+7. **Do I need to preserve individual rows, or collapse them?** Window functions vs `GROUP BY`.
+8. **Can NULL affect the match?** NULL never equals NULL in an equality join.
+9. **Should a condition go in `ON` or in `WHERE`?** For `LEFT JOIN`, it changes the result.
+10. **Could this accidentally be a Cartesian product?** Is every join predicate present and sensible?
+11. **What happens with zero matching rows?** Inner join drops them; left join keeps them NULL-padded.
+12. **What happens with multiple matching rows?** Fan-out by the count of matches.
+13. **Is an anti-join form safe with NULLs?** `NOT IN` vs `NOT EXISTS` (see [23-Anti-Joins]).
+14. **Which indexes make this cheap?** Join key on the lookup side; indexes on `WHERE` filters.
+15. **What does the execution plan say?** `EXPLAIN ANALYZE` / actual plan — never assume.
+EOFCHUNK1
+echo "chunk1 lines: $(wc -l < /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/25-JOIN-Pitfalls.md)"
+chunk1 lines: 146
+[0m
+[0m$ [0msed -n '1,10p' /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/25-JOIN-Pitfalls.md
+# 25 — JOIN: Common Pitfalls
+
+> Category: 3-Joins
+> Cross-references: [15-INNER-JOIN], [16-LEFT-JOIN], [18-CROSS-JOIN], [20-JOIN-ON-vs-WHERE], [21-JOIN-Duplicates-and-Fanout], [22-Many-to-Many-Joins], [23-Anti-Joins], [24-Semi-Joins], [09-NULL-Deep-Dive], [14-NOT-IN-NULL-Pitfalls]
+
+## Table of Contents
+
+- [What this section is](#what-this-section-is)
+- [Sample tables (grain check)](#sample-tableThe first write got corrupted with stray text. I'll rewrite the file cleanly in controlled chunks, verifying each.
+o-run-before-every-join)
+[0m
+[0m$ [0mgrep -n "truncated\|heredoc\|stray\|grain-check)\|placeholder\|append" /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/25-JOIN-Pitfalls.md | head -40
+9:- [Sample tables (grain check)](#sample-tableThe first write got corrupted with stray text. I'll rewrite the file cleanly in controlled chunks, verifying each.
+10:The placeholder write from before had stray text; I've now overwritten cleanly with the real chunk. Let me verify and continue.
+[0m
+[0m$ [0mwc -l /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/25-JOIN-Pitfalls.md; echo "==== FULL ===="; cat /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/25-JOIN-Pitfalls.md
+145 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/25-JOIN-Pitfalls.md
+==== FULL ====
+# 25 — JOIN: Common Pitfalls
+
+> Category: 3-Joins
+> Cross-references: [15-INNER-JOIN], [16-LEFT-JOIN], [18-CROSS-JOIN], [20-JOIN-ON-vs-WHERE], [21-JOIN-Duplicates-and-Fanout], [22-Many-to-Many-Joins], [23-Anti-Joins], [24-Semi-Joins], [09-NULL-Deep-Dive], [14-NOT-IN-NULL-Pitfalls]
+
+## Table of Contents
+
+- [What this section is](#what-this-section-is)
+- [Sample tables (grain check)](#sample-tableThe first write got corrupted with stray text. I'll rewrite the file cleanly in controlled chunks, verifying each.
+The placeholder write from before had stray text; I've now overwritten cleanly with the real chunk. Let me verify and continue.
+up B — NULLs at the join](#pitfall-group-b--nulls-at-the-join)
+- [Pitfall Group C — ON vs WHERE confusion](#pitfall-group-c--on-vs-where-confusion)
+- [Pitfall Group D — Wrong join type](#pitfall-group-d--wrong-join-type)
+- [Pitfall Group E — Aggregation + JOIN mistakes](#pitfall-group-e--aggregation--join-mistakes)
+- [Pitfall Group F — Accidental Cartesian products](#pitfall-group-f--accidental-cartesian-products)
+- [Pitfall Group G — SARGability and join-column traps](#pitfall-group-g--sargability-and-join-column-traps)
+- [Pitfall Group H — Grain and modeling traps](#pitfall-group-h--grain-and-modeling-traps)
+- [Scenarios: full walkthroughs](#scenarios-full-walkthroughs)
+- [Edge cases](#edge-cases)
+- [NULL behavior summary](#null-behavior-summary)
+- [Comparison tables](#comparison-tables)
+- [Common mistakes](#common-mistakes)
+- [Production pitfalls](#production-pitfalls)
+- [Best practices](#best-practices)
+- [Mermaid: the failure-and-diagnosis flow](#mermaid-the-failure-and-diagnosis-flow)
+- [Interview Questions](#interview-questions)
+
+---
+
+## What this section is
+
+Every other section in this category teaches you **how to write a join correctly**.
+This one teaches you **how joins break** — the recurring, expensive, silent bugs that
+show up in production dashboards and interview questions again and again.
+
+A JOIN is the single most common source of **wrong answers that return successfully**.
+Not syntax errors, not crashes: queries that *run*, return rows, and are subtly —
+sometimes wildly — wrong. The database will not warn you. A fan-out produces no error.
+A doubled `SUM` produces no error. A `LEFT JOIN` that quietly turned into an
+`INNER JOIN` produces no error. Only humans catch it.
+
+> **The central idea of this section:** almost every JOIN bug is a mismatch between
+> **what one output row should mean** and **what the query actually produces**.
+> If you can state the output grain before writing a single keyword, you will avoid
+> most of these pitfalls. If you cannot state it, you are already standing in one.
+
+Each pitfall follows the same shape:
+**symptom → BAD approach → why it is wrong → BETTER approach → verification**.
+
+---
+
+## Sample tables (grain check)
+
+State the grain first — always. These tables drive every example in this section.
+
+- **users** — *one row per user.*
+- **orders** — *one row per order* (a user can have many orders).
+- **order_items** — *one row per line item* (an order can have many items).
+- **payments** — *one row per payment* (an order can have many payments).
+
+```sql
+CREATE TABLE users (
+    user_id   INT PRIMARY KEY,
+    user_name VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE orders (
+    order_id   INT PRIMARY KEY,
+    user_id    INT NOT NULL REFERENCES users(user_id),
+    order_date DATE NOT NULL,
+    total      NUMERIC(10,2) NOT NULL
+);
+
+CREATE TABLE order_items (
+    item_id    INT PRIMARY KEY,
+    order_id   INT NOT NULL REFERENCES orders(order_id),
+    product_id INT NOT NULL,
+    qty        INT NOT NULL,
+    unit_price NUMERIC(10,2) NOT NULL
+);
+
+CREATE TABLE payments (
+    payment_id INT PRIMARY KEY,
+    order_id   INT NOT NULL REFERENCES orders(order_id),
+    amount     NUMERIC(10,2) NOT NULL,
+    paid_at    DATE NOT NULL
+);
+```
+
+Sample data:
+
+```sql
+INSERT INTO users (user_id, user_name) VALUES
+(1, 'Ana'), (2, 'Ben'), (3, 'Cid'), (4, 'Deb');   -- Deb has NO orders
+
+INSERT INTO orders (order_id, user_id, order_date, total) VALUES
+(101, 1, '2024-01-05', 40.00),
+(102, 1, '2024-02-10', 30.00),
+(103, 2, '2024-01-20', 24.00);
+
+INSERT INTO order_items (item_id, order_id, product_id, qty, unit_price) VALUES
+(5001, 101, 7, 2, 10.00),
+(5002, 101, 9, 1, 20.00),
+(5003, 102, 7, 1, 10.00),
+(5004, 103, 5, 3,  8.00);
+
+INSERT INTO payments (payment_id, order_id, amount) VALUES
+(9001, 101, 25.00),
+(9002, 101, 15.00),   -- order 101 has TWO payments
+(9003, 102, 30.00),
+(9004, 103, 24.00);
+```
+
+| Table | Grain | Fan-out risk example |
+|---|---|---|
+| `users` | 1 row = 1 user | — (driving side, unique) |
+| `orders` | 1 row = 1 order | Ana has 2 orders |
+| `order_items` | 1 row = 1 line item | order 101 has 2 items |
+| `payments` | 1 row = 1 payment | order 101 has 2 payments |
+
+**Relationship summary:** `users → orders → order_items` is 1 : N at each hop, and
+`orders → payments` is 1 : N as well. Joining across **two** 1:N legs at once
+multiplies — that is where the worst bugs live.
+
+---
+
+## The master checklist: 15 questions to run before every JOIN
+
+Run this **before** writing the query, not after the numbers look wrong.
+
+1. **What does one output row represent?** State the output grain in a sentence.
+2. **What is the grain of each input table?** One row per what?
+3. **Which table is the driving table** — the table that decides which rows may appear?
+4. **Do I need columns from the other table, or only a yes/no existence answer?** (See [24-Semi-Joins] / [23-Anti-Joins])
+5. **Can the JOIN create duplicates?** If either join key is non-unique, expect fan-out.
+6. **Do I need aggregation?** Over which grain — the driving table or the joined table?
+7. **Do I need to preserve individual rows, or collapse them?** Window functions vs `GROUP BY`.
+8. **Can NULL affect the match?** NULL never equals NULL in an equality join.
+9. **Should a condition go in `ON` or in `WHERE`?** For `LEFT JOIN`, it changes the result.
+10. **Could this accidentally be a Cartesian product?** Is every join predicate present and sensible?
+11. **What happens with zero matching rows?** Inner join drops them; left join keeps them NULL-padded.
+12. **What happens with multiple matching rows?** Fan-out by the count of matches.
+13. **Is an anti-join form safe with NULLs?** `NOT IN` vs `NOT EXISTS` (see [23-Anti-Joins]).
+14. **Which indexes make this cheap?** Join key on the lookup side; indexes on `WHERE` filters.
+15. **What does the execution plan say?** `EXPLAIN ANALYZE` / actual plan — never assume.
+[0m
+[93m[1m! [0mpermission requested: external_directory (/tmp/*); auto-rejecting
+[0m✗ [0mcd /home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins
+cp 25-JOIN-Pitfalls.md /tmp/25-before.md
+# Remove the known junk fragments
+sed -i 's/,The giant single Write call was truncated\. I'\''ll write the file in chunks using heredoc appends\. Starting with the header and fundamentals\.//' 25-JOIN-Pitfalls.md
+sed -i 's/#sample-tableThe first write got corrupted with stray text\. I'\''ll rewrite the file cleanly in controlled chunks, verifying each\.$/#sample-tables-grain-check/' 25-JOIN-Pitfalls.md
+sed -i '/^The placeholder write from before had stray text; I'\''ve now overwritten cleanly with the real chunk\. Let me verify and continue\.$/d' 25-JOIN-Pitfalls.md
+grep -n "Writing\|truncated\|stray\|overwritten cleanly\|I'll write the file" 25-JOIN-Pitfalls.md failed
+[91m[1mError: [0mThe user rejected permission to use this specific tool call.
+[0m
+> build · big-pickle
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mls -la /home/soumrnjn/Desktop/Task/SQL
+total 44
+drwxrwxr-x  4 soumrnjn soumrnjn  4096 Sep 14 21:41 .
+drwxrwxr-x 12 soumrnjn soumrnjn  4096 Sep 14 20:41 ..
+drwxrwxr-x  2 soumrnjn soumrnjn  4096 Sep 14 21:41 2-NULL-and-Logic
+-rwxrwxr-x  1 soumrnjn soumrnjn 19656 Sep 14 20:48 script.sh
+drwxrwxr-x  6 soumrnjn soumrnjn  4096 Sep 15 08:02 sql-handbook
+-rw-rw-r--  1 soumrnjn soumrnjn  4330 Sep 15 06:03 sql-master-prompt.md
+[0m
+[0m$ [0mls -R /home/soumrnjn/Desktop/Task/SQL/sql-handbook 2>/dev/null | head -100
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook:
+1-Fundamentals
+2-NULL-and-Logic
+3-Joins
+4-Subqueries
+errors.log
+
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/1-Fundamentals:
+01-SQL-Basics.md
+02-Data-Types.md
+03-DDL-DML-DQL-DCL-TCL.md
+04-Constraints-Keys.md
+05-SELECT-FROM-WHERE.md
+06-Logical-Query-Processing-Order.md
+07-Filtering-Operators.md
+08-CASE-Expressions.md
+
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic:
+09-NULL-Deep-Dive.md
+10-Three-Valued-Logic.md
+11-NULL-Comparisons.md
+12-COALESCE-NULLIF.md
+13-IS-DISTINCT-FROM.md
+14-NOT-IN-NULL-Pitfalls.md
+
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins:
+15-INNER-JOIN.md
+16-LEFT-JOIN.md
+17-RIGHT-FULL-JOIN.md
+18-CROSS-JOIN.md
+19-SELF-JOIN.md
+20-JOIN-ON-vs-WHERE.md
+21-JOIN-Duplicates-and-Fanout.md
+22-Many-to-Many-Joins.md
+23-Anti-Joins.md
+24-Semi-Joins.md
+25-JOIN-Pitfalls.md
+
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries:
+26-Scalar-Subqueries.md
+27-Subqueries-WHERE.md
+[0m
+[0m$ [0mwc -l /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/27-Subqueries-WHERE.md /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/26-Scalar-Subqueries.md
+0 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/27-Subqueries-WHERE.md
+  661 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/26-Scalar-Subqueries.md
+  661 total
+[0m
+[0m→ [0mRead sql-handbook/4-Subqueries/26-Scalar-Subqueries.md
+[0m→ [0mRead sql-handbook/2-NULL-and-Logic/14-NOT-IN-NULL-Pitfalls.md[90m [limit=80][0m
+[0m✱ [0mGrep "ANY|ALL|SOME|IN \("[90m in sql-handbook/1-Fundamentals/07-Filtering-Operators.md · 100 matches[0m
+[0m→ [0mRead sql-handbook/3-Joins/24-Semi-Joins.md[90m [limit=70][0m
+[0m→ [0mRead sql-handbook/3-Joins/23-Anti-Joins.md[90m [limit=70][0m
+[0m
+[0m← [0mWrite sql-handbook/4-Subqueries/27-Subqueries-WHERE.md
+Wrote file successfully.
+[0m
+[0m$ [0mwc -l /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/27-Subqueries-WHERE.md
+900 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/27-Subqueries-WHERE.md
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mls /home/soumrnjn/Desktop/Task/SQL/
+script.sh
+sql-handbook
+sql-master-prompt.md
+[0m
+[0m$ [0mls /home/soumrnjn/Desktop/Task/SQL/sql-handbook/
+1-Fundamentals
+2-NULL-and-Logic
+3-Joins
+4-Subqueries
+errors.log
+[0m
+[0m$ [0mls -la /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/
+total 88
+drwxrwxr-x 2 soumrnjn soumrnjn  4096 Sep 15 09:20 .
+drwxrwxr-x 6 soumrnjn soumrnjn  4096 Sep 15 08:02 ..
+-rw-rw-r-- 1 soumrnjn soumrnjn 31725 Sep 15 08:41 26-Scalar-Subqueries.md
+-rw-rw-r-- 1 soumrnjn soumrnjn 47062 Sep 15 09:20 27-Subqueries-WHERE.md
+-rw-rw-r-- 1 soumrnjn soumrnjn     0 Sep 15 09:20 28-Subqueries-FROM.md
+[0m
+[0m→ [0mRead sql-handbook/4-Subqueries/27-Subqueries-WHERE.md[90m [limit=120][0m
+[0m→ [0mRead sql-handbook/4-Subqueries/26-Scalar-Subqueries.md[90m [limit=80][0m
+[0m
+[0m$ [0mls -la /home/soumrnjn/Desktop/Task/SQL/sql-handbook/
+total 116
+drwxrwxr-x 6 soumrnjn soumrnjn  4096 Sep 15 08:02 .
+drwxrwxr-x 3 soumrnjn soumrnjn  4096 Sep 15 09:18 ..
+drwxrwxr-x 2 soumrnjn soumrnjn  4096 Sep 14 21:25 1-Fundamentals
+drwxrwxr-x 2 soumrnjn soumrnjn  4096 Sep 15 09:18 2-NULL-and-Logic
+drwxrwxr-x 2 soumrnjn soumrnjn  4096 Sep 15 08:02 3-Joins
+drwxrwxr-x 2 soumrnjn soumrnjn  4096 Sep 15 09:20 4-Subqueries
+-rw-rw-r-- 1 soumrnjn soumrnjn 86501 Sep 15 09:20 errors.log
+[0m
+[0m→ [0mRead sql-master-prompt.md[90m [limit=100][0m
+[0m→ [0mRead sql-handbook/4-Subqueries/27-Subqueries-WHERE.md[90m [offset=700, limit=200][0m
+[0m
+[0m$ [0mhead -50 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/errors.log
+[0m
+> build · big-pickle
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m• [0mFind existing handbook files[90m Explore Agent[0m
+[0m✓ [0mFind existing handbook files[90m Explore Agent[0m
+[0m→ [0mRead sql-handbook/1-Fundamentals/01-SQL-Basics.md
+[0m
+[0m← [0mWrite sql-handbook/1-Fundamentals/02-Data-Types.md
+Wrote file successfully.
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m← [0mWrite 1-Fundamentals/03-DDL-DML-DQL-DCL-TCL.md
+Wrote file successfully.
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mls -la
+total 44
+drwxrwxr-x  4 soumrnjn soumrnjn  4096 Sep 14 21:01 .
+drwxrwxr-x 12 soumrnjn soumrnjn  4096 Sep 14 20:41 ..
+drwxrwxr-x  2 soumrnjn soumrnjn  4096 Sep 14 21:01 1-Fundamentals
+-rwxrwxr-x  1 soumrnjn soumrnjn 19656 Sep 14 20:48 script.sh
+drwxrwxr-x  3 soumrnjn soumrnjn  4096 Sep 14 20:51 sql-handbook
+-rw-rw-r--  1 soumrnjn soumrnjn  4330 Sep 14 20:51 sql-master-prompt.md
+[0m
+[0m$ [0mls -la 1-Fundamentals/
+total 40
+drwxrwxr-x 2 soumrnjn soumrnjn  4096 Sep 14 21:01 .
+drwxrwxr-x 4 soumrnjn soumrnjn  4096 Sep 14 21:01 ..
+-rw-rw-r-- 1 soumrnjn soumrnjn 30016 Sep 14 21:01 03-DDL-DML-DQL-DCL-TCL.md
+[0m
+[0m← [0mWrite 1-Fundamentals/05-SELECT-FROM-WHERE.md
+Wrote file successfully.
+[0m
+[0m$ [0mwc -l 1-Fundamentals/05-SELECT-FROM-WHERE.md && echo "---" && head -5 1-Fundamentals/05-SELECT-FROM-WHERE.md
+1055 1-Fundamentals/05-SELECT-FROM-WHERE.md
+---
+# 05 — SELECT, FROM, WHERE: The Foundation of Every Query
+
+---
+[0m
+[0m← [0mWrite sql-handbook/4-Subqueries/28-Subqueries-FROM.md
+Wrote file successfully.
+[0m
+[0m→ [0mRead sql-handbook/4-Subqueries/28-Subqueries-FROM.md[90m [offset=200, limit=130][0m
+[0m→ [0mRead sql-handbook/4-Subqueries/28-Subqueries-FROM.md[90m [limit=75, offset=125][0m
+[0m
+[0m← [0mEdit sql-handbook/4-Subqueries/28-Subqueries-FROM.md
+Index: /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/28-Subqueries-FROM.md
+===================================================================
+--- /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/28-Subqueries-FROM.md
++++ /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/28-Subqueries-FROM.md
+@@ -168,21 +168,12 @@
+ ```
+ 
+ | customer_name | total_spent |
+ |---|---|
+-| Alice | 349.50 |
+-| Charlie | 420.00 |
+ | David | 510.00 |
+ 
+-Wait — David's `510.00` clears the bar, Charlie's `420.00` does not. Correct output:
++Only David clears the bar: Alice `349.50` and Charlie `420.00` do not (order 104 is cancelled and excluded before the sum). The `WHERE` on the outer query filters **after aggregation**, so it compares each customer's `SUM(total)` against 500 — a `WHERE` clause can never do this directly.
+ 
+-| customer_name | total_spent |
+-|---|---|
+-| Alice | 349.50 |
+-| David | 510.00 |
+-
+-(That table above shows the *incorrect* row — a good reminder to actually run the query. The `WHERE` on the derived table filters after aggregation, so only customers whose `SUM(total)` exceeds 500 survive.)
+-
+ **Approach 2 — `HAVING` (equivalent where applicable):**
+ 
+ ```sql
+ SELECT o.customer_id, SUM(o.total) AS total_spent
+
+[0m
+[0m← [0mEdit sql-handbook/4-Subqueries/28-Subqueries-FROM.md
+Index: /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/28-Subqueries-FROM.md
+===================================================================
+--- /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/28-Subqueries-FROM.md
++++ /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/28-Subqueries-FROM.md
+@@ -219,18 +219,18 @@
+ FROM (
+     SELECT customer_id,
+            SUM(total) AS spend_total
+     FROM orders
+-    WHERE status = 'shipped'
++    WHERE status = 'shipped' AND customer_id IS NOT NULL
+     GROUP BY customer_id
+ ) AS per_customer;
+ ```
+ 
+ | avg_customer_spend |
+ |---|
+-| 913.75 |
++| 244.83 |
+ 
+-(Alice 349.50 + David 310.00 + Bob 75.00 + NULL-customer 800.00 = 1534.50; /4 customers... but let's not hand-compute further — run it. The *lesson* is that the outer `AVG` operates on **grouped rows**, not on individual orders.)
++(Alice `349.50` + Bob `75.00` + David `310.00` = `734.50` across 3 shipped customers → `734.50 / 3 = 244.83`. The two NULL-customer orders are excluded with `IS NOT NULL`; the inner query's rows where the SUM is **what feeds the outer `AVG`** — the outer `AVG` operates on grouped rows, not on individual orders.)
+ 
+ ### Example 4 — two derived tables joined together
+ 
+ **Problem.** Show shipped-total and pending-total side by side per customer, including customers who have none of either. Two different aggregations of the same table cannot live in one `GROUP BY` — so compute them as two derived tables and join them.
+
+[0m
+[0m← [0mEdit sql-handbook/4-Subqueries/28-Subqueries-FROM.md
+Index: /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/28-Subqueries-FROM.md
+===================================================================
+--- /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/28-Subqueries-FROM.md
++++ /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/28-Subqueries-FROM.md
+@@ -338,14 +338,16 @@
+ ```
+ 
+ | emp_name | salary | company_avg_pct |
+ |---|---|---|
+-| Alice Chen | 90000 | 83.7 |
+-| Bob Smith | 75000 | 83.7 |
+-| Carol Jones | 82000 | 83.7 |
+-| David Lee | 70000 | 83.7 |
+-| Erin Patel | 65000 | 83.7 |
++| Alice Chen | 90000 | 84.9 |
++| Bob Smith | 75000 | 84.9 |
++| Carol Jones | 82000 | 84.9 |
++| David Lee | 70000 | 84.9 |
++| Erin Patel | 65000 | 84.9 |
+ 
++(Average salary `76400 / max 90000 = 84.89` → rounded to `84.9`.)
++
+ Every employee row gets the same single computed column — a scalar cross join. Neither the derived table nor the employees table is large, but verify with the plan how the one-row result is computed (a `Result` node / separate aggregate) — nothing about this shape is "always faster" than a scalar subquery in the `SELECT` list; both express different intent.
+ 
+ ### Example 8 — `DISTINCT` inside a derived table (dedupe before joining)
+ 
+
+[0m
+[0m→ [0mRead sql-handbook/4-Subqueries/28-Subqueries-FROM.md[90m [limit=80][0m
+[0m
+[0m$ [0mwc -l /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/28-Subqueries-FROM.md && ls -la /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/
+661 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/28-Subqueries-FROM.md
+total 132
+drwxrwxr-x 2 soumrnjn soumrnjn  4096 Sep 15 09:20 .
+drwxrwxr-x 6 soumrnjn soumrnjn  4096 Sep 15 08:02 ..
+-rw-rw-r-- 1 soumrnjn soumrnjn 31725 Sep 15 08:41 26-Scalar-Subqueries.md
+-rw-rw-r-- 1 soumrnjn soumrnjn 47062 Sep 15 09:20 27-Subqueries-WHERE.md
+-rw-rw-r-- 1 soumrnjn soumrnjn 44191 Sep 15 09:27 28-Subqueries-FROM.md
+[0m
+[0m$ [0mgrep -n "Let me\|^# Subqueries in FROM\|## Fundamentals\|Wrote file successfully\|I fixed\|arresting\|Let me correct" /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/28-Subqueries-FROM.md
+1:Now I have a clear picture of the handbook's structure, style, and conventions. Let me write the comprehensive section.
+2:Let me correct a few arithmetic mistakes in the example outputs I wrote, to keep the handbook internally accurate.
+3:The file content looks corrupted — my narrative text leaked into it. Let me investigate.
+[0m
+[0m$ [0mgrep -n "derived table\|derived_table\|Fundamentals\|Interview Questions" /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/28-Subqueries-FROM.md | head -30
+8:FROM ( SELECT ... ) AS derived_table_alias;
+25:Every database has its own word for it: **derived table** (SQL Server), **inline view** (Oracle), **derived table / table subquery** (PostgreSQL), **derived table / subquery in FROM** (MySQL). Behavior is identical; only the name and a few syntax rules differ.
+44:In **Oracle**, `AS` is optional (`(SELECT ...) o` is fine) — but the alias itself is still required. The outer query normally chooses column aliases inside the subquery; column-level aliases on the derived table itself (`AS o(customer_id, order_id)`) are supported by PostgreSQL, SQLite, and some engines, but not by MySQL/SQL Server in the same way — use inner aliasing for portability.
+62:The practical consequence: **you cannot assume the source tables are queried twice.** Whether a derived table is flattened or materialized is a **plan decision**, not a guarantee of the syntax — verify with the execution plan, never by assumption.
+71:2. **Aggregate, then filter on the aggregate (a `WHERE` that needs an aggregate).** The `WHERE` clause cannot hold aggregates directly, and `HAVING` only works over `GROUP BY` output. A derived table computes the aggregate, and the outer query filters the result.
+73:4. **Use window functions computed on one rowset as an input to further filtering.** `WHERE` cannot directly reference a window function; a derived table (or CTE) can.
+76:7. **Overcome engine limitations**, such as MySQL's "can't modify a table and select from the same table in a subquery" error, by wrapping the subquery in a derived table.
+87:FROM ( <subquery> ) AS derived_alias         -- one derived table
+88:    [JOIN ( <subquery> ) AS other_alias ON ...]  -- another derived table
+99:- The subquery can be **any valid `SELECT`** — with `GROUP BY`, `HAVING`, `LIMIT`, window functions, its own subqueries, even its own `FROM` derived tables (nesting is unbounded).
+103:- There is **no visibility into the outer query** from a plain (non-`LATERAL`) derived table: it cannot reference outer columns. That is exactly what separates it from a correlated subquery in `WHERE` or a `LATERAL` join.
+156:**Approach 1 — derived table (reusable, clean):**
+187:Both are valid; the engine may even flatten the derived-table version into the same plan as the `HAVING` version. Why prefer the derived table over `HAVING`? Because the derived table **keeps a named, reusable intermediate rowset** — you can join it to `customers`, reuse it twice, or apply further transforms — while `HAVING` ends at the aggregate. In this particular query the two are equivalent in result; *measure the plan* if you care, don't assume one is faster.
+191:**Problem.** For each employee, show their salary and the average of their department — expressed via a derived table containing department averages.
+235:### Example 4 — two derived tables joined together
+237:**Problem.** Show shipped-total and pending-total side by side per customer, including customers who have none of either. Two different aggregations of the same table cannot live in one `GROUP BY` — so compute them as two derived tables and join them.
+269:### Example 5 — derived table with `LIMIT` (server-dependent flattening)
+289:(The `LIMIT` in the derived table constrains the subquery's output to two rows before the join — that is the entire point. Both top orders belong to NULL customers, so `customer_name` is NULL and the `LEFT JOIN` preserves the rows.)
+293:> "The derived table is always executed first and produces a temporary table, then the outer query runs on it." With most optimizers, a `LIMIT`-free derived table is *flattened into* the outer query and may not be executed separately at all. `LIMIT` subqueries are more likely to be materialized (PostgreSQL materializes them with a collapsible subquery barrier). Rely on `EXPLAIN`, not the intuition that writing a subquery forces two physical steps.
+295:### Example 6 — window function inside a derived table
+299:`WHERE` cannot reference a window function (window functions are evaluated in the `SELECT` step, after `WHERE`). Wrapping in a derived table lets the outer `WHERE` filter on the window result.
+323:Without the derived table you could not write `WHERE rn = 1` at all — `rn` does not exist yet when `WHERE` runs (see [Logical Query Processing Order](../1-Fundamentals/06-Logical-Query-Processing-Order.md)).
+325:### Example 7 — `CROSS JOIN` with a scalar-ish derived table
+327:A derived table returning exactly one row can act as a constant table you combine with everything else (handy for a report header or a company-wide metric):
+351:Every employee row gets the same single computed column — a scalar cross join. Neither the derived table nor the employees table is large, but verify with the plan how the one-row result is computed (a `Result` node / separate aggregate) — nothing about this shape is "always faster" than a scalar subquery in the `SELECT` list; both express different intent.
+353:### Example 8 — `DISTINCT` inside a derived table (dedupe before joining)
+355:**Problem.** Which customers placed at least one shipped order — implement with a derived table of distinct customer ids.
+375:Why does this return names, not orders? Because the derived table outputs **distinct customers**, not orders. This addresses the [JOIN fan-out / double counting](../../3-Joins/XX-Joins-Overview.md) problem at the source: duplicate line items never inflate the outer result.
+379:> Joining `customers` to *raw* `orders` (no dedupe) multiplies rows and appears to double-count aggregates. Wrapping the "one side" of a one-to-many join in a derived table that collapses it to per-customer rows is a standard fix. But it changes the **grain of the output** — decide deliberately which output row you want, per the grain discipline elsewhere in this handbook.
+385:A plain derived table cannot reference outer columns. Correlating a `FROM` subquery requires the **`LATERAL` keyword** in PostgreSQL (and MySQL 8.0.14+, Oracle, standard SQL), or `CROSS APPLY` / `OUTER APPLY` in SQL Server.
+[0m
+[0m→ [0mRead sql-handbook/4-Subqueries/28-Subqueries-FROM.md[90m [limit=30][0m
+[0m→ [0mRead sql-handbook/4-Subqueries/28-Subqueries-FROM.md[90m [offset=31, limit=300][0m
+[0m→ [0mRead sql-handbook/4-Subqueries/28-Subqueries-FROM.md[90m [offset=331][0m
+[0m
+[0m← [0mEdit sql-handbook/4-Subqueries/28-Subqueries-FROM.md
+Index: /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/28-Subqueries-FROM.md
+===================================================================
+--- /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/28-Subqueries-FROM.md
++++ /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/28-Subqueries-FROM.md
+@@ -1,9 +1,17 @@
+-Now I have a clear picture of the handbook's structure, style, and conventions. Let me write the comprehensive section.
+-Let me correct a few arithmetic mistakes in the example outputs I wrote, to keep the handbook internally accurate.
+-The file content looks corrupted — my narrative text leaked into it. Let me investigate.
+-The front matter got clobbered. Let me see the current top of the file to repair it.
+- derived_table_alias;
++# Subqueries in FROM
++
++**Section 28 · Category 4: Subqueries**
++
++---
++
++## Fundamentals
++
++A **subquery in the `FROM` clause** — variously called a **derived table**, **subquery in `FROM`**, **inline view** (Oracle), or **`JOIN`-table subquery** — is a subquery that appears where a *table* belongs: in a `FROM` clause, where it is treated by the outer query as a table.
++
++```sql
++SELECT ...
++FROM ( SELECT ... ) AS derived_table_alias;
+ ```
+ 
+ The outer query sees the subquery **first as a table** (with columns and rows), exactly as if it were a stored table. That is the entire mental model:
+ 
+
+[0m
+[0m→ [0mRead sql-handbook/4-Subqueries/28-Subqueries-FROM.md[90m [limit=40][0m
+[0m
+[0m$ [0mgrep -n "^# Subqueries in FROM\|^# Interview Questions\|^## Fundamentals\|^## Why It Exists\|^## Examples\|^## NULL Behavior\|^## Performance\|^## Database Differences" /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/28-Subqueries-FROM.md; echo "---"; wc -l /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/28-Subqueries-FROM.md
+1:# Subqueries in FROM
+7:## Fundamentals
+72:## Why It Exists
+154:## Examples
+468:## NULL Behavior
+541:## Performance
+588:## Database Differences
+603:# Interview Questions
+---
+667 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/28-Subqueries-FROM.md
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mls -la /home/soumrnjn/Desktop/Task/SQL/
+total 40
+drwxrwxr-x  3 soumrnjn soumrnjn  4096 Sep 15 09:18 .
+drwxrwxr-x 12 soumrnjn soumrnjn  4096 Sep 14 20:41 ..
+-rwxrwxr-x  1 soumrnjn soumrnjn 19656 Sep 14 20:48 script.sh
+drwxrwxr-x  6 soumrnjn soumrnjn  4096 Sep 15 08:02 sql-handbook
+-rw-rw-r--  1 soumrnjn soumrnjn  4330 Sep 15 06:03 sql-master-prompt.md
+[0m
+[0m$ [0mls -la /home/soumrnjn/Desktop/Task/SQL/sql-handbook/ && find /home/soumrnjn/Desktop/Task/SQL/sql-handbook -type f | head -100
+total 132
+drwxrwxr-x 6 soumrnjn soumrnjn   4096 Sep 15 08:02 .
+drwxrwxr-x 3 soumrnjn soumrnjn   4096 Sep 15 09:18 ..
+drwxrwxr-x 2 soumrnjn soumrnjn   4096 Sep 14 21:25 1-Fundamentals
+drwxrwxr-x 2 soumrnjn soumrnjn   4096 Sep 15 09:18 2-NULL-and-Logic
+drwxrwxr-x 2 soumrnjn soumrnjn   4096 Sep 15 08:02 3-Joins
+drwxrwxr-x 2 soumrnjn soumrnjn   4096 Sep 15 09:29 4-Subqueries
+-rw-rw-r-- 1 soumrnjn soumrnjn 103548 Sep 15 09:34 errors.log
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/1-Fundamentals/06-Logical-Query-Processing-Order.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/1-Fundamentals/07-Filtering-Operators.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/1-Fundamentals/03-DDL-DML-DQL-DCL-TCL.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/1-Fundamentals/02-Data-Types.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/1-Fundamentals/01-SQL-Basics.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/1-Fundamentals/04-Constraints-Keys.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/1-Fundamentals/08-CASE-Expressions.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/1-Fundamentals/05-SELECT-FROM-WHERE.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/errors.log
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/24-Semi-Joins.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/18-CROSS-JOIN.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/15-INNER-JOIN.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/19-SELF-JOIN.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/23-Anti-Joins.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/25-JOIN-Pitfalls.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/16-LEFT-JOIN.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/21-JOIN-Duplicates-and-Fanout.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/22-Many-to-Many-Joins.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/17-RIGHT-FULL-JOIN.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins/20-JOIN-ON-vs-WHERE.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/10-Three-Valued-Logic.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/14-NOT-IN-NULL-Pitfalls.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/11-NULL-Comparisons.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/13-IS-DISTINCT-FROM.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/09-NULL-Deep-Dive.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic/12-COALESCE-NULLIF.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/26-Scalar-Subqueries.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/29-Correlated-Subqueries.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/27-Subqueries-WHERE.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/28-Subqueries-FROM.md
+[0m
+[0m$ [0mwc -l /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/*.md; echo '---'; head -60 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/29-Correlated-Subqueries.md
+661 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/26-Scalar-Subqueries.md
+   899 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/27-Subqueries-WHERE.md
+   658 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/28-Subqueries-FROM.md
+    74 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/29-Correlated-Subqueries.md
+  2292 total
+---
+# 29 — Correlated Subqueries
+
+> **Category:** 4-Subqueries
+
+---
+
+## 1. Fundamentals
+
+### 1.1 What is a correlated subquery?
+
+A **correlated subquery** is a subquery that **references one or more columns of the outer (enclosing) query**.
+
+```sql
+SELECT e.emp_id, e.salary
+FROM employees e
+WHERE e.salary > (
+    SELECT AVG(e2.salary)        -- ← inner query
+    FROM employees e2
+    WHERE e2.dept_id = e.dept_id -- ← correlation: uses the OUTER row's dept_id
+);
+```
+
+The line `WHERE e2.dept_id = e.dept_id` is the **correlation condition**. It makes the inner query depend on the currently processed outer row (`e` comes from the outer query). Because of this dependency, the subquery **cannot run on its own** — it is meaningless without an outer row to bind its correlation column.
+
+### 1.2 Correlated vs non-correlated subquery
+
+| Aspect | Non-correlated (simple) subquery | Correlated subquery |
+|---|---|---|
+| References outer columns | No | Yes |
+| Can run standalone | Yes | No |
+| Logically executed | Once | Once **per outer row candidate** |
+| Direction of dependency | Inner → Outer (result feeds the outer query) | Outer → Inner (outer row is fed into the inner query) |
+| Typical execution shape | Hash join, hash semi-join, materialized set | Nested-loop style or "apply" style (may be decorrelated by the optimizer) |
+| Example | `WHERE dept_id IN (SELECT dept_id FROM departments)` | `WHERE salary > (SELECT AVG(...) WHERE dept_id = e.dept_id)` |
+
+### 1.3 Why does it exist?
+
+A correlated subquery solves a class of problems that are awkward or risky to express with plain joins:
+
+1. **Row-preserving existence checks** — "keep this outer row if a matching row exists in another table" without fan-out.
+2. **Per-row comparison against another row's related data** — "compare each employee against a value derived from *their own* department".
+3. **Per-row derived values in the SELECT list** — "for each customer, show the amount of their most recent order".
+4. **Row-at-a-time reasoning** — it mirrors how a human thinks: *"look at this row, look up something related, decide."*
+
+It exists because sometimes a JOIN either duplicates rows (one-to-many / many-to-many) or forces a GROUP BY that you do not want, while a window function may not be available or may compute more than you need.
+
+---
+
+## 2. Internal working
+
+### 2.1 The logical (textbook) evaluation model
+
+The SQL standard describes correlated subqueries using an **iterative loop**:
+
+```
+for each candidate row R produced by the outer query:
+    1. bind the values of the correlation column(s) from R
+    2. execute the inner query with those values substituted
+    3. use the inner result according to the operator
+       (filter R, compute a value for R, decide existence)
+[0m
+[0m$ [0mtail -20 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/29-Correlated-Subqueries.md
+```
+for each candidate row R produced by the outer query:
+    1. bind the values of the correlation column(s) from R
+    2. execute the inner query with those values substituted
+    3. use the inner result according to the operator
+       (filter R, compute a value for R, decide existence)
+```
+
+```mermaid
+flowchart TD
+    A[Outer query produces a candidate row R] --> B[Bind correlation cols of R into inner SQL]
+    B --> C[Execute inner query with bound values]
+    C --> D{Does the inner result satisfy the operator?}
+    D -- yes --> E[Keep R / use inner value for R]
+    D -- no --> F[Drop R / NULL for R]
+    E --> G[Next outer row → repeat]
+    F --> G
+```
+
+###
+[0m
+[0m$ [0mgrep -n "^# \|^## " /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/26-Scalar-Subqueries.md | head -50
+1:# Scalar Subqueries
+7:## Fundamentals
+32:## The Scalar Contract
+50:## Why It Exists
+64:## Syntax
+94:## Sample Data
+136:## Example 1 — Scalar subquery in the `SELECT` list (non-correlated)
+164:## Example 2 — Scalar subquery in `WHERE`
+185:## Example 3 — Correlated scalar subquery in the `SELECT` list
+220:## Example 4 — Correlated scalar subquery in `WHERE`
+245:## Example 5 — Scalar subquery in `HAVING`
+266:## Example 6 — Scalar subquery in `ORDER BY`
+296:## Example 7 — Scalar subquery in `UPDATE`
+310:## Example 8 — Zero rows → NULL
+334:## Example 9 — More than one row → runtime error
+363:## NULL Behavior and Three-Valued Logic
+389:## Internal Working
+431:## Scalar Subquery vs. Alternatives
+508:## Performance
+531:## Common Mistakes
+545:## Production Pitfalls
+565:## Edge Cases
+580:## Best Practices
+595:## Database Differences
+608:# Interview Questions
+[0m
+[0m$ [0msed -n '1,60p' /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/26-Scalar-Subqueries.md
+# Scalar Subqueries
+
+**Section 26 · Category 4: Subqueries**
+
+---
+
+## Fundamentals
+
+A **scalar subquery** is a subquery that returns exactly **one row with exactly one column** — a single value. It is used anywhere in SQL where a single value is expected: a `SELECT` list item, a `WHERE` comparison operand, a `HAVING` condition, an `ORDER BY` expression, a `CASE` branch, an `UPDATE ... SET` expression, or an `INSERT ... VALUES` expression.
+
+The word *scalar* does not describe the SQL you write; it describes the **result contract**. You can write any valid `SELECT` inside the parentheses — what matters is what it returns.
+
+```sql
+(SELECT MAX(salary) FROM employees)
+```
+
+No keywords mark a subquery as "scalar". A subquery *becomes* scalar by context: it is placed where SQL demands a single value.
+
+```mermaid
+flowchart TD
+    SQRY[Subquery] --> ROW[Row subquery<br/>one row, many columns]
+    SQRY --> SC[Scalar subquery<br/>one row, ONE column]
+    SQRY --> TBL[Table subquery<br/>many rows, many columns]
+    SC --> UNCORR[Non-correlated<br/>no reference to outer query]
+    SC --> CORR[Correlated<br/>references outer query columns]
+```
+
+Related concept that is *not* a scalar subquery: a **row subquery** (a tuple comparison such as `(a, b) = (SELECT x, y FROM t)`), which returns one row with multiple columns. PostgreSQL and MySQL allow it in row-constructor contexts; see the **Row Subqueries** section.
+
+---
+
+## The Scalar Contract
+
+A scalar subquery is bound by three rules:
+
+| Rule | Constraint | What happens if violated |
+|------|-----------|--------------------------|
+| Column rule | Must select **exactly one column** | Compile-time error in most contexts |
+| Zero-row rule | May return **zero rows** | Produces the value `NULL` (not an error) |
+| Multi-row rule | Must not return **more than one row** | **Runtime error** — the statement fails |
+
+> Interview trap
+
+> The multi-row violation is a **runtime** error, not a syntax error. The statement compiles and starts executing fine. The database only rejects it *if and when* more than one row is actually produced. This is why the bug can live in production for months and explode the day data grows.
+
+One more subtlety: an **aggregate without `GROUP BY`** (e.g. `(SELECT MAX(salary) FROM employees)`) is *always* safe. An aggregate over zero rows still returns one row (`NULL`, or `0` for `COUNT`). So aggregates give you the zero-row rule and the multi-row rule for free.
+
+---
+
+## Why It Exists
+
+Scalar subqueries exist so that a query can use the result of another query as a **value**, without forcing you to restructure the outer query. This solves problems like:
+
+- Compare each row against a global measure (`company average salary`).
+- Compare each row against a measure of its own group (correlated).
+- Pull a single side-column (`dept_name`) without joining.
+- Reuse one computed value in several places: `WHERE salary > ms AND salary < ms * 1.5`.
+- Use a value computed from live data inside `INSERT`, `UPDATE`, or `ORDER BY`.
+
+Before scalar subqueries existed, expressing "employees paid more than the company average" required either two query steps (compute average, then compare) or a self-join with aggregation.
+[0m
+[0m$ [0msed -n '608,661p' /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/26-Scalar-Subqueries.md
+# Interview Questions
+
+> Practice set — answers are intentionally withheld. Work them out, then verify each with a live query and `EXPLAIN ANALYZE`.
+
+### Beginner
+
+1. What is a scalar subquery? State the three rules it must satisfy.
+2. What happens when a scalar subquery returns zero rows? What happens when it returns two rows?
+3. Where in a statement can a scalar subquery legally appear? Give one example for each position.
+4. What does `(SELECT COUNT(*) FROM employees)` return when `employees` is empty? What does `(SELECT MAX(salary) FROM employees)` return when it is empty, and why the difference?
+
+### Intermediate
+
+5. Contrast correlated vs non-correlated scalar subqueries. How often is each conceptually evaluated?
+6. Explain why `WHERE salary > (SELECT AVG(salary) ...)` returns zero rows when the subquery yields `NULL`. Which row calls it out incorrectly?
+7. Rewrite "list every employee with their department name" using both a scalar subquery and a `LEFT JOIN`. Which would you ship and why? What must you verify before judging the scalar version slow?
+
+### Advanced
+
+8. In PostgreSQL's `EXPLAIN`, what is the difference between `InitPlan` and `SubPlan`? What does that difference imply about evaluation count?
+9. Describe Oracle's scalar subquery caching. In what plan node/option does it appear, and why does it change the performance story?
+10. Under what conditions can the optimizer rewrite a scalar subquery into a join/semi-join or constant? Which engine-specific plan artefacts would you look for to confirm?
+
+### Scenario Based
+
+11. Using the sample data, write a query returning each department's name together with the highest-paid employee's name in it — with one output row per department.
+12. A report needs `emp_name`, `salary`, `company_avg`, and the distance `salary - company_avg`. Write it two ways: scalar subquery, then a CTE. Which is more readable when `company_avg` is referenced twice?
+13. Given `orders`, write a single query that returns, for each order, the order total and the running average order total up to that order (ordered by `order_date`). Would you use a scalar subquery or a window function? Justify.
+
+### Tricky
+
+14. `SELECT (SELECT DISTINCT salary FROM employees)` — predict the outcome with the sample data, or any data having two equal salaries? Is `DISTINCT` a sound fix for the multi-row error? Why?
+15. Grace has `dept_id = NULL`. The correlated subquery `(SELECT MAX(salary) FROM employees e2 WHERE e2.dept_id = e.dept_id)` returns `NULL` for her. Explain the exact relational reason.
+16. What is the difference in result between `WHERE salary = (SELECT MAX(salary) FROM employees)` and `WHERE salary >= ALL (SELECT salary FROM employees)` when multiple employees share the maximum? When does each row-set differ?
+
+### Output Prediction
+
+17. Given the sample data, predict the exact output of Example 4 (correlated `WHERE` variant) — which employee rows appear, and why does Frank's row vanish even though his department average is `NULL`?
+18. Predict the output of `SELECT emp_name FROM employees WHERE salary > (SELECT AVG(salary) FROM employees WHERE dept_id = 999);` before you run it. Then run it and explain the empty result.
+19. Under `EXPLAIN`, when would you expect an `InitPlan` vs a `SubPlan` for `SELECT (SELECT MAX(salary) FROM employees), emp_name FROM employees;`? Predict the shape, then confirm.
+
+### Debugging
+
+20. A query that has been fine for a year now fails with the multi-row subquery error. List the investigation steps and the three most likely data-level root causes, and the structural fix that would prevent recurrence.
+21. An `UPDATE` silently affects 0 rows. The set clause references a scalar subquery. Walk through the diagnosis: what to check first, what the plan shows, and the safe guard.
+22. A correlated scalar subquery makes a 100-row query fine but a 10-million-row query hang. Which plan shape are you looking for? What two concrete fixes would you try first, and how do you prove one worked?
+
+### Performance
+
+23. "Scalar subqueries are always slower than joins." True or false? Give a case where a non-correlated scalar aggregate is the *better* design, and a case where a correlated scalar is dangerous.
+24. What do indexes, statistics, cardinality, and plan-shape have to do with whether a correlated scalar subquery is cheap? Run `EXPLAIN ANALYZE` on Examples 3 and 4 with and without an index on `employees(dept_id)` and compare node costs.
+25. When each outer row triggers a *different* correlated lookup, why might Oracle's scalar caching still help? When does caching *not* help?
+
+Return to the **Subqueries** index when ready.
+[0m
+[0m→ [0mRead sql-handbook/4-Subqueries/29-Correlated-Subqueries.md
+[0m
+[0m← [0mWrite sql-handbook/4-Subqueries/29-Correlated-Subqueries.md
+Wrote file successfully.
+[0m
+[0m$ [0mwc -l /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/29-Correlated-Subqueries.md && grep -c '```' /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/29-Correlated-Subqueries.md && grep -n '^#' /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/29-Correlated-Subqueries.md | head -40
+941 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/29-Correlated-Subqueries.md
+64
+1:# 29 — Correlated Subqueries
+7:## 1. Fundamentals
+9:### 1.1 What is a correlated subquery?
+27:### 1.2 Correlated vs non-correlated subquery
+38:### 1.3 Why does it exist?
+51:## 2. Internal working
+53:### 2.1 The logical (textbook) evaluation model
+77:### 2.2 Physical (optimizer) behavior — you cannot assume the loop
+99:### 2.3 What to look for in an execution plan
+150:## 3. Syntax
+154:### 3.1 Correlated scalar subquery in `WHERE`
+168:### 3.2 Correlated scalar subquery in the `SELECT` list
+184:### 3.3 Correlated `EXISTS` / `NOT EXISTS`
+199:### 3.4 Correlated `IN` / `NOT IN`
+211:### 3.5 Correlated subquery in `HAVING`, `ON`, `UPDATE`, `DELETE`
+244:## 4. Sample data
+327:## 5. Worked examples with expected output
+329:### 5.1 Example 1 — Employees earning more than their department average
+369:### 5.2 Example 2 — Customers who have placed no orders
+389:### 5.3 Example 3 — Most recent order amount, one row per customer
+418:### 5.4 Example 4 — Salary "rank within department" built by counting
+455:## 6. Scenario-based examples
+457:### 6.1 "Top earner in every department"
+481:### 6.2 "Flag rows that have a related row" — a marketing list
+505:### 6.3 "Per-row sheet with a group reference" — normalizing salaries
+537:### 6.4 Correlated `UPDATE` against a group-derived threshold
+555:## 7. Alternatives to correlated subqueries
+559:### 7.1 Derived table + JOIN
+576:### 7.2 Window functions
+590:### 7.3 `LATERAL` / `APPLY`
+594:#### PostgreSQL (and MySQL 8.0.14+)
+610:#### SQL Server (no `LATERAL` keyword — `APPLY` instead)
+632:### 7.4 Comparison table — same problem, four tools
+647:## 8. Edge cases
+663:## 9. NULL behavior and three-valued logic
+705:## 10. Common mistakes
+744:## 11. Production pitfalls
+764:## 12. Performance implications
+766:### 12.1 The cost model you should *start* from
+780:### 12.2 What actually decides the plan
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mls -la /home/soumrnjn/Desktop/Task/SQL
+total 40
+drwxrwxr-x  3 soumrnjn soumrnjn  4096 Sep 15 09:18 .
+drwxrwxr-x 12 soumrnjn soumrnjn  4096 Sep 14 20:41 ..
+-rwxrwxr-x  1 soumrnjn soumrnjn 19656 Sep 14 20:48 script.sh
+drwxrwxr-x  6 soumrnjn soumrnjn  4096 Sep 15 08:02 sql-handbook
+-rw-rw-r--  1 soumrnjn soumrnjn  4330 Sep 15 06:03 sql-master-prompt.md
+[0m
+[0m$ [0mls -R /home/soumrnjn/Desktop/Task/SQL/sql-handbook | head -100
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook:
+1-Fundamentals
+2-NULL-and-Logic
+3-Joins
+4-Subqueries
+errors.log
+
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/1-Fundamentals:
+01-SQL-Basics.md
+02-Data-Types.md
+03-DDL-DML-DQL-DCL-TCL.md
+04-Constraints-Keys.md
+05-SELECT-FROM-WHERE.md
+06-Logical-Query-Processing-Order.md
+07-Filtering-Operators.md
+08-CASE-Expressions.md
+
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/2-NULL-and-Logic:
+09-NULL-Deep-Dive.md
+10-Three-Valued-Logic.md
+11-NULL-Comparisons.md
+12-COALESCE-NULLIF.md
+13-IS-DISTINCT-FROM.md
+14-NOT-IN-NULL-Pitfalls.md
+
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/3-Joins:
+15-INNER-JOIN.md
+16-LEFT-JOIN.md
+17-RIGHT-FULL-JOIN.md
+18-CROSS-JOIN.md
+19-SELF-JOIN.md
+20-JOIN-ON-vs-WHERE.md
+21-JOIN-Duplicates-and-Fanout.md
+22-Many-to-Many-Joins.md
+23-Anti-Joins.md
+24-Semi-Joins.md
+25-JOIN-Pitfalls.md
+
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries:
+26-Scalar-Subqueries.md
+27-Subqueries-WHERE.md
+28-Subqueries-FROM.md
+29-Correlated-Subqueries.md
+30-IN-vs-EXISTS.md
+31-NOT-IN-vs-NOT-EXISTS.md
+[0m
+[0m→ [0mRead sql-handbook/4-Subqueries/30-IN-vs-EXISTS.md
+[0m→ [0mRead sql-handbook/2-NULL-and-Logic/14-NOT-IN-NULL-Pitfalls.md
+[0m→ [0mRead sql-handbook/3-Joins/23-Anti-Joins.md
+[0m
+[0m$ [0mwc -l /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/31-NOT-IN-vs-NOT-EXISTS.md && head -20 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/31-NOT-IN-vs-NOT-EXISTS.md
+0 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/31-NOT-IN-vs-NOT-EXISTS.md
+[0m
+[0m← [0mWrite sql-handbook/4-Subqueries/31-NOT-IN-vs-NOT-EXISTS.md
+Wrote file successfully.
+[0m
+[0m$ [0mwc -l /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/31-NOT-IN-vs-NOT-EXISTS.md
+937 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/4-Subqueries/31-NOT-IN-vs-NOT-EXISTS.md
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mcommand -v sqlite3 && sqlite3 --version || echo "no sqlite"
+no sqlite
+[0m
+[0m$ [0mcommand -v psql || echo "no psql"; command -v mysql || echo "no mysql"
+/usr/bin/psql
+/usr/bin/mysql
+[0m
+[0m$ [0mpg_isready 2>&1; echo "---"; ls /usr/lib/postgresql/ 2>/dev/null; ls /var/run/postgresql/ 2>/dev/null
+/var/run/postgresql:5432 - accepting connections
+---
+17
+17-main.pid
+[0m
+[0m$ [0mmysqladmin ping 2>&1 | head -1; echo "---"; command -v mysqld mariadbd 2>/dev/null; service mysql status 2>&1 | head -2
+mysqladmin: connect to server at 'localhost' failed
+---
+/usr/bin/bash: line 1: service: command not found
+[0m
+[0m$ [0mpsql -d postgres -w -c "SELECT version();" 2>&1 | head -3
+version                                                       
+---------------------------------------------------------------------------------------------------------------------
+ PostgreSQL 17.11 (Debian 17.11-0+deb13u1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+[0m
+[0m$ [0mpsql -d postgres -w -c "DROP DATABASE IF EXISTS cte_handbook;" -c "CREATE DATABASE cte_handbook;" 2>&1
+NOTICE:  database "cte_handbook" does not exist, skipping
+DROP DATABASE
+CREATE DATABASE
+[0m
+[0m$ [0mpsql -d cte_handbook -w <<'SQL' 2>&1
+CREATE TABLE departments (department_id INT PRIMARY KEY, department_name VARCHAR(50) NOT NULL);
+CREATE TABLE employees (employee_id INT PRIMARY KEY, employee_name VARCHAR(100) NOT NULL, department_id INT REFERENCES departments(department_id), salary DECIMAL(10,2) NULL);
+CREATE TABLE orders (order_id INT PRIMARY KEY, customer_id INT NULL, order_date DATE NOT NULL, status VARCHAR(20) NOT NULL);
+CREATE TABLE order_items (item_id INT PRIMARY KEY, order_id INT NOT NULL REFERENCES orders(order_id), product VARCHAR(50) NOT NULL, qty INT NOT NULL, unit_price NUMERIC(10,2) NOT NULL);
+
+INSERT INTO departments VALUES (1,'Engineering'),(2,'Sales'),(3,'Marketing'),(4,'HR');
+INSERT INTO employees VALUES
+ (1,'Ada',1,120000),(2,'Grace',1,110000),(3,'Alan',1,95000),
+ (4,'Margaret',2,70000),(5,'Katherine',2,80000),(6,'Sheryl',3,60000),(7,'Barbara',NULL,NULL);
+INSERT INTO orders VALUES
+ (100,1,'2026-01-10','completed'),(101,1,'2026-02-01','completed'),
+ (102,2,'2026-01-15','pending'),(103,3,'2026-03-05','completed'),(104,NULL,'2026-03-20','cancelled');
+INSERT INTO order_items VALUES
+ (1,100,'Monitor',2,300),(2,100,'Keyboard',1,120),(3,101,'Mouse',3,40),
+ (4,102,'Monitor',1,300),(5,103,'Desk',1,500),(6,104,'Chair',1,150);
+SQL
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+INSERT 0 4
+INSERT 0 7
+INSERT 0 5
+INSERT 0 6
+[0m
+[0m$ [0mpsql -d cte_handbook -w <<'SQL' 2>&1
+-- Q1: departments whose avg salary > company avg
+WITH dept_avg AS (
+  SELECT department_id, AVG(salary) AS avg_salary, COUNT(*) AS headcount
+  FROM employees GROUP BY department_id
+)
+SELECT de.department_name, da.avg_salary, da.headcount
+FROM dept_avg da JOIN departments de ON de.department_id = da.department_id
+WHERE da.avg_salary > (SELECT AVG(salary) FROM employees);
+
+-- Q2: top earner per dept
+WITH ranked AS (
+  SELECT employee_name, department_id, salary,
+         ROW_NUMBER() OVER (PARTITION BY department_id ORDER BY salary DESC) AS rn
+  FROM employees WHERE department_id IS NOT NULL
+)
+SELECT de.department_name, r.employee_name, r.salary
+FROM ranked r JOIN departments de ON de.department_id = r.department_id
+WHERE r.rn = 1;
+
+-- Q3: running total
+WITH cum AS (
+  SELECT employee_name, salary,
+         SUM(salary) OVER (ORDER BY employee_id) AS running_total
+  FROM employees WHERE salary IS NOT NULL
+)
+SELECT employee_name, salary, running_total FROM cum ORDER BY employee_id;
+
+-- Q4: order totals
+WITH order_totals AS (
+  SELECT o.order_id, o.customer_id, SUM(oi.qty * oi.unit_price) AS total
+  FROM orders o JOIN order_items oi ON oi.order_id = o.order_id
+  GROUP BY o.order_id, o.customer_id
+)
+SELECT ot.order_id, ot.customer_id, ot.total
+FROM order_totals ot ORDER BY ot.order_id;
+
+-- Q5: fan-out count trap
+SELECT o.status, COUNT(*) AS rows_after_join
+FROM orders o JOIN order_items oi ON oi.order_id = o.order_id
+GROUP BY o.status ORDER BY o.status;
+
+-- Q6: above dept avg
+WITH stats AS (
+  SELECT department_id, AVG(salary) AS dept_avg FROM employees
+  WHERE department_id IS NOT NULL GROUP BY department_id
+)
+SELECT e.employee_name, e.salary, de.department_name
+FROM employees e JOIN stats s ON s.department_id = e.department_id
+JOIN departments de ON de.department_id = e.department_id
+WHERE e.salary > s.dept_avg ORDER BY e.salary DESC;
+SQL
+department_name |     avg_salary      | headcount 
+-----------------+---------------------+-----------
+ Engineering     | 108333.333333333333 |         3
+(1 row)
+
+ department_name | employee_name |  salary   
+-----------------+---------------+-----------
+ Engineering     | Ada           | 120000.00
+ Sales           | Katherine     |  80000.00
+ Marketing       | Sheryl        |  60000.00
+(3 rows)
+
+ERROR:  column "employee_id" does not exist
+LINE 6: ...yee_name, salary, running_total FROM cum ORDER BY employee_i...
+                                                             ^
+ order_id | customer_id | total  
+----------+-------------+--------
+      100 |           1 | 720.00
+      101 |           1 | 120.00
+      102 |           2 | 300.00
+      103 |           3 | 500.00
+      104 |             | 150.00
+(5 rows)
+
+  status   | rows_after_join 
+-----------+-----------------
+ cancelled |               1
+ completed |               4
+ pending   |               1
+(3 rows)
+
+ employee_name |  salary   | department_name 
+---------------+-----------+-----------------
+ Ada           | 120000.00 | Engineering
+ Grace         | 110000.00 | Engineering
+ Katherine     |  80000.00 | Sales
+(3 rows)
+[0m
+[0m$ [0mpsql -d cte_handbook -w <<'SQL' 2>&1
+WITH cum AS (
+  SELECT employee_id, employee_name, salary,
+         SUM(salary) OVER (ORDER BY employee_id) AS running_total
+  FROM employees WHERE salary IS NOT NULL
+)
+SELECT employee_id, employee_name, salary, running_total FROM cum ORDER BY employee_id;
+
+-- Q7 NULL dept handling: dept_avg with NULL group
+WITH dept_avg AS (
+  SELECT department_id, AVG(salary) AS avg_salary, COUNT(*) AS headcount, COUNT(salary) AS sal_count
+  FROM employees GROUP BY department_id
+)
+SELECT * FROM dept_avg ORDER BY department_id NULLS LAST;
+
+-- Q8: DML CTE (PG) - give all salespeople a 5% raise, returning rows
+WITH updated AS (
+  UPDATE employees SET salary = salary * 1.05
+  WHERE department_id = 2
+  RETURNING employee_id, employee_name, salary
+)
+SELECT * FROM updated ORDER BY employee_id;
+
+-- Q9: reuse same CTE twice (multi-ref)
+WITH stats AS (
+  SELECT department_id, AVG(salary) AS dept_avg FROM employees
+  WHERE department_id IS NOT NULL GROUP BY department_id
+)
+SELECT s.department_id, s.dept_avg,
+       (SELECT COUNT(*) FROM employees e WHERE e.department_id = s.department_id AND e.salary > s.dept_avg) AS above
+FROM stats s;
+SQL
+employee_id | employee_name |  salary   | running_total 
+-------------+---------------+-----------+---------------
+           1 | Ada           | 120000.00 |     120000.00
+           2 | Grace         | 110000.00 |     230000.00
+           3 | Alan          |  95000.00 |     325000.00
+           4 | Margaret      |  70000.00 |     395000.00
+           5 | Katherine     |  80000.00 |     475000.00
+           6 | Sheryl        |  60000.00 |     535000.00
+(6 rows)
+
+ department_id |     avg_salary      | headcount | sal_count 
+---------------+---------------------+-----------+-----------
+             1 | 108333.333333333333 |         3 |         3
+             2 |  75000.000000000000 |         2 |         2
+             3 |  60000.000000000000 |         1 |         1
+               |                     |         1 |         0
+(4 rows)
+
+ employee_id | employee_name |  salary  
+-------------+---------------+----------
+           4 | Margaret      | 73500.00
+           5 | Katherine     | 84000.00
+(2 rows)
+
+ department_id |      dept_avg       | above 
+---------------+---------------------+-------
+             3 |  60000.000000000000 |     0
+             2 |  78750.000000000000 |     1
+             1 | 108333.333333333333 |     2
+(3 rows)
+[0m
+[0m$ [0mpsql -d cte_handbook -w <<'SQL' 2>&1
+-- Reset data modified by the DML demo
+UPDATE employees SET salary = CASE employee_id WHEN 4 THEN 70000 WHEN 5 THEN 80000 END WHERE employee_id IN (4,5);
+EXPLAIN (COSTS OFF)
+WITH dept_avg AS (
+  SELECT department_id, AVG(salary) AS avg_salary FROM employees GROUP BY department_id
+)
+SELECT count(*) FROM dept_avg d JOIN employees e ON e.department_id = d.department_id;
+EXPLAIN (COSTS OFF)
+WITH dept_avg AS MATERIALIZED (
+  SELECT department_id, AVG(salary) AS avg_salary FROM employees GROUP BY department_id
+)
+SELECT count(*) FROM dept_avg d JOIN employees e ON e.department_id = d.department_id;
+SQL
+UPDATE 2
+                          QUERY PLAN                          
+--------------------------------------------------------------
+ Aggregate
+   ->  Hash Join
+         Hash Cond: (e.department_id = d.department_id)
+         ->  Seq Scan on employees e
+         ->  Hash
+               ->  Subquery Scan on d
+                     ->  HashAggregate
+                           Group Key: employees.department_id
+                           ->  Seq Scan on employees
+(9 rows)
+
+                       QUERY PLAN                       
+--------------------------------------------------------
+ Aggregate
+   CTE dept_avg
+     ->  HashAggregate
+           Group Key: employees.department_id
+           ->  Seq Scan on employees
+   ->  Hash Join
+         Hash Cond: (e.department_id = d.department_id)
+         ->  Seq Scan on employees e
+         ->  Hash
+               ->  CTE Scan on dept_avg d
+(10 rows)
+[0m
+[0m$ [0mpsql -d cte_handbook -w <<'SQL' 2>&1
+EXPLAIN (COSTS OFF)
+WITH dept_avg AS (
+  SELECT department_id, AVG(salary) AS avg_salary FROM employees GROUP BY department_id
+)
+SELECT * FROM dept_avg x JOIN dept_avg y USING (department_id);
+SQL
+QUERY PLAN                    
+--------------------------------------------------
+ Hash Join
+   Hash Cond: (x.department_id = y.department_id)
+   CTE dept_avg
+     ->  HashAggregate
+           Group Key: employees.department_id
+           ->  Seq Scan on employees
+   ->  CTE Scan on dept_avg x
+   ->  Hash
+         ->  CTE Scan on dept_avg y
+(9 rows)
+[0m
+[0m✗ [0mWebFetch https://dev.mysql.com/doc/refman/8.0/en/with.html failed
+[91m[1mError: [0mStatusCode: non 2xx status code (403 GET https://dev.mysql.com/doc/refman/8.0/en/with.html)
+[0m◈ [0mExa Web Search "MySQL 8.0 WITH clause: does MySQL support forward references between CTEs and data-modifying statements in WITH"
+[0m
+> build · big-pickle
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mls -la /home/soumrnjn/Desktop/Task/SQL
+total 40
+drwxrwxr-x  3 soumrnjn soumrnjn  4096 Sep 15 09:18 .
+drwxrwxr-x 12 soumrnjn soumrnjn  4096 Sep 14 20:41 ..
+-rwxrwxr-x  1 soumrnjn soumrnjn 19656 Sep 14 20:48 script.sh
+drwxrwxr-x  7 soumrnjn soumrnjn  4096 Sep 15 10:14 sql-handbook
+-rw-rw-r--  1 soumrnjn soumrnjn  4330 Sep 15 06:03 sql-master-prompt.md
+[0m
+[0m✱ [0mGlob "**/*.md"[90m 39 matches[0m
+[0m→ [0mRead sql-handbook/5-Aggregation/38-COUNT-SUM-AVG-MIN-MAX.md
+[0m→ [0mRead sql-handbook/5-Aggregation/37-HAVING.md
+[0m→ [0mRead sql-handbook/5-Aggregation/36-GROUP-BY.md[90m [limit=120][0m
+[0m→ [0mRead sql-handbook/5-Aggregation/36-GROUP-BY.md[90m [offset=640, limit=205][0m
+[0m✱ [0mGlob "**/*.md"[90m in sql-handbook · 38 matches[0m
+[0m
+[0m← [0mWrite sql-handbook/5-Aggregation/38-COUNT-SUM-AVG-MIN-MAX.md
+Wrote file successfully.
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m← [0mWrite 39-COUNT-NULL-Pitfalls.md
+Wrote file successfully.
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m→ [0mRead .
+[0m✱ [0mGlob "**/*.md"[90m in . · 43 matches[0m
+[0m→ [0mRead sql-handbook/5-Aggregation/41-GROUP-BY-vs-DISTINCT.md
+[0m→ [0mRead sql-handbook/5-Aggregation/36-GROUP-BY.md
+[0m→ [0mRead sql-handbook/5-Aggregation/40-DISTINCT.md
+[0m→ [0mRead script.sh
+[0m
+[0m← [0mWrite sql-handbook/5-Aggregation/41-GROUP-BY-vs-DISTINCT.md
+Wrote file successfully.
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m→ [0mRead .
+[0m→ [0mRead sql-handbook
+[0m→ [0mRead sql-handbook/5-Aggregation
+[0m→ [0mRead sql-handbook/5-Aggregation/42-Conditional-Aggregation.md
+[0m→ [0mRead sql-handbook/5-Aggregation/41-GROUP-BY-vs-DISTINCT.md
+[0m→ [0mRead sql-handbook/5-Aggregation/37-HAVING.md[90m [limit=60][0m
+[0m→ [0mRead sql-handbook/5-Aggregation/38-COUNT-SUM-AVG-MIN-MAX.md[90m [limit=60][0m
+[0m→ [0mRead script.sh
+[0m◈ [0mParallel Web Search "FILTER (WHERE ...) aggregate clause support Oracle 21c PostgreSQL SQL Server MySQL BigQuery dialect support"
+[0m◈ [0mParallel Web Search "PostgreSQL FILTER clause aggregate partial aggregation parallel query planner vs CASE WHEN performance"
+[0m
+[0m← [0mWrite sql-handbook/5-Aggregation/42-Conditional-Aggregation.md
+Wrote file successfully.
+[0m
+[0m$ [0mwc -l "/home/soumrnjn/Desktop/Task/SQL/sql-handbook/5-Aggregation/42-Conditional-Aggregation.md"
+851 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/5-Aggregation/42-Conditional-Aggregation.md
+[0m
+[0m→ [0mRead sql-handbook/5-Aggregation/42-Conditional-Aggregation.md[90m [limit=40][0m
+[0m✱ [0mGrep "The file is confirmed|Now writing the section|established style"[90m in sql-handbook/5-Aggregation/42-Conditional-Aggregation.md · 1 match[0m
+[0m→ [0mRead sql-handbook/5-Aggregation/42-Conditional-Aggregation.md[90m [offset=9, limit=6][0m
+[0m
+[0m← [0mEdit sql-handbook/5-Aggregation/42-Conditional-Aggregation.md
+Index: /home/soumrnjn/Desktop/Task/SQL/sql-handbook/5-Aggregation/42-Conditional-Aggregation.md
+===================================================================
+--- /home/soumrnjn/Desktop/Task/SQL/sql-handbook/5-Aggregation/42-Conditional-Aggregation.md
++++ /home/soumrnjn/Desktop/Task/SQL/sql-handbook/5-Aggregation/42-Conditional-Aggregation.md
+@@ -7,11 +7,9 @@
+ ## Fundamentals
+ 
+ ### The one-paragraph answer
+ 
+-ConditioThe file is confirmed empty and I have the established style. Now writing the section.
+-Something got corrupted in the first paragraph (my pre-tool message text seems interleaved into the file). Let me inspect and fix.
+- It lets you compute **several different summaries in a single scan** — for example "shipped count, cancelled count, and pending count" in one row, or "January revenue, February revenue" as separate columns — instead of running one query per summary and gluing the results together.
++Conditional aggregation is the technique of putting a `CASE` expression *inside* an aggregate function (or attaching a `FILTER (WHERE ...)` clause to it) so that each aggregate only considers the rows that satisfy a condition. It lets you compute **several different summaries in a single scan** — for example "shipped count, cancelled count, and pending count" in one row, or "January revenue, February revenue" as separate columns — instead of running one query per summary and gluing the results together.
+ 
+ It exists because of a simple accident of SQL design:
+ 
+ > Aggregates such as `COUNT`, `SUM`, `AVG`, `MIN`, `MAX` **ignore `NULL`** (with the sole exception of `COUNT(*)`). If you can make non-matching rows *become* `NULL`, the aggregate silently skips them. A `CASE` expression with no `ELSE` produces exactly that `NULL`.
+
+[0m
+[0m→ [0mRead sql-handbook/5-Aggregation/42-Conditional-Aggregation.md[90m [limit=14][0m
+[0m✱ [0mGrep "I'm now going to|Let me|Browsing|I should|web of|as an|localhost|opencode|The user|assistant said|instructions"[90m in sql-handbook/5-Aggregation/42-Conditional-Aggregation.md · 3 matches[0m
+[0m
+[0m$ [0mrg -n '^#{1,4} ' "/home/soumrnjn/Desktop/Task/SQL/sql-handbook/5-Aggregation/42-Conditional-Aggregation.md" | head -60
+/usr/bin/bash: line 1: rg: command not found
+[0m
+[0m✱ [0mGrep "^#{1,5}"[90m in sql-handbook/5-Aggregation/42-Conditional-Aggregation.md · 100 matches[0m
+[0m✱ [0mGrep "^#{1,5}"[90m in sql-handbook/5-Aggregation · 57 matches[0m
+[0m→ [0mRead sql-handbook/5-Aggregation/42-Conditional-Aggregation.md[90m [offset=692, limit=25][0m
+[0m→ [0mRead sql-handbook/5-Aggregation/42-Conditional-Aggregation.md[90m [offset=845, limit=7][0m
+[0m
+> build · big-pickle
+[0m
+[0m→ [0mRead .
+[0m→ [0mRead sql-handbook
+[0m→ [0mRead sql-handbook/5-Aggregation
+[0m→ [0mRead sql-handbook/5-Aggregation/43-ROLLUP-CUBE-GROUPING-SETS.md
+[0m→ [0mRead sql-handbook/5-Aggregation/40-DISTINCT.md[90m [limit=120][0m
+[0m→ [0mRead sql-handbook/5-Aggregation/42-Conditional-Aggregation.md[90m [offset=1, limit=80][0m
+[0m
+[0m$ [0mtail -n 160 "/home/soumrnjn/Desktop/Task/SQL/sql-handbook/5-Aggregation/42-Conditional-Aggregation.md"
+```mermaid
+flowchart TD
+    Q{"What must the output<br/>look like?"}
+    Q --> M{"Exactly ONE summary<br/>for all rows?"}
+    Q --> S{"Several sub-summaries<br/>as separate columns?"}
+    S --> I{"Need only ONE condition<br/>distinguishing rows?"}
+    S --> K{"Conditions are mutually<br/>exclusive bands/buckets?"}
+    I --> F{"Engine supports FILTER?"}
+    F -->|"Yes"| FF["agg(...) FILTER (WHERE cond)"]
+    F -->|"No"| CF["agg(CASE WHEN cond THEN x END)"]
+    K --> CK["agg(CASE WHEN cond1 THEN ...<br/>WHEN cond2 THEN ... END)"]
+    M --> W{"Does a selective WHERE<br/>plus one aggregate suffice?"}
+    W -->|"Yes"| WH["WHERE cond + agg()"]
+    W -->|"No"| CO["COALESCE(agg(CASE ...), 0)<br/>or ELSE 0"]
+    FF --> E["Verify with EXPLAIN ANALYZE"]
+    CF --> E
+    CK --> E
+    WH --> E
+    CO --> E
+```
+
+---
+
+## Best practices
+
+1. **State the output grain first.** "One output row per department; each row carries 6 conditional columns" — the same discipline as every other section.
+2. **Prefer `CASE` when the query must be portable** (MySQL/`SQL Server` on the roadmap). Prefer `FILTER` on engines that support it for readability — the condition sits next to the aggregate it shapes.
+3. **`COUNT(CASE ... THEN 1 END)` — never `ELSE 0`.** `SUM(CASE ... ELSE 0 END)` is fine; `COUNT` + `ELSE 0` is the flagship bug.
+4. **Decide the NULL contract per column**: `SUM(CASE...END)` is NULL when empty (use `COALESCE(...,0)` if the report wants zero).
+5. **Reuse one condition.** If the same condition appears 10 times, extract it (CTE/model layer) or generate the SQL. Rust-proof against drift.
+6. **Make band conditions mutually exclusive**, or you are accepting "first-match wins" without realizing it.
+7. **Watch the denominator**: `AVG(CASE...)` and percentage dividers only see matching rows — cast `100.0`/`1.0` to dodge integer division.
+8. **Don't `JOIN` your way into fan-out** — conditionally aggregate at the correct grain, or pre-aggregate children first.
+9. **Measure before arguing.** Compare `EXPLAIN ANALYZE` output for `CASE` vs `FILTER` vs one `WHERE` query when the query is hot; otherwise pick by readability.
+10. **When the answer is "distinct count within a condition"**, write `COUNT(DISTINCT CASE ...)` (or `FILTER`), remembering NULLs and the repeated-key shape.
+
+---
+
+## Cross-references
+
+- `CASE` expressions (order, `ELSE`, type rules) — section 08
+- `GROUP BY` (grain, execution order, NULL buckets) — section 36
+- `HAVING` (filtering groups, alias rules per engine) — section 37
+- `COUNT`/`SUM`/`AVG`/`MIN`/`MAX` (NULL rules, integer division) — section 38
+- `COUNT(*)` vs `COUNT(col)` vs `COUNT(DISTINCT ...)` and NULL — section 39
+- `DISTINCT` (distinct counts, engines) — section 40
+- Fan-out / double counting on joins (the grain rule) — section 21
+- Window functions + `FILTER` (`... FILTER (WHERE ...) OVER (...)`) — section 56
+- `ROLLUP`/`CUBE`/`GROUPING SETS` (multi-level summaries) — section 43
+- `PIVOT`/`UNPIVOT`/`CROSSTAB` (true column transposition) — section 99
+- Aggregation with `GROUPING SETS` for subtotal matrices — section 43
+- Indexes, covering indexes, partial indexes — sections 72–77
+- `EXPLAIN` / execution plans — section 78
+
+---
+
+# Interview Questions
+
+## Beginner
+
+1. What is conditional aggregation? Name the two SQL features it combines (only one of them is an aggregate).
+2. Using the sample `orders`, write one query that counts `'shipped'`, `'pending'`, and `'cancelled'` orders as **three columns** using only `CASE`. What does `COUNT(*)` in the same `SELECT` give?
+3. `COUNT(CASE WHEN status = 'shipped' THEN 1 ELSE 0 END)` — what does it return for the sample data and why is it wrong? What is the correct spelling?
+4. Are `COUNT(CASE WHEN cond THEN 1 END)` and `SUM(CASE WHEN cond THEN 1 ELSE 0 END)` equivalent? Explain why via NULL-skipping.
+5. When does `SUM(CASE WHEN status = 'pending' THEN total END)` return `NULL` rather than `0`?
+
+## Intermediate
+
+6. Rewrite this as one query using conditional aggregation (no `UNION`): "how many orders are shipped, how much revenue did shipped orders bring, how many are cancelled."
+7. `COUNT(DISTINCT CASE WHEN status = 'cancelled' THEN customer_id END)` — walk through all six orders and predict the result. What role do NULLs (from `CASE` and from a hypothetical NULL `customer_id`) play?
+8. What is the `FILTER (WHERE ...)` clause? Which engines support it (name at least two that do and two that don't)?
+9. Explain why putting `ELSE 0` inside a `COUNT` breaks the query but putting it inside `SUM` is harmless.
+10. The on-time report groups by carrier. Write it using `WHERE`-style thinking, then using conditional aggregation, and explain when each approach would scan fewer rows.
+
+## Advanced
+
+11. `CASE` picks the first `TRUE` branch top-to-bottom. Design banded revenue buckets (`<100`, `100–499`, `>=500`) with overlapping conditions and show how both *correct* and *buggy* results can emerge from the same rows.
+12. In PostgreSQL, why might the same `EXPLAIN` show no `Gather`/`Partial Aggregate` for a query containing `COUNT(DISTINCT ...) FILTER (WHERE ...)`? What would you check to confirm the cause?
+13. Compare the *mechanism* of `CASE`-inside-aggregate vs `FILTER`: one relies on NULL-skipping, the other on row exclusion. Give a concrete example where the distinction matters for correctness (e.g., an aggregate that does *not* skip NULLs).
+14. A designer claims "`FILTER` is always faster than `CASE` because the argument expression is never evaluated for non-matching rows." Defend the *proper* answer: when is it plausible, when is it irrelevant, and how do you verify it on one specific engine?
+15. Build a single-query report that needs, per department: headcount, active count, average active salary, and the share of employees above the company-wide average salary (without using a window function). Discuss what the denominator means in each column.
+
+## Scenario Based
+
+16. `shipments(carrier, promised_date, actual_date)`: write one query returning per carrier — total shipments, on-time count, late count, and `late_pct` — using the sample data. State the grain of the output.
+17. `orders(order_date, status, total)`: produce one row per customer with `jan_revenue` and `feb_revenue` columns using `EXTRACT`. Predict what a NULL (not 0) cell means and when a cell would be 0 instead.
+18. Per department, report how many employees earn above the median department salary — no window functions allowed. What must you do differently (subquery/join), and where does conditional aggregation stop being enough?
+
+## Tricky
+
+19. Rows with `status` NULL are fed into `COUNT(CASE WHEN status = 'shipped' THEN 1 END)`. What happens to them, and why does `WHEN status = NULL` never match?
+20. With overlapping conditions `WHEN total >= 100` and `WHEN total >= 200`, a 300-dollar order increments which counter? Show the potential double-count "bug" and its correct mutually-exclusive spelling.
+21. `COUNT(DISTINCT CASE WHEN cond THEN customer_id END)` vs `COUNT(DISTINCT customer_id) FILTER (WHERE cond)` — are they the same? If a `customer_id` is NULL and matches the condition, does either count it?
+22. Someone "fixes" an over-counting `COUNT(CASE ... THEN 1 ELSE 0 END)` by changing `ELSE 0` to `ELSE NULL`. Walk through the sample `orders` and prove which numbers change.
+
+## Output Prediction
+
+23. Predict the exact result of:
+
+```sql
+SELECT
+  COUNT(*)                                       AS total_orders,
+  COUNT(CASE WHEN status = 'shipped'   THEN 1 END)  AS shipped,
+  COUNT(CASE WHEN status = 'cancelled' THEN 1 END)  AS cancelled,
+  COUNT(CASE WHEN status = 'pending'   THEN 1 END)  AS pending
+FROM orders;
+```
+
+24. Predict rows and values for:
+
+```sql
+SELECT department_id,
+       COUNT(*)                                       AS headcount,
+       COUNT(CASE WHEN is_active THEN 1 END)          AS active_cnt,
+       COUNT(CASE WHEN NOT is_active THEN 1 END)      AS inactive_cnt,
+       SUM(CASE WHEN salary > 6500 THEN salary END)   AS high_pay_total
+FROM employees
+WHERE department_id IS NOT NULL
+GROUP BY department_id
+ORDER BY department_id;
+```
+
+Include the `NULL` cells and explain each one.
+
+25. Predict the output of:
+
+```sql
+SELECT customer_id,
+  SUM(CASE WHEN EXTRACT(MONTH FROM order_date) = 1 THEN total END) AS jan_revenue,
+  SUM(CASE WHEN EXTRACT(MONTH FROM order_date) = 2 THEN total END) AS feb_revenue
+FROM orders
+GROUP BY customer_id
+ORDER BY customer_id;
+```
+
+26. Predict what each of these returns on the sample `employees`, and explain *why* they differ:
+
+```sql
+SELECT AVG(salary)                                  AS a,
+       AVG(CASE WHEN is_active THEN salary END)     AS b,
+       AVG(CASE WHEN is_active THEN salary ELSE 0 END) AS c
+FROM employees;
+```
+
+## Debugging
+
+27. An analyst counts shipped orders with `COUNT(CASE WHEN status = 'shipped' THEN 1 ELSE 0 END)` and reports 6. The actual shipped orders are 4. Find the bug, fix it, and explain why the `SUM` version would have been safe.
+28. A finance report shows `NULL` in the `cancelled_revenue` column for February even though the analyst "knows there were zero cancelled orders." Is that a data bug or a NULL-contract issue? Show the fix.
+29. Two teams compute "share of active employees" and get `85.71` and `0`. Read both queries (`SUM(CASE...)` with `100.0`, and a version without it) and identify the integer-division culprit. How would you verify the intended value?
+30. A query `SUM(CASE WHEN o.status='shipped' THEN o.total END)` joined to `order_items` reports $500 revenue for customer 1 when the correct number is $250. Explain the fan-out and rewrite it to the right grain (no joins needed).
+
+## Performance
+
+31. Design a rigorous comparison of "one scan of three conditional counts" vs "three separate `COUNT ... WHERE` queries" on your engine. What must you check in the `EXPLAIN` (node types, actual rows, time) before concluding either is faster on a 10M-row table?
+32. Same metric, two spellings on PostgreSQL: `COUNT(CASE WHEN cond THEN 1 END)` vs `COUNT(*) FILTER (WHERE cond)`. Describe the experiment and which plan features (if any) would make `FILTER` plausibly cheaper.
+33. A `COUNT(DISTINCT CASE ... END) FILTER (WHERE ...)` on a dimensional table of 20M rows is slow on PostgreSQL. List the things you would verify (parallel aggregation eligibility, index-only scan possibility, spill/memory, distinct-count approximation alternatives) *before* rewriting it.
+34. Compare `WHERE status='shipped'` + plain `COUNT(*)` vs a conditional count over the whole table. When can the `WHERE` version legitimately be expected to scan fewer rows, and what schema object would you add to make that provable via `EXPLAIN`?
+
+*(Questions are practice — reason them against the sample tables and your own `EXPLAIN` output before peeking at results.)*
+[0m
+[0m◈ [0mParallel Web Search "MySQL 8.0 GROUPING SETS CUBE support WITH ROLLUP GROUPING() function status"
+[0m◈ [0mParallel Web Search "PostgreSQL GROUPING function multiple arguments grouping() signature 9.5"
+[0m◈ [0mParallel Web Search "MySQL does not support CUBE GROUPING SETS "sql_mode" OR "only ROLLUP" group by modifiers 8.4"
+[0m◈ [0mParallel Web Search "SQL Server GROUPING_ID GROUPING SETS ROLLUP CUBE syntax bitmask rightmost argument"
+[0m◈ [0mParallel Web Search "MySQL "GROUP BY ROLLUP" function-style syntax 8.0.19 release window functions WITH ROLLUP restriction"
+[0m✗ [0mWrite  failed
+[91m[1mError: [0mTool execution aborted
+[0m
+[0m← [0mWrite sql-handbook/5-Aggregation/43-ROLLUP-CUBE-GROUPING-SETS.md
+Wrote file successfully.
+[0m
+[0m$ [0mwc -l "/home/soumrnjn/Desktop/Task/SQL/sql-handbook/5-Aggregation/43-ROLLUP-CUBE-GROUPING-SETS.md"
+750 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/5-Aggregation/43-ROLLUP-CUBE-GROUPING-SETS.md
+[0m
+[0m→ [0mRead sql-handbook/5-Aggregation/43-ROLLUP-CUBE-GROUPING-SETS.md[90m [limit=60][0m
+[0m
+[0m$ [0mrg -n "All dialect facts verified|Verifying the file|rendered cleanly|Now writing|opencode|Reasoning Effort|You are powered|Be concise|I'll now|Let me now|Let's now|verify a few|before writing" "/home/soumrnjn/Desktop/Task/SQL/sql-handbook/5-Aggregation/43-ROLLUP-CUBE-GROUPING-SETS.md"
+/usr/bin/bash: line 1: rg: command not found
+[0m
+[0m✱ [0mGrep "All dialect facts verified|Verifying the file|rendered cleanly|Now writing the section|opencode|Be concise"[90m in sql-handbook/5-Aggregation/43-ROLLUP-CUBE-GROUPING-SETS.md · 2 matches[0m
+[0m✗ [0mEdit sql-handbook/5-Aggregation/43-ROLLUP-CUBE-GROUPING-SETS.md failed
+[91m[1mError: [0mCould not find oldString in the file. It must match exactly, including whitespace, indentation, and line endings.
+[0m→ [0mRead sql-handbook/5-Aggregation/43-ROLLUP-CUBE-GROUPING-SETS.md[90m [limit=12][0m
+[0m→ [0mRead sql-handbook/5-Aggregation/43-ROLLUP-CUBE-GROUPING-SETS.md[90m [limit=40][0m
+[0m
+[0m← [0mEdit sql-handbook/5-Aggregation/43-ROLLUP-CUBE-GROUPING-SETS.md
+Index: /home/soumrnjn/Desktop/Task/SQL/sql-handbook/5-Aggregation/43-ROLLUP-CUBE-GROUPING-SETS.md
+===================================================================
+--- /home/soumrnjn/Desktop/Task/SQL/sql-handbook/5-Aggregation/43-ROLLUP-CUBE-GROUPING-SETS.md
++++ /home/soumrnjn/Desktop/Task/SQL/sql-handbook/5-Aggregation/43-ROLLUP-CUBE-GROUPING-SETS.md
+@@ -5,13 +5,12 @@
+ ---
+ 
+ ## Fundamentals
+ 
+-### The one-paragraph anAll dialect facts verified. Now writing the section.
+-Verifying the file rendered cleanly.
+-The same interleaving corruption that affected section 42 happened here. Let me hunt for all stray text in the file.
+-and total — all in one result set. Each output row carries the aggregate for *one* grouping level; the columns that are *not* part of that level appear as `NULL`.
++### The one-paragraph answer
+ 
++`ROLLUP`, `CUBE`, and `GROUPING SETS` are three extensions of the `GROUP BY` clause that let a single query produce **several aggregation levels at once**: regular row-level groups, subtotals, and a grand total — all in one result set. Each output row carries the aggregate for *one* grouping level; the columns that are *not* part of that level appear as `NULL`.
++
+ - `GROUP BY ROLLUP (a, b, c)` — the "hierarchical drill-down" tool: groups `(a,b,c)`, then `(a,b)`, then `(a)`, then the grand total `()`. Order of columns matters.
+ - `GROUP BY CUBE (a, b, c)` — the "all combinations" tool: every possible subset of the listed columns, plus the grand total.
+ - `GROUP BY GROUPING SETS ((a), (b), ())` — the "explicit shopping list" tool: you name exactly which grouping levels you want.
+ 
+
+[0m
+[0m✱ [0mGrep "interleaving|stray text|happened here|rendered cleanly|All dialect facts|Now writing|Let me hunt|Verify the file|Verifying the file|I'll now|Let me now"[90m in sql-handbook/5-Aggregation/43-ROLLUP-CUBE-GROUPING-SETS.md · 2 matches[0m
+[0m✱ [0mGrep "^#+|^```|^> Category"[90m in sql-handbook/5-Aggregation/43-ROLLUP-CUBE-GROUPING-SETS.md · 100 matches[0m
+[0m
+> build · big-pickle
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m← [0mWrite 6-Window-Functions/45-PARTITION-BY.md
+Wrote file successfully.
+[0m
+[0m→ [0mRead 6-Window-Functions/45-PARTITION-BY.md[90m [offset=590, limit=30][0m
+[93m[1m! [0mpermission requested: external_directory (/home/soumrnjk/Desktop/Task/SQL/6-Window-Functions/*); auto-rejecting
+[0m✗ [0mEdit /home/soumrnjk/Desktop/Task/SQL/6-Window-Functions/45-PARTITION-BY.md failed
+[91m[1mError: [0mThe user rejected permission to use this specific tool call.
+[0m
+> build · big-pickle
+[0m
+[0m✱ [0mGlob "**/*.md"[90m 48 matches[0m
+[0m→ [0mRead .
+[0m→ [0mRead script.sh
+[0m→ [0mRead 6-Window-Functions/45-PARTITION-BY.md
+[0m→ [0mRead sql-handbook/6-Window-Functions/46-ROW-NUMBER.md
+[0m→ [0mRead sql-handbook/6-Window-Functions/44-Window-Functions-Basics.md
+[0m
+[0m$ [0mls -la sql-handbook/6-Window-Functions/ && wc -l sql-handbook/6-Window-Functions/*.md
+total 48
+drwxrwxr-x 2 soumrnjn soumrnjn  4096 Sep 15 11:50 .
+drwxrwxr-x 8 soumrnjn soumrnjn  4096 Sep 15 10:49 ..
+-rw-rw-r-- 1 soumrnjn soumrnjn 34003 Sep 15 11:46 44-Window-Functions-Basics.md
+-rw-rw-r-- 1 soumrnjn soumrnjn    93 Sep 15 11:50 45-PARTITION-BY.md
+-rw-rw-r-- 1 soumrnjn soumrnjn     0 Sep 15 11:50 46-ROW-NUMBER.md
+ 1095 sql-handbook/6-Window-Functions/44-Window-Functions-Basics.md
+    1 sql-handbook/6-Window-Functions/45-PARTITION-BY.md
+    0 sql-handbook/6-Window-Functions/46-ROW-NUMBER.md
+ 1096 total
+[0m
+[0m← [0mWrite sql-handbook/6-Window-Functions/46-ROW-NUMBER.md
+Wrote file successfully.
+[0m
+[0m← [0mEdit sql-handbook/6-Window-Functions/46-ROW-NUMBER.md
+Index: /home/soumrnjn/Desktop/Task/SQL/sql-handbook/6-Window-Functions/46-ROW-NUMBER.md
+===================================================================
+--- /home/soumrnjn/Desktop/Task/SQL/sql-handbook/6-Window-Functions/46-ROW-NUMBER.md
++++ /home/soumrnjn/Desktop/Task/SQL/sql-handbook/6-Window-Functions/46-ROW-NUMBER.md
+@@ -348,10 +348,10 @@
+ |---|---|---|---|---|
+ | 1 | 100 | S-AAA-001 | 2024-06-01 08:00:00 | 1 |
+ | 2 | 100 | S-AAA-001 | 2024-06-01 08:05:00 | 2 |
+ | 3 | 100 | S-AAA-001 | 2024-06-01 08:12:00 | 3 |
+-| 6 | 100 | S-BBB-002 | 2024-06-02 09:00:00 | 1 |
+-| 7 | 100 | S-BBB-002 | 2024-06-02 09:07:00 | 2 |
++| 4 | 100 | S-BBB-002 | 2024-06-02 09:00:00 | 1 |
++| 6 | 100 | S-BBB-002 | 2024-06-02 09:07:00 | 2 |
+ 
+ `occurrence_no > 1` marks the duplicates.
+ 
+ ### Keep one row per group
+
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m→ [0mRead .
+[0m→ [0mRead 6-Window-Functions
+[0m→ [0mRead sql-handbook
+[0m→ [0mRead 6-Window-Functions/45-PARTITION-BY.md
+[0m→ [0mRead sql-handbook/6-Window-Functions
+[0m→ [0mRead sql-handbook/6-Window-Functions/50-Moving-Averages.md
+[0m→ [0mRead sql-handbook/6-Window-Functions/49-Running-Totals.md
+[0m
+> build · big-pickle
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m→ [0mRead .
+[0m→ [0mRead sql-handbook
+[0m→ [0mRead sql-handbook/6-Window-Functions
+[0m→ [0mRead sql-handbook/6-Window-Functions/52-ROWS-vs-RANGE-vs-GROUPS.md
+[0m→ [0mRead sql-handbook/6-Window-Functions/51-Window-Frames.md
+[0m→ [0mRead sql-handbook/6-Window-Functions/44-Window-Functions-Basics.md
+[0m
+[0m← [0mWrite sql-handbook/6-Window-Functions/52-ROWS-vs-RANGE-vs-GROUPS.md
+Wrote file successfully.
+[0m
+[0m← [0mEdit sql-handbook/6-Window-Functions/52-ROWS-vs-RANGE-vs-GROUPS.md
+Index: /home/soumrnjn/Desktop/Task/SQL/sql-handbook/6-Window-Functions/52-ROWS-vs-RANGE-vs-GROUPS.md
+===================================================================
+--- /home/soumrnjn/Desktop/Task/SQL/sql-handbook/6-Window-Functions/52-ROWS-vs-RANGE-vs-GROUPS.md
++++ /home/soumrnjn/Desktop/Task/SQL/sql-handbook/6-Window-Functions/52-ROWS-vs-RANGE-vs-GROUPS.md
+@@ -438,9 +438,9 @@
+ | 2025-01-01 | 100.00 | G1(100) | 100.00 | G1 |
+ | 2025-01-05 | 120.00 | G2(120) | 220.00 | G1, G2 |
+ | 2025-01-02 | 150.00 | G3(150,150) | 520.00 | G1, G2, G3 |
+ | 2025-01-03 | 150.00 | G3(150,150) | 520.00 | G1, G2, G3 |
+-| 2025-01-04 | 200.00 | G4(200) | 720.00 | G2, G3, G4 |
++| 2025-01-04 | 200.00 | G4(200) | 620.00 | G2, G3, G4 |
+ 
+ Row at `amount=200`: 2 groups back from G4 is G2, so frame = {G2(120), G3(150,150), G4(200)} = 120+150+150+200 = 620.
+ 
+ The equivalent `ROWS BETWEEN 2 PRECEDING AND CURRENT ROW` for that row would be {150(Jan 03), 150(Jan 02), 200(Jan 04)} = 500 — different result because it counts physical rows, not groups.
+
+[0m
+[0m→ [0mRead sql-handbook/6-Window-Functions/52-ROWS-vs-RANGE-vs-GROUPS.md[90m [offset=1, limit=120][0m
+[0m→ [0mRead sql-handbook/6-Window-Functions/52-ROWS-vs-RANGE-vs-GROUPS.md[90m [offset=1, limit=10][0m
+[0m✗ [0mEdit sql-handbook/6-Window-Functions/52-ROWS-vs-RANGE-vs-GROUPS.md failed
+[91m[1mError: [0mCould not find oldString in the file. It must match exactly, including whitespace, indentation, and line endings.
+[0m
+[0m$ [0msed -n '1,3p' /home/soumrnjn/Desktop/Task/SQL/sql-handbook/6-Window-Functions/52-ROWS-vs-RANGE-vs-GROUPS.md | cat -A | head -20
+Now I'll generate the comprehensive section for ROWS vs RANGE vs GROUPS.$
+Now let me verify the complete file and check the math throughout:$
+The file's first lines are corrupted (prologue text leaked in). Let me examine and fix:$
+[0m
+[0m→ [0mRead script.sh
+[0m→ [0mRead sql-handbook/errors.log
+[0m
+[0m$ [0mwc -l "/home/soumrnjn/Desktop/Task/SQL/sql-handbook/6-Window-Functions/52-ROWS-vs-RANGE-vs-GROUPS.md" && echo "---HEAD---" && head -8 "/home/soumrnjn/Desktop/Task/SQL/sql-handbook/6-Window-Functions/52-ROWS-vs-RANGE-vs-GROUPS.md" && echo "---TAIL---" && tail -5 "/home/soumrnjn/Desktop/Task/SQL/sql-handbook/6-Window-Functions/52-ROWS-vs-RANGE-vs-GROUPS.md"
+1089 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/6-Window-Functions/52-ROWS-vs-RANGE-vs-GROUPS.md
+---HEAD---
+Now I'll generate the comprehensive section for ROWS vs RANGE vs GROUPS.
+Now let me verify the complete file and check the math throughout:
+The file's first lines are corrupted (prologue text leaked in). Let me examine and fix:
+Something unusual is happening — my reasoning text appears to be leaking into the file. Let me investigate:
+I understand the situation — the `script.sh` pipes streamed session output into these files, which is why narration text leaks in. Let me check the current state of the file and clean it up:
+s)
+6. [Core Comparison — Same Data, Different Results](#core-comparison--same-data-different-results)
+7. [Deep Dive: ROWS](#deep-dive-rows)
+---TAIL---
+What performance concerns might arise? What index would help?
+
+33. You have two window functions with different `ORDER BY` columns in the same query. How might this affect performance? What can you do to mitigate it?
+
+34. When might `RANGE` be slower than `ROWS` for the same logical query? Explain the conditions under which this could happen.
+[0m
+[0m$ [0mps aux | grep -i "opencode\|script.sh" | grep -v grep | head -20; echo "---"; ls -la /proc/*/fd 2>/dev/null | grep -c "52-ROWS" ; echo "---pgrep---"; pgrep -af "opencode" | head
+soumrnjn   17640  0.7  4.9 76808496 781036 pts/1 Sl+  Sep14   9:36 opencode -s ses_f5f75c9dcffePWbNfG2Za93I3L
+soumrnjn  188821  0.0  0.0   7148  3392 pts/0    S+   17:23   0:00 /bin/bash ./script.sh
+soumrnjn  192962  0.0  0.0   7148  1728 pts/0    S+   17:30   0:00 /bin/bash ./script.sh
+soumrnjn  192966 39.8  3.4 75605452 538304 pts/0 Sl+  17:30   1:30 opencode run  # SQL MASTER HANDBOOK — GLOBAL INSTRUCTIONS  You are contributing to a comprehensive SQL handbook.  The handbook is intended for:  - SQL beginners - Backend developers - Software engineers - Data analysts - Interview preparation - LeetCode / HackerRank / StrataScratch - Production SQL - Query optimization - Database design  Use simple language but explain concepts deeply.  Do NOT give shallow explanations.  Every important concept should explain:  1. What it is 2. Why it exists 3. Syntax 4. How it works 5. Example 6. Expected result 7. When to use it 8. When NOT to use it 9. Common mistakes 10. Edge cases 11. NULL behavior 12. Performance implications 13. Interview traps 14. Real-world scenario  Use Markdown.  Use SQL code blocks.  Use tables when comparisons help.  Use Mermaid diagrams when they genuinely improve understanding.  Prefer ANSI SQL.  When behavior differs between PostgreSQL, MySQL, SQL Server, and Oracle, explicitly mention the difference.  Do not make absolute performance claims such as:  "JOIN is always faster than subquery."  "EXISTS is always faster than IN."  "CTEs are always faster."  "Indexes always make queries faster."  Instead explain that performance depends on:  - optimizer - indexes - statistics - cardinality - data distribution - query shape - database engine - execution plan  Whenever optimization is discussed, emphasize EXPLAIN / EXPLAIN ANALYZE or the equivalent execution-plan tool.  ---  ## VERY IMPORTANT SQL CONCEPTS  Do not miss:  - NULL - Three-valued logic - NULL = NULL - NULL <> NULL - IS NULL - IS NOT NULL - IS DISTINCT FROM - IS NOT DISTINCT FROM - COALESCE - NULLIF - COUNT(*) - COUNT(column) - COUNT(DISTINCT column) - NOT IN + NULL - NOT EXISTS - EXISTS - IN - JOIN duplication - accidental Cartesian products - LEFT JOIN becoming INNER JOIN - ON vs WHERE - GROUP BY - HAVING - DISTINCT - Window functions - ROW_NUMBER - RANK - DENSE_RANK - CTE - Recursive CTE - correlated subquery - non-correlated subquery - JOIN vs subquery - JOIN vs EXISTS - IN vs EXISTS - NOT IN vs NOT EXISTS - GROUP BY vs window functions - UNION vs UNION ALL - DELETE vs TRUNCATE vs DROP - indexes - composite indexes - covering indexes - sargability - execution plans - cardinality - query optimization - timestamp boundaries - timezone issues - integer division - duplicate rows - one-to-many joins - many-to-many joins - fan-out - double counting - pagination - keyset pagination - transactions - isolation levels - ACID - normalization - denormalization  ---  ## SCENARIO-BASED TEACHING  Whenever possible, use realistic tables such as:  employees departments customers orders order_items products payments users logins transactions events  Always clearly state the grain of the table.  Example:  "One row in orders represents one order."  This is extremely important for preventing JOIN and aggregation mistakes.  ---  ## SQL REASONING  Teach the reader to ask:  1. What does one output row represent? 2. What is the grain of each table? 3. Which table is the driving table? 4. Do I need columns from another table? 5. Do I only need to know whether a row exists? 6. Can the JOIN create duplicates? 7. Do I need aggregation? 8. Do I need to preserve individual rows? 9. Do I need a window function? 10. Can NULL affect the result? 11. Do I need WHERE or HAVING? 12. Should a condition go inside ON or WHERE? 13. Could the query accidentally create a Cartesian product? 14. What happens when there are zero matching rows? 15. What happens when there are multiple matching rows? 16. What indexes might help? 17. What does the execution plan say?  ---  ## QUALITY REQUIREMENTS  Do not repeat huge explanations unnecessarily.  Cross-reference related concepts instead.  Do not assume the reader already knows database internals.  Do not hide important caveats.  If there is a common misconception, explicitly label it:  > Common misconception  If there is a common interview trap, label it:  > Interview trap  If there is a production danger, label it:  > Production pitfall  If something is database-specific, label it:  > PostgreSQL > MySQL > SQL Server > Oracle  ---  ## IMPORTANT  Generate ONLY the requested section.  Do not generate another section merely because it is related.  However, briefly mention cross-references to other sections where useful.  Return ONLY Markdown.  ============================================================ CURRENT HANDBOOK SECTION ============================================================  Category: 6-Window-Functions  Section: 52-ROWS-vs-RANGE-vs-GROUPS  ============================================================  Generate ONLY this section.  Make it comprehensive.  Include:  - Fundamentals - Internal working where relevant - Syntax - Examples - Sample tables - Expected output - Scenario-based examples - Edge cases - NULL behavior where relevant - Common mistakes - Production pitfalls - Performance implications - Interview traps - Comparison tables - Best practices  For SQL examples, use realistic data.  Whenever appropriate, show:  BAD APPROACH  then:  BETTER APPROACH  and explain why.  For performance-related claims, do not guess. Explain what should be verified using an execution plan.  At the end include:  # Interview Questions  Include:  - Beginner - Intermediate - Advanced - Scenario Based - Tricky - Output Prediction - Debugging - Performance  Do not answer the questions immediately if they are intended as practice.  Return ONLY Markdown. 
+---
+2
+---pgrep---
+17640 opencode -s ses_f5f75c9dcffePWbNfG2Za93I3L
+192966 opencode run  # SQL MASTER HANDBOOK — GLOBAL INSTRUCTIONS  You are contributing to a comprehensive SQL handbook.  The handbook is intended for:  - SQL beginners - Backend developers - Software engineers - Data analysts - Interview preparation - LeetCode / HackerRank / StrataScratch - Production SQL - Query optimization - Database design  Use simple language but explain concepts deeply.  Do NOT give shallow explanations.  Every important concept should explain:  1. What it is 2. Why it exists 3. Syntax 4. How it works 5. Example 6. Expected result 7. When to use it 8. When NOT to use it 9. Common mistakes 10. Edge cases 11. NULL behavior 12. Performance implications 13. Interview traps 14. Real-world scenario  Use Markdown.  Use SQL code blocks.  Use tables when comparisons help.  Use Mermaid diagrams when they genuinely improve understanding.  Prefer ANSI SQL.  When behavior differs between PostgreSQL, MySQL, SQL Server, and Oracle, explicitly mention the difference.  Do not make absolute performance claims such as:  "JOIN is always faster than subquery."  "EXISTS is always faster than IN."  "CTEs are always faster."  "Indexes always make queries faster."  Instead explain that performance depends on:  - optimizer - indexes - statistics - cardinality - data distribution - query shape - database engine - execution plan  Whenever optimization is discussed, emphasize EXPLAIN / EXPLAIN ANALYZE or the equivalent execution-plan tool.  ---  ## VERY IMPORTANT SQL CONCEPTS  Do not miss:  - NULL - Three-valued logic - NULL = NULL - NULL <> NULL - IS NULL - IS NOT NULL - IS DISTINCT FROM - IS NOT DISTINCT FROM - COALESCE - NULLIF - COUNT(*) - COUNT(column) - COUNT(DISTINCT column) - NOT IN + NULL - NOT EXISTS - EXISTS - IN - JOIN duplication - accidental Cartesian products - LEFT JOIN becoming INNER JOIN - ON vs WHERE - GROUP BY - HAVING - DISTINCT - Window functions - ROW_NUMBER - RANK - DENSE_RANK - CTE - Recursive CTE - correlated subquery - non-correlated subquery - JOIN vs subquery - JOIN vs EXISTS - IN vs EXISTS - NOT IN vs NOT EXISTS - GROUP BY vs window functions - UNION vs UNION ALL - DELETE vs TRUNCATE vs DROP - indexes - composite indexes - covering indexes - sargability - execution plans - cardinality - query optimization - timestamp boundaries - timezone issues - integer division - duplicate rows - one-to-many joins - many-to-many joins - fan-out - double counting - pagination - keyset pagination - transactions - isolation levels - ACID - normalization - denormalization  ---  ## SCENARIO-BASED TEACHING  Whenever possible, use realistic tables such as:  employees departments customers orders order_items products payments users logins transactions events  Always clearly state the grain of the table.  Example:  "One row in orders represents one order."  This is extremely important for preventing JOIN and aggregation mistakes.  ---  ## SQL REASONING  Teach the reader to ask:  1. What does one output row represent? 2. What is the grain of each table? 3. Which table is the driving table? 4. Do I need columns from another table? 5. Do I only need to know whether a row exists? 6. Can the JOIN create duplicates? 7. Do I need aggregation? 8. Do I need to preserve individual rows? 9. Do I need a window function? 10. Can NULL affect the result? 11. Do I need WHERE or HAVING? 12. Should a condition go inside ON or WHERE? 13. Could the query accidentally create a Cartesian product? 14. What happens when there are zero matching rows? 15. What happens when there are multiple matching rows? 16. What indexes might help? 17. What does the execution plan say?  ---  ## QUALITY REQUIREMENTS  Do not repeat huge explanations unnecessarily.  Cross-reference related concepts instead.  Do not assume the reader already knows database internals.  Do not hide important caveats.  If there is a common misconception, explicitly label it:  > Common misconception  If there is a common interview trap, label it:  > Interview trap  If there is a production danger, label it:  > Production pitfall  If something is database-specific, label it:  > PostgreSQL > MySQL > SQL Server > Oracle  ---  ## IMPORTANT  Generate ONLY the requested section.  Do not generate another section merely because it is related.  However, briefly mention cross-references to other sections where useful.  Return ONLY Markdown.  ============================================================ CURRENT HANDBOOK SECTION ============================================================  Category: 6-Window-Functions  Section: 52-ROWS-vs-RANGE-vs-GROUPS  ============================================================  Generate ONLY this section.  Make it comprehensive.  Include:  - Fundamentals - Internal working where relevant - Syntax - Examples - Sample tables - Expected output - Scenario-based examples - Edge cases - NULL behavior where relevant - Common mistakes - Production pitfalls - Performance implications - Interview traps - Comparison tables - Best practices  For SQL examples, use realistic data.  Whenever appropriate, show:  BAD APPROACH  then:  BETTER APPROACH  and explain why.  For performance-related claims, do not guess. Explain what should be verified using an execution plan.  At the end include:  # Interview Questions  Include:  - Beginner - Intermediate - Advanced - Scenario Based - Tricky - Output Prediction - Debugging - Performance  Do not answer the questions immediately if they are intended as practice.  Return ONLY Markdown. 
+195385 /usr/bin/bash -c ps aux | grep -i "opencode\|script.sh" | grep -v grep | head -20; echo "---"; ls -la /proc/*/fd 2>/dev/null | grep -c "52-ROWS" ; echo "---pgrep---"; pgrep -af "opencode" | head
+[0m
+[0m$ [0mps -o pid,etime,stat,pcpu,cmd -p 192966 2>/dev/null; echo "---file-state---"; wc -l "/home/soumrnjn/Desktop/Task/SQL/sql-handbook/6-Window-Functions/52-ROWS-vs-RANGE-vs-GROUPS.md"; echo "---head20---"; head -20 "/home/soumrnjn/Desktop/Task/SQL/sql-handbook/6-Window-Functions/52-ROWS-vs-RANGE-vs-GROUPS.md"
+PID     ELAPSED STAT %CPU CMD
+ 192966       04:27 Rl+  36.6 opencode run  # SQL MASTER HANDBOOK — GLOBAL INSTRUCTIONS  You are contributing to a comprehensive SQL handbook.  The handbook is intended for:  - SQL beginners - Backend developers - Software engineers - Data analysts - Interview preparation - LeetCode / HackerRank / StrataScratch - Production SQL - Query optimization - Database design  Use simple language but explain concepts deeply.  Do NOT give shallow explanations.  Every important concept should explain:  1. What it is 2. Why it exists 3. Syntax 4. How it works 5. Example 6. Expected result 7. When to use it 8. When NOT to use it 9. Common mistakes 10. Edge cases 11. NULL behavior 12. Performance implications 13. Interview traps 14. Real-world scenario  Use Markdown.  Use SQL code blocks.  Use tables when comparisons help.  Use Mermaid diagrams when they genuinely improve understanding.  Prefer ANSI SQL.  When behavior differs between PostgreSQL, MySQL, SQL Server, and Oracle, explicitly mention the difference.  Do not make absolute performance claims such as:  "JOIN is always faster than subquery."  "EXISTS is always faster than IN."  "CTEs are always faster."  "Indexes always make queries faster."  Instead explain that performance depends on:  - optimizer - indexes - statistics - cardinality - data distribution - query shape - database engine - execution plan  Whenever optimization is discussed, emphasize EXPLAIN / EXPLAIN ANALYZE or the equivalent execution-plan tool.  ---  ## VERY IMPORTANT SQL CONCEPTS  Do not miss:  - NULL - Three-valued logic - NULL = NULL - NULL <> NULL - IS NULL - IS NOT NULL - IS DISTINCT FROM - IS NOT DISTINCT FROM - COALESCE - NULLIF - COUNT(*) - COUNT(column) - COUNT(DISTINCT column) - NOT IN + NULL - NOT EXISTS - EXISTS - IN - JOIN duplication - accidental Cartesian products - LEFT JOIN becoming INNER JOIN - ON vs WHERE - GROUP BY - HAVING - DISTINCT - Window functions - ROW_NUMBER - RANK - DENSE_RANK - CTE - Recursive CTE - correlated subquery - non-correlated subquery - JOIN vs subquery - JOIN vs EXISTS - IN vs EXISTS - NOT IN vs NOT EXISTS - GROUP BY vs window functions - UNION vs UNION ALL - DELETE vs TRUNCATE vs DROP - indexes - composite indexes - covering indexes - sargability - execution plans - cardinality - query optimization - timestamp boundaries - timezone issues - integer division - duplicate rows - one-to-many joins - many-to-many joins - fan-out - double counting - pagination - keyset pagination - transactions - isolation levels - ACID - normalization - denormalization  ---  ## SCENARIO-BASED TEACHING  Whenever possible, use realistic tables such as:  employees departments customers orders order_items products payments users logins transactions events  Always clearly state the grain of the table.  Example:  "One row in orders represents one order."  This is extremely important for preventing JOIN and aggregation mistakes.  ---  ## SQL REASONING  Teach the reader to ask:  1. What does one output row represent? 2. What is the grain of each table? 3. Which table is the driving table? 4. Do I need columns from another table? 5. Do I only need to know whether a row exists? 6. Can the JOIN create duplicates? 7. Do I need aggregation? 8. Do I need to preserve individual rows? 9. Do I need a window function? 10. Can NULL affect the result? 11. Do I need WHERE or HAVING? 12. Should a condition go inside ON or WHERE? 13. Could the query accidentally create a Cartesian product? 14. What happens when there are zero matching rows? 15. What happens when there are multiple matching rows? 16. What indexes might help? 17. What does the execution plan say?  ---  ## QUALITY REQUIREMENTS  Do not repeat huge explanations unnecessarily.  Cross-reference related concepts instead.  Do not assume the reader already knows database internals.  Do not hide important caveats.  If there is a common misconception, explicitly label it:  > Common misconception  If there is a common interview trap, label it:  > Interview trap  If there is a production danger, label it:  > Production pitfall  If something is database-specific, label it:  > PostgreSQL > MySQL > SQL Server > Oracle  ---  ## IMPORTANT  Generate ONLY the requested section.  Do not generate another section merely because it is related.  However, briefly mention cross-references to other sections where useful.  Return ONLY Markdown.  ============================================================ CURRENT HANDBOOK SECTION ============================================================  Category: 6-Window-Functions  Section: 52-ROWS-vs-RANGE-vs-GROUPS  ============================================================  Generate ONLY this section.  Make it comprehensive.  Include:  - Fundamentals - Internal working where relevant - Syntax - Examples - Sample tables - Expected output - Scenario-based examples - Edge cases - NULL behavior where relevant - Common mistakes - Production pitfalls - Performance implications - Interview traps - Comparison tables - Best practices  For SQL examples, use realistic data.  Whenever appropriate, show:  BAD APPROACH  then:  BETTER APPROACH  and explain why.  For performance-related claims, do not guess. Explain what should be verified using an execution plan.  At the end include:  # Interview Questions  Include:  - Beginner - Intermediate - Advanced - Scenario Based - Tricky - Output Prediction - Debugging - Performance  Do not answer the questions immediately if they are intended as practice.  Return ONLY Markdown. 
+---file-state---
+1086 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/6-Window-Functions/52-ROWS-vs-RANGE-vs-GROUPS.md
+---head20---
+Now I'll generate the comprehensive section for ROWS vs RANGE vs GROUPS.
+Now let me verify the complete file and check the math throughout:
+The file's first lines are corrupted (prologue text leaked in). Let me examine and fix:
+Something unusual is happening — my reasoning text appears to be leaking into the file. Let me investigate:
+I understand the situation — the `script.sh` pipes streamed session output into these files, which is why narration text leaks in. Let me check the current state of the file and clean it up:
+I now understand the setup: `script.sh` launched `opencode run` (PID 192966) for this exact section, and it's streaming session output into the file concurrently. Let me check its status and the current file state:
+-groups)
+10. [Side-by-Side Visual Comparison](#side-by-side-visual-comparison)
+11. [When ROWS and RANGE Produce Identical Results](#when-rows-and-range-produce-identical-results)
+12. [Edge Cases](#edge-cases)
+13. [NULL Behavior](#null-behavior)
+14. [Common Mistakes](#common-mistakes)
+15. [Production Pitfalls](#production-pitfalls)
+16. [Performance Implications](#performance-implications)
+17. [Comparison Tables](#comparison-tables)
+18. [Best Practices](#best-practices)
+19. [Interview Questions](#interview-questions)
+
+---
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m→ [0mRead .
+[0m→ [0mRead sql-handbook
+[0m→ [0mRead sql-handbook/6-Window-Functions
+[0m✱ [0mGlob "sql-handbook/**/*.md"[90m in . · 54 matches[0m
+[0m→ [0mRead sql-handbook/6-Window-Functions/53-Top-N-Per-Group.md
+[0m→ [0mRead sql-handbook/6-Window-Functions/46-ROW-NUMBER.md
+[0m→ [0mRead sql-handbook/6-Window-Functions/54-Latest-Row-Per-Group.md
+[0m
+[0m← [0mWrite sql-handbook/6-Window-Functions/54-Latest-Row-Per-Group.md
+Wrote file successfully.
+[0m
+[0m→ [0mRead sql-handbook/errors.log
+[0m→ [0mRead sql-handbook/6-Window-Functions/54-Latest-Row-Per-Group.md[90m [limit=30][0m
+[0m→ [0mRead sql-handbook/6-Window-Functions/54-Latest-Row-Per-Group.md[90m [limit=15, offset=1][0m
+[0m
+[0m← [0mEdit sql-handbook/6-Window-Functions/54-Latest-Row-Per-Group.md
+Index: /home/soumrnjn/Desktop/Task/SQL/sql-handbook/6-Window-Functions/54-Latest-Row-Per-Group.md
+===================================================================
+--- /home/soumrnjn/Desktop/Task/SQL/sql-handbook/6-Window-Functions/54-Latest-Row-Per-Group.md
++++ /home/soumrnjn/Desktop/Task/SQL/sql-handbook/6-Window-Functions/54-Latest-Row-Per-Group.md
+@@ -7,11 +7,10 @@
+ 1. [What It Is](#what-it-is)
+ 2. [Why It Exists](#why-it-exists)
+ 3. [Syntax](#syntax)
+ 4. [How It Works Internally](#how-it-works-internally)
+-5Let me verify the file was written correctly and check the errors log note from the script.
+-I notice a minor text artifact on line 11 of the file. Let me fix that.
+-2--correlated-subquery)
++5. [Method 1 — ROW_NUMBER Window Function](#method-1--row_number-window-function)
++6. [Method 2 — Correlated Subquery](#method-2--correlated-subquery)
+ 8. [Method 3 — JOIN on MAX/MIN Aggregate](#method-3--join-on-maxmin-aggregate)
+ 9. [Method 4 — LATERAL JOIN / CROSS APPLY](#method-4--lateral-join--cross-apply)
+ 10. [Method 5 — NOT EXISTS Anti-Pattern](#method-5--not-exists-anti-pattern)
+ 11. [Method 6 — DISTINCT ON (PostgreSQL)](#method-6--distinct-on-postgresql)
+
+[0m
+[0m→ [0mRead sql-handbook/6-Window-Functions/54-Latest-Row-Per-Group.md[90m [offset=1320][0m
+[0m
+[0m← [0mEdit sql-handbook/6-Window-Functions/54-Latest-Row-Per-Group.md
+Index: /home/soumrnjn/Desktop/Task/SQL/sql-handbook/6-Window-Functions/54-Latest-Row-Per-Group.md
+===================================================================
+--- /home/soumrnjn/Desktop/Task/SQL/sql-handbook/6-Window-Functions/54-Latest-Row-Per-Group.md
++++ /home/soumrnjn/Desktop/Task/SQL/sql-handbook/6-Window-Functions/54-Latest-Row-Per-Group.md
+@@ -1331,4 +1331,8 @@
+ 
+ 33. A nightly batch job runs the "latest row per group" query on a table that is partitioned by month. How does partition pruning affect performance? What partition key would you choose?
+ 
+ 34. You need to run the "latest row per group" query 50 times per second on a read replica. The query currently uses `ROW_NUMBER()`. How would you optimize for this throughput? Consider caching, indexing, and materialized views.
++
++---
++
++> **Cross-references:** [44-Window-Functions-Basics](44-Window-Functions-Basics.md) covers the `OVER` clause fundamentals. [45-PARTITION-BY](45-PARTITION-BY.md) deep-dives into partition semantics. [46-ROW-NUMBER](46-ROW-NUMBER.md) covers the core function in detail. [47-RANK-vs-DENSE-RANK](47-RANK-vs-DENSE-RANK.md) contrasts the ranking family for when ties matter. [53-Top-N-Per-Group](53-Top-N-Per-Group.md) generalizes this to any N. For pagination alternatives see [84-Pagination-and-Keyset-Pagination](../9-Optimization/84-Pagination-and-Keyset-Pagination.md). For sort-elimination guidance see [78-EXPLAIN-Execution-Plans](../9-Optimization/78-EXPLAIN-Execution-Plans.md) and [73-Composite-Indexes](../9-Optimization/73-Composite-Indexes.md).
+
+[0m
+[0m$ [0mwc -l /home/soumrnjn/Desktop/Task/SQL/sql-handbook/6-Window-Functions/54-Latest-Row-Per-Group.md && echo "---" && head -30 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/6-Window-Functions/54-Latest-Row-Per-Group.md
+1339 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/6-Window-Functions/54-Latest-Row-Per-Group.md
+---
+# 54 — Latest Row Per Group
+
+---
+
+## Table of Contents
+
+1. [What It Is](#what-it-is)
+2. [Why It Exists](#why-it-exists)
+3. [Syntax](#syntax)
+4. [How It Works Internally](#how-it-works-internally)
+5. [Method 1 — ROW_NUMBER Window Function](#method-1--row_number-window-function)
+6. [Method 2 — Correlated Subquery](#method-2--correlated-subquery)
+8. [Method 3 — JOIN on MAX/MIN Aggregate](#method-3--join-on-maxmin-aggregate)
+9. [Method 4 Let me add a cross-reference at the end, consistent with the handbook's style.
+Let me verify the final state of the file.
+--not-exists-anti-pattern)
+11. [Method 6 — DISTINCT ON (PostgreSQL)](#method-6--distinct-on-postgresql)
+12. [Comparison of All Methods](#comparison-of-all-methods)
+13. [Scenario-Based Examples](#scenario-based-examples)
+14. [Edge Cases](#edge-cases)
+15. [NULL Behavior](#null-behavior)
+16. [Common Mistakes](#common-mistakes)
+17. [Production Pitfalls](#production-pitfalls)
+18. [Performance Implications](#performance-implications)
+19. [Interview Traps](#interview-traps)
+20. [Best Practices](#best-practices)
+21. [Interview Questions](#interview-questions)
+
+---
+[0m
+[0m← [0mEdit sql-handbook/6-Window-Functions/54-Latest-Row-Per-Group.md
+Index: /home/soumrnjn/Desktop/Task/SQL/sql-handbook/6-Window-Functions/54-Latest-Row-Per-Group.md
+===================================================================
+--- /home/soumrnjn/Desktop/Task/SQL/sql-handbook/6-Window-Functions/54-Latest-Row-Per-Group.md
++++ /home/soumrnjn/Desktop/Task/SQL/sql-handbook/6-Window-Functions/54-Latest-Row-Per-Group.md
+@@ -10,11 +10,10 @@
+ 4. [How It Works Internally](#how-it-works-internally)
+ 5. [Method 1 — ROW_NUMBER Window Function](#method-1--row_number-window-function)
+ 6. [Method 2 — Correlated Subquery](#method-2--correlated-subquery)
+ 8. [Method 3 — JOIN on MAX/MIN Aggregate](#method-3--join-on-maxmin-aggregate)
+-9. [Method 4 Let me add a cross-reference at the end, consistent with the handbook's style.
+-Let me verify the final state of the file.
+---not-exists-anti-pattern)
++9. [Method 4 — LATERAL JOIN / CROSS APPLY](#method-4--lateral-join--cross-apply)
++10. [Method 5 — NOT EXISTS Anti-Pattern](#method-5--not-exists-anti-pattern)
+ 11. [Method 6 — DISTINCT ON (PostgreSQL)](#method-6--distinct-on-postgresql)
+ 12. [Comparison of All Methods](#comparison-of-all-methods)
+ 13. [Scenario-Based Examples](#scenario-based-examples)
+ 14. [Edge Cases](#edge-cases)
+
+[0m
+[0m→ [0mRead sql-handbook/6-Window-Functions/54-Latest-Row-Per-Group.md[90m [limit=35][0m
+[0m
+[0m← [0mEdit sql-handbook/6-Window-Functions/54-Latest-Row-Per-Group.md
+Index: /home/soumrnjn/Desktop/Task/SQL/sql-handbook/6-Window-Functions/54-Latest-Row-Per-Group.md
+===================================================================
+--- /home/soumrnjn/Desktop/Task/SQL/sql-handbook/6-Window-Functions/54-Latest-Row-Per-Group.md
++++ /home/soumrnjn/Desktop/Task/SQL/sql-handbook/6-Window-Functions/54-Latest-Row-Per-Group.md
+@@ -9,22 +9,22 @@
+ 3. [Syntax](#syntax)
+ 4. [How It Works Internally](#how-it-works-internally)
+ 5. [Method 1 — ROW_NUMBER Window Function](#method-1--row_number-window-function)
+ 6. [Method 2 — Correlated Subquery](#method-2--correlated-subquery)
+-8. [Method 3 — JOIN on MAX/MIN Aggregate](#method-3--join-on-maxmin-aggregate)
+-9. [Method 4 — LATERAL JOIN / CROSS APPLY](#method-4--lateral-join--cross-apply)
+-10. [Method 5 — NOT EXISTS Anti-Pattern](#method-5--not-exists-anti-pattern)
+-11. [Method 6 — DISTINCT ON (PostgreSQL)](#method-6--distinct-on-postgresql)
+-12. [Comparison of All Methods](#comparison-of-all-methods)
+-13. [Scenario-Based Examples](#scenario-based-examples)
+-14. [Edge Cases](#edge-cases)
+-15. [NULL Behavior](#null-behavior)
+-16. [Common Mistakes](#common-mistakes)
+-17. [Production Pitfalls](#production-pitfalls)
+-18. [Performance Implications](#performance-implications)
+-19. [Interview Traps](#interview-traps)
+-20. [Best Practices](#best-practices)
+-21. [Interview Questions](#interview-questions)
++7. [Method 3 — JOIN on MAX/MIN Aggregate](#method-3--join-on-maxmin-aggregate)
++8. [Method 4 — LATERAL JOIN / CROSS APPLY](#method-4--lateral-join--cross-apply)
++9. [Method 5 — NOT EXISTS Anti-Pattern](#method-5--not-exists-anti-pattern)
++10. [Method 6 — DISTINCT ON (PostgreSQL)](#method-6--distinct-on-postgresql)
++11. [Comparison of All Methods](#comparison-of-all-methods)
++12. [Scenario-Based Examples](#scenario-based-examples)
++13. [Edge Cases](#edge-cases)
++14. [NULL Behavior](#null-behavior)
++15. [Common Mistakes](#common-mistakes)
++16. [Production Pitfalls](#production-pitfalls)
++17. [Performance Implications](#performance-implications)
++18. [Interview Traps](#interview-traps)
++19. [Best Practices](#best-practices)
++20. [Interview Questions](#interview-questions)
+ 
+ ---
+ 
+ ## What It Is
+
+[0m
+[0m→ [0mRead sql-handbook/6-Window-Functions/54-Latest-Row-Per-Group.md[90m [limit=30][0m
+[0m
+[0m← [0mEdit sql-handbook/6-Window-Functions/54-Latest-Row-Per-Group.md
+Index: /home/soumrnjn/Desktop/Task/SQL/sql-handbook/6-Window-Functions/54-Latest-Row-Per-Group.md
+===================================================================
+--- /home/soumrnjn/Desktop/Task/SQL/sql-handbook/6-Window-Functions/54-Latest-Row-Per-Group.md
++++ /home/soumrnjn/Desktop/Task/SQL/sql-handbook/6-Window-Functions/54-Latest-Row-Per-Group.md
+@@ -7,24 +7,25 @@
+ 1. [What It Is](#what-it-is)
+ 2. [Why It Exists](#why-it-exists)
+ 3. [Syntax](#syntax)
+ 4. [How It Works Internally](#how-it-works-internally)
+-5. [Method 1 — ROW_NUMBER Window Function](#method-1--row_number-window-function)
+-6. [Method 2 — Correlated Subquery](#method-2--correlated-subquery)
+-7. [Method 3 — JOIN on MAX/MIN Aggregate](#method-3--join-on-maxmin-aggregate)
+-8. [Method 4 — LATERAL JOIN / CROSS APPLY](#method-4--lateral-join--cross-apply)
+-9. [Method 5 — NOT EXISTS Anti-Pattern](#method-5--not-exists-anti-pattern)
+-10. [Method 6 — DISTINCT ON (PostgreThe TOC numbering is slightly off (missing item 7). Let me fix that.
+-ds](#comparison-of-all-methods)
+-12. [Scenario-Based Examples](#scenario-based-examples)
+-13. [Edge Cases](#edge-cases)
+-14. [NULL Behavior](#null-behavior)
+-15. [Common Mistakes](#common-mistakes)
+-16. [Production Pitfalls](#production-pitfalls)
+-17. [Performance Implications](#performance-implications)
+-18. [Interview Traps](#interview-traps)
+-19. [Best Practices](#best-practices)
+-20. [Interview Questions](#interview-questions)
++5. [Sample Tables](#sample-tables)
++6. [Method 1 — ROW_NUMBER Window Function](#method-1--row_number-window-function)
++7. [Method 2 — Correlated Subquery](#method-2--correlated-subquery)
++8. [Method 3 — JOIN on MAX/MIN Aggregate](#method-3--join-on-maxmin-aggregate)
++9. [Method 4 — LATERAL JOIN / CROSS APPLY](#method-4--lateral-join--cross-apply)
++10. [Method 5 — NOT EXISTS Anti-Pattern](#method-5--not-exists-anti-pattern)
++11. [Method 6 — DISTINCT ON (PostgreSQL)](#method-6--distinct-on-postgresql)
++12. [Comparison of All Methods](#comparison-of-all-methods)
++13. [Scenario-Based Examples](#scenario-based-examples)
++14. [Edge Cases](#edge-cases)
++15. [NULL Behavior](#null-behavior)
++16. [Common Mistakes](#common-mistakes)
++17. [Production Pitfalls](#production-pitfalls)
++18. [Performance Implications](#performance-implications)
++19. [Interview Traps](#interview-traps)
++20. [Best Practices](#best-practices)
++21. [Interview Questions](#interview-questions)
+ 
+ ---
+ 
+ ## What It Is
+
+[0m
