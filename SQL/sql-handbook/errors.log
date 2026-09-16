@@ -12100,3 +12100,22 @@ Wrote file successfully.
 [0m
 > build · big-pickle
 [0m
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mls -la /home/soumrnjn/Desktop/Task/SQL
+total 40
+drwxrwxr-x  3 soumrnjn soumrnjn  4096 Sep 16 10:34 .
+drwxrwxr-x 13 soumrnjn soumrnjn  4096 Sep 16 10:27 ..
+-rwxrwxr-x  1 soumrnjn soumrnjn 19656 Sep 14 20:48 script.sh
+drwxrwxr-x 13 soumrnjn soumrnjn  4096 Sep 16 10:37 sql-handbook
+-rw-rw-r--  1 soumrnjn soumrnjn  4330 Sep 16 08:47 sql-master-prompt.md
+[0m
+[0m✱ [0mGlob "**/*.md"[90m in . · 93 matches[0m
+[0m→ [0mRead sql-handbook/10-Database-Design/92-Keys-and-Relationships.md
+[0m→ [0mRead sql-handbook/10-Database-Design/90-Normalization.md
+[0m→ [0mRead sql-handbook/10-Database-Design/90-Normalization.md[90m [offset=790][0m
+[0m→ [0mRead sql-handbook/10-Database-Design/91-Denormalization.md[90m [limit=80][0m
+[0m→ [0mRead sql-handbook/1-Fundamentals/04-Constraints-Keys.md[90m [limit=40][0m
+[0m→ [0mRead sql-handbook/10-Database-Design/86-ACID.md[90m [limit=30][0m
+[0m→ [0mRead sql-master-prompt.md
