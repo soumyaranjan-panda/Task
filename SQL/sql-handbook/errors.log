@@ -13107,3 +13107,721 @@ Wrote file successfully.
 [0m
 > build · big-pickle
 [0m
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mls -la && find . -maxdepth 3 -type f | head -50
+total 40
+drwxrwxr-x  3 soumrnjn soumrnjn  4096 Sep 16 10:34 .
+drwxrwxr-x 13 soumrnjn soumrnjn  4096 Sep 16 10:27 ..
+-rwxrwxr-x  1 soumrnjn soumrnjn 19740 Sep 16 11:13 script.sh
+drwxrwxr-x 14 soumrnjn soumrnjn  4096 Sep 16 11:47 sql-handbook
+-rw-rw-r--  1 soumrnjn soumrnjn  4330 Sep 16 11:14 sql-master-prompt.md
+./script.sh
+./sql-handbook/09-Optimization/79-Cardinality-and-Statistics.md
+./sql-handbook/09-Optimization/72-Indexes-Basics.md
+./sql-handbook/09-Optimization/84-Pagination-and-Keyset-Pagination.md
+./sql-handbook/09-Optimization/80-Join-Algorithms.md
+./sql-handbook/09-Optimization/74-Covering-Indexes.md
+./sql-handbook/09-Optimization/76-Partial-Filtered-Indexes.md
+./sql-handbook/09-Optimization/83-Index-Design-Strategy.md
+./sql-handbook/09-Optimization/82-Performance-Pitfalls.md
+./sql-handbook/09-Optimization/77-SARGability.md
+./sql-handbook/09-Optimization/81-Query-Rewriting.md
+./sql-handbook/09-Optimization/78-EXPLAIN-Execution-Plans.md
+./sql-handbook/09-Optimization/75-Clustered-vs-Nonclustered.md
+./sql-handbook/09-Optimization/73-Composite-Indexes.md
+./sql-handbook/08-DML-and-Sets/65-UNION-UNION-ALL.md
+./sql-handbook/08-DML-and-Sets/66-INTERSECT-EXCEPT-MINUS.md
+./sql-handbook/08-DML-and-Sets/68-UPDATE.md
+./sql-handbook/08-DML-and-Sets/70-MERGE-and-UPSERT.md
+./sql-handbook/08-DML-and-Sets/67-INSERT.md
+./sql-handbook/08-DML-and-Sets/69-DELETE.md
+./sql-handbook/08-DML-and-Sets/71-Safe-UPDATE-DELETE.md
+./sql-handbook/errors.log
+./sql-handbook/10-Database-Design/86-ACID.md
+./sql-handbook/10-Database-Design/88-Locks-and-Blocking.md
+./sql-handbook/10-Database-Design/87-Isolation-Levels.md
+./sql-handbook/10-Database-Design/90-Normalization.md
+./sql-handbook/10-Database-Design/92-Keys-and-Relationships.md
+./sql-handbook/10-Database-Design/89-Deadlocks.md
+./sql-handbook/10-Database-Design/91-Denormalization.md
+./sql-handbook/10-Database-Design/85-Transactions.md
+./sql-handbook/07-Dates-and-Strings/58-Date-Arithmetic.md
+./sql-handbook/07-Dates-and-Strings/59-Timestamp-Filtering.md
+./sql-handbook/07-Dates-and-Strings/62-MoM-YoY-Rolling-Metrics.md
+./sql-handbook/07-Dates-and-Strings/60-Timezone-Pitfalls.md
+./sql-handbook/07-Dates-and-Strings/63-String-Functions.md
+./sql-handbook/07-Dates-and-Strings/57-Date-Time-Basics.md
+./sql-handbook/07-Dates-and-Strings/64-Regular-Expressions.md
+./sql-handbook/07-Dates-and-Strings/61-Monthly-Daily-Reporting.md
+./sql-handbook/06-Window-Functions/48-LAG-LEAD.md
+./sql-handbook/06-Window-Functions/56-Window-vs-GROUP-BY.md
+./sql-handbook/06-Window-Functions/52-ROWS-vs-RANGE-vs-GROUPS.md
+./sql-handbook/06-Window-Functions/44-Window-Functions-Basics.md
+./sql-handbook/06-Window-Functions/49-Running-Totals.md
+./sql-handbook/06-Window-Functions/45-PARTITION-BY.md
+./sql-handbook/06-Window-Functions/46-ROW-NUMBER.md
+./sql-handbook/06-Window-Functions/50-Moving-Averages.md
+./sql-handbook/06-Window-Functions/51-Window-Frames.md
+./sql-handbook/06-Window-Functions/55-Gaps-and-Islands.md
+./sql-handbook/06-Window-Functions/54-Latest-Row-Per-Group.md
+./sql-handbook/06-Window-Functions/47-RANK-vs-DENSE-RANK.md
+[0m
+[0m$ [0mls sql-handbook/ && echo "---ADV---" && ls sql-handbook/11-Advanced/ 2>/dev/null && echo "---CTE grep---" && ls sql-handbook/ | grep -iE "05|CTE|Subquer"
+01-Fundamentals
+02-NULL-and-Logic
+03-Joins
+04-Subqueries
+05-Aggregation
+06-Window-Functions
+07-Dates-and-Strings
+08-DML-and-Sets
+09-Optimization
+10-Database-Design
+11-Advanced
+12-Interview-and-Scenarios
+errors.log
+---ADV---
+100-Lateral-Joins-CROSS-APPLY.md
+101-JSON-SQL.md
+102-Recursive-Hierarchies.md
+93-Views.md
+94-Materialized-Views.md
+95-Temporary-Tables.md
+96-Stored-Procedures.md
+97-Functions.md
+98-Triggers.md
+99-Pivot-Unpivot.md
+---CTE grep---
+04-Subqueries
+05-Aggregation
+[0m
+[0m$ [0mwc -l sql-handbook/11-Advanced/102-Recursive-Hierarchies.md sql-handbook/11-Advanced/100-Lateral-Joins-CROSS-APPLY.md sql-handbook/11-Advanced/101-JSON-SQL.md && ls sql-handbook/04-Subqueries/
+0 sql-handbook/11-Advanced/102-Recursive-Hierarchies.md
+  826 sql-handbook/11-Advanced/100-Lateral-Joins-CROSS-APPLY.md
+ 1688 sql-handbook/11-Advanced/101-JSON-SQL.md
+ 2514 total
+26-Scalar-Subqueries.md
+27-Subqueries-WHERE.md
+28-Subqueries-FROM.md
+29-Correlated-Subqueries.md
+30-IN-vs-EXISTS.md
+31-NOT-IN-vs-NOT-EXISTS.md
+32-JOIN-vs-SUBQUERY.md
+33-CTEs.md
+34-Recursive-CTEs.md
+35-CTE-vs-Subquery-vs-Temp-Table.md
+[0m
+[0m→ [0mRead sql-handbook/04-Subqueries/34-Recursive-CTEs.md
+[0m→ [0mRead sql-handbook/11-Advanced/100-Lateral-Joins-CROSS-APPLY.md[90m [limit=80][0m
+[0m
+[0m← [0mWrite sql-handbook/11-Advanced/102-Recursive-Hierarchies.md
+Wrote file successfully.
+[0m
+[0m← [0mEdit sql-handbook/11-Advanced/102-Recursive-Hierarchies.md
+Index: /home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced/102-Recursive-Hierarchies.md
+===================================================================
+--- /home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced/102-Recursive-Hierarchies.md
++++ /home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced/102-Recursive-Hierarchies.md
+@@ -127,9 +127,9 @@
+    a. Run the RECURSIVE member, substituting the current WORKING table
+       wherever the CTE's own name appears.
+    b. Send the output to an INTERMEDIATE table, append it to the result.
+    c. The INTERMEDIATE table becomes the new WORKING table.
+-3. UNTIL the workIING table is empty.
++3. UNTIL the WORKING table is empty.
+ ```
+ 
+ ```mermaid
+ flowchart TD
+
+[0m
+[0m$ [0mwc -l sql-handbook/11-Advanced/102-Recursive-Hierarchies.md && rg -n "Interview trap|Production pitfall|Common misconception|BETTER APPROACH|BAD APPROACH" sql-handbook/11-Advanced/102-Recursive-Hierarchies.md | wc -l
+945 sql-handbook/11-Advanced/102-Recursive-Hierarchies.md
+/usr/bin/bash: line 1: rg: command not found
+0
+[0m
+[0m✱ [0mGrep "Interview trap|Production pitfall|Common misconception|BETTER APPROACH|BAD APPROACH"[90m in sql-handbook/11-Advanced/102-Recursive-Hierarchies.md · 100 matches[0m
+[0m→ [0mRead sql-handbook/11-Advanced/102-Recursive-Hierarchies.md[90m [offset=680, limit=30][0m
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mls -la /home/soumrnjn/Desktop/Task/SQL && ls /home/soumrnjn/Desktop/Task
+total 40
+drwxrwxr-x  3 soumrnjn soumrnjn  4096 Sep 16 10:34 .
+drwxrwxr-x 13 soumrnjn soumrnjn  4096 Sep 16 10:27 ..
+-rwxrwxr-x  1 soumrnjn soumrnjn 19740 Sep 16 11:13 script.sh
+drwxrwxr-x 14 soumrnjn soumrnjn  4096 Sep 16 11:47 sql-handbook
+-rw-rw-r--  1 soumrnjn soumrnjn  4330 Sep 16 11:14 sql-master-prompt.md
+DSA
+English
+java
+media
+sd_note
+SpringBatch
+SQL
+SystemDesign
+venv
+visuals
+[0m
+[0m$ [0mfind /home/soumrnjn/Desktop/Task/SQL/sql-handbook -type f | sort
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/01-Fundamentals/01-SQL-Basics.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/01-Fundamentals/02-Data-Types.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/01-Fundamentals/03-DDL-DML-DQL-DCL-TCL.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/01-Fundamentals/04-Constraints-Keys.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/01-Fundamentals/05-SELECT-FROM-WHERE.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/01-Fundamentals/06-Logical-Query-Processing-Order.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/01-Fundamentals/07-Filtering-Operators.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/01-Fundamentals/08-CASE-Expressions.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/02-NULL-and-Logic/09-NULL-Deep-Dive.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/02-NULL-and-Logic/10-Three-Valued-Logic.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/02-NULL-and-Logic/11-NULL-Comparisons.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/02-NULL-and-Logic/12-COALESCE-NULLIF.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/02-NULL-and-Logic/13-IS-DISTINCT-FROM.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/02-NULL-and-Logic/14-NOT-IN-NULL-Pitfalls.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/03-Joins/15-INNER-JOIN.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/03-Joins/16-LEFT-JOIN.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/03-Joins/17-RIGHT-FULL-JOIN.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/03-Joins/18-CROSS-JOIN.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/03-Joins/19-SELF-JOIN.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/03-Joins/20-JOIN-ON-vs-WHERE.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/03-Joins/21-JOIN-Duplicates-and-Fanout.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/03-Joins/22-Many-to-Many-Joins.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/03-Joins/23-Anti-Joins.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/03-Joins/24-Semi-Joins.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/03-Joins/25-JOIN-Pitfalls.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/04-Subqueries/26-Scalar-Subqueries.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/04-Subqueries/27-Subqueries-WHERE.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/04-Subqueries/28-Subqueries-FROM.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/04-Subqueries/29-Correlated-Subqueries.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/04-Subqueries/30-IN-vs-EXISTS.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/04-Subqueries/31-NOT-IN-vs-NOT-EXISTS.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/04-Subqueries/32-JOIN-vs-SUBQUERY.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/04-Subqueries/33-CTEs.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/04-Subqueries/34-Recursive-CTEs.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/04-Subqueries/35-CTE-vs-Subquery-vs-Temp-Table.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/05-Aggregation/36-GROUP-BY.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/05-Aggregation/37-HAVING.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/05-Aggregation/38-COUNT-SUM-AVG-MIN-MAX.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/05-Aggregation/39-COUNT-NULL-Pitfalls.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/05-Aggregation/40-DISTINCT.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/05-Aggregation/41-GROUP-BY-vs-DISTINCT.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/05-Aggregation/42-Conditional-Aggregation.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/05-Aggregation/43-ROLLUP-CUBE-GROUPING-SETS.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/06-Window-Functions/44-Window-Functions-Basics.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/06-Window-Functions/45-PARTITION-BY.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/06-Window-Functions/46-ROW-NUMBER.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/06-Window-Functions/47-RANK-vs-DENSE-RANK.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/06-Window-Functions/48-LAG-LEAD.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/06-Window-Functions/49-Running-Totals.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/06-Window-Functions/50-Moving-Averages.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/06-Window-Functions/51-Window-Frames.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/06-Window-Functions/52-ROWS-vs-RANGE-vs-GROUPS.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/06-Window-Functions/53-Top-N-Per-Group.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/06-Window-Functions/54-Latest-Row-Per-Group.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/06-Window-Functions/55-Gaps-and-Islands.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/06-Window-Functions/56-Window-vs-GROUP-BY.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/07-Dates-and-Strings/57-Date-Time-Basics.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/07-Dates-and-Strings/58-Date-Arithmetic.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/07-Dates-and-Strings/59-Timestamp-Filtering.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/07-Dates-and-Strings/60-Timezone-Pitfalls.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/07-Dates-and-Strings/61-Monthly-Daily-Reporting.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/07-Dates-and-Strings/62-MoM-YoY-Rolling-Metrics.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/07-Dates-and-Strings/63-String-Functions.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/07-Dates-and-Strings/64-Regular-Expressions.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/08-DML-and-Sets/65-UNION-UNION-ALL.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/08-DML-and-Sets/66-INTERSECT-EXCEPT-MINUS.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/08-DML-and-Sets/67-INSERT.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/08-DML-and-Sets/68-UPDATE.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/08-DML-and-Sets/69-DELETE.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/08-DML-and-Sets/70-MERGE-and-UPSERT.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/08-DML-and-Sets/71-Safe-UPDATE-DELETE.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/09-Optimization/72-Indexes-Basics.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/09-Optimization/73-Composite-Indexes.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/09-Optimization/74-Covering-Indexes.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/09-Optimization/75-Clustered-vs-Nonclustered.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/09-Optimization/76-Partial-Filtered-Indexes.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/09-Optimization/77-SARGability.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/09-Optimization/78-EXPLAIN-Execution-Plans.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/09-Optimization/79-Cardinality-and-Statistics.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/09-Optimization/80-Join-Algorithms.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/09-Optimization/81-Query-Rewriting.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/09-Optimization/82-Performance-Pitfalls.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/09-Optimization/83-Index-Design-Strategy.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/09-Optimization/84-Pagination-and-Keyset-Pagination.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/10-Database-Design/85-Transactions.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/10-Database-Design/86-ACID.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/10-Database-Design/87-Isolation-Levels.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/10-Database-Design/88-Locks-and-Blocking.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/10-Database-Design/89-Deadlocks.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/10-Database-Design/90-Normalization.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/10-Database-Design/91-Denormalization.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/10-Database-Design/92-Keys-and-Relationships.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced/100-Lateral-Joins-CROSS-APPLY.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced/101-JSON-SQL.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced/102-Recursive-Hierarchies.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced/93-Views.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced/94-Materialized-Views.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced/95-Temporary-Tables.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced/96-Stored-Procedures.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced/97-Functions.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced/98-Triggers.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced/99-Pivot-Unpivot.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/12-Interview-and-Scenarios/103-SQL-Problem-Solving-Framework.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/errors.log
+[0m
+[0m→ [0mRead sql-handbook/12-Interview-and-Scenarios/103-SQL-Problem-Solving-Framework.md
+[0m→ [0mRead sql-handbook/11-Advanced/102-Recursive-Hierarchies.md[90m [limit=150][0m
+[0m
+[0m$ [0mtail -120 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced/102-Recursive-Hierarchies.md
+|---|---|---|---|---|---|---|
+| Adjacency + recursive CTE | D iterations | D iterations | trivial | easy via recursion | none | write-heavy, unbounded depth, graphs |
+| Materialized path (`ltree`/`hierarchyid`) | `LIKE`/range on path | path compare | cheap | cheap | path column duplicated | read-heavy deep trees |
+| Nested set | single range scan | range count | **costly renumbering** | cheap | lft/rgt per row | read-heavy stable trees |
+| Closure table | one join | one join | 1 + depth rows | range of pairs | O(n·depth) rows | mixed, hierarchy-heavy analytics |
+
+### Engine capabilities (recursive CTEs)
+
+| Engine | Keyword | Default recursion limit | Native cycle/depth tools |
+|---|---|---|---|
+| PostgreSQL | `WITH RECURSIVE` | none | `SEARCH` + `CYCLE` (v14+) |
+| MySQL / MariaDB | `WITH RECURSIVE` | 1000 (`cte_max_recursion_depth`) | manual guards |
+| SQL Server | `WITH` + **implicit recursion** (no `RECURSIVE`) | 100 (`OPTION (MAXRECURSION n)`, max 32767) | manual guards |
+| Oracle | recursive CTE **and** `CONNECT BY` | loop detection on `CONNECT BY ... NOCYCLE` | `NOCYCLE`, `CONNECT_BY_ISCYCLE`, `LEVEL` pseudo-column |
+| SQLite | `WITH RECURSIVE` | 1000 (`recursive_cte_max_depth`) | manual guards |
+
+---
+
+## Best practices
+
+1. **Always use `UNION ALL`** unless cross-generation dedup is the actual requirement.
+2. **Always carry a `level` (or distance) column** — cheap, and it powers filtering, presentation, and depth caps.
+3. **Always guard the recursion**: depth cap, `CYCLE` (PostgreSQL 14+), `MAXRECURSION` (SQL Server), or a visited-set/path check. No exceptions — not even in a demo script.
+4. **Aggregate outside** the recursion; keep the recursive member a pure "one generation" expansion.
+5. **Carry the root id down** when the final question is per-subtree (Examples 4 and the scenario).
+6. **Cast types in the anchor** to avoid implicit-coercion drift in later generations.
+7. **Index the parent/child key** (`parent_id`, `manager_id`); add a covering composite if you select extra columns.
+8. **Filter the anchor to the needed scope** (one root, not every root) when a single subtree is the goal.
+9. **Order explicitly** with a `path`/`level` column or `SEARCH` clauses — never rely on default iteration order.
+10. **Verify with `EXPLAIN ANALYZE`** — confirm iteration count, working-table row estimates, and index usage before tuning; claims like "always faster" are wrong without a plan.
+11. **Test with dirty data**: a cyclic row, an orphan, and a NULL path — expect then behavior, don't discover it in production.
+
+---
+
+## Interview traps
+
+> **Interview trap — "How many times does this run?"**
+> For a tree of depth 4 with 1,000 nodes: about **4 iterations** (each = one self-join), not 1,000. Iterations are bounded by depth; row *volume* is bounded by width. Interviewers love the quantity-vs-density distinction.
+
+> **Interview trap — "What is inside the CTE name in the recursive member?"**
+> The **previous generation's output only** — not the accumulated result. Someone who says "the whole result set" has missed the working-table semantics.
+
+> **Interview trap — "Where do aggregates go?"**
+> Into the final SELECT, not the recursive member. Reasons: working-table semantics + engine restrictions on aggregates/window functions over the recursive reference.
+
+> **Interview trap — "What happens when there is a cycle and no root?"**
+> If *every* node has a parent (a pure ring — `1→2`, `2→1`), the anchor `WHERE parent_id IS NULL` finds **nothing**, and the whole query returns **0 rows** — a silent, easy-to-miss failure, not an error.
+
+> **Interview trap — stating absolute performance claims**
+> "Nested set is always faster," "recursive CTEs are always slower." Both miss that cost depends on shape, depth, indexes, statistics, and the optimizer — insist on an execution plan.
+
+---
+
+# Interview Questions
+
+## Beginner
+
+1. What are the two mandatory parts of a recursive CTE, and which runs only once?
+2. Why is `UNION ALL` the default operator between them — what changes if you write `UNION`?
+3. In `categories`, what does `parent_id = NULL` mean? What is the grain of the table?
+4. Write a recursive CTE that prints the numbers 1 through 10.
+5. When does a recursive CTE stop recursing?
+6. How many iterations does a recursive CTE run on a tree of depth 5 that has 90 nodes?
+
+## Intermediate
+
+7. Write a query returning all descendants of category `Phones` at any depth, with a level column.
+8. Write a query returning the full ancestor chain for `Ultrabooks` (id 9).
+9. Explain how fixed-depth chained self-joins fail, and give a concrete dataset where they output wrong results.
+10. What is the difference in the `JOIN` condition when you walk the tree downward (children) vs upward (ancestors)?
+11. Why can't you put `SUM(salary)` in the recursive member, and where must the aggregate go?
+12. A delete is run inside a transaction because a subtree removal may leave orphans. What does the FK constraint have to do with the order of deletion?
+
+## Advanced
+
+13. Explain the "carry the root id down" pattern and why it is required to compute a per-manager subtree total.
+14. Describe the PostgreSQL `SEARCH DEPTH FIRST` and `SEARCH BREADTH FIRST` clauses, and the problem they solve.
+15. Compare adjacency list + recursive CTE, nested set, materialized path (`ltree`/`hierarchyid`), and closure table for a write-heavy org chart vs a read-heavy 50,000-node taxonomy.
+16. What happens when a node has two parents (a DAG)? Show the double-count condition and the fix.
+17. How does the `CYCLE ... SET is_cycle USING path` clause (PostgreSQL 14+) detect cycles, and how is it better than a depth cap?
+18. Write a BOM explosion that multiplies quantities level by level and sums outside the recursion.
+
+## Scenario Based
+
+19. For each manager, count their total team size (self + all indirect reports). State the grain of each output row.
+20. The storefront scenario: explain the result row for `Desktops` (0 products) and why the `LEFT JOIN` is required for it to appear.
+21. A `flights` table is reachability-scored from `JFK` with at most 3 hops and a visited-set guard. Which airports come out, and which are deliberately excluded?
+22. Delete the `Books` subtree without leaving orphans — write the statement and the transaction steps.
+23. Build a 30-day date spine with a recursive CTE, then LEFT JOIN a `logins` table so days with no logins still appear.
+
+## Tricky
+
+24. The data has a pure cycle (`1→2`, `2→1`) and **no** row with `parent_id NULL`. What does an anchor `WHERE parent_id IS NULL` produce — an error, 0 rows, or an infinite loop?
+25. Someone changes `manager_id` to `NOT NULL DEFAULT 1`. The old anchor `WHERE manager_id IS NULL` now returns one node. What does the org report silently lose, and where would you spot it?
+26. A recursive member accidentally uses `FROM categories c` with no join at all. Walk one or two iterations — what happens to the working set and the runtime?
+27. What is the difference between a tree with two roots and a DAG with a shared subtree — for row counts in the recursive CTE, then for `COUNT(DISTINCT ...)` in the final SELECT?
+28. Explain why the BOM rollup needs `SUM` **outside** even though each part appears exactly once per assembly path. What would `GROUP BY` inside the recursive member do (and would the engine allow it)?
+
+## Output Prediction
+
+29. Using the sample `categories`, predict every row of the subtree query anchored at `Phones (3)`, with levels. Now anchor at `Books (8)` — how many rows?
+30. Predict the raw (pre-aggregation) rows of the BOM explosion for one Bike, with their multipliers. Which part has the largest multiplier and why?
+31. For the flights dataset, list the route rows for hops 1, 2, and 3 from `JFK`. Which two candidate rows (`EWR→JFK`, `LAX→JFK`) are dropped, and by which condition?
+32. Predict the team-salary rollup row for `Noah Kim (8)` alone. Now predict `Fatima Ali (5)`. Where does the extra 85,000 come from?
+33. Anchor at `categories` root `Electronics` but `ORDER BY level, name` — write the predicted output order, and say which "tree shape" property this ordering **does not** guarantee.
+
+## Debugging
+
+34. The org chart "worked on Monday, hangs on Tuesday." Write the query that finds the corrupt rows (self-cycle or mutual management) before rerunning the recursion.
+35. A subtree rollup reports products_in_subtree that are exactly a multiple of the true count. Which data condition causes multiples, and which keyword fixes it?
+36. `Laptops` shows up in the category list but nothing under it ever appears, even though rows exist. What data condition (orphan vs open cycle vs wrong anchor filter) explains it, and how do you check in one query?
+37. The BOM total for `Spoke` is 40, correct, but `Rim` shows 0. Where do you look first — the `assembly` pair, the multiplier, or the final `GROUP BY`?
+38. A recursive report works with `UNION ALL` but the same query with `UNION` returns far fewer rows on cyclic data. Is that a fix, and why exactly?
+
+## Performance
+
+39. Using `EXPLAIN ANALYZE`, how do you confirm the recursion is doing one index lookup per pass instead of a full scan per pass? What plan node names do you look for (PostgreSQL `WorkTable Scan`, SQL Server spool)?
+40. Given a 500,000-row employee table and a depth-40 tree, what does the cost curve look like if `manager_id` is unindexed? Describe the index that turns it into per-pass logarithmic probes, and the execution-plan evidence that would confirm the improvement.
+41. Is "nested set is always faster than a recursive CTE" true? Defend both sides, and describe the workload where the recursive CTE wins and the experiment you would run to prove it.
+42. The flight reachability query on 1M legs grows the working table super-linearly at hop 3. Which lever helps — a tighter anchor, an earlier hop cap, a visited-set, or a stronger index? How would the plan tell you which one is working?
+[0m
+[0m$ [0mhead -60 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced/100-Lateral-Joins-CROSS-APPLY.md
+# 100. LATERAL Joins & CROSS APPLY / OUTER APPLY
+
+> Cross-references: this section pairs with **Correlated Subqueries** (`29-CorrWrote the section to `sql-handbook/11-Advanced/100-Lateral-Joins-CROSS-APPLY.md`.
+
+**What it covers (all 13 required components):**
+
+- **Fundamentals** — what LATERAL/CROSS APPLY is, why it exists (the FROM/WHERE correlation gap), grain rules for every sample table, per-engine support matrix (PostgreSQL 9.3+, MySQL 8.0.14+, SQL Server 2005+, Oracle 12c+, SQLite 3.33+)
+- **Internal working** — with a Mermaid diagram, nested-loop mental model, per-dialect plan/tooling, and the "not always a nested loop" caveat
+- **Syntax** — full cheat sheet for all four majors + portability matrix
+- **6 worked examples** with seed data and hand-verified outputs: latest-per-customer, top-N per group (BAD `salary = MAX` vs BETTER lateral vs window alternative), aggregate-in-lateral with single-computation reuse, self-lateral "next order" time series, `generate_series` gap-filling, SQL Server TVF/`STRING_SPLIT`
+- **NULL behavior** — CROSS vs OUTER/LEFT table, aggregate-returns-one-row subtlety, `ON TRUE`, NULL join keys
+- **Edge cases, common mistakes, production pitfalls** (per-row cost surprise, missing inner index, determinism, sargability, skew)
+- **Performance** — plan-first guidance, `Loops:` and equivalent tooling, supporting composite index, no absolute claims
+- **Comparison tables** — LATERAL vs scalar subquery / derived table / window / plain join, CROSS vs OUTER, engine×syntax
+- **When to use / NOT use, best practices, real-world scenario** with the full 17-point reasoning checklist
+- **40 interview questions** across all 8 categories (Beginner/Intermediate/Advanced/Scenario/Tricky/Output Prediction/Debugging/Performance), practice-style, answers withheld
+ai"]
+        L3["customer Zoe"]
+    end
+    subgraph RIGHT["LATERAL subquery — run once per left row"]
+        R1["WHERE orders.customer_id = Ada<br/>ORDER BY placed_on DESC LIMIT 1"]
+        R2["WHERE orders.customer_id = Kai<br/>ORDER BY placed_on DESC LIMIT 1"]
+        R3["WHERE orders.customer_id = Zoe<br/>→ returns 0 rows"]
+    end
+    L1 --> R1
+    L2 --> R2
+    L3 --> R3
+    R1 --> OUT["Ada | 1003 | 2022-12-20 | 200"]
+    R2 --> OUT
+    R3 --> DROP["CROSS: row dropped · LEFT/OUTER: kept with NULLs"]
+```
+
+### Why it exists
+
+Before LATERAL, the SQL language imposed an artificial split:
+
+- **Correlated subqueries** could appear only in `WHERE`, the `SELECT` list, `HAVING`, or an `ON` clause. They can see the outer row, but they cannot return **multiple rows** (the `SELECT` list needs a scalar) or a **multi-column, multi-row set that you then join further**.
+- **Table sources** in `FROM` could join and fan out but were **forbidden from seeing sibling tables** — so you could not compute each row's "own" set of related rows and join to it.
+
+LATERAL removes that wall. The result: set-returning, per-row computations ("for each customer, her latest order", "for each department, its top-2 salaries", "for each event, the next event for that user") become a single, readable, index-friendly query.
+
+The semantics are part of the SQL standard (**SQL:2003**, LATERAL), but its home is mostly three dialects:
+
+| Engine | Keyword | Availability |
+|---|---|---|
+| PostgreSQL | `LATERAL` | since 9.3 |
+| MySQL / MariaDB | `LATERAL` | MySQL 8.0.14+ (MariaDB via syntax, limited) |
+| SQL Server | `CROSS APPLY` / `OUTER APPLY` | since 2005 |
+| Oracle | `LATERAL` and `CROSS APPLY` / `OUTER APPLY` | 12c+ |
+| SQLite | `LATERAL` | 3.33.0+ (2020) with `ON` support |
+
+### Grain rules — say it out loud before writing anything
+
+> One row in `departments` = one department.
+> One row in `employees` = one employee (each employee has one department; a department has many employees).
+> One row in `customers` = one customer.
+> One row in `orders` = one order (a customer has 0..N orders).
+> One row in `payments` = one payment (an order has 0..N payments — order 1003 has two).
+
+The entire section's correctness depends on these grains. Every time you see a LATERAL that should return "one row per left row", ask *can the inner query return more than one row?* If yes, you get a fan-out. If you *want* one row, you need `LIMIT`/`TOP`/`FETCH FIRST`, a `DISTINCT`, an aggregate, or a tight join that is provably 1:1.
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m# [0mTodos
+[•] Generate Section 103: SQL Problem-Solving Framework
+[ ] Create sample tables and realistic data for examples
+[ ] Cover all 17 reasoning questions as a systematic framework
+[ ] Include BAD vs BETTER approach patterns
+[ ] Add interview questions at the end
+[0m
+[0m✱ [0mGlob "**/*.md"[90m in . · 100 matches[0m
+[0m✱ [0mGlob "**/*"[90m in . · 100 matches[0m
+[0m→ [0mRead sql-handbook/12-Interview-and-Scenarios/103-SQL-Problem-Solving-Framework.md
+[0m→ [0mRead sql-handbook/12-Interview-and-Scenarios
+[0m→ [0mRead sql-handbook/09-Optimization/84-Pagination-and-Keyset-Pagination.md[90m [limit=120][0m
+[0m→ [0mRead sql-handbook/03-Joins/25-JOIN-Pitfalls.md[90m [limit=80][0m
+[0m→ [0mRead sql-master-prompt.md[90m [limit=60][0m
+[0m
+[0m← [0mWrite sql-handbook/12-Interview-and-Scenarios/103-SQL-Problem-Solving-Framework.md
+Wrote file successfully.
+[0m
+[0m$ [0mwc -l /home/soumrnjn/Desktop/Task/SQL/sql-handbook/12-Interview-and-Scenarios/103-SQL-Problem-Solving-Framework.md && rg -c '^\#' /home/soumrnjn/Desktop/Task/SQL/sql-handbook/12-Interview-and-Scenarios/103-SQL-Problem-Solving-Framework.md
+1344 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/12-Interview-and-Scenarios/103-SQL-Problem-Solving-Framework.md
+/usr/bin/bash: line 1: rg: command not found
+[0m
+[0m# [0mTodos
+[✓] Generate Section 103: SQL Problem-Solving Framework
+[✓] Create sample tables and realistic data for examples
+[✓] Cover all 17 reasoning questions as a systematic framework
+[✓] Include BAD vs BETTER approach patterns
+[✓] Add interview questions at the end
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mls -la /home/soumrnjn/Desktop/Task/SQL 2>/dev/null && echo "---" && ls -la /home/soumrnjn/Desktop/Task 2>/dev/null
+total 40
+drwxrwxr-x  3 soumrnjn soumrnjn  4096 Sep 16 10:34 .
+drwxrwxr-x 13 soumrnjn soumrnjn  4096 Sep 16 10:27 ..
+-rwxrwxr-x  1 soumrnjn soumrnjn 19740 Sep 16 11:13 script.sh
+drwxrwxr-x 14 soumrnjn soumrnjn  4096 Sep 16 11:47 sql-handbook
+-rw-rw-r--  1 soumrnjn soumrnjn  4330 Sep 16 17:22 sql-master-prompt.md
+---
+total 56
+drwxrwxr-x 13 soumrnjn soumrnjn 4096 Sep 16 10:27 .
+drwxr-xr-x  8 soumrnjn soumrnjn 4096 Aug 24 18:40 ..
+drwxrwxr-x  3 soumrnjn soumrnjn 4096 Sep 10 10:22 DSA
+drwxrwxr-x  2 soumrnjn soumrnjn 4096 Aug 24 18:40 English
+drwxrwxr-x  9 soumrnjn soumrnjn 4096 Sep 16 11:44 .git
+-rw-rw-r--  1 soumrnjn soumrnjn   77 Sep 16 10:41 .gitignore
+drwxrwxr-x  4 soumrnjn soumrnjn 4096 Jul 21 22:07 java
+drwxrwxr-x  5 soumrnjn soumrnjn 4096 Aug 27 07:40 media
+drwxrwxr-x  6 soumrnjn soumrnjn 4096 Jun  6 11:50 sd_note
+drwxrwxr-x  2 soumrnjn soumrnjn 4096 Jul  5 13:12 SpringBatch
+drwxrwxr-x  3 soumrnjn soumrnjn 4096 Sep 16 10:34 SQL
+drwxrwxr-x  6 soumrnjn soumrnjn 4096 Aug  2 10:23 SystemDesign
+drwxrwxr-x  5 soumrnjn soumrnjn 4096 Aug 27 07:20 venv
+drwxrwxr-x  5 soumrnjn soumrnjn 4096 Aug 29 10:42 visuals
+[0m
+[0m$ [0mfind /home/soumrnjn/Desktop/Task/SQL/sql-handbook -type f | head -50 && echo "---DIRS---" && find /home/soumrnjn/Desktop/Task/SQL/sql-handbook -type d
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/09-Optimization/79-Cardinality-and-Statistics.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/09-Optimization/72-Indexes-Basics.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/09-Optimization/84-Pagination-and-Keyset-Pagination.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/09-Optimization/80-Join-Algorithms.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/09-Optimization/74-Covering-Indexes.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/09-Optimization/76-Partial-Filtered-Indexes.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/09-Optimization/83-Index-Design-Strategy.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/09-Optimization/82-Performance-Pitfalls.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/09-Optimization/77-SARGability.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/09-Optimization/81-Query-Rewriting.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/09-Optimization/78-EXPLAIN-Execution-Plans.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/09-Optimization/75-Clustered-vs-Nonclustered.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/09-Optimization/73-Composite-Indexes.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/08-DML-and-Sets/65-UNION-UNION-ALL.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/08-DML-and-Sets/66-INTERSECT-EXCEPT-MINUS.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/08-DML-and-Sets/68-UPDATE.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/08-DML-and-Sets/70-MERGE-and-UPSERT.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/08-DML-and-Sets/67-INSERT.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/08-DML-and-Sets/69-DELETE.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/08-DML-and-Sets/71-Safe-UPDATE-DELETE.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/errors.log
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/10-Database-Design/86-ACID.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/10-Database-Design/88-Locks-and-Blocking.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/10-Database-Design/87-Isolation-Levels.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/10-Database-Design/90-Normalization.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/10-Database-Design/92-Keys-and-Relationships.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/10-Database-Design/89-Deadlocks.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/10-Database-Design/91-Denormalization.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/10-Database-Design/85-Transactions.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/07-Dates-and-Strings/58-Date-Arithmetic.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/07-Dates-and-Strings/59-Timestamp-Filtering.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/07-Dates-and-Strings/62-MoM-YoY-Rolling-Metrics.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/07-Dates-and-Strings/60-Timezone-Pitfalls.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/07-Dates-and-Strings/63-String-Functions.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/07-Dates-and-Strings/57-Date-Time-Basics.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/07-Dates-and-Strings/64-Regular-Expressions.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/07-Dates-and-Strings/61-Monthly-Daily-Reporting.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/06-Window-Functions/48-LAG-LEAD.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/06-Window-Functions/56-Window-vs-GROUP-BY.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/06-Window-Functions/52-ROWS-vs-RANGE-vs-GROUPS.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/06-Window-Functions/44-Window-Functions-Basics.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/06-Window-Functions/49-Running-Totals.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/06-Window-Functions/45-PARTITION-BY.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/06-Window-Functions/46-ROW-NUMBER.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/06-Window-Functions/50-Moving-Averages.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/06-Window-Functions/51-Window-Frames.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/06-Window-Functions/55-Gaps-and-Islands.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/06-Window-Functions/54-Latest-Row-Per-Group.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/06-Window-Functions/47-RANK-vs-DENSE-RANK.md
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/06-Window-Functions/53-Top-N-Per-Group.md
+---DIRS---
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/09-Optimization
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/08-DML-and-Sets
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/10-Database-Design
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/07-Dates-and-Strings
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/06-Window-Functions
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/04-Subqueries
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/03-Joins
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/05-Aggregation
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/01-Fundamentals
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/12-Interview-and-Scenarios
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/02-NULL-and-Logic
+[0m
+[0m$ [0mls -la /home/soumrnjn/Desktop/Task/SQL/sql-handbook/12-Interview-and-Scenarios /home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced:
+total 432
+drwxrwxr-x  2 soumrnjn soumrnjn  4096 Sep 16 11:47 .
+drwxrwxr-x 14 soumrnjn soumrnjn  4096 Sep 16 11:47 ..
+-rw-rw-r--  1 soumrnjn soumrnjn 44202 Sep 16 11:42 100-Lateral-Joins-CROSS-APPLY.md
+-rw-rw-r--  1 soumrnjn soumrnjn 48461 Sep 16 11:46 101-JSON-SQL.md
+-rw-rw-r--  1 soumrnjn soumrnjn 46089 Sep 16 11:51 102-Recursive-Hierarchies.md
+-rw-rw-r--  1 soumrnjn soumrnjn 50026 Sep 16 10:47 93-Views.md
+-rw-rw-r--  1 soumrnjn soumrnjn 30788 Sep 16 10:49 94-Materialized-Views.md
+-rw-rw-r--  1 soumrnjn soumrnjn 27656 Sep 16 10:52 95-Temporary-Tables.md
+-rw-rw-r--  1 soumrnjn soumrnjn 36984 Sep 16 10:55 96-Stored-Procedures.md
+-rw-rw-r--  1 soumrnjn soumrnjn 46122 Sep 16 11:00 97-Functions.md
+-rw-rw-r--  1 soumrnjn soumrnjn 38696 Sep 16 11:05 98-Triggers.md
+-rw-rw-r--  1 soumrnjn soumrnjn 43443 Sep 16 11:21 99-Pivot-Unpivot.md
+
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/12-Interview-and-Scenarios:
+total 124
+drwxrwxr-x  2 soumrnjn soumrnjn  4096 Sep 16 17:37 .
+drwxrwxr-x 14 soumrnjn soumrnjn  4096 Sep 16 11:47 ..
+-rw-rw-r--  1 soumrnjn soumrnjn 67443 Sep 16 17:28 103-SQL-Problem-Solving-Framework.md
+-rw-rw-r--  1 soumrnjn soumrnjn 45969 Sep 16 17:37 104-Employee-Problems.md
+-rw-rw-r--  1 soumrnjn soumrnjn     0 Sep 16 17:37 105-Customer-Order-Problems.md
+[0m
+[0m→ [0mRead sql-handbook/12-Interview-and-Scenarios/104-Employee-Problems.md[90m [limit=200][0m
+[0m→ [0mRead sql-handbook/12-Interview-and-Scenarios/104-Employee-Problems.md[90m [offset=200, limit=400][0m
+[0m→ [0mRead sql-handbook/12-Interview-and-Scenarios/104-Employee-Problems.md[90m [offset=600][0m
+[0m
+[0m$ [0mhead -30 "/home/soumrnjn/Desktop/Task/SQL/sql-handbook/12-Interview-and-Scenarios/103-SQL-Problem-Solving-Framework.md" && echo "===END===" && tail -15 "/home/soumrnjn/Desktop/Task/SQL/sql-handbook/12-Interview-and-Scenarios/103-SQL-Problem-Solving-Framework.md"
+# 103. SQL Problem-Solving Framework
+
+> Category: 12-Interview-and-Scenarios
+> Cross-references: [06-Logical-Query-Processing-Empty target file confirmed. Now I'll write the comprehensive section following the handbook's conventions.
+Section `103-SQL-Problem-Solving-Framework.md` written (1344 lines) to `sql-handbook/12-Interview-and-Scenarios/`.
+
+Key content:
+- **5-phase framework** (Clarify → Map → Choose → Write → Verify) with Mermaid flowcharts and the central "output grain" principle
+- **17 reasoning questions** expanded with detailed guidance, labeled traps/misconceptions
+- **10 worked scenarios**, each BAD → BETTER: join fan-out, one-to-many double counting, zero-match departments, `NOT IN` + NULL, top-N per group with ties, calendar zero-fill, window vs correlated subquery, LEFT-JOIN-to-INNER, timestamp boundaries, keyset pagination
+- **Sample schema** (departments/employees/customers/orders/order_items/payments) with explicit grain statements, ready for output-prediction practice
+- Comparison tables, NULL behavior, edge cases, production pitfalls, performance guidance (no absolute claims; all pointing to EXPLAIN verification)
+- **40 interview questions** across all 8 requested categories, unanswered for practice
+
+Database-specific differences (generate_series, OFFSET/FETCH, ONLY_FULL_GROUP_BY, NULL ordering, timezones) and cross-references to other sections included throughout.
+n-aggregate](#scenario-2--fan-out-in-a-join-then-aggregate)
+- [Scenario 3 — Departments with no revenue (zero matching rows)](#scenario-3--departments-with-no-revenue-zero-matching-rows)
+- [Scenario 4 — "Never" questions: NOT IN vs NOT EXISTS](#scenario-4--never-questions-not-in-vs-not-exists)
+- [Scenario 5 — Top-N per group](#scenario-5--top-n-per-group)
+- [Scenario 6 — Days with zero orders (calendar fill)](#scenario-6--days-with-zero-orders-calendar-fill)
+- [Scenario 7 — Each employee vs department average](#scenario-7--each-employee-vs-department-average)
+- [Scenario 8 — The LEFT JOIN that became an INNER JOIN](#scenario-8--the-left-join-that-became-an-inner-join)
+- [Scenario 9 — Timestamp "last 30 days" boundary trap](#scenario-9--timestamp-last-30-days-boundary-trap)
+- [Scenario 10 — Pagination: OFFSET vs keyset](#scenario-10--pagination-offset-vs-keyset)
+- [Strategy selection table](#strategy-selection-table)
+- [NULL behavior in the framework](#null-behavior-in-the-framework)
+- [Common mistakes](#common-mistakes)
+- [Edge cases](#edge-cases)
+- [Production pitfalls](#production-pitfalls)
+- [Performance implications](#performance-implications)
+===END===
+33. The hourly report "orders per hour" shows hours 00:00–23:00 but the DB stores TIMESTAMP in UTC and the report is supposed to be in local time. What is wrong and what changes?
+34. Explaining output: someone shows you `NOT EXISTS` that works on a staging DB but returns everything on production. What data difference can cause different (both "correct") behaviors?
+35. A group-by query returns the wrong text for a non-aggregated, non-grouped column (MySQL default but not PostgreSQL). Explain `ONLY_FULL_GROUP_BY` and what PostgreSQL does differently.
+
+### Performance
+
+36. Your `EXPLAIN ANALYZE` shows 1.2M rows scanned for a query over a 2M-row table with an index on the filtered column. What are the possible reasons the index was not used?
+37. Two identical-looking queries — one with `EXISTS`, one with `IN` — have different plans in production. Is one "always" better? How do you actually decide?
+38. You rewrote a correlated subquery as a `LEFT JOIN` and it *slowed down*. Explain at least two reasons this is possible.
+39. `WHERE ORDER_YEAR = 2025` (a column) vs `WHERE date_col >= '2025-01-01' AND date_col < '2026-01-01'` — why is the second version more likely to use an index? What term describes the first?
+40. Design the index plan for this query and justify: `SELECT order_id, total FROM orders WHERE customer_id = ? AND order_date >= ? ORDER BY order_date DESC;` — then explain when your index would NOT help.
+
+---
+
+**End of Section 103 — SQL Problem-Solving Framework.**
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m✱ [0mGlob "**/*.md"[90m in /home/soumrnjn/Desktop/Task · 100 matches[0m
+[0m→ [0mRead /home/soumrnjn/Desktop/Task
+[0m→ [0mRead sql-handbook/12-Interview-and-Scenarios/105-Customer-Order-Problems.md
+[0m→ [0mRead sql-handbook/12-Interview-and-Scenarios/104-Employee-Problems.md
+[0m→ [0mRead sql-handbook/12-Interview-and-Scenarios/103-SQL-Problem-Solving-Framework.md
+[0m
+[0m← [0mWrite sql-handbook/12-Interview-and-Scenarios/105-Customer-Order-Problems.md
+Wrote file successfully.
+[0m
+[0m$ [0mwc -l /home/soumrnjn/Desktop/Task/SQL/sql-handbook/12-Interview-and-Scenarios/105-Customer-Order-Problems.md
+1281 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/12-Interview-and-Scenarios/105-Customer-Order-Problems.md
+[0m
+[0m→ [0mRead sql-handbook/12-Interview-and-Scenarios/105-Customer-Order-Problems.md[90m [offset=1270][0m
+[0m
+> build · big-pickle
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m→ [0mRead .
+[0m
+[0m$ [0mls -la /home/soumrnjn/Desktop/Task/SQL/sql-handbook/ 2>/dev/null; echo "---"; ls /home/soumrnjn/Desktop/Task/SQL/sql-handbook/12-Interview-and-Scenarios/ 2>/dev/null
+total 832
+drwxrwxr-x 14 soumrnjn soumrnjn   4096 Sep 16 11:47 .
+drwxrwxr-x  3 soumrnjn soumrnjn   4096 Sep 16 10:34 ..
+drwxrwxr-x  2 soumrnjn soumrnjn   4096 Sep 14 21:25 01-Fundamentals
+drwxrwxr-x  2 soumrnjn soumrnjn   4096 Sep 15 09:18 02-NULL-and-Logic
+drwxrwxr-x  2 soumrnjn soumrnjn   4096 Sep 15 08:02 03-Joins
+drwxrwxr-x  2 soumrnjn soumrnjn   4096 Sep 15 10:14 04-Subqueries
+drwxrwxr-x  2 soumrnjn soumrnjn   4096 Sep 15 10:49 05-Aggregation
+drwxrwxr-x  2 soumrnjn soumrnjn   4096 Sep 15 18:03 06-Window-Functions
+drwxrwxr-x  2 soumrnjn soumrnjn   4096 Sep 15 18:59 07-Dates-and-Strings
+drwxrwxr-x  2 soumrnjn soumrnjn   4096 Sep 15 20:49 08-DML-and-Sets
+drwxrwxr-x  2 soumrnjn soumrnjn   4096 Sep 16 10:34 09-Optimization
+drwxrwxr-x  2 soumrnjn soumrnjn   4096 Sep 16 10:37 10-Database-Design
+drwxrwxr-x  2 soumrnjn soumrnjn   4096 Sep 16 11:47 11-Advanced
+drwxrwxr-x  2 soumrnjn soumrnjn   4096 Sep 16 18:32 12-Interview-and-Scenarios
+-rw-rw-r--  1 soumrnjn soumrnjn 787056 Sep 16 18:32 errors.log
+---
+103-SQL-Problem-Solving-Framework.md
+104-Employee-Problems.md
+105-Customer-Order-Problems.md
+106-Product-Problems.md
+107-User-Activity-Problems.md
+[0m
+[0m→ [0mRead sql-handbook/12-Interview-and-Scenarios/107-User-Activity-Problems.md
+[0m
+[0m$ [0mwc -l /home/soumrnjn/Desktop/Task/SQL/sql-handbook/12-Interview-and-Scenarios/*.md
+1340 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/12-Interview-and-Scenarios/103-SQL-Problem-Solving-Framework.md
+  1017 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/12-Interview-and-Scenarios/104-Employee-Problems.md
+  1255 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/12-Interview-and-Scenarios/105-Customer-Order-Problems.md
+   893 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/12-Interview-and-Scenarios/106-Product-Problems.md
+     0 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/12-Interview-and-Scenarios/107-User-Activity-Problems.md
+  4505 total
+[0m
+[0m→ [0mRead sql-handbook/12-Interview-and-Scenarios/105-Customer-Order-Problems.md[90m [limit=150][0m
+[0m✱ [0mGrep "^#{1,3}"[90m in sql-handbook/12-Interview-and-Scenarios/105-Customer-Order-Problems.md · 100 matches[0m
+[0m→ [0mRead sql-handbook/12-Interview-and-Scenarios/105-Customer-Order-Problems.md[90m [offset=1120, limit=140][0m
+[0m→ [0mRead sql-handbook/12-Interview-and-Scenarios/106-Product-Problems.md[90m [limit=110][0m
+[0m→ [0mRead sql-handbook/12-Interview-and-Scenarios/106-Product-Problems.md[90m [offset=760][0m
