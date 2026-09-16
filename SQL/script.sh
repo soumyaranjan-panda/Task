@@ -383,14 +383,14 @@ Return ONLY Markdown.
 
 log_section "1/12 — SQL Fundamentals"
 
-run_agent "01-SQL-Basics" "1-Fundamentals"
-run_agent "02-Data-Types" "1-Fundamentals"
-run_agent "03-DDL-DML-DQL-DCL-TCL" "1-Fundamentals"
-run_agent "04-Constraints-Keys" "1-Fundamentals"
-run_agent "05-SELECT-FROM-WHERE" "1-Fundamentals"
-run_agent "06-Logical-Query-Processing-Order" "1-Fundamentals"
-run_agent "07-Filtering-Operators" "1-Fundamentals"
-run_agent "08-CASE-Expressions" "1-Fundamentals"
+run_agent "01-SQL-Basics" "01-Fundamentals"
+run_agent "02-Data-Types" "01-Fundamentals"
+run_agent "03-DDL-DML-DQL-DCL-TCL" "01-Fundamentals"
+run_agent "04-Constraints-Keys" "01-Fundamentals"
+run_agent "05-SELECT-FROM-WHERE" "01-Fundamentals"
+run_agent "06-Logical-Query-Processing-Order" "01-Fundamentals"
+run_agent "07-Filtering-Operators" "01-Fundamentals"
+run_agent "08-CASE-Expressions" "01-Fundamentals"
 
 
 # ============================================================
@@ -399,12 +399,12 @@ run_agent "08-CASE-Expressions" "1-Fundamentals"
 
 log_section "2/12 — NULL & Three-Valued Logic"
 
-run_agent "09-NULL-Deep-Dive" "2-NULL-and-Logic"
-run_agent "10-Three-Valued-Logic" "2-NULL-and-Logic"
-run_agent "11-NULL-Comparisons" "2-NULL-and-Logic"
-run_agent "12-COALESCE-NULLIF" "2-NULL-and-Logic"
-run_agent "13-IS-DISTINCT-FROM" "2-NULL-and-Logic"
-run_agent "14-NOT-IN-NULL-Pitfalls" "2-NULL-and-Logic"
+run_agent "09-NULL-Deep-Dive" "02-NULL-and-Logic"
+run_agent "10-Three-Valued-Logic" "02-NULL-and-Logic"
+run_agent "11-NULL-Comparisons" "02-NULL-and-Logic"
+run_agent "12-COALESCE-NULLIF" "02-NULL-and-Logic"
+run_agent "13-IS-DISTINCT-FROM" "02-NULL-and-Logic"
+run_agent "14-NOT-IN-NULL-Pitfalls" "02-NULL-and-Logic"
 
 
 # ============================================================
@@ -413,17 +413,17 @@ run_agent "14-NOT-IN-NULL-Pitfalls" "2-NULL-and-Logic"
 
 log_section "3/12 — Joins"
 
-run_agent "15-INNER-JOIN" "3-Joins"
-run_agent "16-LEFT-JOIN" "3-Joins"
-run_agent "17-RIGHT-FULL-JOIN" "3-Joins"
-run_agent "18-CROSS-JOIN" "3-Joins"
-run_agent "19-SELF-JOIN" "3-Joins"
-run_agent "20-JOIN-ON-vs-WHERE" "3-Joins"
-run_agent "21-JOIN-Duplicates-and-Fanout" "3-Joins"
-run_agent "22-Many-to-Many-Joins" "3-Joins"
-run_agent "23-Anti-Joins" "3-Joins"
-run_agent "24-Semi-Joins" "3-Joins"
-run_agent "25-JOIN-Pitfalls" "3-Joins"
+run_agent "15-INNER-JOIN" "03-Joins"
+run_agent "16-LEFT-JOIN" "03-Joins"
+run_agent "17-RIGHT-FULL-JOIN" "03-Joins"
+run_agent "18-CROSS-JOIN" "03-Joins"
+run_agent "19-SELF-JOIN" "03-Joins"
+run_agent "20-JOIN-ON-vs-WHERE" "03-Joins"
+run_agent "21-JOIN-Duplicates-and-Fanout" "03-Joins"
+run_agent "22-Many-to-Many-Joins" "03-Joins"
+run_agent "23-Anti-Joins" "03-Joins"
+run_agent "24-Semi-Joins" "03-Joins"
+run_agent "25-JOIN-Pitfalls" "03-Joins"
 
 
 # ============================================================
@@ -432,16 +432,16 @@ run_agent "25-JOIN-Pitfalls" "3-Joins"
 
 log_section "4/12 — Subqueries, EXISTS & CTEs"
 
-run_agent "26-Scalar-Subqueries" "4-Subqueries"
-run_agent "27-Subqueries-WHERE" "4-Subqueries"
-run_agent "28-Subqueries-FROM" "4-Subqueries"
-run_agent "29-Correlated-Subqueries" "4-Subqueries"
-run_agent "30-IN-vs-EXISTS" "4-Subqueries"
-run_agent "31-NOT-IN-vs-NOT-EXISTS" "4-Subqueries"
-run_agent "32-JOIN-vs-SUBQUERY" "4-Subqueries"
-run_agent "33-CTEs" "4-Subqueries"
-run_agent "34-Recursive-CTEs" "4-Subqueries"
-run_agent "35-CTE-vs-Subquery-vs-Temp-Table" "4-Subqueries"
+run_agent "26-Scalar-Subqueries" "04-Subqueries"
+run_agent "27-Subqueries-WHERE" "04-Subqueries"
+run_agent "28-Subqueries-FROM" "04-Subqueries"
+run_agent "29-Correlated-Subqueries" "04-Subqueries"
+run_agent "30-IN-vs-EXISTS" "04-Subqueries"
+run_agent "31-NOT-IN-vs-NOT-EXISTS" "04-Subqueries"
+run_agent "32-JOIN-vs-SUBQUERY" "04-Subqueries"
+run_agent "33-CTEs" "04-Subqueries"
+run_agent "34-Recursive-CTEs" "04-Subqueries"
+run_agent "35-CTE-vs-Subquery-vs-Temp-Table" "04-Subqueries"
 
 
 # ============================================================
@@ -450,14 +450,14 @@ run_agent "35-CTE-vs-Subquery-vs-Temp-Table" "4-Subqueries"
 
 log_section "5/12 — Aggregation"
 
-run_agent "36-GROUP-BY" "5-Aggregation"
-run_agent "37-HAVING" "5-Aggregation"
-run_agent "38-COUNT-SUM-AVG-MIN-MAX" "5-Aggregation"
-run_agent "39-COUNT-NULL-Pitfalls" "5-Aggregation"
-run_agent "40-DISTINCT" "5-Aggregation"
-run_agent "41-GROUP-BY-vs-DISTINCT" "5-Aggregation"
-run_agent "42-Conditional-Aggregation" "5-Aggregation"
-run_agent "43-ROLLUP-CUBE-GROUPING-SETS" "5-Aggregation"
+run_agent "36-GROUP-BY" "05-Aggregation"
+run_agent "37-HAVING" "05-Aggregation"
+run_agent "38-COUNT-SUM-AVG-MIN-MAX" "05-Aggregation"
+run_agent "39-COUNT-NULL-Pitfalls" "05-Aggregation"
+run_agent "40-DISTINCT" "05-Aggregation"
+run_agent "41-GROUP-BY-vs-DISTINCT" "05-Aggregation"
+run_agent "42-Conditional-Aggregation" "05-Aggregation"
+run_agent "43-ROLLUP-CUBE-GROUPING-SETS" "05-Aggregation"
 
 
 # ============================================================
@@ -466,19 +466,19 @@ run_agent "43-ROLLUP-CUBE-GROUPING-SETS" "5-Aggregation"
 
 log_section "6/12 — Window Functions"
 
-run_agent "44-Window-Functions-Basics" "6-Window-Functions"
-run_agent "45-PARTITION-BY" "6-Window-Functions"
-run_agent "46-ROW-NUMBER" "6-Window-Functions"
-run_agent "47-RANK-vs-DENSE-RANK" "6-Window-Functions"
-run_agent "48-LAG-LEAD" "6-Window-Functions"
-run_agent "49-Running-Totals" "6-Window-Functions"
-run_agent "50-Moving-Averages" "6-Window-Functions"
-run_agent "51-Window-Frames" "6-Window-Functions"
-run_agent "52-ROWS-vs-RANGE-vs-GROUPS" "6-Window-Functions"
-run_agent "53-Top-N-Per-Group" "6-Window-Functions"
-run_agent "54-Latest-Row-Per-Group" "6-Window-Functions"
-run_agent "55-Gaps-and-Islands" "6-Window-Functions"
-run_agent "56-Window-vs-GROUP-BY" "6-Window-Functions"
+run_agent "44-Window-Functions-Basics" "06-Window-Functions"
+run_agent "45-PARTITION-BY" "06-Window-Functions"
+run_agent "46-ROW-NUMBER" "06-Window-Functions"
+run_agent "47-RANK-vs-DENSE-RANK" "06-Window-Functions"
+run_agent "48-LAG-LEAD" "06-Window-Functions"
+run_agent "49-Running-Totals" "06-Window-Functions"
+run_agent "50-Moving-Averages" "06-Window-Functions"
+run_agent "51-Window-Frames" "06-Window-Functions"
+run_agent "52-ROWS-vs-RANGE-vs-GROUPS" "06-Window-Functions"
+run_agent "53-Top-N-Per-Group" "06-Window-Functions"
+run_agent "54-Latest-Row-Per-Group" "06-Window-Functions"
+run_agent "55-Gaps-and-Islands" "06-Window-Functions"
+run_agent "56-Window-vs-GROUP-BY" "06-Window-Functions"
 
 
 # ============================================================
@@ -487,14 +487,14 @@ run_agent "56-Window-vs-GROUP-BY" "6-Window-Functions"
 
 log_section "7/12 — Dates, Times & Strings"
 
-run_agent "57-Date-Time-Basics" "7-Dates-and-Strings"
-run_agent "58-Date-Arithmetic" "7-Dates-and-Strings"
-run_agent "59-Timestamp-Filtering" "7-Dates-and-Strings"
-run_agent "60-Timezone-Pitfalls" "7-Dates-and-Strings"
-run_agent "61-Monthly-Daily-Reporting" "7-Dates-and-Strings"
-run_agent "62-MoM-YoY-Rolling-Metrics" "7-Dates-and-Strings"
-run_agent "63-String-Functions" "7-Dates-and-Strings"
-run_agent "64-Regular-Expressions" "7-Dates-and-Strings"
+run_agent "57-Date-Time-Basics" "07-Dates-and-Strings"
+run_agent "58-Date-Arithmetic" "07-Dates-and-Strings"
+run_agent "59-Timestamp-Filtering" "07-Dates-and-Strings"
+run_agent "60-Timezone-Pitfalls" "07-Dates-and-Strings"
+run_agent "61-Monthly-Daily-Reporting" "07-Dates-and-Strings"
+run_agent "62-MoM-YoY-Rolling-Metrics" "07-Dates-and-Strings"
+run_agent "63-String-Functions" "07-Dates-and-Strings"
+run_agent "64-Regular-Expressions" "07-Dates-and-Strings"
 
 
 # ============================================================
@@ -503,13 +503,13 @@ run_agent "64-Regular-Expressions" "7-Dates-and-Strings"
 
 log_section "8/12 — Set Operations & Data Modification"
 
-run_agent "65-UNION-UNION-ALL" "8-DML-and-Sets"
-run_agent "66-INTERSECT-EXCEPT-MINUS" "8-DML-and-Sets"
-run_agent "67-INSERT" "8-DML-and-Sets"
-run_agent "68-UPDATE" "8-DML-and-Sets"
-run_agent "69-DELETE" "8-DML-and-Sets"
-run_agent "70-MERGE-and-UPSERT" "8-DML-and-Sets"
-run_agent "71-Safe-UPDATE-DELETE" "8-DML-and-Sets"
+run_agent "65-UNION-UNION-ALL" "08-DML-and-Sets"
+run_agent "66-INTERSECT-EXCEPT-MINUS" "08-DML-and-Sets"
+run_agent "67-INSERT" "08-DML-and-Sets"
+run_agent "68-UPDATE" "08-DML-and-Sets"
+run_agent "69-DELETE" "08-DML-and-Sets"
+run_agent "70-MERGE-and-UPSERT" "08-DML-and-Sets"
+run_agent "71-Safe-UPDATE-DELETE" "08-DML-and-Sets"
 
 
 # ============================================================
@@ -518,19 +518,19 @@ run_agent "71-Safe-UPDATE-DELETE" "8-DML-and-Sets"
 
 log_section "9/12 — Indexing & Query Optimization"
 
-run_agent "72-Indexes-Basics" "9-Optimization"
-run_agent "73-Composite-Indexes" "9-Optimization"
-run_agent "74-Covering-Indexes" "9-Optimization"
-run_agent "75-Clustered-vs-Nonclustered" "9-Optimization"
-run_agent "76-Partial-Filtered-Indexes" "9-Optimization"
-run_agent "77-SARGability" "9-Optimization"
-run_agent "78-EXPLAIN-Execution-Plans" "9-Optimization"
-run_agent "79-Cardinality-and-Statistics" "9-Optimization"
-run_agent "80-Join-Algorithms" "9-Optimization"
-run_agent "81-Query-Rewriting" "9-Optimization"
-run_agent "82-Performance-Pitfalls" "9-Optimization"
-run_agent "83-Index-Design-Strategy" "9-Optimization"
-run_agent "84-Pagination-and-Keyset-Pagination" "9-Optimization"
+run_agent "72-Indexes-Basics" "09-Optimization"
+run_agent "73-Composite-Indexes" "09-Optimization"
+run_agent "74-Covering-Indexes" "09-Optimization"
+run_agent "75-Clustered-vs-Nonclustered" "09-Optimization"
+run_agent "76-Partial-Filtered-Indexes" "09-Optimization"
+run_agent "77-SARGability" "09-Optimization"
+run_agent "78-EXPLAIN-Execution-Plans" "09-Optimization"
+run_agent "79-Cardinality-and-Statistics" "09-Optimization"
+run_agent "80-Join-Algorithms" "09-Optimization"
+run_agent "81-Query-Rewriting" "09-Optimization"
+run_agent "82-Performance-Pitfalls" "09-Optimization"
+run_agent "83-Index-Design-Strategy" "09-Optimization"
+run_agent "84-Pagination-and-Keyset-Pagination" "09-Optimization"
 
 
 # ============================================================

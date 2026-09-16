@@ -12633,3 +12633,468 @@ Wrote file successfully.
 [0m
 > build · big-pickle
 [0m
+[0m$ [0mls -la && find . -maxdepth 3 -type f | head -50
+total 40
+drwxrwxr-x  3 soumrnjn soumrnjn  4096 Sep 16 10:34 .
+drwxrwxr-x 13 soumrnjn soumrnjn  4096 Sep 16 10:27 ..
+-rwxrwxr-x  1 soumrnjn soumrnjn 19656 Sep 14 20:48 script.sh
+drwxrwxr-x 13 soumrnjn soumrnjn  4096 Sep 16 11:05 sql-handbook
+-rw-rw-r--  1 soumrnjn soumrnjn  4330 Sep 16 08:47 sql-master-prompt.md
+./script.sh
+./sql-handbook/09-Optimization/79-Cardinality-and-Statistics.md
+./sql-handbook/09-Optimization/72-Indexes-Basics.md
+./sql-handbook/09-Optimization/84-Pagination-and-Keyset-Pagination.md
+./sql-handbook/09-Optimization/80-Join-Algorithms.md
+./sql-handbook/09-Optimization/74-Covering-Indexes.md
+./sql-handbook/09-Optimization/76-Partial-Filtered-Indexes.md
+./sql-handbook/09-Optimization/83-Index-Design-Strategy.md
+./sql-handbook/09-Optimization/82-Performance-Pitfalls.md
+./sql-handbook/09-Optimization/77-SARGability.md
+./sql-handbook/09-Optimization/81-Query-Rewriting.md
+./sql-handbook/09-Optimization/78-EXPLAIN-Execution-Plans.md
+./sql-handbook/09-Optimization/75-Clustered-vs-Nonclustered.md
+./sql-handbook/09-Optimization/73-Composite-Indexes.md
+./sql-handbook/08-DML-and-Sets/65-UNION-UNION-ALL.md
+./sql-handbook/08-DML-and-Sets/66-INTERSECT-EXCEPT-MINUS.md
+./sql-handbook/08-DML-and-Sets/68-UPDATE.md
+./sql-handbook/08-DML-and-Sets/70-MERGE-and-UPSERT.md
+./sql-handbook/08-DML-and-Sets/67-INSERT.md
+./sql-handbook/08-DML-and-Sets/69-DELETE.md
+./sql-handbook/08-DML-and-Sets/71-Safe-UPDATE-DELETE.md
+./sql-handbook/errors.log
+./sql-handbook/10-Database-Design/86-ACID.md
+./sql-handbook/10-Database-Design/88-Locks-and-Blocking.md
+./sql-handbook/10-Database-Design/87-Isolation-Levels.md
+./sql-handbook/10-Database-Design/90-Normalization.md
+./sql-handbook/10-Database-Design/92-Keys-and-Relationships.md
+./sql-handbook/10-Database-Design/89-Deadlocks.md
+./sql-handbook/10-Database-Design/91-Denormalization.md
+./sql-handbook/10-Database-Design/85-Transactions.md
+./sql-handbook/07-Dates-and-Strings/58-Date-Arithmetic.md
+./sql-handbook/07-Dates-and-Strings/59-Timestamp-Filtering.md
+./sql-handbook/07-Dates-and-Strings/62-MoM-YoY-Rolling-Metrics.md
+./sql-handbook/07-Dates-and-Strings/60-Timezone-Pitfalls.md
+./sql-handbook/07-Dates-and-Strings/63-String-Functions.md
+./sql-handbook/07-Dates-and-Strings/57-Date-Time-Basics.md
+./sql-handbook/07-Dates-and-Strings/64-Regular-Expressions.md
+./sql-handbook/07-Dates-and-Strings/61-Monthly-Daily-Reporting.md
+./sql-handbook/06-Window-Functions/48-LAG-LEAD.md
+./sql-handbook/06-Window-Functions/56-Window-vs-GROUP-BY.md
+./sql-handbook/06-Window-Functions/52-ROWS-vs-RANGE-vs-GROUPS.md
+./sql-handbook/06-Window-Functions/44-Window-Functions-Basics.md
+./sql-handbook/06-Window-Functions/49-Running-Totals.md
+./sql-handbook/06-Window-Functions/45-PARTITION-BY.md
+./sql-handbook/06-Window-Functions/46-ROW-NUMBER.md
+./sql-handbook/06-Window-Functions/50-Moving-Averages.md
+./sql-handbook/06-Window-Functions/51-Window-Frames.md
+./sql-handbook/06-Window-Functions/55-Gaps-and-Islands.md
+./sql-handbook/06-Window-Functions/54-Latest-Row-Per-Group.md
+./sql-handbook/06-Window-Functions/47-RANK-vs-DENSE-RANK.md
+[0m
+[0m$ [0mfind . -maxdepth 3 -type d && find . -maxdepth 3 -type f -path '*11*' | head -50
+.
+./sql-handbook
+./sql-handbook/09-Optimization
+./sql-handbook/08-DML-and-Sets
+./sql-handbook/10-Database-Design
+./sql-handbook/07-Dates-and-Strings
+./sql-handbook/06-Window-Functions
+./sql-handbook/04-Subqueries
+./sql-handbook/03-Joins
+./sql-handbook/05-Aggregation
+./sql-handbook/01-Fundamentals
+./sql-handbook/11-Advanced
+./sql-handbook/02-NULL-and-Logic
+./sql-handbook/11-Advanced/96-Stored-Procedures.md
+./sql-handbook/11-Advanced/93-Views.md
+./sql-handbook/11-Advanced/94-Materialized-Views.md
+./sql-handbook/11-Advanced/99-Pivot-Unpivot.md
+./sql-handbook/11-Advanced/97-Functions.md
+./sql-handbook/11-Advanced/95-Temporary-Tables.md
+./sql-handbook/11-Advanced/98-Triggers.md
+./sql-handbook/02-NULL-and-Logic/11-NULL-Comparisons.md
+[0m
+[0m→ [0mRead sql-handbook/11-Advanced/99-Pivot-Unpivot.md
+[0m→ [0mRead sql-handbook/11-Advanced/98-Triggers.md[90m [limit=120][0m
+[0m→ [0mRead sql-handbook/10-Database-Design/90-Normalization.md[90m [limit=60][0m
+[0m✗ [0mRead sql-handbook/05-Aggregation/34-GROUP-BY.md failed[90m [limit=60][0m
+[91m[1mError: [0mFile not found: /home/soumrnjn/Desktop/Task/SQL/sql-handbook/05-Aggregation/34-GROUP-BY.md
+[0m→ [0mRead sql-handbook/errors.log
+[0m
+[0m$ [0mls sql-handbook/05-Aggregation sql-handbook/06-Window-Functions sql-handbook/README* 2>/dev/null; ls sql-handbook
+sql-handbook/05-Aggregation:
+36-GROUP-BY.md
+37-HAVING.md
+38-COUNT-SUM-AVG-MIN-MAX.md
+39-COUNT-NULL-Pitfalls.md
+40-DISTINCT.md
+41-GROUP-BY-vs-DISTINCT.md
+42-Conditional-Aggregation.md
+43-ROLLUP-CUBE-GROUPING-SETS.md
+
+sql-handbook/06-Window-Functions:
+44-Window-Functions-Basics.md
+45-PARTITION-BY.md
+46-ROW-NUMBER.md
+47-RANK-vs-DENSE-RANK.md
+48-LAG-LEAD.md
+49-Running-Totals.md
+50-Moving-Averages.md
+51-Window-Frames.md
+52-ROWS-vs-RANGE-vs-GROUPS.md
+53-Top-N-Per-Group.md
+54-Latest-Row-Per-Group.md
+55-Gaps-and-Islands.md
+56-Window-vs-GROUP-BY.md
+01-Fundamentals
+02-NULL-and-Logic
+03-Joins
+04-Subqueries
+05-Aggregation
+06-Window-Functions
+07-Dates-and-Strings
+08-DML-and-Sets
+09-Optimization
+10-Database-Design
+11-Advanced
+errors.log
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mls -la /home/soumrnjn/Desktop/Task/SQL 2>/dev/null && echo "---" && ls /home/soumrnjn/Desktop/Task 2>/dev/null
+total 40
+drwxrwxr-x  3 soumrnjn soumrnjn  4096 Sep 16 10:34 .
+drwxrwxr-x 13 soumrnjn soumrnjn  4096 Sep 16 10:27 ..
+-rwxrwxr-x  1 soumrnjn soumrnjn 19740 Sep 16 11:13 script.sh
+drwxrwxr-x 13 soumrnjn soumrnjn  4096 Sep 16 11:12 sql-handbook
+-rw-rw-r--  1 soumrnjn soumrnjn  4330 Sep 16 11:14 sql-master-prompt.md
+---
+DSA
+English
+java
+media
+sd_note
+SpringBatch
+SQL
+SystemDesign
+venv
+visuals
+[0m
+[0m$ [0mfind /home/soumrnjn/Desktop/Task/SQL/sql-handbook -type d | head -50
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/09-Optimization
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/08-DML-and-Sets
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/10-Database-Design
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/07-Dates-and-Strings
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/06-Window-Functions
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/04-Subqueries
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/03-Joins
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/05-Aggregation
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/01-Fundamentals
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced
+/home/soumrnjn/Desktop/Task/SQL/sql-handbook/02-NULL-and-Logic
+[0m
+[0m$ [0mls /home/soumrnjn/Desktop/Task/SQL/sql-handbook
+01-Fundamentals
+02-NULL-and-Logic
+03-Joins
+04-Subqueries
+05-Aggregation
+06-Window-Functions
+07-Dates-and-Strings
+08-DML-and-Sets
+09-Optimization
+10-Database-Design
+11-Advanced
+errors.log
+[0m
+[0m$ [0mls /home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced
+93-Views.md
+94-Materialized-Views.md
+95-Temporary-Tables.md
+96-Stored-Procedures.md
+97-Functions.md
+98-Triggers.md
+99-Pivot-Unpivot.md
+[0m
+[0m$ [0mwc -l /home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced/99-Pivot-Unpivot.md && echo "---" && ls -la /home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced/
+0 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced/99-Pivot-Unpivot.md
+---
+total 248
+drwxrwxr-x  2 soumrnjn soumrnjn  4096 Sep 16 11:05 .
+drwxrwxr-x 13 soumrnjn soumrnjn  4096 Sep 16 11:12 ..
+-rw-rw-r--  1 soumrnjn soumrnjn 50026 Sep 16 10:47 93-Views.md
+-rw-rw-r--  1 soumrnjn soumrnjn 30788 Sep 16 10:49 94-Materialized-Views.md
+-rw-rw-r--  1 soumrnjn soumrnjn 27656 Sep 16 10:52 95-Temporary-Tables.md
+-rw-rw-r--  1 soumrnjn soumrnjn 36984 Sep 16 10:55 96-Stored-Procedures.md
+-rw-rw-r--  1 soumrnjn soumrnjn 46122 Sep 16 11:00 97-Functions.md
+-rw-rw-r--  1 soumrnjn soumrnjn 38696 Sep 16 11:05 98-Triggers.md
+-rw-rw-r--  1 soumrnjn soumrnjn     0 Sep 16 11:14 99-Pivot-Unpivot.md
+[0m
+[0m→ [0mRead sql-handbook/11-Advanced/99-Pivot-Unpivot.md[90m [limit=100][0m
+[0m→ [0mRead sql-handbook/11-Advanced/93-Views.md[90m [limit=150][0m
+[0m
+[0m$ [0mhead -3 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced/94-Materialized-Views.md /home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced/95-Temporary-Tables.md /home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced/96-Stored-Procedures.md /home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced/97-Functions.md /home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced/98-Triggers.md
+==> /home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced/94-Materialized-Views.md <==
+# Section 94 — Materialized Views
+
+## Fundamentals
+
+==> /home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced/95-Temporary-Tables.md <==
+```markdown
+# 95 — Temporary Tables
+
+
+==> /home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced/96-Stored-Procedures.md <==
+Wrote `sql-handbook/11-Advanced/96-Stored-Procedures.md` (818 lines) — full Section 96 covering fundamentals, internal working (parse/plan/cache flow with Mermaid), per-engine syntax for PostgreSQL/MySQL/SQL Server/Oracle, parameter modes, control flow, four scenario examples (transactional payment, dynamic search with injection-safe BAD/BETTER, NULL handling, logging/error handling), procedure-vs-function-vs-view comparison, NULL behavior, edge cases, common mistakes, production pitfalls, performance implications tied to execution plans (parameter sniffing, plan reuse, cursor-vs-set-based), best practices, and withheld-answer interview questions across all 8 requested categories.
+e row in `orders` represents one order.
+> One row in `order_items` represents one line item of an order.
+
+==> /home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced/97-Functions.md <==
+NOTE: This is a writing task — no tools needed. Generating the requested section below.
+
+---
+
+==> /home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced/98-Triggers.md <==
+# 98. Triggers
+
+> Cross-references: this section pairs with **Constraints**, **Stored Procedures**, **Views**, **Transactions & Isolation**, **Views (INSTEAD OF)**, **Normalization/Denormalization**, and **Performance & Execution Plans**. It does not replace any of them; a trigger is often the *wrong* tool and the better one lives in one of those sections.
+[0m
+[0m$ [0mtail -60 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced/98-Triggers.md
+1. What is a trigger? How is it different from a CHECK constraint? Give one rule each could express but the other cannot.
+2. Name the three DML events a trigger can fire on.
+3. What is the difference between `BEFORE` and `AFTER` triggers? Give a realistic use of each.
+4. What does `FOR EACH ROW` mean? What happens if a single `UPDATE` affects 5 rows?
+5. In your database of choice, how do you see which triggers exist?
+
+## Intermediate
+
+6. Explain `INSERTED`/`DELETED` (SQL Server) vs `NEW`/`OLD` (PostgreSQL/MySQL). Write an audit trigger in both styles.
+7. When would you choose a **statement-level** trigger over a **row-level** one? Show a bulk-update example.
+8. `BEFORE INSERT` trigger performs `RAISE EXCEPTION`/`SIGNAL` — explain what happens to the row, the statement, and the transaction.
+9. How do you prevent a trigger from firing when the `UPDATE ... SET col = col` pattern occurs (no real change)?
+10. What is the `INSTEAD OF` trigger used for? Why would you attach one to a view?
+
+## Advanced
+
+11. Explain the mutating-table error (Oracle `ORA-04091`, MySQL 1442). How is it avoided?
+12. Describe the recursion behavior of triggers in **each** of PostgreSQL, MySQL, SQL Server, and Oracle. How do you write a recursion guard?
+13. Why do `ON DELETE CASCADE` actions not fire triggers in most engines? What is the consequence for a trigger-maintained counter, and what are your mitigation options?
+14. How would you design an **audit log** that captures the *username* of the session user, survives rollback-adjacent failures, and does not double write-volume on hot tables?
+15. `TRUNCATE` fires no row triggers. Describe a scenario where this silently breaks a business invariant, and how you'd harden it.
+
+## Scenario Based
+
+16. Orders have a status FSM (`pending → paid → shipped → delivered`, any → `cancelled`). Write the trigger and explain why `CHECK` can't do it. How do you detect the change if status is `NULL`?
+17. You keep `users.orders_count`. Write INSERT/DELETE triggers to maintain it. Then explain the concurrency/deadlock risk and why some teams choose a nightly reconciliation instead.
+18. A joined view `order_summary` needs to accept `INSERT`. Write the `INSTEAD OF` trigger that fans the insert into `orders` + `order_items`.
+19. A stock system decrements `products.stock_qty` when `order_items` rows are inserted. What happens under (a) two concurrent inserts, (b) a rollback, (c) an `UPDATE` to `qty`? Design a trigger set that stays correct.
+20. Your team plans a 50M-row archival `DELETE`. The table has a per-row audit trigger. Describe the risk and your migration plan (disable, archive, re-enable, reconcile).
+
+## Tricky
+
+21. `IF NEW.amount > 100` inside a trigger — what happens when `amount IS NULL`? Why is your answer different from what beginners expect?
+22. A trigger fires on `UPDATE`, but the `UPDATE` used the same values. Does it fire? Is `OLD` equal to `NEW`? How do you prove it?
+23. You have 3 triggers on the same table/event. Does the firing order match creation order? Could it differ between PostgreSQL and SQL Server?
+24. A BEFORE ROW trigger modifies `NEW.email`, then a NOT NULL constraint fails on `name`. Which rows survive? Does your audit AFTER trigger fire?
+25. Auditor reports that a DELETE happened but `audit_log` has no record for it. List every plausible cause (cascade, TRUNCATE, disabled trigger, rolled-back statement, wrong trigger branch, `RETURN NULL` skipping, view-level DML).
+
+## Output Prediction
+
+26. Given a `BEFORE UPDATE FOR EACH ROW` trigger that sets `NEW.updated_at = now()`, predict the stored value under `UPDATE users SET updated_at = '2000-01-01'` and explain what you'd verify to be sure.
+27. Table `t`, a `BEFORE INSERT ... FOR EACH ROW` trigger that raises when `NEW.x % 2 = 1`. Statement: `INSERT INTO t VALUES (1),(2),(3),(4);`. Which rows exist afterwards, and why?
+28. `users.orders_count` = 0. An `INSERT` into `orders` triggers `orders_count = orders_count + 1`. A second statement `UPDATE orders SET user_id = same_user` executes. Predict the counter. Does the trigger detect `user_id` changes?
+
+## Debugging
+
+29. "The `updated_at` trigger isn't working." Walk me through your debug steps: do you check the function, the trigger binding, `WHEN` conditions, `RETURN` value, transaction rollback, or the column default?
+30. A counter field is *sometimes* off by exactly 1. The DB has FK cascades and two related triggers. What are the three most likely causes, and how do you confirm with data/queries?
+31. A nightly load job (COPY/`LOAD DATA`) is 10× slower with triggers on. Is the trigger the culprit? How would you *prove* it with the execution plan / profiling tools in your engine?
+
+## Performance
+
+32. Explain why `EXPLAIN` (plan-only) can look innocent while the same `UPDATE` is slow at runtime, and what `EXPLAIN ANALYZE`/`SET STATISTICS` adds for trigger diagnosis (PostgreSQL shows a `Triggers:` section).
+33. Compare cost of `FOR EACH ROW` vs `FOR EACH STATEMENT` triggers on a `DELETE` of 1M rows. What are the optimizer/planner limits you must still measure yourself?
+34. You must turn on a mandatory audit trigger on a table receiving 10k writes/sec. Enumerate the costs (WAL, locks, contention, bloat) and propose an architecture that doesn't slow the business write (e.g. outbox, CDC, batch flush), explaining what you'd benchmark to decide.
+
+---
+
+*End of Section 98 — Triggers. Next related topics: "Constraints", "Stored Procedures", "Views", "Transactions & Isolation", "Auditing", "Execution Plans".*
+[0m
+[0m$ [0mgrep -n '^#' /home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced/94-Materialized-Views.md
+1:# Section 94 — Materialized Views
+3:## Fundamentals
+27:## Why Materialized Views Exist
+51:## How It Works (Internal Working)
+53:### 1. Creation phase
+64:### 2. Read phase
+72:### 3. Refresh phase
+89:## Syntax
+91:### ANSI SQL — No Standard
+95:### PostgreSQL
+123:### MySQL
+146:### SQL Server
+172:### Oracle
+201:## Getting Started: Sample Tables
+290:## Worked Example
+292:### The expensive query
+315:### Materialized view (PostgreSQL/ANSI-style)
+335:### Expected output
+348:### Reading from it
+362:### Refreshing it
+371:## BAD APPROACH vs BETTER APPROACH
+403:## Scenario-Based Examples
+405:### Scenario 1 — Daily revenue rollup for finance
+424:### Scenario 2 — Product catalog summary for a storefront
+440:### Scenario 3 — Slow nightly report that would time out
+455:## When to Use a Materialized View
+464:## When NOT to Use a Materialized View
+477:## Refresh Strategies Comparison
+489:## Common Mistakes
+516:## Edge Cases
+530:## NULL Behavior
+540:## Performance Implications
+542:### Where matviews help
+548:### Where they hurt
+556:### Never make absolute claims
+568:### Verify with the execution plan
+590:## Interview Traps
+606:## How Materialized Views Interact With Other Concepts
+618:## Real-World Scenario
+653:## Best Practices
+668:# Interview Questions
+670:## Beginner
+678:## Intermediate
+686:## Advanced
+694:## Scenario Based
+702:## Tricky
+710:## Output Prediction
+716:## Debugging
+723:## Performance
+[0m
+[0m$ [0mhead -80 /home/soumrnjn/Desktop/Task/SQL/script.sh
+#!/bin/bash
+set -o pipefail
+
+# ============================================================
+# SQL MASTER HANDBOOK GENERATOR
+# ============================================================
+
+OUTPUT_DIR="./sql-handbook"
+PROMPT_FILE="./sql-master-prompt.md"
+
+# Keep this low if you have limited API/agent capacity.
+# Increase to 2-4 if your OpenCode setup can handle parallel agents.
+MAX_JOBS=1
+
+mkdir -p "$OUTPUT_DIR"
+
+log() {
+    echo "[$(date '+%H:%M:%S')] $1"
+}
+
+log_section() {
+    echo ""
+    echo "==============================================================="
+    echo "  $1"
+    echo "==============================================================="
+}
+
+# ============================================================
+# MASTER PROMPT
+# ============================================================
+
+cat > "$PROMPT_FILE" <<'EOF'
+# SQL MASTER HANDBOOK — GLOBAL INSTRUCTIONS
+
+You are contributing to a comprehensive SQL handbook.
+
+The handbook is intended for:
+
+- SQL beginners
+- Backend developers
+- Software engineers
+- Data analysts
+- Interview preparation
+- LeetCode / HackerRank / StrataScratch
+- Production SQL
+- Query optimization
+- Database design
+
+Use simple language but explain concepts deeply.
+
+Do NOT give shallow explanations.
+
+Every important concept should explain:
+
+1. What it is
+2. Why it exists
+3. Syntax
+4. How it works
+5. Example
+6. Expected result
+7. When to use it
+8. When NOT to use it
+9. Common mistakes
+10. Edge cases
+11. NULL behavior
+12. Performance implications
+13. Interview traps
+14. Real-world scenario
+
+Use Markdown.
+
+Use SQL code blocks.
+
+Use tables when comparisons help.
+
+Use Mermaid diagrams when they genuinely improve understanding.
+
+Prefer ANSI SQL.
+
+When behavior differs between PostgreSQL, MySQL, SQL Server, and Oracle, explicitly mention the difference.
+[0m
+[0m← [0mWrite sql-handbook/11-Advanced/99-Pivot-Unpivot.md
+Wrote file successfully.
+[0m
+[0m$ [0mwc -l /home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced/99-Pivot-Unpivot.md
+897 /home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced/99-Pivot-Unpivot.md
+[0m
+[0m✱ [0mGrep "GSUM|pres-pres|shipping revenue for"[90m in sql-handbook/11-Advanced/99-Pivot-Unpivot.md · 1 match[0m
+[0m
+[0m← [0mEdit sql-handbook/11-Advanced/99-Pivot-Unpivot.md
+Index: /home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced/99-Pivot-Unpivot.md
+===================================================================
+--- /home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced/99-Pivot-Unpivot.md
++++ /home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced/99-Pivot-Unpivot.md
+@@ -533,9 +533,9 @@
+ **Use a pivot when:**
+ 
+ - A report is a fixed matrix: categories in rows, a *known, small, bounded* set in columns (months of one year, East/West regions, statuses).
+ - The result feeds a spreadsheet / BI grid that expects one column per value.
+-- You need a COUNT/GSUM matrix (e.g., a confusion matrix, a rating histogram −15..15).
++- You need a matrix of counts or sums (e.g., a confusion matrix, a rating histogram from −15..+15).
+ 
+ **Do NOT use a pivot when:**
+ 
+ - The pivot key is open-ended (unbounded user tags, arbitrary dates). Result: thousands of columns, exceeding engine limits and choking BI tools — use a long table and let the BI tool pivot.
+
+[0m
+[0m$ [0mgrep -c '^# ' /home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced/99-Pivot-Unpivot.md && grep -n '^# Interview Questions' /home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced/99-Pivot-Unpivot.md
+2
+828:# Interview Questions
+[0m
+[0m$ [0mgrep -c '```' /home/soumrnjn/Desktop/Task/SQL/sql-handbook/11-Advanced/99-Pivot-Unpivot.md && echo "fences should be even"
+46
+fences should be even
+[0m
+[0m
+> build · big-pickle
+[0m
+[0m✱ [0mGlob "**/*.md"[90m 100 matches[0m
+[0m→ [0mRead sql-handbook/11-Advanced/100-Lateral-Joins-CROSS-APPLY.md
+[0m→ [0mRead sql-handbook/11-Advanced/99-Pivot-Unpivot.md
