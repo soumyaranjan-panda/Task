@@ -27,23 +27,23 @@
 
 `SELECT`, `FROM`, and `WHERE` are the three clauses you will write in virtually every SQL query. This section explains how each one works individually, how they interact, and how to avoid the traps that trip up beginners and experienced developers alike.
 
-> **Grain reminder:** Always ask yourself — *"What does one row in my result represent?"* The answer depends on the tables in `FROM` and the filters in `WHERE`.
+> **Grain reminder:** Always ask yourself — _"What does one row in my result represent?"_ The answer depends on the tables in `FROM` and the filters in `WHERE`.
 
 ---
 
 ## The Query Processing Order
 
-SQL is **declarative** — you describe *what* you want, not *how* to get it. But the database engine executes clauses in a specific logical order. Understanding this order is critical.
+SQL is **declarative** — you describe _what_ you want, not _how_ to get it. But the database engine executes clauses in a specific logical order. Understanding this order is critical.
 
-| Logical Order | Clause    | Purpose                                      |
-|---------------|-----------|----------------------------------------------|
-| 1             | `FROM`    | Identify the source tables                   |
-| 2             | `WHERE`   | Filter rows **before** grouping              |
-| 3             | `GROUP BY`| Group remaining rows                         |
-| 4             | `HAVING`  | Filter groups                                |
-| 5             | `SELECT`  | Choose columns and compute expressions       |
-| 6             | `ORDER BY`| Sort the result                              |
-| 7             | `LIMIT`   | Restrict the number of rows returned         |
+| Logical Order | Clause     | Purpose                                |
+| ------------- | ---------- | -------------------------------------- |
+| 1             | `FROM`     | Identify the source tables             |
+| 2             | `WHERE`    | Filter rows **before** grouping        |
+| 3             | `GROUP BY` | Group remaining rows                   |
+| 4             | `HAVING`   | Filter groups                          |
+| 5             | `SELECT`   | Choose columns and compute expressions |
+| 6             | `ORDER BY` | Sort the result                        |
+| 7             | `LIMIT`    | Restrict the number of rows returned   |
 
 ```mermaid
 graph TD
@@ -59,7 +59,7 @@ graph TD
 
 ### PostgreSQL, MySQL, SQL Server
 
-All three follow the same logical order. The physical execution may differ — the optimizer can reorder scans, joins, and filters — but the *logical* semantics above hold.
+All three follow the same logical order. The physical execution may differ — the optimizer can reorder scans, joins, and filters — but the _logical_ semantics above hold.
 
 ### Oracle
 
@@ -73,25 +73,25 @@ All examples in this section use the following tables.
 
 ### employees
 
-| id | name        | department_id | salary | hire_date  | manager_id | is_active |
-|----|-------------|---------------|--------|------------|------------|-----------|
-| 1  | Alice       | 1             | 95000  | 2019-03-15 | NULL       | TRUE      |
-| 2  | Bob         | 1             | 72000  | 2021-06-01 | 1          | TRUE      |
-| 3  | Charlie     | 2             | 88000  | 2020-01-20 | 1          | TRUE      |
-| 4  | Diana       | 2             | 67000  | 2022-11-10 | 3          | TRUE      |
-| 5  | Eve         | 3             | 110000 | 2018-07-04 | NULL       | FALSE     |
-| 6  | Frank       | NULL          | 55000  | 2023-02-28 | NULL       | TRUE      |
+| id  | name    | department_id | salary | hire_date  | manager_id | is_active |
+| --- | ------- | ------------- | ------ | ---------- | ---------- | --------- |
+| 1   | Alice   | 1             | 95000  | 2019-03-15 | NULL       | TRUE      |
+| 2   | Bob     | 1             | 72000  | 2021-06-01 | 1          | TRUE      |
+| 3   | Charlie | 2             | 88000  | 2020-01-20 | 1          | TRUE      |
+| 4   | Diana   | 2             | 67000  | 2022-11-10 | 3          | TRUE      |
+| 5   | Eve     | 3             | 110000 | 2018-07-04 | NULL       | FALSE     |
+| 6   | Frank   | NULL          | 55000  | 2023-02-28 | NULL       | TRUE      |
 
 **Grain:** One row = one employee. Each employee belongs to at most one department.
 
 ### departments
 
-| id | name        | budget  |
-|----|-------------|---------|
-| 1  | Engineering | 500000  |
-| 2  | Marketing   | 300000  |
-| 3  | Executive   | 800000  |
-| 4  | Sales       | 200000  |
+| id  | name        | budget |
+| --- | ----------- | ------ |
+| 1   | Engineering | 500000 |
+| 2   | Marketing   | 300000 |
+| 3   | Executive   | 800000 |
+| 4   | Sales       | 200000 |
 
 **Grain:** One row = one department.
 
@@ -127,7 +127,7 @@ FROM employees;
 ```
 
 | name    | salary |
-|---------|--------|
+| ------- | ------ |
 | Alice   | 95000  |
 | Bob     | 72000  |
 | Charlie | 88000  |
@@ -142,7 +142,7 @@ SELECT name AS employee_name, salary AS annual_salary
 FROM employees;
 ```
 
-> **Interview trap:** Aliases defined in `SELECT` cannot be used in `WHERE`. They *can* be used in `ORDER BY` in most databases.
+> **Interview trap:** Aliases defined in `SELECT` cannot be used in `WHERE`. They _can_ be used in `ORDER BY` in most databases.
 
 ### Expressions in SELECT
 
@@ -152,7 +152,7 @@ FROM employees;
 ```
 
 | name    | salary | annual_salary |
-|---------|--------|---------------|
+| ------- | ------ | ------------- |
 | Alice   | 95000  | 1140000       |
 | Bob     | 72000  | 864000        |
 | Charlie | 88000  | 1056000       |
@@ -170,7 +170,7 @@ FROM employees;
 ```
 
 | department_id |
-|---------------|
+| ------------- |
 | 1             |
 | 2             |
 | 3             |
@@ -251,7 +251,7 @@ WHERE department_id = 1;
 ```
 
 | name  | salary |
-|-------|--------|
+| ----- | ------ |
 | Alice | 95000  |
 | Bob   | 72000  |
 
@@ -264,7 +264,7 @@ WHERE salary > 80000;
 ```
 
 | name    | salary |
-|---------|--------|
+| ------- | ------ |
 | Alice   | 95000  |
 | Charlie | 88000  |
 | Eve     | 110000 |
@@ -278,7 +278,7 @@ WHERE department_id = 2 AND salary > 70000;
 ```
 
 | name    | salary |
-|---------|--------|
+| ------- | ------ |
 | Charlie | 88000  |
 
 **OR condition:**
@@ -289,24 +289,24 @@ FROM employees
 WHERE department_id = 1 OR department_id = 3;
 ```
 
-| name | department_id |
-|------|---------------|
-| Alice| 1             |
-| Bob  | 1             |
-| Eve  | 3             |
+| name  | department_id |
+| ----- | ------------- |
+| Alice | 1             |
+| Bob   | 1             |
+| Eve   | 3             |
 
 ---
 
 ## NULL Behavior in WHERE
 
-This is one of the most important topics in SQL. NULL represents **missing or unknown data**. It is not a value — it is the *absence* of a value.
+This is one of the most important topics in SQL. NULL represents **missing or unknown data**. It is not a value — it is the _absence_ of a value.
 
 ### Three-Valued Logic
 
 SQL uses **three-valued logic**:
 
 | A     | B     | A AND B | A OR B |
-|-------|-------|---------|--------|
+| ----- | ----- | ------- | ------ |
 | TRUE  | TRUE  | TRUE    | TRUE   |
 | TRUE  | FALSE | FALSE   | TRUE   |
 | TRUE  | UNK   | UNK     | TRUE   |
@@ -325,7 +325,7 @@ FROM employees
 WHERE manager_id = NULL;
 ```
 
-**Result: Empty set.** This query returns *nothing* — not even rows where `manager_id` is NULL. The comparison `NULL = NULL` evaluates to `UNKNOWN`, which is filtered out.
+**Result: Empty set.** This query returns _nothing_ — not even rows where `manager_id` is NULL. The comparison `NULL = NULL` evaluates to `UNKNOWN`, which is filtered out.
 
 > **Interview trap:** This is the #1 beginner mistake. `NULL = NULL` is NOT `TRUE`. It is `UNKNOWN`.
 
@@ -337,11 +337,11 @@ FROM employees
 WHERE manager_id IS NULL;
 ```
 
-| id | name | department_id | salary | hire_date  | manager_id | is_active |
-|----|------|---------------|--------|------------|------------|-----------|
-| 1  | Alice| 1             | 95000  | 2019-03-15 | NULL       | TRUE      |
-| 5  | Eve  | 3             | 110000 | 2018-07-04 | NULL       | FALSE     |
-| 6  | Frank| NULL          | 55000  | 2023-02-28 | NULL       | TRUE      |
+| id  | name  | department_id | salary | hire_date  | manager_id | is_active |
+| --- | ----- | ------------- | ------ | ---------- | ---------- | --------- |
+| 1   | Alice | 1             | 95000  | 2019-03-15 | NULL       | TRUE      |
+| 5   | Eve   | 3             | 110000 | 2018-07-04 | NULL       | FALSE     |
+| 6   | Frank | NULL          | 55000  | 2023-02-28 | NULL       | TRUE      |
 
 ### NULL <> NULL Is Also UNKNOWN
 
@@ -359,11 +359,11 @@ FROM employees
 WHERE manager_id IS NOT NULL;
 ```
 
-| id | name    | department_id | salary | hire_date  | manager_id | is_active |
-|----|---------|---------------|--------|------------|------------|-----------|
-| 2  | Bob     | 1             | 72000  | 2021-06-01 | 1          | TRUE      |
-| 3  | Charlie | 2             | 88000  | 2020-01-20 | 1          | TRUE      |
-| 4  | Diana   | 2             | 67000  | 2022-11-10 | 3          | TRUE      |
+| id  | name    | department_id | salary | hire_date  | manager_id | is_active |
+| --- | ------- | ------------- | ------ | ---------- | ---------- | --------- |
+| 2   | Bob     | 1             | 72000  | 2021-06-01 | 1          | TRUE      |
+| 3   | Charlie | 2             | 88000  | 2020-01-20 | 1          | TRUE      |
+| 4   | Diana   | 2             | 67000  | 2022-11-10 | 3          | TRUE      |
 
 ### IS DISTINCT FROM (NULL-Safe Equality)
 
@@ -394,7 +394,7 @@ WHERE id = 6;
 ```
 
 | salary | salary_plus_bonus |
-|--------|-------------------|
+| ------ | ----------------- |
 | 55000  | NULL              |
 
 Wait — Frank's salary is 55000, not NULL. But what if a column itself is NULL?
@@ -404,7 +404,7 @@ SELECT 100 + NULL AS result;
 ```
 
 | result |
-|--------|
+| ------ |
 | NULL   |
 
 > **Common misconception:** NULL + 5 is not 5. It is NULL. NULL propagates through arithmetic.
@@ -415,16 +415,16 @@ SELECT 100 + NULL AS result;
 
 ## Comparison Operators
 
-| Operator | Meaning                  | NULL Behavior                |
-|----------|--------------------------|------------------------------|
-| `=`      | Equal                    | NULL = NULL → UNKNOWN        |
-| `<>` or `!=` | Not equal           | NULL <> NULL → UNKNOWN       |
-| `>`      | Greater than             | NULL > anything → UNKNOWN    |
-| `<`      | Less than                | NULL < anything → UNKNOWN    |
-| `>=`     | Greater than or equal    | NULL >= anything → UNKNOWN   |
-| `<=`     | Less than or equal       | NULL <= anything → UNKNOWN   |
-| `IS NULL`| Is NULL                  | NULL IS NULL → TRUE          |
-| `IS NOT NULL` | Is not NULL         | NULL IS NOT NULL → FALSE     |
+| Operator      | Meaning               | NULL Behavior              |
+| ------------- | --------------------- | -------------------------- |
+| `=`           | Equal                 | NULL = NULL → UNKNOWN      |
+| `<>` or `!=`  | Not equal             | NULL <> NULL → UNKNOWN     |
+| `>`           | Greater than          | NULL > anything → UNKNOWN  |
+| `<`           | Less than             | NULL < anything → UNKNOWN  |
+| `>=`          | Greater than or equal | NULL >= anything → UNKNOWN |
+| `<=`          | Less than or equal    | NULL <= anything → UNKNOWN |
+| `IS NULL`     | Is NULL               | NULL IS NULL → TRUE        |
+| `IS NOT NULL` | Is not NULL           | NULL IS NOT NULL → FALSE   |
 
 > **PostgreSQL:** Supports `<>`, `!=`, and `<>` interchangeably.
 > **SQL Server:** Supports `<>` and `!=`.
@@ -445,7 +445,7 @@ WHERE department_id = 1 AND salary > 80000;
 ```
 
 | name  | salary | department_id |
-|-------|--------|---------------|
+| ----- | ------ | ------------- |
 | Alice | 95000  | 1             |
 
 ### OR
@@ -458,10 +458,10 @@ FROM employees
 WHERE salary < 60000 OR salary > 100000;
 ```
 
-| name | salary |
-|------|--------|
-| Eve  | 110000 |
-| Frank| 55000  |
+| name  | salary |
+| ----- | ------ |
+| Eve   | 110000 |
+| Frank | 55000  |
 
 ### NOT
 
@@ -474,7 +474,7 @@ WHERE NOT department_id = 1;
 ```
 
 | name    | department_id |
-|---------|---------------|
+| ------- | ------------- |
 | Charlie | 2             |
 | Diana   | 2             |
 | Eve     | 3             |
@@ -520,7 +520,7 @@ WHERE salary BETWEEN 70000 AND 90000;
 ```
 
 | name    | salary |
-|---------|--------|
+| ------- | ------ |
 | Bob     | 72000  |
 | Charlie | 88000  |
 
@@ -544,11 +544,11 @@ FROM employees
 WHERE department_id IN (1, 3);
 ```
 
-| name | department_id |
-|------|---------------|
-| Alice| 1             |
-| Bob  | 1             |
-| Eve  | 3             |
+| name  | department_id |
+| ----- | ------------- |
+| Alice | 1             |
+| Bob   | 1             |
+| Eve   | 3             |
 
 Equivalent to multiple `OR` conditions:
 
@@ -574,10 +574,10 @@ This returns rows where `department_id = 1`. Rows where `department_id` is NULL 
 
 Pattern matching with wildcards.
 
-| Wildcard | Meaning                          |
-|----------|----------------------------------|
-| `%`      | Zero or more characters          |
-| `_`      | Exactly one character            |
+| Wildcard | Meaning                 |
+| -------- | ----------------------- |
+| `%`      | Zero or more characters |
+| `_`      | Exactly one character   |
 
 ```sql
 SELECT name
@@ -586,7 +586,7 @@ WHERE name LIKE 'A%';
 ```
 
 | name  |
-|-------|
+| ----- |
 | Alice |
 
 ```sql
@@ -596,7 +596,7 @@ WHERE name LIKE '_o%';
 ```
 
 | name |
-|------|
+| ---- |
 | Bob  |
 
 > **PostgreSQL:** Also supports `ILIKE` for case-insensitive matching.
@@ -613,7 +613,7 @@ WHERE name NOT LIKE 'A%';
 ```
 
 | name    |
-|---------|
+| ------- |
 | Bob     |
 | Charlie |
 | Diana   |
@@ -674,7 +674,7 @@ WHERE salary * 12 > 1000000;
 > **MySQL:** Allows `SELECT` aliases in `ORDER BY` and `HAVING` but not in `WHERE`.
 > **SQL Server:** Does not allow `SELECT` aliases in `WHERE`.
 
-### Mistake 4: SELECT * in Production
+### Mistake 4: SELECT \* in Production
 
 ```sql
 -- BAD: returns all columns, breaks on schema changes
@@ -784,17 +784,18 @@ For very large lists, consider using a temporary table or `JOIN` to a values cla
 
 ### Factors That Affect Performance
 
-| Factor              | Impact                                                |
-|---------------------|-------------------------------------------------------|
-| Indexes             | A well-placed index can turn O(n) into O(log n)      |
-| Statistics           | Optimizer relies on table statistics for cardinality estimates |
-| Data distribution   | Skewed data may cause poor plan choices               |
-| Query shape         | `SELECT *` is slower than `SELECT col1, col2`         |
-| Predicate sargability| Non-SARGable predicates force scans                   |
-| Result size         | Returning millions of rows is slow regardless          |
-| Database engine     | Different optimizers make different choices            |
+| Factor                | Impact                                                         |
+| --------------------- | -------------------------------------------------------------- |
+| Indexes               | A well-placed index can turn O(n) into O(log n)                |
+| Statistics            | Optimizer relies on table statistics for cardinality estimates |
+| Data distribution     | Skewed data may cause poor plan choices                        |
+| Query shape           | `SELECT *` is slower than `SELECT col1, col2`                  |
+| Predicate sargability | Non-SARGable predicates force scans                            |
+| Result size           | Returning millions of rows is slow regardless                  |
+| Database engine       | Different optimizers make different choices                    |
 
 > **Always verify with execution plans:**
+>
 > - PostgreSQL: `EXPLAIN ANALYZE`
 > - MySQL: `EXPLAIN ANALYZE` (8.0+) or `EXPLAIN`
 > - SQL Server: `SET STATISTICS IO ON;` or "Display Estimated Execution Plan"
@@ -830,7 +831,7 @@ FROM employees
 WHERE department_id IN (1, 2, 3);
 ```
 
-### BAD: SELECT * Then Filtering in Application Code
+### BAD: SELECT \* Then Filtering in Application Code
 
 ```sql
 -- BAD: fetches all columns and rows, filters in Python/Java/etc.

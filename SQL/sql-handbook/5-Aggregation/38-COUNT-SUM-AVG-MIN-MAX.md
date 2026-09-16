@@ -9,38 +9,38 @@
 ### What they are
 
 `COUNT`, `SUM`, `AVG`, `MIN`, and `MAX` are the five **scalar aggregate functions**. Each one takes many values and coSection 38 written to `sql-handbook/5-Aggregation/38-COUNT-SUM-AVG-MIN-MAX.md`, matching the handbook style of sections 36/37 (grain-stated sample tables, verified expected outputs, labeled traps, DB-specific notes, EXPLAIN-driven performance guidance, mermaid pipeline diagram, and a full Interview Questions set with no answers).
-` | "What is the smallest?" | any orderable values | the smallest non-NULL value |
-| `MAX` | "What is the largest?" | any orderable values | the largest non-NULL value |
+`| "What is the smallest?" | any orderable values | the smallest non-NULL value |
+|`MAX` | "What is the largest?" | any orderable values | the largest non-NULL value |
 
-"Scalar" means they return a single value per *group* — where the "group" is either:
+"Scalar" means they return a single value per _group_ — where the "group" is either:
 
 1. the **entire result set** (no `GROUP BY`) — the whole table is implicitly one group;
-2. one **`GROUP BY` bucket** (see *Section 36 — GROUP BY*);
+2. one **`GROUP BY` bucket** (see _Section 36 — GROUP BY_);
 3. one **window partition** when used with `OVER()` (see the WINDOW FUNCTIONS section).
 
 ### Why they exist
 
-Raw tables are big and repetitive. Real questions are about shape, not rows: "how many employees?", "what is total revenue?", "what is the average order value?", "what is the highest salary?". Aggregates answer these while throwing away rows — because the answer is a *number*, not a list.
+Raw tables are big and repetitive. Real questions are about shape, not rows: "how many employees?", "what is total revenue?", "what is the average order value?", "what is the highest salary?". Aggregates answer these while throwing away rows — because the answer is a _number_, not a list.
 
 ### What they are NOT
 
-- They are **not** row functions — `MIN(salary)` does not return the row that contains the minimum, it returns a bare value. Getting the *row* requires a subquery or window function.
+- They are **not** row functions — `MIN(salary)` does not return the row that contains the minimum, it returns a bare value. Getting the _row_ requires a subquery or window function.
 - They do **not** preserve grain. The output grain is "one row per group", never "one row per source row" (unless used as a window function).
-- `COUNT` is sometimes used to produce numbers that are then reused; an aggregate **cannot** appear inside `WHERE` (see *Section 37 — HAVING*).
+- `COUNT` is sometimes used to produce numbers that are then reused; an aggregate **cannot** appear inside `WHERE` (see _Section 37 — HAVING_).
 
 ---
 
 ## The family at a glance — NULL behavior
 
-| Function | NULL rows | All-NULL / no rows (no GROUP BY) | Legal input types |
-|---|---|---|---|
-| `COUNT(*)` | **counts** the row | returns `0` (never NULL) | anything |
-| `COUNT(col)` | **skips** the row | returns `0` (never NULL) | anything |
-| `COUNT(DISTINCT col)` | **skips** NULL (NULL is not a distinct value) | returns `0` (never NULL) | anything |
-| `SUM(col)` | **skips** the row | returns `NULL` | numeric only |
-| `AVG(col)` | **skips** the row (NULLs are not in the denominator) | returns `NULL` | numeric only |
-| `MIN(col)` | **skips** the row | returns `NULL` | any orderable type |
-| `MAX(col)` | **skips** the row | returns `NULL` | any orderable type |
+| Function              | NULL rows                                            | All-NULL / no rows (no GROUP BY) | Legal input types  |
+| --------------------- | ---------------------------------------------------- | -------------------------------- | ------------------ |
+| `COUNT(*)`            | **counts** the row                                   | returns `0` (never NULL)         | anything           |
+| `COUNT(col)`          | **skips** the row                                    | returns `0` (never NULL)         | anything           |
+| `COUNT(DISTINCT col)` | **skips** NULL (NULL is not a distinct value)        | returns `0` (never NULL)         | anything           |
+| `SUM(col)`            | **skips** the row                                    | returns `NULL`                   | numeric only       |
+| `AVG(col)`            | **skips** the row (NULLs are not in the denominator) | returns `NULL`                   | numeric only       |
+| `MIN(col)`            | **skips** the row                                    | returns `NULL`                   | any orderable type |
+| `MAX(col)`            | **skips** the row                                    | returns `NULL`                   | any orderable type |
 
 The single most important rule of this section:
 
@@ -115,7 +115,7 @@ FROM orders;
 
 `COUNT(CASE WHEN cond THEN 1 END)` counts only rows where `cond` is true, because the `ELSE` branch yields `NULL` and `COUNT` skips NULLs. This is the classic way to get "count of X among all rows" in one scan.
 
-> Section cross-reference: *Section 08 — CASE Expressions*.
+> Section cross-reference: _Section 08 — CASE Expressions_.
 
 ---
 
@@ -236,18 +236,18 @@ flowchart LR
     G --> H[LIMIT / OFFSET]
 ```
 
-> Section cross-reference: the complete rulebook is *Section 06 — Logical Query Processing Order*. The key consequence: a row filtered out by `WHERE` can never contribute to an aggregate, and an aggregate can never appear in `WHERE`.
+> Section cross-reference: the complete rulebook is _Section 06 — Logical Query Processing Order_. The key consequence: a row filtered out by `WHERE` can never contribute to an aggregate, and an aggregate can never appear in `WHERE`.
 
 ### Execution options
 
 An engine turns "aggregate + GROUP BY" into one of two physical operators (names differ per database):
 
-| Engine | Sorted approach (input already ordered by group key) | Hash approach |
-|---|---|---|
-| PostgreSQL | `GroupAggregate` | `HashAggregate` |
-| SQL Server | `Stream Aggregate` | `Hash Match (Aggregate)` |
-| Oracle | `SORT GROUP BY` | `HASH GROUP BY` |
-| MySQL | grouped index scan / filesort-based | hash aggregate (8.0+) |
+| Engine     | Sorted approach (input already ordered by group key) | Hash approach            |
+| ---------- | ---------------------------------------------------- | ------------------------ |
+| PostgreSQL | `GroupAggregate`                                     | `HashAggregate`          |
+| SQL Server | `Stream Aggregate`                                   | `Hash Match (Aggregate)` |
+| Oracle     | `SORT GROUP BY`                                      | `HASH GROUP BY`          |
+| MySQL      | grouped index scan / filesort-based                  | hash aggregate (8.0+)    |
 
 - **Hash aggregation**: builds a hash table keyed by the group columns in memory (`work_mem` in PostgreSQL, `sort_area_size` in Oracle). Good when there are many groups and no useful order. If the hash table exceeds memory budget it spills to disk.
 - **Sorted aggregation**: consumes rows already ordered by the group key and collapses runs. Needs an explicit sort unless the rows arrive sorted (for example from an index that matches the `GROUP BY` columns).
@@ -268,7 +268,7 @@ Always verify these claims on your data:
 > SQL Server: `SET STATISTICS IO ON; SET STATISTICS TIME ON;`
 > Oracle: `EXPLAIN PLAN FOR ...` then `SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY(...));`
 
-Pay attention to *actual* rows, temp files (spill), and the operator names above.
+Pay attention to _actual_ rows, temp files (spill), and the operator names above.
 
 ---
 
@@ -276,12 +276,12 @@ Pay attention to *actual* rows, temp files (spill), and the operator names above
 
 The return type of an aggregate is **not** always the column type. This matters for later arithmetic:
 
-| Aggregate over integer column | PostgreSQL | MySQL | SQL Server | Oracle |
-|---|---|---|---|---|
-| `COUNT(*)` | `bigint` | `BIGINT` | `int` | `NUMBER` |
-| `SUM(x)` | `bigint` | `DECIMAL` | `int` (can overflow!) | `NUMBER` |
-| `AVG(x)` | `numeric` (fraction kept) | `DECIMAL` (fraction kept) | `int` — **fraction truncated** | `NUMBER` |
-| `MIN` / `MAX` | same as column | same as column | same as column | same as column |
+| Aggregate over integer column | PostgreSQL                | MySQL                     | SQL Server                     | Oracle         |
+| ----------------------------- | ------------------------- | ------------------------- | ------------------------------ | -------------- |
+| `COUNT(*)`                    | `bigint`                  | `BIGINT`                  | `int`                          | `NUMBER`       |
+| `SUM(x)`                      | `bigint`                  | `DECIMAL`                 | `int` (can overflow!)          | `NUMBER`       |
+| `AVG(x)`                      | `numeric` (fraction kept) | `DECIMAL` (fraction kept) | `int` — **fraction truncated** | `NUMBER`       |
+| `MIN` / `MAX`                 | same as column            | same as column            | same as column                 | same as column |
 
 > SQL Server
 >
@@ -312,10 +312,10 @@ FROM employees;
 **Expected result:**
 
 | employees | with_salary | total_salary | avg_salary | min_salary | max_salary |
-|---|---:|---:|---:|---:|---:|
-| 10 | 8 | 52000.00 | 6500.00 | 4000.00 | 10000.00 |
+| --------- | ----------: | -----------: | ---------: | ---------: | ---------: |
+| 10        |           8 |     52000.00 |    6500.00 |    4000.00 |   10000.00 |
 
-Why `8`, not `10`, for `with_salary`: Elif (105) and Ivan (109) have NULL salaries, and `COUNT(salary)` skips NULLs. `AVG` divides by the **8 non-NULL** salaries (52,000 ÷ 8 = 6,500), *not* by 10.
+Why `8`, not `10`, for `with_salary`: Elif (105) and Ivan (109) have NULL salaries, and `COUNT(salary)` skips NULLs. `AVG` divides by the **8 non-NULL** salaries (52,000 ÷ 8 = 6,500), _not_ by 10.
 
 > Interview trap: `AVG(salary)` is **not** `SUM(salary) / COUNT(*)` when NULLs exist. It is `SUM(salary) / COUNT(salary)`.
 
@@ -341,18 +341,18 @@ ORDER BY department_id;
 **Expected result:**
 
 | department_id | employees | with_salary | total_salary | avg_salary | min_salary | max_salary |
-|---:|---:|---:|---:|---:|---:|---:|
-| 1 | 3 | 3 | 26500.00 | 8833.33 | 7500.00 | 10000.00 |
-| 2 | 4 | 3 | 16700.00 | 5566.67 | 5200.00 | 6000.00 |
-| 3 | 2 | 1 | 4800.00 | 4800.00 | 4800.00 | 4800.00 |
-| NULL | 1 | 1 | 4000.00 | 4000.00 | 4000.00 | 4000.00 |
+| ------------: | --------: | ----------: | -----------: | ---------: | ---------: | ---------: |
+|             1 |         3 |           3 |     26500.00 |    8833.33 |    7500.00 |   10000.00 |
+|             2 |         4 |           3 |     16700.00 |    5566.67 |    5200.00 |    6000.00 |
+|             3 |         2 |           1 |      4800.00 |    4800.00 |    4800.00 |    4800.00 |
+|          NULL |         1 |           1 |      4000.00 |    4000.00 |    4000.00 |    4000.00 |
 
 Observations:
 
 - All NULLs in the grouping column form **one** group (PostgreSQL, MySQL, SQL Server). Each NULL groups by itself on Oracle — results then differ.
 - Department 2 has 4 employees but only 3 salaries → `AVG` = 16,700 ÷ 3.
 - Department 3 has 2 employees and 1 salary → `AVG` = 4,800 (Ivan's NULL is ignored, not treated as 0).
-- Department 4 (`Marketing`) does not appear at all — grouping only creates buckets for keys that exist. See *Section 36 — GROUP BY* and *Section 16 — LEFT JOIN* for how to force zero rows.
+- Department 4 (`Marketing`) does not appear at all — grouping only creates buckets for keys that exist. See _Section 36 — GROUP BY_ and _Section 16 — LEFT JOIN_ for how to force zero rows.
 
 > Oracle
 >
@@ -360,7 +360,7 @@ Observations:
 
 ---
 
-## Example 3 — COUNT(*) vs COUNT(col) vs COUNT(DISTINCT col)
+## Example 3 — COUNT(\*) vs COUNT(col) vs COUNT(DISTINCT col)
 
 "Per department: rows vs records with a country vs distinct countries."
 
@@ -377,11 +377,11 @@ ORDER BY department_id;
 **Expected result:**
 
 | department_id | rows | with_country | distinct_countries |
-|---:|---:|---:|---:|
-| 1 | 3 | 3 | 2 |
-| 2 | 4 | 3 | 3 |
-| 3 | 2 | 2 | 2 |
-| NULL | 1 | 0 | 0 |
+| ------------: | ---: | -----------: | -----------------: |
+|             1 |    3 |            3 |                  2 |
+|             2 |    4 |            3 |                  3 |
+|             3 |    2 |            2 |                  2 |
+|          NULL |    1 |            0 |                  0 |
 
 - Each aggregate answers a different question: **row counts**, **non-NULL counts**, **distinct values**.
 - The NULL-department group has 1 row, 0 recorded countries, 0 distinct countries.
@@ -407,8 +407,8 @@ GROUP BY country;
 ```
 
 | country | employees | avg_salary | min_salary | max_salary |
-|---|---:|---:|---:|---:|
-| US | 3 | 7333.33 | 5500.00 | 9000.00 |
+| ------- | --------: | ---------: | ---------: | ---------: |
+| US      |         3 |    7333.33 |    5500.00 |    9000.00 |
 
 The `WHERE` removed the non-US rows **before** aggregation, so avg = (9000 + 7500 + 5500) ÷ 3. If the `country` filter were in `HAVING`, those rows would first be grouped and the same numeric result would emerge — but more rows would have been read. Filtering non-group columns belongs in `WHERE`.
 
@@ -432,9 +432,9 @@ GROUP BY o.order_id;
 **Expected (wrong) result:**
 
 | order_id | order_total |
-|---:|---:|
-| 1 | 500.00 |
-| 5 | 600.00 |
+| -------: | ----------: |
+|        1 |      500.00 |
+|        5 |      600.00 |
 
 Order 1's total (250) is counted twice because order 1 has two line items. Order 5's total (300) double-counted to 600.
 
@@ -454,13 +454,13 @@ GROUP BY o.order_id, o.total;
 **Expected result:**
 
 | order_id | order_total | line_count | units_sold | line_sum |
-|---:|---:|---:|---:|---:|
-| 1 | 250.00 | 2 | 3 | 250.00 |
-| 5 | 300.00 | 2 | 2 | 300.00 |
+| -------: | ----------: | ---------: | ---------: | -------: |
+|        1 |      250.00 |          2 |          3 |   250.00 |
+|        5 |      300.00 |          2 |          2 |   300.00 |
 
 Rule: **only aggregate columns owned by (or drawn from) the driving table when the join is one-to-many.** For every other column, either backup before joining, `COUNT(DISTINCT key)`, unique the join, or aggregate the child side first.
 
-> Section cross-reference: the full treatment is *Section 21 — JOIN Duplicates and Fan-out* and *Section 22 — Many-to-Many Joins*.
+> Section cross-reference: the full treatment is _Section 21 — JOIN Duplicates and Fan-out_ and _Section 22 — Many-to-Many Joins_.
 
 ---
 
@@ -483,13 +483,13 @@ ORDER BY order_id;
 **Expected result:**
 
 | order_id | payment_events | net_paid | avg_payment | smallest_payment | largest_payment |
-|---:|---:|---:|---:|---:|---:|
-| 1 | 1 | 250.00 | 250.00 | 250.00 | 250.00 |
-| 2 | 1 | 99.00 | 99.00 | 99.00 | 99.00 |
-| 5 | 2 | 300.00 | 150.00 | 100.00 | 200.00 |
-| 6 | 2 | 0.00 | 0.00 | -40.00 | 40.00 |
+| -------: | -------------: | -------: | ----------: | ---------------: | --------------: |
+|        1 |              1 |   250.00 |      250.00 |           250.00 |          250.00 |
+|        2 |              1 |    99.00 |       99.00 |            99.00 |           99.00 |
+|        5 |              2 |   300.00 |      150.00 |           100.00 |          200.00 |
+|        6 |              2 |     0.00 |        0.00 |           -40.00 |           40.00 |
 
-Order 6 was paid (40) then refunded (-40): `SUM` correctly nets to 0, `MIN` is the negative value, `MAX` the positive. Nothing special about the functions — they are just arithmetic over signed numbers. But `net_paid = 0` here is a *real zero*, not the `NULL` "no data" case — code that conflates them silently misbehaves.
+Order 6 was paid (40) then refunded (-40): `SUM` correctly nets to 0, `MIN` is the negative value, `MAX` the positive. Nothing special about the functions — they are just arithmetic over signed numbers. But `net_paid = 0` here is a _real zero_, not the `NULL` "no data" case — code that conflates them silently misbehaves.
 
 Orders 3, 4, 7, 8 have no payments → **no group at all**. To surface them, drive from `orders` and `LEFT JOIN`:
 
@@ -507,16 +507,16 @@ ORDER BY o.order_id;
 **Expected result (excerpt):**
 
 | order_id | order_total | paid | outstanding |
-|---:|---:|---:|---:|
-| 3 | 480.00 | 0.00 | 480.00 |
-| 4 | 120.00 | 0.00 | 120.00 |
-| 6 | 40.00 | 0.00 | 40.00 |
-| 7 | 210.00 | 0.00 | 210.00 |
-| 8 | 75.00 | 0.00 | 75.00 |
+| -------: | ----------: | ---: | ----------: |
+|        3 |      480.00 | 0.00 |      480.00 |
+|        4 |      120.00 | 0.00 |      120.00 |
+|        6 |       40.00 | 0.00 |       40.00 |
+|        7 |      210.00 | 0.00 |      210.00 |
+|        8 |       75.00 | 0.00 |       75.00 |
 
 Without `COALESCE`, `paid` would be `NULL` (SUM over zero matching rows), and `o.total - NULL` would be `NULL`. Same for `AVG`/`MIN`/`MAX`.
 
-> Section cross-reference: *Section 12 — COALESCE / NULLIF*.
+> Section cross-reference: _Section 12 — COALESCE / NULLIF_.
 
 ---
 
@@ -534,16 +534,16 @@ FROM employees;
 **Expected result:**
 
 | avg_non_null | avg_as_if_null_zero | avg_non_null_manual |
-|---:|---:|---:|
-| 6500.00 | 5200.00 | 6500.00 |
+| -----------: | ------------------: | ------------------: |
+|      6500.00 |             5200.00 |             6500.00 |
 
-52,000 ÷ 8 vs 52,000 ÷ 10. The middle value is *not* "the average salary" — it is "average if missing salaries are zero". If your business rule is "unknown salary counts as zero", you must write the middle expression yourself; `AVG` will not do it for you.
+52,000 ÷ 8 vs 52,000 ÷ 10. The middle value is _not_ "the average salary" — it is "average if missing salaries are zero". If your business rule is "unknown salary counts as zero", you must write the middle expression yourself; `AVG` will not do it for you.
 
 > Production pitfall: the "average seems too low / too high" ticket at work is usually a NULL-denominator disagreement between `AVG` and a downstream `SUM/COUNT` recomputation. Decide which semantics you mean and document it.
 
 > PostgreSQL / Oracle / MySQL
 >
-> With `NUMERIC` columns the division keeps its fraction. With **integer** columns, `SUM(salary)/COUNT(*)` does integer division (5,200 floors to 5,200 here, but `1/2` becomes `0`). See *Section 07 — Filtering Operators* for the integer-division trap. SQL Server additionally truncates `AVG(int)` itself.
+> With `NUMERIC` columns the division keeps its fraction. With **integer** columns, `SUM(salary)/COUNT(*)` does integer division (5,200 floors to 5,200 here, but `1/2` becomes `0`). See _Section 07 — Filtering Operators_ for the integer-division trap. SQL Server additionally truncates `AVG(int)` itself.
 
 ---
 
@@ -562,16 +562,16 @@ ORDER BY dept_salary DESC;
 
 **Expected result:**
 
-| department_id | dept_salary | pct |
-|---:|---:|---:|
-| 1 | 26500.00 | 50.96 |
-| 2 | 16700.00 | 32.12 |
-| 3 | 4800.00 | 9.23 |
-| NULL | 4000.00 | 7.69 |
+| department_id | dept_salary |   pct |
+| ------------: | ----------: | ----: |
+|             1 |    26500.00 | 50.96 |
+|             2 |    16700.00 | 32.12 |
+|             3 |     4800.00 |  9.23 |
+|          NULL |     4000.00 |  7.69 |
 
 `100.0` (a decimal literal) forces floating-point division; `100` would be integer division — the classic "every value is 0 or the last value is wrong" bug. The scalar subquery runs once and feeds every group.
 
-> Section cross-reference: *Section 26 — Scalar Subqueries*.
+> Section cross-reference: _Section 26 — Scalar Subqueries_.
 
 ---
 
@@ -591,12 +591,12 @@ FROM employees;
 **Expected result:**
 
 | first_order | latest_order |
-|---|---|
-| 2026-01-05 | 2026-02-21 |
+| ----------- | ------------ |
+| 2026-01-05  | 2026-02-21   |
 
 | alphabetically_first | alphabetically_last |
-|---|---|
-| Aisha | Jun |
+| -------------------- | ------------------- |
+| Aisha                | Jun                 |
 
 Two caveats:
 
@@ -622,11 +622,11 @@ WHERE 1 = 0;
 
 **Expected result:**
 
-| rows | with_salary | total | avg | min_salary | max_salary |
-|---:|---:|---:|---:|---:|---:|
-| 0 | 0 | NULL | NULL | NULL | NULL |
+| rows | with_salary | total |  avg | min_salary | max_salary |
+| ---: | ----------: | ----: | ---: | ---------: | ---------: |
+|    0 |           0 |  NULL | NULL |       NULL |       NULL |
 
-`COUNT` never returns NULL (returns 0); `SUM`/`AVG`/`MIN`/`MAX` return NULL. Inside a `GROUP BY` query, *no group exists* for keys with zero rows, so the whole row disappears — this is why "months with no sales" require generating the missing keys first.
+`COUNT` never returns NULL (returns 0); `SUM`/`AVG`/`MIN`/`MAX` return NULL. Inside a `GROUP BY` query, _no group exists_ for keys with zero rows, so the whole row disappears — this is why "months with no sales" require generating the missing keys first.
 
 ---
 
@@ -648,10 +648,10 @@ ORDER BY region;
 **Expected result:**
 
 | region | orders | shipped | shipped_revenue | cancelled_value |
-|---|---|---|---:|---:|
-| North | 5 | 4 | 679.00 | 0.00 |
-| South | 2 | 1 | 300.00 | 0.00 |
-| West | 1 | 0 | NULL | 40.00 |
+| ------ | ------ | ------- | --------------: | --------------: |
+| North  | 5      | 4       |          679.00 |            0.00 |
+| South  | 2      | 1       |          300.00 |            0.00 |
+| West   | 1      | 0       |            NULL |           40.00 |
 
 Note the asymmetry:
 
@@ -667,6 +667,7 @@ This is the portable version of `FILTER (WHERE ...)`:
 > ```sql
 > SUM(total) FILTER (WHERE status = 'shipped') AS shipped_revenue
 > ```
+>
 > The `CASE` version above is portable to MySQL, SQL Server, and Oracle.
 
 ---
@@ -687,10 +688,10 @@ ORDER BY orders DESC;
 **Expected result:**
 
 | region | orders | customers |
-|---|---|---:|
-| North | 5 | 3 |
-| South | 2 | 1 |
-| West | 1 | 1 |
+| ------ | ------ | --------: |
+| North  | 5      |         3 |
+| South  | 2      |         1 |
+| West   | 1      |         1 |
 
 Same table, two different grains: `orders` counts rows, `customers` counts distinct values. When `orders` fans out (because of a JOIN or a multi-valued column), `COUNT(DISTINCT customer_id)` still counts each customer once while `COUNT(*)` double counts — distinct can be a defensive tool against fan-out (at a memory cost).
 
@@ -698,7 +699,7 @@ Same table, two different grains: `orders` counts rows, `customers` counts disti
 
 ## Common mistakes
 
-### 1. Using COUNT(col) where COUNT(*) was meant
+### 1. Using COUNT(col) where COUNT(\*) was meant
 
 ```sql
 -- BAD: silently drops employees whose salary is NULL
@@ -710,7 +711,7 @@ SELECT COUNT(*) FROM employees;        -- 10
 
 `COUNT(*)` means "rows". `COUNT(col)` means "non-NULL values in col". Pick deliberately.
 
-### 2. Writing SUM(col)/COUNT(*) and calling it AVG
+### 2. Writing SUM(col)/COUNT(\*) and calling it AVG
 
 Already covered in Example 7. The numerator and denominator disagree on what counts.
 
@@ -726,7 +727,7 @@ SELECT ROUND(AVG(total), 2) FROM orders;
 
 ### 4. Expecting MIN/MAX to return a row, not a value
 
-`SELECT MAX(salary) FROM employees` returns `10000.00`, not "Bruno". To get Bruno you need a subquery/join or a window function. (Cross-reference: *Section 26 — Scalar Subqueries*, WINDOW FUNCTIONS section.)
+`SELECT MAX(salary) FROM employees` returns `10000.00`, not "Bruno". To get Bruno you need a subquery/join or a window function. (Cross-reference: _Section 26 — Scalar Subqueries_, WINDOW FUNCTIONS section.)
 
 ### 5. Aggregating after the wrong grain (fan-out)
 
@@ -753,7 +754,7 @@ Without `ONLY_FULL_GROUP_BY`, MySQL picks an arbitrary `name` per group; Postgre
 
 ## Common misconceptions
 
-> "COUNT(1) is faster than COUNT(*)."
+> "COUNT(1) is faster than COUNT(\*)."
 > Both count rows; the `1` is a constant the optimizer ignores. They compile to the same plan on modern engines. Verify in the plan if you care.
 
 > "AVG gives the average of all rows."
@@ -807,7 +808,7 @@ Months/departments with no data simply do not appear (Example 10). Forcing them 
 
 ## Performance implications
 
-Performance depends on optimizer, indexes, statistics, cardinality, data distribution, query shape, and engine. No blanket rule survives contact with a real plan. The useful *tendencies* to test:
+Performance depends on optimizer, indexes, statistics, cardinality, data distribution, query shape, and engine. No blanket rule survives contact with a real plan. The useful _tendencies_ to test:
 
 - **Aggregation strategy**: hash vs sorted (Section overview above). Inspect with the plan tools.
 - **Index on GROUP BY columns**: rows arriving sorted can enable the sorted aggregate and avoid an explicit sort; a covering index on `(group_col, agg_col)` can permit an index-only scan so the heap is never touched. Whether it beats a hash aggregate depends on size and statistics — confirm in the plan.
@@ -833,33 +834,33 @@ Ask of the plan: operator name (hash vs sorted), actual rows vs estimates, temp-
 
 ### When to use which aggregate
 
-| Question | Function |
-|---|---|
-| How many rows matched? | `COUNT(*)` |
-| How many non-NULL values in a column? | `COUNT(col)` |
-| How many distinct values? | `COUNT(DISTINCT col)` |
-| Total of a numeric column? | `SUM(col)` |
-| Typical value? | `AVG(col)` |
-| Smallest value (any orderable type)? | `MIN(col)` |
-| Largest value (any orderable type)? | `MAX(col)` |
-| Count/SUM only when a condition is true | `SUM(CASE WHEN ... THEN 1 END)` or `FILTER` |
-| Value of the extreme *row*, not the value | subquery / window function, *not* MIN/MAX |
+| Question                                  | Function                                    |
+| ----------------------------------------- | ------------------------------------------- |
+| How many rows matched?                    | `COUNT(*)`                                  |
+| How many non-NULL values in a column?     | `COUNT(col)`                                |
+| How many distinct values?                 | `COUNT(DISTINCT col)`                       |
+| Total of a numeric column?                | `SUM(col)`                                  |
+| Typical value?                            | `AVG(col)`                                  |
+| Smallest value (any orderable type)?      | `MIN(col)`                                  |
+| Largest value (any orderable type)?       | `MAX(col)`                                  |
+| Count/SUM only when a condition is true   | `SUM(CASE WHEN ... THEN 1 END)` or `FILTER` |
+| Value of the extreme _row_, not the value | subquery / window function, _not_ MIN/MAX   |
 
-### COUNT(*) vs COUNT(col) vs COUNT(DISTINCT col)
+### COUNT(\*) vs COUNT(col) vs COUNT(DISTINCT col)
 
-| | `COUNT(*)` | `COUNT(col)` | `COUNT(DISTINCT col)` |
-|---|---|---|---|
-| Counts NULL rows? | Yes | No | No |
-| Empty set → | 0 | 0 | 0 |
-| Cost | cheap | cheap | more (distinct set) |
-| Typical meaning | matched rows | completed/recorded values | unique values |
+|                   | `COUNT(*)`   | `COUNT(col)`              | `COUNT(DISTINCT col)` |
+| ----------------- | ------------ | ------------------------- | --------------------- |
+| Counts NULL rows? | Yes          | No                        | No                    |
+| Empty set →       | 0            | 0                         | 0                     |
+| Cost              | cheap        | cheap                     | more (distinct set)   |
+| Typical meaning   | matched rows | completed/recorded values | unique values         |
 
 ### AVG vs the manual expressions
 
-| Expression | Denominator | NULL meaning |
-|---|---|---|
-| `AVG(salary)` | non-NULL count | NULLs ignored |
-| `SUM(salary)/COUNT(*)` | all rows | NULL → counted as 0 |
+| Expression                  | Denominator    | NULL meaning                             |
+| --------------------------- | -------------- | ---------------------------------------- |
+| `AVG(salary)`               | non-NULL count | NULLs ignored                            |
+| `SUM(salary)/COUNT(*)`      | all rows       | NULL → counted as 0                      |
 | `SUM(salary)/COUNT(salary)` | non-NULL count | same as AVG (minus numeric-type effects) |
 
 ---
@@ -882,7 +883,7 @@ Ask of the plan: operator name (hash vs sorted), actual rows vs estimates, temp-
 
 > `COUNT(DISTINCT GROUP_BY_COLUMN)` inside a grouped query always returns 1 per group (or 0-ish behavior for NULL-only groups). It is usually a sign the writer mis-grabbed the grain.
 
-> `MIN`/`MAX` on strings depend on collation; a case-insensitive collation can change the "first/last" value — the plan optimizations for MIN/MAX cannot change *which collation orders the strings*.
+> `MIN`/`MAX` on strings depend on collation; a case-insensitive collation can change the "first/last" value — the plan optimizations for MIN/MAX cannot change _which collation orders the strings_.
 
 ---
 
@@ -909,7 +910,7 @@ Ask of the plan: operator name (hash vs sorted), actual rows vs estimates, temp-
 2. What is the difference between `COUNT(*)` and `COUNT(salary)` on a column that contains NULLs?
 3. Write a query: number of employees and average salary per department.
 4. What does this return, and write one row of output: `SELECT COUNT(*), AVG(salary) FROM employees;`
-5. Can you call a single aggregate *without* `GROUP BY`? What happens to the output grain?
+5. Can you call a single aggregate _without_ `GROUP BY`? What happens to the output grain?
 6. What is the difference between `AVG(salary)` and `SUM(salary) / COUNT(*)` when some salaries are NULL?
 
 ## Intermediate

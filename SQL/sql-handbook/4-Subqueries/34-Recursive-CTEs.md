@@ -6,7 +6,7 @@
 
 ## What is a Recursive CTE
 
-A **recursive CTE** (also called a **recursive common table expression**) is a `WITH` query whose result set is built by repeating a step: it starts from a set of **seed rows**, then repeatedly expands those rows to produce *new* rows, feeding those new rows back into itself, until it can no longer produce anything new.
+A **recursive CTE** (also called a **recursive common table expression**) is a `WITH` query whose result set is built by repeating a step: it starts from a set of **seed rows**, then repeatedly expands those rows to produce _new_ rows, feeding those new rows back into itself, until it can no longer produce anything new.
 
 It is SQL's way of expressing **"walk this tree, graph, or chain until it runs out."**
 
@@ -49,12 +49,12 @@ SELECT * FROM cte_name;
 
 Two mandatory parts:
 
-| Part | Role | Runs |
-|------|------|------|
-| **Anchor member** | Produces the seed rows | Exactly once, before any recursion |
+| Part                 | Role                                                                     | Runs                                    |
+| -------------------- | ------------------------------------------------------------------------ | --------------------------------------- |
+| **Anchor member**    | Produces the seed rows                                                   | Exactly once, before any recursion      |
 | **Recursive member** | Produces the next "generation" of rows by referencing the CTE's own name | Repeatedly, until it produces zero rows |
 
-The recursive member **must** reference the CTE name itself. If it does not, the query is *not* recursive at all — it's just a normal joined query.
+The recursive member **must** reference the CTE name itself. If it does not, the query is _not_ recursive at all — it's just a normal joined query.
 
 ---
 
@@ -93,7 +93,7 @@ flowchart TD
     style Z fill:#fbb,stroke:#a00
 ```
 
-> **Crucial, and widely misunderstood:** inside the recursive member, the CTE name refers **only to the previous iteration's output (the working table)** — *not* to the whole accumulated result set.
+> **Crucial, and widely misunderstood:** inside the recursive member, the CTE name refers **only to the previous iteration's output (the working table)** — _not_ to the whole accumulated result set.
 
 That is why `SUM(x)` over the recursive reference would only sum the current generation, not the entire tree. Aggregates over the full result must be done **outside** the recursion, in the final `SELECT`.
 
@@ -106,7 +106,7 @@ Two engine-specific consequences of this model:
 > Has a default limit of **1000** iterations, configurable via `SET SESSION cte_max_recursion_depth = 1000000;`.
 
 > **SQL Server**
-> Default limit of **100** recursions; maximum allowed **32767**. Control with `OPTION (MAXRECURSION N)`. Exceeding the limit raises *`The statement terminated. The maximum recursion 100 has been exhausted before statement completion.`*
+> Default limit of **100** recursions; maximum allowed **32767**. Control with `OPTION (MAXRECURSION N)`. Exceeding the limit raises _`The statement terminated. The maximum recursion 100 has been exhausted before statement completion.`_
 
 > **Oracle**
 > Supports both `CONNECT BY` (older, proprietary) and recursive CTEs (standards-compliant). Without cycle handling, a cyclic structure raises `ORA-32044: cycle detected while executing recursive WITH query` — or keeps going, depending on the version and configuration.
@@ -180,18 +180,18 @@ ORDER BY level, name;
 
 ### Expected result
 
-| level | name | job_title |
-|------:|------|-----------|
-| 1 | Amara Okafor | CEO |
-| 1 | Grace Liu | Consultant |
-| 2 | Liam Chen | VP Engineering |
-| 2 | Priya Sharma | VP Sales |
-| 3 | Marcus Reed | Sales Manager |
-| 3 | Noah Williams | Engineering Mgr |
-| 3 | Elena Petrova | Backend Lead |
-| 4 | Sofia Garcia | Senior Engineer |
-| 4 | Kenji Tanaka | Engineer |
-| 4 | Aisha Khan | Engineer |
+| level | name          | job_title       |
+| ----: | ------------- | --------------- |
+|     1 | Amara Okafor  | CEO             |
+|     1 | Grace Liu     | Consultant      |
+|     2 | Liam Chen     | VP Engineering  |
+|     2 | Priya Sharma  | VP Sales        |
+|     3 | Marcus Reed   | Sales Manager   |
+|     3 | Noah Williams | Engineering Mgr |
+|     3 | Elena Petrova | Backend Lead    |
+|     4 | Sofia Garcia  | Senior Engineer |
+|     4 | Kenji Tanaka  | Engineer        |
+|     4 | Aisha Khan    | Engineer        |
 
 **Walk through the algorithm:**
 
@@ -229,15 +229,15 @@ ORDER BY level, name;          -- breadth-first style
 
 Result (excerpt):
 
-| level | name | path |
-|------:|------|------|
-| 1 | Amara Okafor | `Amara Okafor` |
-| 1 | Grace Liu | `Grace Liu` |
-| 2 | Liam Chen | `Amara Okafor -> Liam Chen` |
-| 3 | Elena Petrova | `Amara Okafor -> Liam Chen -> Elena Petrova` |
-| 4 | Aisha Khan | `Amara Okafor -> Liam Chen -> Elena Petrova -> Aisha Khan` |
+| level | name          | path                                                       |
+| ----: | ------------- | ---------------------------------------------------------- |
+|     1 | Amara Okafor  | `Amara Okafor`                                             |
+|     1 | Grace Liu     | `Grace Liu`                                                |
+|     2 | Liam Chen     | `Amara Okafor -> Liam Chen`                                |
+|     3 | Elena Petrova | `Amara Okafor -> Liam Chen -> Elena Petrova`               |
+|     4 | Aisha Khan    | `Amara Okafor -> Liam Chen -> Elena Petrova -> Aisha Khan` |
 
-**Ordering caveat.** The SQL standard does *not* guarantee the ordering of recursive output, and a final `ORDER BY` sorts the *whole* result, destroying any natural tree order. If you need a well-defined traversal order:
+**Ordering caveat.** The SQL standard does _not_ guarantee the ordering of recursive output, and a final `ORDER BY` sorts the _whole_ result, destroying any natural tree order. If you need a well-defined traversal order:
 
 > **PostgreSQL (14+)**
 > Use the `SEARCH` clause — either `SEARCH DEPTH FIRST` or `SEARCH BREADTH FIRST`:
@@ -307,11 +307,11 @@ ORDER BY max_depth DESC;
 ### Expected result
 
 | root_id | max_depth |
-|--------:|----------:|
-| 1 | 4 |
-| 10 | 1 |
+| ------: | --------: |
+|       1 |         4 |
+|      10 |         1 |
 
-**Pattern:** if you need information from the *origin* of the tree (root, top-level category, source part), **carry it down as a column** during recursion rather than trying to compute it afterward.
+**Pattern:** if you need information from the _origin_ of the tree (root, top-level category, source part), **carry it down as a column** during recursion rather than trying to compute it afterward.
 
 ---
 
@@ -330,11 +330,11 @@ WITH RECURSIVE dates AS (
 SELECT d FROM dates;
 ```
 
-| d |
-|---|
+| d          |
+| ---------- |
 | 2026-01-01 |
 | 2026-01-02 |
-| ... |
+| ...        |
 | 2026-01-31 |
 
 This is the cleaner, portable alternative to generating a row per day with a numbers table or `generate_series` (though `generate_series` is faster in PostgreSQL when available). Recursive date spines are commonly joined as the **driving table** to fill gaps in daily metrics:
@@ -392,10 +392,10 @@ ORDER BY total_needed DESC;
 ```
 
 | part_name | total_needed |
-|-----------|-------------:|
-| Spoke | 40 |
-| Rim | 2 |
-| Wheel | 2 |
+| --------- | -----------: |
+| Spoke     |           40 |
+| Rim       |            2 |
+| Wheel     |            2 |
 
 **Why the structure matters:** quantities are **multiplied** level by level inside recursion (`1 * 2 = 2` at wheel level, `2 * 20 = 40` at spoke level), but the **aggregation happens outside** in the final `SELECT`. You cannot `SUM()` over the recursive reference — it would only see the current working table, and many engines forbid aggregate references over the recursive CTE entirely.
 
@@ -427,7 +427,7 @@ Now the org-chart query **never terminates** — it generates the same two rows 
 WHERE t.level < 20
 ```
 
-Simple and always available, but it silently *truncates* the tree — you must also alert the right people.
+Simple and always available, but it silently _truncates_ the tree — you must also alert the right people.
 
 ### Defense 2 — PostgreSQL `CYCLE` clause (v14+)
 
@@ -462,7 +462,7 @@ START WITH manager_id IS NULL
 CONNECT BY NOCYCLE PRIOR employee_id = manager_id;
 ```
 
-Plus `CONNECT_BY_ISCYCLE` to see *which* rows formed the cycle. Oracle's proprietary `CONNECT BY` remains idiomatic there.
+Plus `CONNECT_BY_ISCYCLE` to see _which_ rows formed the cycle. Oracle's proprietary `CONNECT BY` remains idiomatic there.
 
 ### Manual path-string check (portable, older-engine friendly)
 
@@ -481,25 +481,25 @@ Works everywhere, but string scans get expensive on deep trees. Prefer engine-na
 
 ## NULL behavior
 
-| NULL situation | What happens |
-|----------------|--------------|
-| `manager_id IS NULL` in anchor | Correctly seeds the roots — this is primarically why the anchor lists roots explicitly. |
+| NULL situation                                 | What happens                                                                                                   |
+| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | --------------------- | ---------------------------------------------------------- | --- | ----------------------------------------------------------------- |
+| `manager_id IS NULL` in anchor                 | Correctly seeds the roots — this is primarically why the anchor lists roots explicitly.                        |
 | NULL in the **middle** of a chain (orphan row) | The orphan row never appears in the result: nothing points to it as a child, and no parent chain can reach it. |
-| NULL path string in `||`-style concatenation | In SQL Server, `'abc' + NULL = NULL`; in PostgreSQL `'abc' || NULL = 'abc'`. Concatenate defensively with `COALESCE(path, '')`. |
-| NULL join key | Rows whose key column is NULL simply never join → counted as "not matching." |
-| Anchor returns zero rows | The whole query returns zero rows — recursion never starts. |
+| NULL path string in `                          |                                                                                                                | `-style concatenation | In SQL Server, `'abc' + NULL = NULL`; in PostgreSQL `'abc' |     | NULL = 'abc'`. Concatenate defensively with `COALESCE(path, '')`. |
+| NULL join key                                  | Rows whose key column is NULL simply never join → counted as "not matching."                                   |
+| Anchor returns zero rows                       | The whole query returns zero rows — recursion never starts.                                                    |
 
 ---
 
 ## Common mistakes
 
-1. **Forgetting `UNION ALL` / using `UNION`.** With `UNION`, duplicates are pruned at every generation. That changes row counts and — worse — combined with a cycle can accidentally *terminate* a query that should keep going. Use `UNION ALL` unless you specifically want dedup.
+1. **Forgetting `UNION ALL` / using `UNION`.** With `UNION`, duplicates are pruned at every generation. That changes row counts and — worse — combined with a cycle can accidentally _terminate_ a query that should keep going. Use `UNION ALL` unless you specifically want dedup.
 2. **The recursive member doesn't reference the CTE.** Then it isn't recursive — it just runs once.
 3. **Column count/type mismatch** between anchor and recursive member. Recursive terms do **implicit type coercion** in most engines, but `NULL` literals and `INT` vs `BIGINT` or numeric precisions cause errors or silent truncation. **Cast in the anchor** (`1::BIGINT`).
 4. **Aggregating or applying window functions over the recursive reference.** It only holds the current working table, and many engines reject it outright.
 5. **No termination condition, no depth cap, no cycle detection.** See the pitfall above.
 6. **Missing join between the recursive member and the working table.** `FROM employees e JOIN org_tree t ON ...` — without the join you get a Cartesian product that grows the working set every iteration (exponential blowup).
-7. **Mistaking the anchor for "the root of one subtree."** If your anchor is *all* roots, you get all subtrees at once. Filter the anchor when you want a single subtree (as in the BOM example with `WHERE part_id = 100`).
+7. **Mistaking the anchor for "the root of one subtree."** If your anchor is _all_ roots, you get all subtrees at once. Filter the anchor when you want a single subtree (as in the BOM example with `WHERE part_id = 100`).
 8. **Assuming the final result is ordered depth-first.** It isn't guaranteed; order explicitly.
 9. **Recursive CTE inside a subquery or LATERAL with further recursion** — referencing the recursive name twice, or nested recursion (a recursive CTE referencing another recursive CTE) is **mutual recursion** and is disallowed in every major engine.
 
@@ -507,21 +507,21 @@ Works everywhere, but string scans get expensive on deep trees. Prefer engine-na
 
 ## Recursive CTE vs the alternatives
 
-| Concern | Recursive CTE | `CONNECT BY` (Oracle) | Nested set | Materialized path | App-side loop |
-|---------|---------------|----------------------|------------|-------------------|---------------|
-| Engine support | PostgreSQL, MySQL 8+, SQL Server, Oracle | Oracle only | Any | Any | Any |
-| Standard SQL | ✅ | ❌ proprietary | n/a (design) | n/a (design) | — |
-| Set-based, single statement | ✅ | ✅ | ✅ reads | ✅ reads | ❌ N+1 |
-| Cycle detection | Manual / `CYCLE` | `NOCYCLE` + `IS_CYCLE` | n/a | `LIKE` check | Manual |
-| Level tracking | Manual column | `LEVEL` pseudo-column | Depth col | Path arithmetic | Manual |
-| Writes / deletes | Awkward | Awkward | Horrific | Good | Easy |
-| Read-heavy tree | Good | Good | **Best** | Good | Poor |
-| Deep trees (1000+) | Watch limits | Watch `MAX` | Good | Good | Good |
+| Concern                     | Recursive CTE                            | `CONNECT BY` (Oracle)  | Nested set   | Materialized path | App-side loop |
+| --------------------------- | ---------------------------------------- | ---------------------- | ------------ | ----------------- | ------------- |
+| Engine support              | PostgreSQL, MySQL 8+, SQL Server, Oracle | Oracle only            | Any          | Any               | Any           |
+| Standard SQL                | ✅                                       | ❌ proprietary         | n/a (design) | n/a (design)      | —             |
+| Set-based, single statement | ✅                                       | ✅                     | ✅ reads     | ✅ reads          | ❌ N+1        |
+| Cycle detection             | Manual / `CYCLE`                         | `NOCYCLE` + `IS_CYCLE` | n/a          | `LIKE` check      | Manual        |
+| Level tracking              | Manual column                            | `LEVEL` pseudo-column  | Depth col    | Path arithmetic   | Manual        |
+| Writes / deletes            | Awkward                                  | Awkward                | Horrific     | Good              | Easy          |
+| Read-heavy tree             | Good                                     | Good                   | **Best**     | Good              | Poor          |
+| Deep trees (1000+)          | Watch limits                             | Watch `MAX`            | Good         | Good              | Good          |
 
 **Rules of thumb**
 
 - **Deep, read-heavy, stable trees** (e.g., a menu, taxonomy, org chart) → consider **nested set / closure table**; they answer "all descendants" with a single `WHERE` instead of N iterations.
-- **Recursive CTE** is the right tool when the tree is written frequently, is a *graph* (shared nodes, many parents), or the recursion is genuinely unbounded/on-the-fly (flights, reachability, BOM).
+- **Recursive CTE** is the right tool when the tree is written frequently, is a _graph_ (shared nodes, many parents), or the recursion is genuinely unbounded/on-the-fly (flights, reachability, BOM).
 - **Recursive CTE is not a substitute for a proper graph database** for very large graphs.
 
 ---
@@ -530,7 +530,7 @@ Works everywhere, but string scans get expensive on deep trees. Prefer engine-na
 
 Optimization claims here are engine- and plan-dependent — **verify with `EXPLAIN ANALYZE`** (or equivalent) on your real data and cardinality before trusting any of the following:
 
-- **Number of iterations = tree depth.** Depth drives the "loop count"; width drives the working-table size. A deep, narrow tree is *iteration*-bound; a wide tree is *working-set*-bound.
+- **Number of iterations = tree depth.** Depth drives the "loop count"; width drives the working-table size. A deep, narrow tree is _iteration_-bound; a wide tree is _working-set_-bound.
 - **Each iteration is essentially a self-join** of `employees` to the working table. It scans the working table once per pass.
 - **The FK/child column needs an index.** `JOIN ... ON e.manager_id = t.employee_id` wants an index on `employees(manager_id)`; make it a composite index if you also filter other columns. Without it, each iteration does a full scan.
 - **Plans show the recursion.** PostgreSQL shows `CTE Scan` / `WorkTable Scan` nodes; SQL Server shows a recursive `Clustered Index Scan` with a "spool." Reading the plan node names tells you the engine recognizes recursion. Check actual vs estimated row counts per iteration — a wildly wrong estimate on the working table is the most common optimizer failure mode here.
@@ -566,7 +566,7 @@ Optimization claims here are engine- and plan-dependent — **verify with `EXPLA
 ## Interview traps
 
 > **Interview trap**
-> "How many times will this recursive query run for a tree of depth 4 and 1,000 nodes?" The right answer is about **iterations = depth = 4**, not 1,000. Each iteration processes the *current working generation*, not the whole tree — though the number of *rows scanned* tends to grow with width.
+> "How many times will this recursive query run for a tree of depth 4 and 1,000 nodes?" The right answer is about **iterations = depth = 4**, not 1,000. Each iteration processes the _current working generation_, not the whole tree — though the number of _rows scanned_ tends to grow with width.
 
 > **Interview trap**
 > "What does the CTE name refer to inside the recursive member?" The **previous generation only** — not the accumulated result. Anyone who answers "the whole result set" has missed the working-table semantics.

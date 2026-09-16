@@ -4,10 +4,10 @@
 
 **RANK** and **DENSE_RANK** are window functions that assign a ranking number to each row within a partition based on a specified ordering. Both handle ties identically — rows with the same value in the ORDER BY clause receive the same rank. The critical difference lies in how they handle gaps after ties.
 
-| Function | Ties | Gap After Tie |
-|----------|------|---------------|
-| `RANK()` | Same rank for equal values | Yes — skips next rank(s) |
-| `DENSE_RANK()` | Same rank for equal values | No — consecutive ranks |
+| Function       | Ties                       | Gap After Tie            |
+| -------------- | -------------------------- | ------------------------ |
+| `RANK()`       | Same rank for equal values | Yes — skips next rank(s) |
+| `DENSE_RANK()` | Same rank for equal values | No — consecutive ranks   |
 
 > Common misconception: "RANK and DENSE_RANK are the same thing except for cosmetic formatting." They are not. Choosing the wrong one can silently produce incorrect business logic — e.g., "top 3 customers" returning 5 rows with RANK but exactly 3 with DENSE_RANK.
 
@@ -46,43 +46,43 @@ DENSE_RANK() OVER (
 
 One row per employee.
 
-| employee_id | name       | department | salary | hire_date  |
-|-------------|------------|------------|--------|------------|
-| 1           | Alice      | Engineering| 95000  | 2019-03-15 |
-| 2           | Bob        | Engineering| 85000  | 2020-06-01 |
-| 3           | Carol      | Engineering| 85000  | 2021-01-10 |
-| 4           | Dave       | Engineering| 75000  | 2022-09-20 |
-| 5           | Eve        | Marketing  | 70000  | 2020-04-12 |
-| 6           | Frank      | Marketing  | 70000  | 2021-08-05 |
-| 7           | Grace      | Marketing  | 65000  | 2023-02-28 |
-| 8           | Hank       | Sales      | 80000  | 2018-11-30 |
-| 9           | Ivy        | Sales      | 80000  | 2019-07-14 |
-| 10          | Jack       | Sales      | 80000  | 2020-03-22 |
-| 11          | Karen      | Sales      | 60000  | 2023-06-01 |
+| employee_id | name  | department  | salary | hire_date  |
+| ----------- | ----- | ----------- | ------ | ---------- |
+| 1           | Alice | Engineering | 95000  | 2019-03-15 |
+| 2           | Bob   | Engineering | 85000  | 2020-06-01 |
+| 3           | Carol | Engineering | 85000  | 2021-01-10 |
+| 4           | Dave  | Engineering | 75000  | 2022-09-20 |
+| 5           | Eve   | Marketing   | 70000  | 2020-04-12 |
+| 6           | Frank | Marketing   | 70000  | 2021-08-05 |
+| 7           | Grace | Marketing   | 65000  | 2023-02-28 |
+| 8           | Hank  | Sales       | 80000  | 2018-11-30 |
+| 9           | Ivy   | Sales       | 80000  | 2019-07-14 |
+| 10          | Jack  | Sales       | 80000  | 2020-03-22 |
+| 11          | Karen | Sales       | 60000  | 2023-06-01 |
 
 ### products
 
 One row per product.
 
-| product_id | product_name | category  | price |
-|------------|--------------|-----------|-------|
-| 101        | Widget A     | Electronics| 29.99 |
-| 102        | Widget B     | Electronics| 29.99 |
-| 103        | Widget C     | Electronics| 19.99 |
-| 104        | Gadget X     | Clothing  | 49.99 |
-| 105        | Gadget Y     | Clothing  | NULL  |
+| product_id | product_name | category    | price |
+| ---------- | ------------ | ----------- | ----- |
+| 101        | Widget A     | Electronics | 29.99 |
+| 102        | Widget B     | Electronics | 29.99 |
+| 103        | Widget C     | Electronics | 19.99 |
+| 104        | Gadget X     | Clothing    | 49.99 |
+| 105        | Gadget Y     | Clothing    | NULL  |
 
 ### scores
 
 One row per student per test.
 
 | student_id | test_date  | score |
-|------------|------------|-------|
+| ---------- | ---------- | ----- |
 | 1          | 2024-01-15 | 95    |
 | 2          | 2024-01-15 | 95    |
 | 3          | 2024-01-15 | 90    |
 | 4          | 2024-01-15 | 85    |
-| 5          | 2024-01-15 | NULL   |
+| 5          | 2024-01-15 | NULL  |
 
 ---
 
@@ -126,19 +126,19 @@ ORDER BY salary DESC, name;
 
 ### Expected Output
 
-| employee_id | name   | department  | salary | rank_val | dense_rank_val |
-|-------------|--------|-------------|--------|----------|----------------|
-| 1           | Alice  | Engineering | 95000  | 1        | 1              |
-| 2           | Bob    | Engineering | 85000  | 2        | 2              |
-| 3           | Carol  | Engineering | 85000  | 2        | 2              |
-| 8           | Hank   | Sales       | 80000  | 4        | 3              |
-| 9           | Ivy    | Sales       | 80000  | 4        | 3              |
-| 10          | Jack   | Sales       | 80000  | 4        | 3              |
-| 4           | Dave   | Engineering | 75000  | 7        | 4              |
-| 5           | Eve    | Marketing   | 70000  | 8        | 5              |
-| 6           | Frank  | Marketing   | 70000  | 8        | 5              |
-| 7           | Grace  | Marketing   | 65000  | 10       | 6              |
-| 11          | Karen  | Sales       | 60000  | 11       | 7              |
+| employee_id | name  | department  | salary | rank_val | dense_rank_val |
+| ----------- | ----- | ----------- | ------ | -------- | -------------- |
+| 1           | Alice | Engineering | 95000  | 1        | 1              |
+| 2           | Bob   | Engineering | 85000  | 2        | 2              |
+| 3           | Carol | Engineering | 85000  | 2        | 2              |
+| 8           | Hank  | Sales       | 80000  | 4        | 3              |
+| 9           | Ivy   | Sales       | 80000  | 4        | 3              |
+| 10          | Jack  | Sales       | 80000  | 4        | 3              |
+| 4           | Dave  | Engineering | 75000  | 7        | 4              |
+| 5           | Eve   | Marketing   | 70000  | 8        | 5              |
+| 6           | Frank | Marketing   | 70000  | 8        | 5              |
+| 7           | Grace | Marketing   | 65000  | 10       | 6              |
+| 11          | Karen | Sales       | 60000  | 11       | 7              |
 
 **Key observations:**
 
@@ -165,19 +165,19 @@ ORDER BY department, salary DESC, name;
 
 ### Expected Output
 
-| employee_id | name   | department  | salary | dept_rank | dept_dense_rank |
-|-------------|--------|-------------|--------|-----------|-----------------|
-| 1           | Alice  | Engineering | 95000  | 1         | 1               |
-| 2           | Bob    | Engineering | 85000  | 2         | 2               |
-| 3           | Carol  | Engineering | 85000  | 2         | 2               |
-| 4           | Dave   | Engineering | 75000  | 4         | 3               |
-| 5           | Eve    | Marketing   | 70000  | 1         | 1               |
-| 6           | Frank  | Marketing   | 70000  | 1         | 1               |
-| 7           | Grace  | Marketing   | 65000  | 3         | 2               |
-| 8           | Hank   | Sales       | 80000  | 1         | 1               |
-| 9           | Ivy    | Sales       | 80000  | 1         | 1               |
-| 10          | Jack   | Sales       | 80000  | 1         | 1               |
-| 11          | Karen  | Sales       | 60000  | 4         | 2               |
+| employee_id | name  | department  | salary | dept_rank | dept_dense_rank |
+| ----------- | ----- | ----------- | ------ | --------- | --------------- |
+| 1           | Alice | Engineering | 95000  | 1         | 1               |
+| 2           | Bob   | Engineering | 85000  | 2         | 2               |
+| 3           | Carol | Engineering | 85000  | 2         | 2               |
+| 4           | Dave  | Engineering | 75000  | 4         | 3               |
+| 5           | Eve   | Marketing   | 70000  | 1         | 1               |
+| 6           | Frank | Marketing   | 70000  | 1         | 1               |
+| 7           | Grace | Marketing   | 65000  | 3         | 2               |
+| 8           | Hank  | Sales       | 80000  | 1         | 1               |
+| 9           | Ivy   | Sales       | 80000  | 1         | 1               |
+| 10          | Jack  | Sales       | 80000  | 1         | 1               |
+| 11          | Karen | Sales       | 60000  | 4         | 2               |
 
 **Key observations:**
 
@@ -208,16 +208,16 @@ WHERE rnk <= 2;
 
 **Result — returns more than 2 per department when ties exist:**
 
-| employee_id | name   | department  | salary | rnk |
-|-------------|--------|-------------|--------|-----|
-| 1           | Alice  | Engineering | 95000  | 1   |
-| 2           | Bob    | Engineering | 85000  | 2   |
-| 3           | Carol  | Engineering | 85000  | 2   |
-| 5           | Eve    | Marketing   | 70000  | 1   |
-| 6           | Frank  | Marketing   | 70000  | 1   |
-| 8           | Hank   | Sales       | 80000  | 1   |
-| 9           | Ivy    | Sales       | 80000  | 1   |
-| 10          | Jack   | Sales       | 80000  | 1   |
+| employee_id | name  | department  | salary | rnk |
+| ----------- | ----- | ----------- | ------ | --- |
+| 1           | Alice | Engineering | 95000  | 1   |
+| 2           | Bob   | Engineering | 85000  | 2   |
+| 3           | Carol | Engineering | 85000  | 2   |
+| 5           | Eve   | Marketing   | 70000  | 1   |
+| 6           | Frank | Marketing   | 70000  | 1   |
+| 8           | Hank  | Sales       | 80000  | 1   |
+| 9           | Ivy   | Sales       | 80000  | 1   |
+| 10          | Jack  | Sales       | 80000  | 1   |
 
 Engineering returns 3 rows, Sales returns 3 rows — neither is exactly "top 2."
 
@@ -239,17 +239,17 @@ WHERE drnk <= 2;
 
 **Result — exactly the top 2 distinct salary levels per department:**
 
-| employee_id | name   | department  | salary | drnk |
-|-------------|--------|-------------|--------|------|
-| 1           | Alice  | Engineering | 95000  | 1    |
-| 2           | Bob    | Engineering | 85000  | 2    |
-| 3           | Carol  | Engineering | 85000  | 2    |
-| 5           | Eve    | Marketing   | 70000  | 1    |
-| 6           | Frank  | Marketing   | 70000  | 1    |
-| 7           | Grace  | Marketing   | 65000  | 2    |
-| 8           | Hank   | Sales       | 80000  | 1    |
-| 9           | Ivy    | Sales       | 80000  | 1    |
-| 10          | Jack   | Sales       | 80000  | 1    |
+| employee_id | name  | department  | salary | drnk |
+| ----------- | ----- | ----------- | ------ | ---- |
+| 1           | Alice | Engineering | 95000  | 1    |
+| 2           | Bob   | Engineering | 85000  | 2    |
+| 3           | Carol | Engineering | 85000  | 2    |
+| 5           | Eve   | Marketing   | 70000  | 1    |
+| 6           | Frank | Marketing   | 70000  | 1    |
+| 7           | Grace | Marketing   | 65000  | 2    |
+| 8           | Hank  | Sales       | 80000  | 1    |
+| 9           | Ivy   | Sales       | 80000  | 1    |
+| 10          | Jack  | Sales       | 80000  | 1    |
 
 **Why is this better?** DENSE_RANK considers distinct values, not distinct rows. If the business question is "top 2 salary levels," DENSE_RANK is correct. If the question is "top 2 employees by salary" (meaning exactly 2 rows regardless of ties), you need ROW_NUMBER instead (see section on ROW_NUMBER).
 
@@ -274,7 +274,7 @@ ORDER BY score DESC, student_id;
 ### Expected Output
 
 | student_id | score | competition_rank | medal_rank |
-|------------|-------|------------------|------------|
+| ---------- | ----- | ---------------- | ---------- |
 | 1          | 95    | 1                | 1          |
 | 2          | 95    | 1                | 1          |
 | 3          | 90    | 3                | 2          |
@@ -313,12 +313,12 @@ ORDER BY salary DESC;
 
 ### How NULLs Sort
 
-| Database    | NULLs in ASC        | NULLs in DESC       |
-|-------------|---------------------|---------------------|
-| PostgreSQL  | NULLS LAST (default)| NULLS FIRST (default)|
-| MySQL       | Always first in ASC | Always last in DESC |
-| SQL Server  | Always first in ASC | Always last in DESC |
-| Oracle      | NULLS LAST in ASC   | NULLS FIRST in DESC |
+| Database   | NULLs in ASC         | NULLs in DESC         |
+| ---------- | -------------------- | --------------------- |
+| PostgreSQL | NULLS LAST (default) | NULLS FIRST (default) |
+| MySQL      | Always first in ASC  | Always last in DESC   |
+| SQL Server | Always first in ASC  | Always last in DESC   |
+| Oracle     | NULLS LAST in ASC    | NULLS FIRST in DESC   |
 
 ### NULLs in Ranking
 
@@ -336,7 +336,7 @@ ORDER BY price DESC NULLS LAST;
 ### Expected Output
 
 | product_id | product_name | price | rank_val | dense_rank_val |
-|------------|--------------|-------|----------|----------------|
+| ---------- | ------------ | ----- | -------- | -------------- |
 | 104        | Gadget X     | 49.99 | 1        | 1              |
 | 101        | Widget A     | 29.99 | 2        | 2              |
 | 102        | Widget B     | 29.99 | 2        | 2              |
@@ -435,16 +435,17 @@ If multiple rows share the same rank, pagination breaks. Page 1 might return row
 
 ## Comparison Table
 
-| Aspect                    | RANK                          | DENSE_RANK                    | ROW_NUMBER                     |
-|---------------------------|-------------------------------|-------------------------------|--------------------------------|
-| Ties                     | Same rank                     | Same rank                     | Arbitrary (no ties)            |
-| Gaps after ties          | Yes                           | No                            | No gaps                        |
-| Deterministic            | No (tie-breaking unspecified)| No (tie-breaking unspecified) | No (tie-breaking unspecified)  |
-| NULL handling            | NULLs tie together            | NULLs tie together            | Each NULL gets unique number   |
-| Use case                 | Competition ranking           | Level/rank without gaps       | Exact row count, pagination    |
-| "Top N" accuracy         | May return >N rows            | May return >N rows            | Exactly N rows                 |
+| Aspect           | RANK                          | DENSE_RANK                    | ROW_NUMBER                    |
+| ---------------- | ----------------------------- | ----------------------------- | ----------------------------- |
+| Ties             | Same rank                     | Same rank                     | Arbitrary (no ties)           |
+| Gaps after ties  | Yes                           | No                            | No gaps                       |
+| Deterministic    | No (tie-breaking unspecified) | No (tie-breaking unspecified) | No (tie-breaking unspecified) |
+| NULL handling    | NULLs tie together            | NULLs tie together            | Each NULL gets unique number  |
+| Use case         | Competition ranking           | Level/rank without gaps       | Exact row count, pagination   |
+| "Top N" accuracy | May return >N rows            | May return >N rows            | Exactly N rows                |
 
 > All three functions are non-deterministic when ties exist and no additional tie-breaking column is specified. The database does not guarantee which tied row gets which value. For deterministic ordering within ties, add a unique column as a secondary sort:
+>
 > ```sql
 > RANK() OVER (ORDER BY salary DESC, employee_id ASC)
 > ```
@@ -610,7 +611,7 @@ Ties are only created when ALL ORDER BY columns match. If two employees are in t
 11. Explain why RANK, DENSE_RANK, and ROW_NUMBER are non-deterministic when ties exist. How would you make them deterministic?
 12. Write a query using RANK that computes the gap between each employee's rank and the expected rank if there were no ties.
 13. How would you implement a "dense排名" (dense ranking without gaps) if your database did not have DENSE_RANK? (Hint: COUNT DISTINCT.)
-14. Compare the execution plans of RANK() OVER (ORDER BY salary) vs a subquery approach using COUNT(*) to compute rank. Under what conditions might one outperform the other?
+14. Compare the execution plans of RANK() OVER (ORDER BY salary) vs a subquery approach using COUNT(\*) to compute rank. Under what conditions might one outperform the other?
 15. Write a query using DENSE_RANK to identify salary bands where more than 3 employees exist, and show the band number.
 
 ### Scenario Based
@@ -659,13 +660,13 @@ WINDOW w AS (PARTITION BY department ORDER BY salary DESC);
 
 25. Given this data:
 
-| id | value |
-|----|-------|
-| 1  | 10    |
-| 2  | 20    |
-| 3  | 20    |
-| 4  | 20    |
-| 5  | 30    |
+| id  | value |
+| --- | ----- |
+| 1   | 10    |
+| 2   | 20    |
+| 3   | 20    |
+| 4   | 20    |
+| 5   | 30    |
 
 Predict the output of:
 

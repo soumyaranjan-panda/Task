@@ -38,6 +38,7 @@ ORDER BY salary DESC;
 ```
 
 The database engine may:
+
 - Scan the table fully
 - Use an index
 - Choose a hash join vs nested loop
@@ -49,12 +50,12 @@ All of this is decided by the optimizer based on statistics, indexes, and data d
 
 ## SQL Command Categories
 
-| Category | Full Name | Purpose | Commands |
-|----------|-----------|---------|----------|
-| **DDL** | Data Definition Language | Define / modify schema | `CREATE`, `ALTER`, `DROP`, `TRUNCATE` |
-| **DML** | Data Manipulation Language | Read / modify data | `SELECT`, `INSERT`, `UPDATE`, `DELETE` |
-| **DCL** | Data Control Language | Permissions | `GRANT`, `REVOKE` |
-| **TCL** | Transaction Control | Transactions | `BEGIN`, `COMMIT`, `ROLLBACK`, `SAVEPOINT` |
+| Category | Full Name                  | Purpose                | Commands                                   |
+| -------- | -------------------------- | ---------------------- | ------------------------------------------ |
+| **DDL**  | Data Definition Language   | Define / modify schema | `CREATE`, `ALTER`, `DROP`, `TRUNCATE`      |
+| **DML**  | Data Manipulation Language | Read / modify data     | `SELECT`, `INSERT`, `UPDATE`, `DELETE`     |
+| **DCL**  | Data Control Language      | Permissions            | `GRANT`, `REVOKE`                          |
+| **TCL**  | Transaction Control        | Transactions           | `BEGIN`, `COMMIT`, `ROLLBACK`, `SAVEPOINT` |
 
 > **Note:** `SELECT` is sometimes classified as DQL (Data Query Language) separately from DML. The categorization varies across textbooks. What matters is understanding what each command does.
 
@@ -204,14 +205,15 @@ LIMIT       → 9. Restrict row count
 SELECT * FROM departments;
 ```
 
-| department_id | department_name | location |
-|---------------|-----------------|----------|
-| 1 | Engineering | New York |
-| 2 | Marketing | San Francisco |
-| 3 | Human Resources | Chicago |
-| 4 | Finance | New York |
+| department_id | department_name | location      |
+| ------------- | --------------- | ------------- |
+| 1             | Engineering     | New York      |
+| 2             | Marketing       | San Francisco |
+| 3             | Human Resources | Chicago       |
+| 4             | Finance         | New York      |
 
 > **Production pitfall:** `SELECT *` is discouraged in production code. It returns all columns including ones you do not need, which:
+>
 > - Wastes network bandwidth
 > - Breaks code if schema changes (column added/removed/renamed)
 > - Prevents covering index usage
@@ -225,16 +227,16 @@ SELECT first_name, last_name, salary
 FROM employees;
 ```
 
-| first_name | last_name | salary |
-|------------|-----------|--------|
-| Alice | Chen | 95000.00 |
-| Bob | Martinez | 72000.00 |
-| Charlie | Patel | 110000.00 |
-| Diana | Kowalski | 68000.00 |
-| Eve | Nguyen | 85000.00 |
-| Frank | Singh | 125000.00 |
-| Grace | Brown | 55000.00 |
-| Hank | Davis | NULL |
+| first_name | last_name | salary    |
+| ---------- | --------- | --------- |
+| Alice      | Chen      | 95000.00  |
+| Bob        | Martinez  | 72000.00  |
+| Charlie    | Patel     | 110000.00 |
+| Diana      | Kowalski  | 68000.00  |
+| Eve        | Nguyen    | 85000.00  |
+| Frank      | Singh     | 125000.00 |
+| Grace      | Brown     | 55000.00  |
+| Hank       | Davis     | NULL      |
 
 ### Expressions in SELECT
 
@@ -248,18 +250,20 @@ SELECT
 FROM employees;
 ```
 
-| first_name | last_name | salary | annual_salary | projected_salary |
-|------------|-----------|--------|---------------|------------------|
-| Alice | Chen | 95000.00 | 1140000.00 | 104500.00 |
-| Bob | Martinez | 72000.00 | 864000.00 | 79200.00 |
-| ... | ... | ... | ... | ... |
+| first_name | last_name | salary   | annual_salary | projected_salary |
+| ---------- | --------- | -------- | ------------- | ---------------- |
+| Alice      | Chen      | 95000.00 | 1140000.00    | 104500.00        |
+| Bob        | Martinez  | 72000.00 | 864000.00     | 79200.00         |
+| ...        | ...       | ...      | ...           | ...              |
 
 > NULL behavior: Any arithmetic with NULL yields NULL.
+>
 > ```sql
 > SELECT NULL + 1;  -- Result: NULL
 > SELECT NULL * 5;  -- Result: NULL
 > SELECT NULL / 0;  -- Result: NULL (not an error in most databases)
 > ```
+>
 > See [NULL — The Most Misunderstood Concept](#null--the-most-misunderstood-concept) for full details.
 
 ---
@@ -276,23 +280,23 @@ FROM employees
 WHERE salary > 80000;
 ```
 
-| first_name | salary |
-|------------|--------|
-| Alice | 95000.00 |
-| Charlie | 110000.00 |
-| Eve | 85000.00 |
-| Frank | 125000.00 |
+| first_name | salary    |
+| ---------- | --------- |
+| Alice      | 95000.00  |
+| Charlie    | 110000.00 |
+| Eve        | 85000.00  |
+| Frank      | 125000.00 |
 
 ### All Comparison Operators
 
-| Operator | Meaning |
-|----------|---------|
-| `=` | Equal to |
-| `<>` or `!=` | Not equal to |
-| `>` | Greater than |
-| `<` | Less than |
-| `>=` | Greater than or equal to |
-| `<=` | Less than or equal to |
+| Operator     | Meaning                  |
+| ------------ | ------------------------ |
+| `=`          | Equal to                 |
+| `<>` or `!=` | Not equal to             |
+| `>`          | Greater than             |
+| `<`          | Less than                |
+| `>=`         | Greater than or equal to |
+| `<=`         | Less than or equal to    |
 
 ### Logical Operators
 
@@ -303,10 +307,10 @@ FROM employees
 WHERE salary > 70000 AND department_id = 1;
 ```
 
-| first_name | salary | department_id |
-|------------|--------|---------------|
-| Alice | 95000.00 | 1 |
-| Eve | 85000.00 | 1 |
+| first_name | salary   | department_id |
+| ---------- | -------- | ------------- |
+| Alice      | 95000.00 | 1             |
+| Eve        | 85000.00 | 1             |
 
 ```sql
 -- OR: at least one condition must be true
@@ -316,12 +320,12 @@ WHERE department_id = 1 OR department_id = 3;
 ```
 
 | first_name | department_id |
-|------------|---------------|
-| Alice | 1 |
-| Bob | 1 |
-| Eve | 1 |
-| Frank | 3 |
-| Hank | 3 |
+| ---------- | ------------- |
+| Alice      | 1             |
+| Bob        | 1             |
+| Eve        | 1             |
+| Frank      | 3             |
+| Hank       | 3             |
 
 ```sql
 -- NOT: negates a condition
@@ -330,13 +334,13 @@ FROM employees
 WHERE NOT department_id = 1;
 ```
 
-| first_name | salary |
-|------------|--------|
-| Charlie | 110000.00 |
-| Diana | 68000.00 |
-| Frank | 125000.00 |
-| Grace | 55000.00 |
-| Hank | NULL |
+| first_name | salary    |
+| ---------- | --------- |
+| Charlie    | 110000.00 |
+| Diana      | 68000.00  |
+| Frank      | 125000.00 |
+| Grace      | 55000.00  |
+| Hank       | NULL      |
 
 ### IN Operator
 
@@ -377,18 +381,18 @@ WHERE salary BETWEEN 70000 AND 95000;
 WHERE salary >= 70000 AND salary <= 95000
 ```
 
-| first_name | salary |
-|------------|--------|
-| Alice | 95000.00 |
-| Bob | 72000.00 |
-| Eve | 85000.00 |
+| first_name | salary   |
+| ---------- | -------- |
+| Alice      | 95000.00 |
+| Bob        | 72000.00 |
+| Eve        | 85000.00 |
 
 ### LIKE Pattern Matching
 
-| Pattern | Meaning |
-|---------|---------|
-| `%` | Zero or more characters |
-| `_` | Exactly one character |
+| Pattern | Meaning                 |
+| ------- | ----------------------- |
+| `%`     | Zero or more characters |
+| `_`     | Exactly one character   |
 
 ```sql
 -- Names starting with 'A'
@@ -416,8 +420,8 @@ WHERE email IS NULL;
 ```
 
 | first_name | email |
-|------------|-------|
-| Eve | NULL |
+| ---------- | ----- |
+| Eve        | NULL  |
 
 ```sql
 -- Find employees with no department
@@ -427,8 +431,8 @@ WHERE department_id IS NULL;
 ```
 
 | first_name | department_id |
-|------------|---------------|
-| Grace | NULL |
+| ---------- | ------------- |
+| Grace      | NULL          |
 
 > Interview trap: `WHERE email = NULL` **never** returns rows. NULL is not a value — it represents the absence of a value. You must use `IS NULL`.
 
@@ -470,27 +474,27 @@ FROM employees
 ORDER BY salary DESC;
 ```
 
-| first_name | salary |
-|------------|--------|
-| Frank | 125000.00 |
-| Charlie | 110000.00 |
-| Alice | 95000.00 |
-| Eve | 85000.00 |
-| Bob | 72000.00 |
-| Diana | 68000.00 |
-| Grace | 55000.00 |
-| Hank | NULL |
+| first_name | salary    |
+| ---------- | --------- |
+| Frank      | 125000.00 |
+| Charlie    | 110000.00 |
+| Alice      | 95000.00  |
+| Eve        | 85000.00  |
+| Bob        | 72000.00  |
+| Diana      | 68000.00  |
+| Grace      | 55000.00  |
+| Hank       | NULL      |
 
 ### NULL Ordering
 
 > PostgreSQL, MySQL, SQL Server, Oracle handle NULL ordering differently.
 
-| Database | Default NULL Order (ASC) | Default NULL Order (DESC) |
-|----------|--------------------------|---------------------------|
-| PostgreSQL | Last (NULLS LAST) | First (NULLS FIRST) |
-| MySQL | First (NULL before values) | Last |
-| SQL Server | First | Last |
-| Oracle | Last | First |
+| Database   | Default NULL Order (ASC)   | Default NULL Order (DESC) |
+| ---------- | -------------------------- | ------------------------- |
+| PostgreSQL | Last (NULLS LAST)          | First (NULLS FIRST)       |
+| MySQL      | First (NULL before values) | Last                      |
+| SQL Server | First                      | Last                      |
+| Oracle     | Last                       | First                     |
 
 To make behavior explicit:
 
@@ -511,12 +515,12 @@ Restricts the number of rows returned.
 
 ### Syntax Differences
 
-| Database | Syntax |
-|----------|--------|
-| PostgreSQL, MySQL, SQLite | `LIMIT n OFFSET m` or `LIMIT m, n` |
-| SQL Server | `OFFSET m ROWS FETCH NEXT n ROWS ONLY` |
-| Oracle | `FETCH FIRST n ROWS ONLY` (12c+) or rownum |
-| MySQL (older) | `LIMIT m, n` |
+| Database                  | Syntax                                     |
+| ------------------------- | ------------------------------------------ |
+| PostgreSQL, MySQL, SQLite | `LIMIT n OFFSET m` or `LIMIT m, n`         |
+| SQL Server                | `OFFSET m ROWS FETCH NEXT n ROWS ONLY`     |
+| Oracle                    | `FETCH FIRST n ROWS ONLY` (12c+) or rownum |
+| MySQL (older)             | `LIMIT m, n`                               |
 
 ```sql
 -- PostgreSQL / MySQL
@@ -526,11 +530,11 @@ ORDER BY salary DESC
 LIMIT 3;
 ```
 
-| first_name | salary |
-|------------|--------|
-| Frank | 125000.00 |
-| Charlie | 110000.00 |
-| Alice | 95000.00 |
+| first_name | salary    |
+| ---------- | --------- |
+| Frank      | 125000.00 |
+| Charlie    | 110000.00 |
+| Alice      | 95000.00  |
 
 ```sql
 -- SQL Server
@@ -576,11 +580,11 @@ FROM employees;
 ```
 
 | department_id |
-|---------------|
-| 1 |
-| 2 |
-| 3 |
-| NULL |
+| ------------- |
+| 1             |
+| 2             |
+| 3             |
+| NULL          |
 
 > **NULL behavior:** `DISTINCT` treats all NULLs as one value. There is only one NULL in the output even if multiple rows have NULL.
 
@@ -589,11 +593,11 @@ SELECT DISTINCT location
 FROM departments;
 ```
 
-| location |
-|----------|
-| New York |
+| location      |
+| ------------- |
+| New York      |
 | San Francisco |
-| Chicago |
+| Chicago       |
 
 > Common misconception: `DISTINCT` is not a performance tool. It adds a sort or hash step to remove duplicates. If you are getting unexpected duplicates, the problem is usually in your JOINs or missing GROUP BY, not a lack of `DISTINCT`.
 >
@@ -741,15 +745,15 @@ WHERE employee_id = 10;
 
 ### DELETE vs TRUNCATE vs DROP
 
-| Feature | DELETE | TRUNCATE | DROP |
-|---------|--------|----------|------|
-| What it removes | Specific rows (or all) | All rows | Entire table + data + schema |
-| WHERE clause | Yes | No | No |
-| Rollback | Yes (in transaction) | Yes (in most databases) | Yes (in transaction) |
-| Identity reset | No | Yes (resets auto-increment) | N/A |
-| Triggers | Fires DELETE triggers | Does NOT fire triggers | N/A |
-| Speed (large tables) | Slower (row-by-row) | Faster (deallocates pages) | Fastest |
-| Logging | Logs each row | Logs page deallocation | Logs schema change |
+| Feature              | DELETE                 | TRUNCATE                    | DROP                         |
+| -------------------- | ---------------------- | --------------------------- | ---------------------------- |
+| What it removes      | Specific rows (or all) | All rows                    | Entire table + data + schema |
+| WHERE clause         | Yes                    | No                          | No                           |
+| Rollback             | Yes (in transaction)   | Yes (in most databases)     | Yes (in transaction)         |
+| Identity reset       | No                     | Yes (resets auto-increment) | N/A                          |
+| Triggers             | Fires DELETE triggers  | Does NOT fire triggers      | N/A                          |
+| Speed (large tables) | Slower (row-by-row)    | Faster (deallocates pages)  | Fastest                      |
+| Logging              | Logs each row          | Logs page deallocation      | Logs schema change           |
 
 ```sql
 -- Removes all rows, but table structure remains
@@ -774,12 +778,12 @@ NULL is **not** a value. It represents the **absence of a value** or **unknown d
 
 SQL uses three-valued logic: `TRUE`, `FALSE`, and `UNKNOWN`. NULL produces `UNKNOWN` in most comparisons.
 
-| A | B | A = B |
-|---|---|-------|
-| 1 | 1 | TRUE |
-| 1 | 2 | FALSE |
-| NULL | 1 | UNKNOWN |
-| 1 | NULL | UNKNOWN |
+| A    | B    | A = B   |
+| ---- | ---- | ------- |
+| 1    | 1    | TRUE    |
+| 1    | 2    | FALSE   |
+| NULL | 1    | UNKNOWN |
+| 1    | NULL | UNKNOWN |
 | NULL | NULL | UNKNOWN |
 
 ### Core NULL Rules
@@ -829,10 +833,10 @@ FROM employees;
 ```
 
 | count_all | count_email | count_dept |
-|-----------|-------------|------------|
-| 8 | 6 | 7 |
+| --------- | ----------- | ---------- |
+| 8         | 6           | 7          |
 
-### COUNT(*) vs COUNT(1)
+### COUNT(\*) vs COUNT(1)
 
 ```sql
 SELECT COUNT(*) FROM employees;    -- 8
@@ -853,12 +857,12 @@ SELECT
 FROM employees;
 ```
 
-| first_name | salary | salary_or_zero |
-|------------|--------|----------------|
-| Alice | 95000.00 | 95000.00 |
-| Bob | 72000.00 | 72000.00 |
-| ... | ... | ... |
-| Hank | NULL | 0 |
+| first_name | salary   | salary_or_zero |
+| ---------- | -------- | -------------- |
+| Alice      | 95000.00 | 95000.00       |
+| Bob        | 72000.00 | 72000.00       |
+| ...        | ...      | ...            |
+| Hank       | NULL     | 0              |
 
 ```sql
 -- Practical use: provide a default email
@@ -924,12 +928,12 @@ SELECT * FROM employees WHERE department_id IS DISTINCT FROM 1;
 -- Returns all employees NOT in department 1, INCLUDING those with NULL department_id
 ```
 
-| department_id | department_id IS DISTINCT FROM 1 |
-|---------------|----------------------------------|
-| 1 | FALSE |
-| 2 | TRUE |
-| 3 | TRUE |
-| NULL | TRUE (NULL is "different from" 1) |
+| department_id | department_id IS DISTINCT FROM 1  |
+| ------------- | --------------------------------- |
+| 1             | FALSE                             |
+| 2             | TRUE                              |
+| 3             | TRUE                              |
+| NULL          | TRUE (NULL is "different from" 1) |
 
 ### NOT IN + NULL
 
@@ -943,9 +947,9 @@ WHERE department_id NOT IN (1, 2);
 ```
 
 | first_name | department_id |
-|------------|---------------|
-| Frank | 3 |
-| Hank | 3 |
+| ---------- | ------------- |
+| Frank      | 3             |
+| Hank       | 3             |
 
 So far so good. But watch what happens:
 
@@ -1008,9 +1012,9 @@ FROM employees;
 ```
 
 | First Name | annual_salary |
-|------------|---------------|
-| Alice | 1140000.00 |
-| Bob | 864000.00 |
+| ---------- | ------------- |
+| Alice      | 1140000.00    |
+| Bob        | 864000.00     |
 
 ### Table Aliases
 
@@ -1089,7 +1093,7 @@ FROM employees e
 JOIN departments d ON e.department_id = d.department_id;
 ```
 
-### 4. SELECT * in Production
+### 4. SELECT \* in Production
 
 ```sql
 -- BAD
@@ -1200,18 +1204,18 @@ SELECT first_name, salary FROM employees WHERE department_id = 1;
 
 ## Best Practices
 
-| Practice | Why |
-|----------|-----|
-| Always specify column names in SELECT | Avoids breaking on schema changes |
-| Always specify column names in INSERT | Protects against column order changes |
-| Use `IS NULL` / `IS NOT NULL` | `= NULL` never works |
-| Use `EXISTS` instead of `IN` when the subquery may contain NULLs | `NOT IN + NULL` returns zero rows |
-| Use `COALESCE` for default values | Handles NULL gracefully |
-| Use `NULLIF` to prevent division by zero | Avoids runtime errors |
-| Use explicit JOIN syntax (ANSI SQL) | Clearer intent, less error-prone |
-| Always run SELECT before UPDATE/DELETE | Verify what will be affected |
-| Use transactions for multi-statement changes | Enable rollback on error |
-| Use EXPLAIN to understand query plans | Never guess about performance |
+| Practice                                                         | Why                                   |
+| ---------------------------------------------------------------- | ------------------------------------- |
+| Always specify column names in SELECT                            | Avoids breaking on schema changes     |
+| Always specify column names in INSERT                            | Protects against column order changes |
+| Use `IS NULL` / `IS NOT NULL`                                    | `= NULL` never works                  |
+| Use `EXISTS` instead of `IN` when the subquery may contain NULLs | `NOT IN + NULL` returns zero rows     |
+| Use `COALESCE` for default values                                | Handles NULL gracefully               |
+| Use `NULLIF` to prevent division by zero                         | Avoids runtime errors                 |
+| Use explicit JOIN syntax (ANSI SQL)                              | Clearer intent, less error-prone      |
+| Always run SELECT before UPDATE/DELETE                           | Verify what will be affected          |
+| Use transactions for multi-statement changes                     | Enable rollback on error              |
+| Use EXPLAIN to understand query plans                            | Never guess about performance         |
 
 ---
 
@@ -1267,12 +1271,14 @@ SELECT first_name, salary FROM employees WHERE department_id = 1;
 Given the sample tables above, predict the output:
 
 31.
+
 ```sql
 SELECT COUNT(*) AS total, COUNT(salary) AS with_salary
 FROM employees;
 ```
 
 32.
+
 ```sql
 SELECT first_name, COALESCE(email, CONCAT(first_name, '@unknown.com')) AS email
 FROM employees
@@ -1280,6 +1286,7 @@ WHERE email IS NULL;
 ```
 
 33.
+
 ```sql
 SELECT department_id, COUNT(*) AS cnt
 FROM employees
@@ -1288,11 +1295,13 @@ HAVING COUNT(*) > 2;
 ```
 
 34.
+
 ```sql
 SELECT NULLIF(10, 10), NULLIF(10, 20);
 ```
 
 35.
+
 ```sql
 SELECT COUNT(DISTINCT location) FROM departments;
 ```
@@ -1300,11 +1309,13 @@ SELECT COUNT(DISTINCT location) FROM departments;
 ## Debugging
 
 36. The following query returns 0 rows. Why?
+
 ```sql
 SELECT * FROM employees WHERE department_id NOT IN (SELECT department_id FROM departments WHERE location IS NULL);
 ```
 
 37. This query returns duplicate rows after joining. How do you fix it?
+
 ```sql
 SELECT e.first_name, d.department_name
 FROM employees e
@@ -1316,9 +1327,11 @@ JOIN departments d ON e.department_id = d.department_id;
 ## Performance
 
 39. You have a query:
+
 ```sql
 SELECT * FROM employees WHERE UPPER(first_name) = 'ALICE';
 ```
+
 Why might this be slow? How would you fix it?
 
 40. You need to paginate through 1 million rows using `OFFSET`. After page 100, queries become noticeably slower. Explain why and suggest a better approach.

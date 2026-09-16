@@ -4,14 +4,15 @@
 
 - [Fundamentals](#fundamentals)
 - [The Sample Tables (grain check)](#the-sample-tables-grain-chI've reviewed the conventions. Now I'll write the comprehensive Anti-Joins section.
-Done. Wrote `sql-handbook/3-Joins/23-Anti-Joins.md` (~1,130 lines).
+  Done. Wrote `sql-handbook/3-Joins/23-Anti-Joins.md` (~1,130 lines).
 
 Covers: fundamentals & mental model, grain-stated sample tables, the four anti-join forms (`NOT EXISTS`, `NOT IN`, `LEFT JOIN ... IS NULL`, `EXCEPT`/`MINUS`) plus non-ANSI `ANTI JOIN`, physical internals (nested-loop/hash/merge anti + semi vs anti, per-engine plan nodes), the `NOT IN` NULL-poison with demonstrations, 8 scenario-based examples with BAD vs BETTER, edge cases, mistakes, production pitfalls, performance with plan-verification emphasis, comparison tables, mermaid diagrams, dialect notes, and an unanswered Interview Questions bank (Beginner → Performance) with exact output-prediction exercises tied to the shared dataset.
+
 > "Which rows from table A have **no matching row** in table B?"
 
-It is the *opposite* of a semi-join. A **semi-join** returns rows of A that **do** have a match. An **anti-join** returns rows of A that **do not**.
+It is the _opposite_ of a semi-join. A **semi-join** returns rows of A that **do** have a match. An **anti-join** returns rows of A that **do not**.
 
-It is a **row-preserving** operation: it only ever emits rows from the driving table (`A`). It never emits a row from `B`, and it never emits *combinations* of `A` and `B` the way an INNER JOIN does. One input row from `A` produces **at most one output row**.
+It is a **row-preserving** operation: it only ever emits rows from the driving table (`A`). It never emits a row from `B`, and it never emits _combinations_ of `A` and `B` the way an INNER JOIN does. One input row from `A` produces **at most one output row**.
 
 ```
 AntiJoin(A, B) = { a ∈ A : there is NO b ∈ B such that condition(a, b) = TRUE }
@@ -29,9 +30,9 @@ Real queries constantly need this:
 - Orphan rows: rows whose foreign key points to a **non-existent** parent (referential-integrity checks).
 - "All of X except for the ones that are Y."
 
-You cannot express these with an INNER JOIN (INNER JOIN throws away the non-matching rows — exactly the ones you want) and you typically do not want a plain LEFT JOIN either, because a LEFT JOIN keeps the unmatched rows *along with* everything that matched, and it pads NULLs. The anti-join is the precise tool.
+You cannot express these with an INNER JOIN (INNER JOIN throws away the non-matching rows — exactly the ones you want) and you typically do not want a plain LEFT JOIN either, because a LEFT JOIN keeps the unmatched rows _along with_ everything that matched, and it pads NULLs. The anti-join is the precise tool.
 
-Note that SQL has **no dedicated anti-join keyword in the ANSI standard**. Instead, anti-joins are *expressed* with a small set of query patterns, and the optimizer usually recognizes those patterns and executes them with a dedicated physical **anti-join operator**.
+Note that SQL has **no dedicated anti-join keyword in the ANSI standard**. Instead, anti-joins are _expressed_ with a small set of query patterns, and the optimizer usually recognizes those patterns and executes them with a dedicated physical **anti-join operator**.
 
 ### The mental model
 
@@ -41,7 +42,7 @@ The easiest way to think about it: an anti-join is a **filtered difference of se
 A "minus" the rows that match something in B
 ```
 
-But — and this is the crucial caveat — SQL is *relationally* a set language, while your tables behave like *bags* (duplicate rows are possible). So:
+But — and this is the crucial caveat — SQL is _relationally_ a set language, while your tables behave like _bags_ (duplicate rows are possible). So:
 
 - It preserves **multiplicity** of the driving table `A` (see [Edge Cases — duplicates on the left]).
 - It never meshes data from `B` into the output.
@@ -49,13 +50,13 @@ But — and this is the crucial caveat — SQL is *relationally* a set language,
 
 ### The four families (and one bonus)
 
-| Form | What it literally says | Pattern |
-|---|---|---|
-| `NOT EXISTS` | "there is no such matching row" | correlated subquery |
-| `NOT IN` | "the value is not a member of this set" | subquery / list |
-| `LEFT JOIN ... WHERE b.key IS NULL` | "no row on the right ever got attached" | outer join + filter |
-| `EXCEPT` / `MINUS` | "rows in A that are not also in B", whole-row set difference | set operator |
-| `ANTI JOIN` / `LEFT ANTI JOIN` (non-ANSI) | explicitly "keep A rows with no match" | DuckDB, Spark SQL, and friends |
+| Form                                      | What it literally says                                       | Pattern                        |
+| ----------------------------------------- | ------------------------------------------------------------ | ------------------------------ |
+| `NOT EXISTS`                              | "there is no such matching row"                              | correlated subquery            |
+| `NOT IN`                                  | "the value is not a member of this set"                      | subquery / list                |
+| `LEFT JOIN ... WHERE b.key IS NULL`       | "no row on the right ever got attached"                      | outer join + filter            |
+| `EXCEPT` / `MINUS`                        | "rows in A that are not also in B", whole-row set difference | set operator                   |
+| `ANTI JOIN` / `LEFT ANTI JOIN` (non-ANSI) | explicitly "keep A rows with no match"                       | DuckDB, Spark SQL, and friends |
 
 Each behaves slightly differently under **NULLs** and **duplicates**. That difference is the whole art of anti-joins and most of the interview material in this section.
 
@@ -67,61 +68,62 @@ Each behaves slightly differently under **NULLs** and **duplicates**. That diffe
 
 We reuse the same dataset as the INNER JOIN and LEFT JOIN sections so you can compare directly. Always state the grain before querying.
 
-**customers** — *one row per customer.*
+**customers** — _one row per customer._
 
 | customer_id | name  | country |
-|-------------|-------|---------|
+| ----------- | ----- | ------- |
 | 1           | Alice | USA     |
 | 2           | Bob   | UK      |
 | 3           | Carol | Germany |
 | 4           | Dave  | NULL    |
 
-**orders** — *one row per order.*
+**orders** — _one row per order._
 
 | order_id | customer_id | order_date | amount |
-|----------|-------------|------------|--------|
+| -------- | ----------- | ---------- | ------ |
 | 101      | 1           | 2026-01-05 | 250.00 |
 | 102      | 2           | 2026-01-07 | 120.50 |
-| 103      | 1           | 2026-01-12 |  89.99 |
+| 103      | 1           | 2026-01-12 | 89.99  |
 | 104      | 3           | 2026-01-20 | 450.00 |
-| 105      | NULL        | 2026-02-01 |  30.00 |
+| 105      | NULL        | 2026-02-01 | 30.00  |
 | 106      | 5           | 2026-02-03 | 610.00 |
 
-**payments** — *one row per payment.*
+**payments** — _one row per payment._
 
 | payment_id | order_id | amount | paid_at    |
-|------------|----------|--------|------------|
+| ---------- | -------- | ------ | ---------- |
 | 1          | 101      | 100.00 | 2026-01-06 |
 | 2          | 101      | 150.00 | 2026-01-08 |
 | 3          | 102      | 120.50 | 2026-01-09 |
 
-**logins** — *one row per login event.*
+**logins** — _one row per login event._
 
 | login_id | customer_id | logged_at           |
-|----------|-------------|---------------------|
+| -------- | ----------- | ------------------- |
 | 1        | 1           | 2026-01-06 09:12:00 |
 | 2        | 1           | 2026-01-09 18:45:00 |
 | 3        | 2           | 2026-01-10 08:00:00 |
 
-**products** — *one row per product.*
+**products** — _one row per product._
 
 | product_id | product_name |
-|------------|--------------|
+| ---------- | ------------ |
 | 10         | Keyboard     |
 | 20         | Mouse        |
 | 30         | Monitor      |
 | 40         | Headset      |
 
-**order_items** — *one row per line item.*
+**order_items** — _one row per line item._
 
 | order_item_id | order_id | product_id | quantity | unit_price |
-|---------------|----------|------------|----------|------------|
+| ------------- | -------- | ---------- | -------- | ---------- |
 | 1001          | 101      | 10         | 1        | 100.00     |
-| 1002          | 101      | 30         | 2        |  70.00     |
-| 1003          | 102      | 10         | 3        |  95.00     |
-| 1004          | 103      | 40         | 1        |  40.00     |
+| 1002          | 101      | 30         | 2        | 70.00      |
+| 1003          | 102      | 10         | 3        | 95.00      |
+| 1004          | 103      | 40         | 1        | 40.00      |
 
 **Grain check highlights:**
+
 - Customer 4 (Dave) has no orders.
 - Order 105 has `customer_id = NULL`.
 - Order 106 references customer 5, who does not exist in `customers` (orphan).
@@ -133,7 +135,7 @@ We reuse the same dataset as the INNER JOIN and LEFT JOIN sections so you can co
 
 ## Syntax: Four Ways to Write an Anti-Join
 
-All four of these SQL forms describe the *same logical set* on NULL-free data. They are **not** always the same when NULLs are present — see [NULL Behavior].
+All four of these SQL forms describe the _same logical set_ on NULL-free data. They are **not** always the same when NULLs are present — see [NULL Behavior].
 
 ### 1. `NOT EXISTS`
 
@@ -150,10 +152,10 @@ WHERE NOT EXISTS (
 **Expected result:**
 
 | customer_id | name |
-|-------------|------|
+| ----------- | ---- |
 | 4           | Dave |
 
-`NOT EXISTS` is *correlated*: the inner query re-evaluates against each outer row. The optimizer usually turns this into an **anti join** operator.
+`NOT EXISTS` is _correlated_: the inner query re-evaluates against each outer row. The optimizer usually turns this into an **anti join** operator.
 
 ### 2. `NOT IN`
 
@@ -182,7 +184,7 @@ WHERE o.order_id IS NULL;
 **Expected result:**
 
 | customer_id | name |
-|-------------|------|
+| ----------- | ---- |
 | 4           | Dave |
 
 The unmatched customer keeps NULL-padded order columns; the `IS NULL` check on the right table's key picks out exactly those rows. The sentinel must be a **non-nullable** column of the right table — `order_id` here, not e.g. `amount`.
@@ -198,12 +200,12 @@ SELECT customer_id FROM orders;
 **Expected result:**
 
 | customer_id |
-|-------------|
+| ----------- |
 | 4           |
 
 (`EXCEPT` in PostgreSQL, SQL Server, and MySQL 8.0.31+; `MINUS` in Oracle.) Whole-row set difference: outputs the rows of the first result that don't appear in the second.
 
-**Why this one returns Dave despite the NULL:** set operators treat NULL as a value for matching purposes — but here no *customer* has a NULL id, and no order's NULL can equal Dave's `4`, so `4` survives. The subtlety shows up when the **outer** side has NULL keys, covered later.
+**Why this one returns Dave despite the NULL:** set operators treat NULL as a value for matching purposes — but here no _customer_ has a NULL id, and no order's NULL can equal Dave's `4`, so `4` survives. The subtlety shows up when the **outer** side has NULL keys, covered later.
 
 ### 5. Explicit `ANTI JOIN` (non-ANSI)
 
@@ -238,11 +240,11 @@ The operator family:
 
 Common physical implementations, distinguished by the join algorithm used:
 
-- **Nested Loop Anti Join** — outer scan + for each row, an index probe on the inner side looking for *any* match; stop at the first match (semi behavior) or find none (anti).
+- **Nested Loop Anti Join** — outer scan + for each row, an index probe on the inner side looking for _any_ match; stop at the first match (semi behavior) or find none (anti).
 - **Hash Anti Join** — build a hash table on the inner side, then probe with the outer side; rows that hit nothing are emitted.
 - **Merge Anti Join** — both sides sorted on the join key, then walked in lockstep emitting outer rows that never line up.
 
-> These are what your *execution plan* should show instead of the raw SQL form. When you see a node named "Anti" (or "Anti Semi"), the optimizer has recognized your anti-join pattern.
+> These are what your _execution plan_ should show instead of the raw SQL form. When you see a node named "Anti" (or "Anti Semi"), the optimizer has recognized your anti-join pattern.
 
 ### What the plan nodes look like (illustrative)
 
@@ -276,7 +278,7 @@ Hash Right Anti Join  (cost=... rows=4)
 
 **Oracle** — plans commonly show **`HASH JOIN ANTI`** (and `HASH JOIN ANTI SNA` for `NOT IN` where the subquery cannot be transformed), or `NESTED LOOPS ANTI`.
 
-**MySQL (8.x)** — the optimizer has a set of *subquery strategies*. For `NOT IN` and `NOT EXISTS` it may use **materialization** (build the inner result once, then apply anti/semi semantics), **FirstMatch**, or an **`Not exists`** execution strategy; you will see this reflected in `EXPLAIN EXTENDED` / `EXPLAIN FORMAT=JSON` annotations. Whether a subquery is flattened depends as much on the query shape (e.g. `LIMIT` or `GROUP BY` inside) as on the version.
+**MySQL (8.x)** — the optimizer has a set of _subquery strategies_. For `NOT IN` and `NOT EXISTS` it may use **materialization** (build the inner result once, then apply anti/semi semantics), **FirstMatch**, or an **`Not exists`** execution strategy; you will see this reflected in `EXPLAIN EXTENDED` / `EXPLAIN FORMAT=JSON` annotations. Whether a subquery is flattened depends as much on the query shape (e.g. `LIMIT` or `GROUP BY` inside) as on the version.
 
 ### When the pattern is NOT recognized
 
@@ -289,7 +291,7 @@ A few shapes defeat recognition and fall back to a literal "evaluate the subquer
 
 In those cases the plan shows a regular (nested loop / hash) join or a materialized subquery with a filter — and you should expect very different costs. Check with `EXPLAIN ANALYZE`, never by reading the SQL flavor alone.
 
-> Common misconception: "The engine just runs the subquery once and filters." It *might* — via subquery materialization — or it might build an Anti Join operator. Optimizers vary by engine, version, and statistics. The only reliable source of truth is the execution plan.
+> Common misconception: "The engine just runs the subquery once and filters." It _might_ — via subquery materialization — or it might build an Anti Join operator. Optimizers vary by engine, version, and statistics. The only reliable source of truth is the execution plan.
 
 **How to inspect in each engine:**
 
@@ -324,11 +326,11 @@ a.x NOT IN (b1.x, b2.x, ...)
 ```
 
 - If `a.x` is `NULL`: the whole `NOT (...) OR ...` chain is UNKNOWN → row **dropped**.
-- If *any* `b.x` is `NULL` and no `b.x` equals `a.x`: the `OR` chain is `FALSE OR UNKNOWN ... = UNKNOWN` → `NOT UNKNOWN` = UNKNOWN → row **dropped**.
+- If _any_ `b.x` is `NULL` and no `b.x` equals `a.x`: the `OR` chain is `FALSE OR UNKNOWN ... = UNKNOWN` → `NOT UNKNOWN` = UNKNOWN → row **dropped**.
 
 So **one NULL anywhere in the right-hand set drops every single row** — even rows whose key clearly has no match. This is the famous **"NOT IN poison."**
 
-> Interview trap: `WHERE customer_id NOT IN (SELECT customer_id FROM orders)` returns *zero rows*, not "Dave," if any `orders.customer_id` is NULL — which is precisely our data. The query looks correct; it is not.
+> Interview trap: `WHERE customer_id NOT IN (SELECT customer_id FROM orders)` returns _zero rows_, not "Dave," if any `orders.customer_id` is NULL — which is precisely our data. The query looks correct; it is not.
 
 ### The poison, demonstrated
 
@@ -353,7 +355,7 @@ WHERE o.order_id IS NULL;
 
 ### When does `NOT IN` become safe?
 
-Only when you can prove **the right-hand set never contains NULL** *and* you don't care about NULL keys on the left:
+Only when you can prove **the right-hand set never contains NULL** _and_ you don't care about NULL keys on the left:
 
 ```sql
 -- payments.order_id is a NOT NULL FK: safe
@@ -364,7 +366,7 @@ WHERE o.order_id NOT IN (SELECT p.order_id FROM payments p);
 
 **Expected result:** 103, 104, 105, 106 (orders with no payment). Here `NOT IN`, `NOT EXISTS`, `LEFT JOIN ... IS NULL`, and `EXCEPT` all agree.
 
-The danger is dependencies. `customer_id` is nullable in our `orders` table (order 105), so the `NOT IN` version is fragile. If you *must* keep `NOT IN`, guard it:
+The danger is dependencies. `customer_id` is nullable in our `orders` table (order 105), so the `NOT IN` version is fragile. If you _must_ keep `NOT IN`, guard it:
 
 ```sql
 SELECT c.name
@@ -378,13 +380,13 @@ But defending `NOT IN` with patches is futile complexity — prefer `NOT EXISTS`
 
 ### NULL keys on the outer side — the asymmetry
 
-Contrast the two questions with a customer whose *own* id is NULL (impossible in our PK, but conceivable with non-key columns):
+Contrast the two questions with a customer whose _own_ id is NULL (impossible in our PK, but conceivable with non-key columns):
 
-| Outer key `a.x` | `NOT EXISTS` / `LEFT JOIN...IS NULL` | `NOT IN` |
-|---|---|---|
-| `NULL` | **kept** ("no match found") | **dropped** (UNKNOWN) |
-| non-NULL, no match | kept | kept (if right set has no NULL) |
-| non-NULL, no match, right set has a NULL | kept | **dropped** (poison) |
+| Outer key `a.x`                          | `NOT EXISTS` / `LEFT JOIN...IS NULL` | `NOT IN`                        |
+| ---------------------------------------- | ------------------------------------ | ------------------------------- |
+| `NULL`                                   | **kept** ("no match found")          | **dropped** (UNKNOWN)           |
+| non-NULL, no match                       | kept                                 | kept (if right set has no NULL) |
+| non-NULL, no match, right set has a NULL | kept                                 | **dropped** (poison)            |
 
 So the three forms diverge in two independent places: NULL outer keys and NULLs in the right set.
 
@@ -408,16 +410,16 @@ SELECT customer_id FROM orders;
 -- returns 4 (Dave)
 ```
 
-But if the *outer* side had NULL ids, `EXCEPT` would remove NULL rows, whereas `NOT EXISTS`/`LEFT JOIN` would keep them. Behavior on NULLs in set operators is dialect-specific; treat it as "NULLs are deduplicated," but verify on your engine before relying on it in an anti-join.
+But if the _outer_ side had NULL ids, `EXCEPT` would remove NULL rows, whereas `NOT EXISTS`/`LEFT JOIN` would keep them. Behavior on NULLs in set operators is dialect-specific; treat it as "NULLs are deduplicated," but verify on your engine before relying on it in an anti-join.
 
 ### NULL behavior summary
 
-| Situation | `NOT EXISTS` | `NOT IN` | `LEFT JOIN ... IS NULL` | `EXCEPT`/`MINUS` |
-|---|---|---|---|---|
-| Outer row key is NULL | kept | dropped | kept | dropped (NULL matches NULL in the set) |
-| Right set contains a NULL, no match for the outer row | kept | **dropped (poison)** | kept | kept |
-| Right set empty | all outer rows kept (incl. NULL keys) | all outer non-NULL rows kept; NULL keys dropped | all kept | all kept |
-| Right set contains a match | row dropped | row dropped | row dropped | row dropped |
+| Situation                                             | `NOT EXISTS`                          | `NOT IN`                                        | `LEFT JOIN ... IS NULL` | `EXCEPT`/`MINUS`                       |
+| ----------------------------------------------------- | ------------------------------------- | ----------------------------------------------- | ----------------------- | -------------------------------------- |
+| Outer row key is NULL                                 | kept                                  | dropped                                         | kept                    | dropped (NULL matches NULL in the set) |
+| Right set contains a NULL, no match for the outer row | kept                                  | **dropped (poison)**                            | kept                    | kept                                   |
+| Right set empty                                       | all outer rows kept (incl. NULL keys) | all outer non-NULL rows kept; NULL keys dropped | all kept                | all kept                               |
+| Right set contains a match                            | row dropped                           | row dropped                                     | row dropped             | row dropped                            |
 
 **Conclusion:** for production anti-joins, start from `NOT EXISTS` (or `LEFT JOIN ... IS NULL` with a NOT NULL sentinel). Treat `NOT IN` as a landmine and `EXCEPT` as "set semantics with NULL equality."
 
@@ -452,7 +454,7 @@ WHERE NOT EXISTS (
 **Result:**
 
 | customer_id | name |
-|-------------|------|
+| ----------- | ---- |
 | 4           | Dave |
 
 **Why better:** NULL-safe by construction, no fan-out, optimizer can build an Anti Join. Verify with the plan.
@@ -484,15 +486,15 @@ ORDER BY o.order_id;
 **Result:**
 
 | order_id | amount | order_date |
-|----------|--------|------------|
-| 103      |  89.99 | 2026-01-12 |
+| -------- | ------ | ---------- |
+| 103      | 89.99  | 2026-01-12 |
 | 104      | 450.00 | 2026-01-20 |
-| 105      |  30.00 | 2026-02-01 |
+| 105      | 30.00  | 2026-02-01 |
 | 106      | 610.00 | 2026-02-03 |
 
-Note orders 101 and 102 are excluded even though 101 has *two* payments — semi/anti logic checks "does at least one exist," the row count of matches is irrelevant.
+Note orders 101 and 102 are excluded even though 101 has _two_ payments — semi/anti logic checks "does at least one exist," the row count of matches is irrelevant.
 
-> Interview trap: a beginner writes `WHERE o.order_id NOT IN (SELECT p.order_id FROM payments p)` here and, because `payments.order_id` is NOT NULL, it happens to be correct. They may then generalize this wrongly to every situation. The correctness is *data-dependent*, not a property of `NOT IN`.
+> Interview trap: a beginner writes `WHERE o.order_id NOT IN (SELECT p.order_id FROM payments p)` here and, because `payments.order_id` is NOT NULL, it happens to be correct. They may then generalize this wrongly to every situation. The correctness is _data-dependent_, not a property of `NOT IN`.
 
 **BAD approach** that turns the anti-join into an INNER JOIN — filter the right table in `WHERE` instead of checking for NULL:
 
@@ -505,7 +507,7 @@ LEFT JOIN payments p ON p.order_id = o.order_id
 WHERE p.paid_at > '2026-01-01';
 ```
 
-**Result:** 101, 102 — the exact *opposite* of the intent. The `WHERE` predicate on the right table eliminated the NULL-padded rows, collapsing the LEFT JOIN into INNER JOIN semantics (see [JOIN: ON vs WHERE section]). An anti-join must filter on `IS NULL`, nothing else.
+**Result:** 101, 102 — the exact _opposite_ of the intent. The `WHERE` predicate on the right table eliminated the NULL-padded rows, collapsing the LEFT JOIN into INNER JOIN semantics (see [JOIN: ON vs WHERE section]). An anti-join must filter on `IS NULL`, nothing else.
 
 ### Scenario 3 — Users who never logged in
 
@@ -522,7 +524,7 @@ WHERE NOT EXISTS (
 **Result:**
 
 | customer_id | name  |
-|-------------|-------|
+| ----------- | ----- |
 | 3           | Carol |
 | 4           | Dave  |
 
@@ -545,7 +547,7 @@ WHERE NOT EXISTS (
 **Result:**
 
 | product_id | product_name |
-|------------|--------------|
+| ---------- | ------------ |
 | 20         | Mouse        |
 
 **BAD approach** — putting a condition on the inner side in the outer `WHERE`:
@@ -559,7 +561,7 @@ WHERE oi.product_id IS NULL AND oi.quantity > 0;
 
 **Result:** zero rows. For unmatched products, `oi.quantity` is NULL (padded), and `NULL > 0` is UNKNOWN, so every anti-join row is filtered out.
 
-> Rule: conditions that belong to the **right** side go *inside* the `EXISTS`/`NOT EXISTS` subquery (or in the `ON` of the LEFT JOIN variant). Never combine them with the `IS NULL` sentinel in `WHERE`.
+> Rule: conditions that belong to the **right** side go _inside_ the `EXISTS`/`NOT EXISTS` subquery (or in the `ON` of the LEFT JOIN variant). Never combine them with the `IS NULL` sentinel in `WHERE`.
 
 Example with a condition inside:
 
@@ -576,7 +578,7 @@ WHERE NOT EXISTS (
 **Result:**
 
 | product_id | product_name |
-|------------|--------------|
+| ---------- | ------------ |
 | 20         | Mouse        |
 | 40         | Headset      |
 
@@ -598,7 +600,7 @@ WHERE c.customer_id IS NULL;
 **Result:**
 
 | order_id | customer_id |
-|----------|-------------|
+| -------- | ----------- |
 | 105      | NULL        |
 | 106      | 5           |
 
@@ -607,7 +609,7 @@ Two distinct causes of "orphan":
 - Order 105: its FK is **NULL** (never assigned a customer).
 - Order 106: its FK points to **customer 5, who was deleted/never existed**.
 
-> Interview trap: "How many orphan orders are there?" The answer is 2 *only if you consider NULL FKs orphans*. If the business defines an orphan as "references a customer that doesn't exist," then order 105 (NULL) is *unassigned*, not orphaned, and the answer is 1:
+> Interview trap: "How many orphan orders are there?" The answer is 2 _only if you consider NULL FKs orphans_. If the business defines an orphan as "references a customer that doesn't exist," then order 105 (NULL) is _unassigned_, not orphaned, and the answer is 1:
 
 ```sql
 SELECT o.order_id, o.customer_id
@@ -646,12 +648,12 @@ WHERE NOT EXISTS (
 **Expected result:**
 
 | customer_id | name |
-|-------------|------|
+| ----------- | ---- |
 | 4           | Dave |
 
-Alice (250 and 89.99 → has one above 100), Bob (120.50 → above 100) and Carol (450 → above 100) are all excluded; Dave has no order at all, so *trivially* no order above $100 — and is kept.
+Alice (250 and 89.99 → has one above 100), Bob (120.50 → above 100) and Carol (450 → above 100) are all excluded; Dave has no order at all, so _trivially_ no order above $100 — and is kept.
 
-**Key insight:** customers with only small orders (e.g. only an $89 order) would also be kept, because for them the *combined* predicate `customer_id = c.customer_id AND amount > 100` matches zero rows.
+**Key insight:** customers with only small orders (e.g. only an $89 order) would also be kept, because for them the _combined_ predicate `customer_id = c.customer_id AND amount > 100` matches zero rows.
 
 The `LEFT JOIN` variant moves the condition into `ON`:
 
@@ -669,18 +671,18 @@ Same result (the `DISTINCT` guards against fan-out when the same customer has se
 
 With a two-column relationship you must correlate **every** key column. Consider:
 
-**enrollments** — *one row per (student, course) pair.*
+**enrollments** — _one row per (student, course) pair._
 
 | student_id | course_id |
-|------------|-----------|
+| ---------- | --------- |
 | 1          | 10        |
 | 1          | 20        |
 | 2          | 10        |
 
-**attendance** — *one row per attended class session (so duplicates by student+course are possible).*
+**attendance** — _one row per attended class session (so duplicates by student+course are possible)._
 
 | attendance_id | student_id | course_id | attended_at |
-|---------------|------------|-----------|-------------|
+| ------------- | ---------- | --------- | ----------- |
 | 1             | 1          | 10        | 2026-03-01  |
 | 2             | 2          | 10        | 2026-03-01  |
 
@@ -709,7 +711,7 @@ LEFT JOIN attendance a
 WHERE a.attendance_id IS NULL;
 ```
 
-**Result:** `(1, 20)`. Correlating only one column (`ON a.student_id = e.student_id`) is a classic bug — it would wrongly flag enrollment `(2,10)` because student 2 has an attendance record (for course 10 → actually correct here), but would flip semantics whenever a student attends *any* course. Keep all key columns.
+**Result:** `(1, 20)`. Correlating only one column (`ON a.student_id = e.student_id`) is a classic bug — it would wrongly flag enrollment `(2,10)` because student 2 has an attendance record (for course 10 → actually correct here), but would flip semantics whenever a student attends _any_ course. Keep all key columns.
 
 ### Scenario 8 — Multi-hop anti-join: "customers who have never paid for anything"
 
@@ -733,7 +735,7 @@ WHERE NOT EXISTS (
 **Result:**
 
 | customer_id | name  |
-|-------------|-------|
+| ----------- | ----- |
 | 3           | Carol |
 | 4           | Dave  |
 
@@ -755,14 +757,14 @@ WHERE p.payment_id IS NULL;
 **Result:**
 
 | customer_id | name  |
-|-------------|-------|
+| ----------- | ----- |
 | 1           | Alice |
 | 3           | Carol |
 | 4           | Dave  |
 
-**Alice is wrong.** Her order 103 has no payment, so at the *row* level one of her combinations is NULL-padded and the query keeps her. The join-chain anti-join answers a **different question**: "customers with at least one order that has no payment." Multi-hop anti-joins need the anti condition at the *outermost* hop, not the last join.
+**Alice is wrong.** Her order 103 has no payment, so at the _row_ level one of her combinations is NULL-padded and the query keeps her. The join-chain anti-join answers a **different question**: "customers with at least one order that has no payment." Multi-hop anti-joins need the anti condition at the _outermost_ hop, not the last join.
 
-> Production pitfall: this is silently wrong *and* looks reasonable. Always re-derive the semantics at every join: "does a NULL here mean no payment, or just no payment for *this particular order*?"
+> Production pitfall: this is silently wrong _and_ looks reasonable. Always re-derive the semantics at every join: "does a NULL here mean no payment, or just no payment for _this particular order_?"
 
 ---
 
@@ -780,11 +782,11 @@ WHERE NOT EXISTS (SELECT 1 FROM orders o WHERE 1 = 0);
 
 ### 2. Right side is nothing but NULLs
 
-`NOT IN` → **zero rows** (total poison). `NOT EXISTS` → all outer rows (including rows whose key is NULL). `LEFT JOIN ... IS NULL` → all outer rows. `EXCEPT` → all outer rows *except* those with a NULL key (NULL matches NULL in set difference).
+`NOT IN` → **zero rows** (total poison). `NOT EXISTS` → all outer rows (including rows whose key is NULL). `LEFT JOIN ... IS NULL` → all outer rows. `EXCEPT` → all outer rows _except_ those with a NULL key (NULL matches NULL in set difference).
 
 ### 3. Duplicate keys on the right — output safe, cost differs
 
-If `orders` had 1,000 duplicate rows for customer 1, all three forms still output "Dave" exactly once. Anti/semi logic only cares about *existence*. However:
+If `orders` had 1,000 duplicate rows for customer 1, all three forms still output "Dave" exactly once. Anti/semi logic only cares about _existence_. However:
 
 - `NOT EXISTS` may stop at the first match (plan-dependent).
 - `LEFT JOIN` materializes all 1,000 combinations before filtering → more work.
@@ -839,7 +841,7 @@ Broken: the `ON` predicate requires `order_id IS NULL`, which never matches a re
 WHERE customer_id NOT IN (SELECT MAX(customer_id) FROM orders)
 ```
 
-`MAX()` over a table containing any row returns a single non-NULL value unless no rows match the filter... but `MAX()` over an *empty* filtered set returns **NULL** → `NOT IN (NULL)` → **zero rows** for the whole query. A single-value subquery can quietly become `(NULL)` and poison everything.
+`MAX()` over a table containing any row returns a single non-NULL value unless no rows match the filter... but `MAX()` over an _empty_ filtered set returns **NULL** → `NOT IN (NULL)` → **zero rows** for the whole query. A single-value subquery can quietly become `(NULL)` and poison everything.
 
 ---
 
@@ -853,7 +855,7 @@ WHERE customer_id NOT IN (SELECT MAX(customer_id) FROM orders)
 6. **Assuming `EXCEPT` preserves duplicates** — it does not; use it only for set semantics.
 7. **Putting right-side conditions in the outer `WHERE`** of a `LEFT JOIN ... IS NULL` (the `quantity > 0` example).
 8. **Thinking `NOT IN` is the same as `NOT EXISTS`** under NULLs.
-9. **Writing the anti-join from the wrong side** — e.g. "products never sold" by anti-joining `order_items → products` instead of `products → order_items`; the *left* table defines the output rows.
+9. **Writing the anti-join from the wrong side** — e.g. "products never sold" by anti-joining `order_items → products` instead of `products → order_items`; the _left_ table defines the output rows.
 10. **Not verifying** — assuming which physical operator runs without reading `EXPLAIN ANALYZE`.
 
 ---
@@ -865,8 +867,8 @@ WHERE customer_id NOT IN (SELECT MAX(customer_id) FROM orders)
 3. **Anti-join against a huge right side without an index** — a nested-loop anti join probing an unindexed inner table can degrade to repeated full scans (or a giant hash build). The plan will show it.
 4. **Chained anti-joins** (Scenario 8) answer a subtly different question at each hop; a NULL at an intermediate level changes meaning.
 5. **`EXCEPT` portability**: MySQL only added it in 8.0.31; earlier versions error out. Oracle spells it `MINUS`.
-6. **Scheduling jobs that reverse-anti-join** (e.g. "rows in staging not in production") — with `EXCEPT` a row count mismatch between source and target quietly reports extra "differences" whenever NULL-comparison semantics differ from what an operator *expected* from the `=` behavior.
-7. **Anti-join + aggregation in one pass** (e.g., counting "customers with no orders") from the wrong driving side inflates the count via fan-out; aggregate on the *left* grain only.
+6. **Scheduling jobs that reverse-anti-join** (e.g. "rows in staging not in production") — with `EXCEPT` a row count mismatch between source and target quietly reports extra "differences" whenever NULL-comparison semantics differ from what an operator _expected_ from the `=` behavior.
+7. **Anti-join + aggregation in one pass** (e.g., counting "customers with no orders") from the wrong driving side inflates the count via fan-out; aggregate on the _left_ grain only.
 
 ---
 
@@ -877,7 +879,7 @@ As everywhere in this handbook: **no form is universally fastest.** Which one wi
 ### What the optimizer does with each form
 
 - `NOT EXISTS` is the shape most reliably converted into a true **Anti Join** operator (nested-loop/hash/merge depending on data size and index availability).
-- `LEFT JOIN ... IS NULL` is often folded into a **hash ("right") anti join** or **Left Anti Semi Join**, but only after the optimizer proves the outer-join semantics are removable *because* of the `IS NULL` filter.
+- `LEFT JOIN ... IS NULL` is often folded into a **hash ("right") anti join** or **Left Anti Semi Join**, but only after the optimizer proves the outer-join semantics are removable _because_ of the `IS NULL` filter.
 - `NOT IN` requires the subquery to be **decorrelated/materialized** first; engines differ (MySQL has a range of "semi-join" strategies, Oracle has `HASH JOIN ANTI`, etc.).
 - `EXCEPT` is implemented as its own set-operator plan node (often hash-based on both sides) — with an **automatic deduplication pass** you may not want.
 
@@ -886,14 +888,14 @@ As everywhere in this handbook: **no form is universally fastest.** Which one wi
 1. An **Anti / Anti Semi** node exists (good sign: the engine understood the semantics).
 2. Estimated vs actual **rows** at every node — a gap means stale statistics.
 3. Whether the **inner side** is probed by an **index seek** (nested-loop anti) or built into a **hash**.
-4. Which side is the **hash build** side. In a hash anti join the engine typically builds on the inner (right) input; if you control the driving side, put the table whose rows you *want* as the outer/probe side.
+4. Which side is the **hash build** side. In a hash anti join the engine typically builds on the inner (right) input; if you control the driving side, put the table whose rows you _want_ as the outer/probe side.
 5. Subquery **materialization** (a "Materialize"/"Subquery Scan" node) — using extra memory/temp storage; check whether an index would remove it.
 
 ### Index guidance (still needs a plan to confirm)
 
-- An index on the *inner* correlated column (e.g. `orders(customer_id)`) enables an **index-only nested-loop anti join** — often the cheapest for "small outer × large inner" shapes.
+- An index on the _inner_ correlated column (e.g. `orders(customer_id)`) enables an **index-only nested-loop anti join** — often the cheapest for "small outer × large inner" shapes.
 - A **unique** index on that column gives the optimizer trustworthy cardinality, preventing catastrophic over/under-estimates.
-- Duplicates in the inner key can inflate the LEFT JOIN's intermediate scan even though the anti output is unaffected; `NOT EXISTS` short-circuits at the first match (semi behavior), so it can be cheaper there — *hypothesis to verify*, not a law.
+- Duplicates in the inner key can inflate the LEFT JOIN's intermediate scan even though the anti output is unaffected; `NOT EXISTS` short-circuits at the first match (semi behavior), so it can be cheaper there — _hypothesis to verify_, not a law.
 
 ### The "pre-distinct" and "pre-aggregate" tricks
 
@@ -913,7 +915,7 @@ This can shrink the built hash table. But note the optimizer may already dedupli
 
 - Non-equality predicates inside the anti (e.g. `amount < 100`) can prevent the anti-join rewrite; the plan may show a full outer join plus filter, or a nested loop with poor estimates.
 - `OR` conditions inside the `EXISTS` predicate frequently block flattening.
-- `SELECT DISTINCT` at the top level to *hide* a fan-out is a smell; it can turn a cheap semi into a sort of the full product.
+- `SELECT DISTINCT` at the top level to _hide_ a fan-out is a smell; it can turn a cheap semi into a sort of the full product.
 
 ### Verify, don't guess
 
@@ -938,60 +940,65 @@ Read off: operator type, estimated vs actual rows, index usage, memory/disk spil
 
 ### The four forms, front to back
 
-| Aspect | `NOT EXISTS` | `NOT IN` | `LEFT JOIN ... IS NULL` | `EXCEPT` / `MINUS` |
-|---|---|---|---|---|
-| Correlated? | yes | usually not | no | no |
-| Output rows | driving table rows | driving table rows | driving table rows | distinct set rows |
-| NULL in right set killing results? | no | **yes (poison)** | no | no (NULL drives set match) |
-| Outer NULL key kept? | yes | no | yes | no |
-| Left duplicates preserved? | yes | yes | yes | **no** (deduplicates) |
-| Right duplicates cost | stops at first match (often) | membership test | materializes all matches | deduplicates right side |
-| Clarity of intent | excellent | good (dangerous) | good, sentinel risk | good for whole-row diff |
-| Typical plan node | Nested Loop / Hash **Anti Join** | Materialized + anti / anti-semi | Hash Right Anti Join / Left Anti Semi | Hash set-op / merge set-op |
-| NULL-safe default? | ✅ | ❌ | ✅ (with NOT NULL sentinel) | ⚠ (NULL= in sets) |
+| Aspect                             | `NOT EXISTS`                     | `NOT IN`                        | `LEFT JOIN ... IS NULL`               | `EXCEPT` / `MINUS`         |
+| ---------------------------------- | -------------------------------- | ------------------------------- | ------------------------------------- | -------------------------- |
+| Correlated?                        | yes                              | usually not                     | no                                    | no                         |
+| Output rows                        | driving table rows               | driving table rows              | driving table rows                    | distinct set rows          |
+| NULL in right set killing results? | no                               | **yes (poison)**                | no                                    | no (NULL drives set match) |
+| Outer NULL key kept?               | yes                              | no                              | yes                                   | no                         |
+| Left duplicates preserved?         | yes                              | yes                             | yes                                   | **no** (deduplicates)      |
+| Right duplicates cost              | stops at first match (often)     | membership test                 | materializes all matches              | deduplicates right side    |
+| Clarity of intent                  | excellent                        | good (dangerous)                | good, sentinel risk                   | good for whole-row diff    |
+| Typical plan node                  | Nested Loop / Hash **Anti Join** | Materialized + anti / anti-semi | Hash Right Anti Join / Left Anti Semi | Hash set-op / merge set-op |
+| NULL-safe default?                 | ✅                               | ❌                              | ✅ (with NOT NULL sentinel)           | ⚠ (NULL= in sets)          |
 
-### Choosing a physical anti-join algorithm (decision, *then* confirm with plan)
+### Choosing a physical anti-join algorithm (decision, _then_ confirm with plan)
 
-| Shape | Usually a candidate | Confirm via |
-|---|---|---|
-| Small outer × large indexed inner | Nested Loop Anti Join | plan shows index seek on inner |
-| Large × large, equality keys | Hash Anti Join | plan shows "Hash" node, build side |
-| Both sides already sorted / `ORDER BY` alignment | Merge Anti Join | plan shows merge/sort nodes |
-| Right side huge with dupes | consider pre-DISTINCT subquery | rows in busy nodes drop |
+| Shape                                            | Usually a candidate            | Confirm via                        |
+| ------------------------------------------------ | ------------------------------ | ---------------------------------- |
+| Small outer × large indexed inner                | Nested Loop Anti Join          | plan shows index seek on inner     |
+| Large × large, equality keys                     | Hash Anti Join                 | plan shows "Hash" node, build side |
+| Both sides already sorted / `ORDER BY` alignment | Merge Anti Join                | plan shows merge/sort nodes        |
+| Right side huge with dupes                       | consider pre-DISTINCT subquery | rows in busy nodes drop            |
 
 ---
 
 ## When to Use Each Form
 
 **Use `NOT EXISTS`:**
+
 - Default choice for "driving rows with no match in B."
 - Outer keys (or right keys) can be NULL.
 - The matching rule has extra predicates ("no order above $100").
 - You want no duplication risk and the clearest semantics.
 
 **Use `LEFT JOIN ... WHERE b.key IS NULL`:**
+
 - When you already have the LEFT JOIN for other reasons (you need the left rows regardless).
 - In engines where NOT EXISTS was historically optimized poorly (verify per version).
 - You remember the two rules: sentinel is a NOT NULL column, predicate stays in `WHERE`.
 
 **Use `NOT IN`:**
+
 - Only for literal lists with no NULLs: `WHERE status NOT IN ('cancelled', 'refunded')`.
-- For subqueries *only* when you can guarantee no NULLs can ever appear in the result set (NOT NULL constraints + filters), and outer NULL keys are irrelevant.
+- For subqueries _only_ when you can guarantee no NULLs can ever appear in the result set (NOT NULL constraints + filters), and outer NULL keys are irrelevant.
 - Never as a reflex; if you think you need it, prefer `NOT EXISTS` unless you can prove it safe.
 
 **Use `EXCEPT` / `MINUS`:**
+
 - Whole-row set difference ("rows in A not in B") when you actually want set behavior: distinct output, NULL-as-value matching.
 - Comparing two result sets of identical shape (data-reconciliation, staging-vs-prod drift).
 - Not when row multiplicity matters.
 
 **Use explicit `ANTI JOIN` / `LEFT ANTI JOIN`:**
+
 - DuckDB / Spark SQL / Presto-family engines where the keyword exists and you want the intent printed in the query itself.
 
 ---
 
 ## Best Practices
 
-1. **Ask "what is one output row?"** An anti-join output row is always *a driving-table row with no qualifying match* — never a combination.
+1. **Ask "what is one output row?"** An anti-join output row is always _a driving-table row with no qualifying match_ — never a combination.
 2. **Prefer `NOT EXISTS`** as the default anti-join; it is NULL-safe and optimizer-friendly.
 3. **If you use `LEFT JOIN ... IS NULL`:** sentinel = a NOT NULL PK/FK column of the right table; keep `IS NULL` in `WHERE`; keep right-side conditions in the `ON` (or inside an EXISTS).
 4. **If you keep `NOT IN`:** add the safety filter `... WHERE col IS NOT NULL` in the subquery and re-verify after every schema or data change.
@@ -1036,7 +1043,7 @@ flowchart LR
 - **`NOT IN`** is portable, but its NULL-poisoning behavior is identical everywhere and always a hazard.
 - **`EXCEPT`**: PostgreSQL, SQL Server, SQLite (3.30+), MySQL **8.0.31+**. Oracle uses **`MINUS`**. NULL-matching inside set operators is treated as "equal" for dedup — but confirm NULL behavior on your specific engine version before relying on it.
 - **Explicit anti-join keywords** exist in DuckDB (`ANTI JOIN`) and Spark SQL / Trino-family (`LEFT ANTI JOIN`), not in the big four.
-- **`IS [NOT] DISTINCT FROM`** (relevant to NULL matching in conditions): PostgreSQL, and Oracle 23c+, support `IS NOT DISTINCT FROM`; MySQL uses `<=>`. See the [IS DISTINCT FROM section]. In anti-join predicates, `IS DISTINCT FROM` inside `ON`/correlation changes which rows count as "matching" when NULLs are involved — use it only when you *want* NULLs to spread the anti behavior.
+- **`IS [NOT] DISTINCT FROM`** (relevant to NULL matching in conditions): PostgreSQL, and Oracle 23c+, support `IS NOT DISTINCT FROM`; MySQL uses `<=>`. See the [IS DISTINCT FROM section]. In anti-join predicates, `IS DISTINCT FROM` inside `ON`/correlation changes which rows count as "matching" when NULLs are involved — use it only when you _want_ NULLs to spread the anti behavior.
 - MySQL rewrites subqueries through engine-specific **semi-join strategies** (materialization / first-match / exists), so check `EXPLAIN` per version; `LIMIT`, `GROUP BY`, or `ORDER BY` inside the subquery can force materialization and change the plan shape entirely.
 
 ---
@@ -1056,15 +1063,15 @@ Answers to the practice questions below are intentionally not provided — attem
 ## Intermediate
 
 6. Given the sample data (order 105 has `customer_id = NULL`), what does `WHERE customer_id NOT IN (SELECT customer_id FROM orders)` return, and why?
-7. Explain the "NOT IN poison": why does one NULL in the right-hand set remove *every* row?
+7. Explain the "NOT IN poison": why does one NULL in the right-hand set remove _every_ row?
 8. In a `LEFT JOIN ... IS NULL` anti-join, why must the sentinel column be non-nullable? Give a concrete counterexample.
-9. Write "orders with no payments" in all four forms (`NOT EXISTS`, `NOT IN`, `LEFT JOIN`, `EXCEPT`/`MINUS`). Which forms agree, and which one is fragile here — and why is it actually fine in *this* case?
+9. Write "orders with no payments" in all four forms (`NOT EXISTS`, `NOT IN`, `LEFT JOIN`, `EXCEPT`/`MINUS`). Which forms agree, and which one is fragile here — and why is it actually fine in _this_ case?
 10. Difference between a **semi-join** and an **anti-join**? Which physical operator does the engine usually pick for `NOT EXISTS`?
 
 ## Advanced
 
 11. Compare the physical plans you expect for `NOT EXISTS`, `NOT IN`, and `LEFT JOIN ... IS NULL` on the same data. Which factors (indexes, statistics, cardinality) would flip your expectation?
-12. A right table contains 5,000 duplicate keys. Explain why the *output* of the anti-join is identical across forms, but the *cost* can differ dramatically.
+12. A right table contains 5,000 duplicate keys. Explain why the _output_ of the anti-join is identical across forms, but the _cost_ can differ dramatically.
 13. "Customers who have never paid" solved with two chained `LEFT JOIN`s returns Alice even though she has paid. Re-derive the semantics at every hop and write the correct nested `NOT EXISTS` version.
 14. When does `EXCEPT` disagree with `NOT EXISTS`? Construct an example with NULL keys and duplicate left rows where the outputs differ, and explain the engine's deduplication behavior.
 15. Why might a `NOT EXISTS` become a "hash anti join" on one dataset and a "nested loop anti join" on another? What would you read in the plan to confirm which was chosen and why?
@@ -1086,7 +1093,7 @@ Answers to the practice questions below are intentionally not provided — attem
 
 ## Output Prediction
 
-For each of the following, predict the exact rows from the sample data in this section *before* running anything:
+For each of the following, predict the exact rows from the sample data in this section _before_ running anything:
 
 25. `SELECT name FROM customers c WHERE NOT EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.customer_id);`
 26. `SELECT name FROM customers c WHERE c.customer_id NOT IN (SELECT customer_id FROM orders);`
@@ -1098,10 +1105,10 @@ For each of the following, predict the exact rows from the sample data in this s
 ## Debugging
 
 31. A nightly report titled "customers with no orders" suddenly returns **zero rows** for everyone. List the checks you run, first on data, then on the query, then on the plan.
-32. A `LEFT JOIN` anti-join for "unpaid orders" now returns *only* paid orders. The query changed: `WHERE p.amount IS NULL` became `WHERE p.amount < p.due`. Explain the mechanism and recover the fix.
+32. A `LEFT JOIN` anti-join for "unpaid orders" now returns _only_ paid orders. The query changed: `WHERE p.amount IS NULL` became `WHERE p.amount < p.due`. Explain the mechanism and recover the fix.
 33. Development works, but production "products never sold" misses every product whose only order_items rows contain NULL quantities. Find the bug in the sentinel choice.
 34. `EXPLAIN (ANALYZE)` shows `Rows Removed by Filter` at the join with `actual rows` wildly above `estimated rows`. What statistics problem does this indicate, and how does it affect which anti-join form wins?
-35. Two engineers argue: "NOT EXISTS is always faster than NOT IN" vs "they're identical." How would you design a fair experiment on your engine that settles it for a *specific* dataset?
+35. Two engineers argue: "NOT EXISTS is always faster than NOT IN" vs "they're identical." How would you design a fair experiment on your engine that settles it for a _specific_ dataset?
 
 ## Performance
 

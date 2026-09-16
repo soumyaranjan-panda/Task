@@ -3,8 +3,7 @@ Wrote the complete SELF-JOIN section to `sql-handbook/3-Joins/19-SELF-JOIN.md` (
 
 Covers almost everything requested — the alias mechanics, the two-logical-copies mental model, 8 scenario examples with sample tables and expected outputs (hierarchy, out-earning-manager, depth-2, sibling pairs with `<` dedup, market basket, connecting-flights fan-out, interval overlap, and the LAG-vs-self-join previous-row trap), NULL behavior (root dropped, anti-join for leaves, NULL counting), edge cases (self-loops, cycles, duplicates), BAD→BETTER code pairs, performance notes with execution-plan verification, a comparison table, a Mermaid diagram, cross-references, and the full Interview Questions set (Beginner → Performance).
 
-
-To answer questions about relationships *within* one table — "who reports to whom", "which two flights connect", "which employees overlap on vacation" — you must be able to compare rows of a table against **other rows of the same table**. A self-join is the mechanism for that.
+To answer questions about relationships _within_ one table — "who reports to whom", "which two flights connect", "which employees overlap on vacation" — you must be able to compare rows of a table against **other rows of the same table**. A self-join is the mechanism for that.
 
 > Common misconception: "A self-join requires special SQL syntax." It does not. It is an ordinary `INNER`/`LEFT`/`CROSS` join where the two tables happen to be the same physical table under two aliases.
 
@@ -35,7 +34,7 @@ For each row of `A` there can be **zero, one, or many** matching rows in `B`, an
 
 Before writing one, answer:
 
-1. **What does one output row represent?** Usually a *pair* of rows from the same table.
+1. **What does one output row represent?** Usually a _pair_ of rows from the same table.
 2. **What are the two roles?** Name them with meaningful aliases (e.g., `child`/`parent`, `curr`/`prev`, `leg1`/`leg2`).
 3. **Which side is many, which side is one?** Determines fan-out.
 4. **Do I need unordered pairs, ordered pairs, or self-pairs excluded?** Determines whether to add `A.key < B.key`.
@@ -101,33 +100,33 @@ For `n` rows this yields `n × n` rows. The ordered-pair and unordered-pair patt
 
 Every example below uses one of these tables. Always state the grain first.
 
-**employees** — *one row per employee.* `manager_id` is a self-referencing foreign key: it points at `employee_id` of the same table. `NULL` means "no manager" (the root).
+**employees** — _one row per employee._ `manager_id` is a self-referencing foreign key: it points at `employee_id` of the same table. `NULL` means "no manager" (the root).
 
-| employee_id | name   | manager_id | salary |
-|-------------|--------|------------|--------|
-| 1           | Dana   | NULL       | 20000  |
-| 2           | Erin   | 1          | 12000  |
-| 3           | Frank  | 1          | 15000  |
-| 4           | Grace  | 2          | 9000   |
-| 5           | Henry  | 2          | 13000  |
-| 6           | Ivy    | 3          | 11000  |
+| employee_id | name  | manager_id | salary |
+| ----------- | ----- | ---------- | ------ |
+| 1           | Dana  | NULL       | 20000  |
+| 2           | Erin  | 1          | 12000  |
+| 3           | Frank | 1          | 15000  |
+| 4           | Grace | 2          | 9000   |
+| 5           | Henry | 2          | 13000  |
+| 6           | Ivy   | 3          | 11000  |
 
 Hierarchy: `Dana (1)` manages `Erin (2)` and `Frank (3)`; `Erin (2)` manages `Grace (4)` and `Henry (5)`; `Frank (3)` manages `Ivy (6)`.
 
-**vacations** — *one row per approved vacation period.*
+**vacations** — _one row per approved vacation period._
 
 | vacation_id | employee_id | start_date | end_date   |
-|-------------|-------------|------------|------------|
+| ----------- | ----------- | ---------- | ---------- |
 | 101         | 2           | 2026-06-01 | 2026-06-10 |
 | 102         | 3           | 2026-06-05 | 2026-06-12 |
 | 103         | 4           | 2026-07-01 | 2026-07-08 |
 | 104         | 5           | 2026-06-02 | 2026-06-06 |
 | 105         | 6           | 2026-08-01 | 2026-08-05 |
 
-**order_items** — *one row per (order, product) pair.*
+**order_items** — _one row per (order, product) pair._
 
 | order_id | product_id |
-|----------|------------|
+| -------- | ---------- |
 | 501      | 10         |
 | 501      | 20         |
 | 501      | 30         |
@@ -136,19 +135,19 @@ Hierarchy: `Dana (1)` manages `Erin (2)` and `Frank (3)`; `Erin (2)` manages `Gr
 | 503      | 20         |
 | 503      | 30         |
 
-**flights** — *one row per flight leg.* All times in UTC for this example.
+**flights** — _one row per flight leg._ All times in UTC for this example.
 
 | flight_id | origin | destination | departs_at          | arrives_at          |
-|-----------|--------|-------------|---------------------|---------------------|
+| --------- | ------ | ----------- | ------------------- | ------------------- |
 | 1         | JFK    | ORD         | 2026-03-01 08:00:00 | 2026-03-01 10:00:00 |
 | 2         | ORD    | SFO         | 2026-03-01 15:00:00 | 2026-03-01 18:00:00 |
 | 3         | ORD    | LAX         | 2026-03-01 19:00:00 | 2026-03-01 22:00:00 |
 | 4         | JFK    | LAX         | 2026-03-02 09:00:00 | 2026-03-02 12:00:00 |
 
-**daily_metrics** — *one row per day* (assume uniqueness on `day`, i.e., each date has exactly one row).
+**daily_metrics** — _one row per day_ (assume uniqueness on `day`, i.e., each date has exactly one row).
 
 | day        | revenue |
-|------------|---------|
+| ---------- | ------- |
 | 2026-01-01 | 100     |
 | 2026-01-02 | 120     |
 | 2026-01-03 | 115     |
@@ -169,7 +168,7 @@ JOIN employees m ON m.employee_id = e.manager_id;
 **Expected result:**
 
 | employee | manager |
-|----------|---------|
+| -------- | ------- |
 | Erin     | Dana    |
 | Frank    | Dana    |
 | Grace    | Erin    |
@@ -190,7 +189,7 @@ LEFT JOIN employees m ON m.employee_id = e.manager_id;
 ```
 
 | employee | manager |
-|----------|---------|
+| -------- | ------- |
 | Dana     | NULL    |
 | Erin     | Dana    |
 | Frank    | Dana    |
@@ -218,7 +217,7 @@ WHERE e.salary > m.salary;
 **Expected result:**
 
 | employee | employee_salary | manager_salary |
-|----------|-----------------|----------------|
+| -------- | --------------- | -------------- |
 | Henry    | 13000           | 12000          |
 
 Henry's manager is Erin (salary 12000); Henry out-earns her. This is the classic "self-join is a comparison within one table" pattern — same shape as "find users who joined after their referrer", "find orders priced above the same product's earlier orders", etc.
@@ -241,7 +240,7 @@ JOIN employees mm ON mm.employee_id = m.manager_id;
 **Expected result:**
 
 | employee | manager | grand_manager |
-|----------|---------|---------------|
+| -------- | ------- | ------------- |
 | Grace    | Erin    | Dana          |
 | Henry    | Erin    | Dana          |
 | Ivy      | Frank   | Dana          |
@@ -267,6 +266,7 @@ JOIN employees b ON b.manager_id = a.manager_id;
 ```
 
 For manager 1 (Dana), reports are Erin and Frank. This returns:
+
 - (Erin, Erin), (Erin, Frank), (Frank, Erin), (Frank, Frank) — three rows twice, plus the two self-pairs.
 
 The fix is a **strict ordering constraint** on a unique column:
@@ -284,7 +284,7 @@ JOIN employees b
 **Expected result:**
 
 | employee_a | employee_b | manager_id |
-|------------|------------|------------|
+| ---------- | ---------- | ---------- |
 | Erin       | Frank      | 1          |
 | Grace      | Henry      | 2          |
 
@@ -313,7 +313,7 @@ ORDER BY bought_together DESC;
 **Expected result:**
 
 | product_a | product_b | bought_together |
-|-----------|-----------|-----------------|
+| --------- | --------- | --------------- |
 | 10        | 20        | 2               |
 | 20        | 30        | 2               |
 | 10        | 30        | 1               |
@@ -341,7 +341,7 @@ JOIN flights b
 **Expected result:**
 
 | first_leg | second_leg | connection_city |
-|-----------|------------|-----------------|
+| --------- | ---------- | --------------- |
 | 1         | 2          | ORD             |
 | 1         | 3          | ORD             |
 
@@ -381,7 +381,7 @@ JOIN vacations b
 **Expected result:**
 
 | v_a | v_b | employee_a | employee_b |
-|-----|-----|------------|------------|
+| --- | --- | ---------- | ---------- |
 | 101 | 102 | 2          | 3          |
 | 101 | 104 | 2          | 5          |
 | 102 | 104 | 3          | 5          |
@@ -390,8 +390,8 @@ JOIN vacations b
 
 **Two important details:**
 
-1. **`a.vacation_id < b.vacation_id`** is *not* an optimization you can skip — it prevents each pair from appearing twice and prevents a row from being its own neighbor. This is the same `<` trick as Scenario 4, restated for interval problems.
-2. **Boundary semantics are inclusive here.** With `<=`, two periods that *touch* on the same day count as overlapping. If business rules say "check-out / check-in on the same day is allowed", use strict `<` on one or both sides. The choice must match the business rule, not be accidental.
+1. **`a.vacation_id < b.vacation_id`** is _not_ an optimization you can skip — it prevents each pair from appearing twice and prevents a row from being its own neighbor. This is the same `<` trick as Scenario 4, restated for interval problems.
+2. **Boundary semantics are inclusive here.** With `<=`, two periods that _touch_ on the same day count as overlapping. If business rules say "check-out / check-in on the same day is allowed", use strict `<` on one or both sides. The choice must match the business rule, not be accidental.
 
 > Interview trap: "Do two intervals on dates `[1–5]` and `[5–10]` overlap?" The answer depends entirely on inclusive vs. exclusive boundaries. An interview screener wants you to **state** the boundary convention, not silently pick one.
 
@@ -414,7 +414,7 @@ LEFT JOIN daily_metrics prev
 **Expected result:**
 
 | day        | revenue | previous_revenue | change |
-|------------|---------|------------------|--------|
+| ---------- | ------- | ---------------- | ------ |
 | 2026-01-01 | 100     | NULL             | NULL   |
 | 2026-01-02 | 120     | 100              | 20     |
 | 2026-01-03 | 115     | 120              | -5     |
@@ -460,7 +460,7 @@ FROM vendor_daily_metrics;
 
 `LAG`/`LEAD` are part of ANSI SQL and exist in PostgreSQL, MySQL 8+, SQL Server, and Oracle.
 
-> When NOT to grab the window function: when the "previous" row is defined by a *key relationship* rather than an *ordering*, the self-join is the honest expression of the relationship. For example "compare today's price to the previous *price change* (not the previous calendar row)" genuinely asks for a join — `LAG` over a calendar would hit unchanged-price days that are not the event of interest.
+> When NOT to grab the window function: when the "previous" row is defined by a _key relationship_ rather than an _ordering_, the self-join is the honest expression of the relationship. For example "compare today's price to the previous _price change_ (not the previous calendar row)" genuinely asks for a join — `LAG` over a calendar would hit unchanged-price days that are not the event of interest.
 
 ---
 
@@ -470,7 +470,7 @@ Self-joins inherit all the NULL rules of ordinary joins (see [NULL and Three-Val
 
 ### 1. The root row disappears with INNER
 
-`NULL = NULL` is `UNKNOWN` (not `TRUE`), so an employee with `manager_id = NULL` never appears in an INNER self-join — Dana vanishes in Scenario 1. Use `LEFT JOIN` to keep the root, or a direct `WHERE manager_id IS NULL` to *select* the root:
+`NULL = NULL` is `UNKNOWN` (not `TRUE`), so an employee with `manager_id = NULL` never appears in an INNER self-join — Dana vanishes in Scenario 1. Use `LEFT JOIN` to keep the root, or a direct `WHERE manager_id IS NULL` to _select_ the root:
 
 ```sql
 SELECT name
@@ -493,14 +493,14 @@ WHERE e.employee_id IS NULL;
 **Expected result:**
 
 | manager |
-|---------|
+| ------- |
 | Grace   |
 | Henry   |
 | Ivy     |
 
 Grace, Henry, and Ivy have nobody below them. Dana, Erin, Frank do.
 
-> Interview trap: many write this with `INNER JOIN` and add `WHERE e.employee_id IS NULL`, which filters out *all* rows (an INNER JOIN result can never have `NULL` from the equi-joined column). The correct shape is `LEFT JOIN ... WHERE probe IS NULL`. See the same trap in [LEFT JOIN section].
+> Interview trap: many write this with `INNER JOIN` and add `WHERE e.employee_id IS NULL`, which filters out _all_ rows (an INNER JOIN result can never have `NULL` from the equi-joined column). The correct shape is `LEFT JOIN ... WHERE probe IS NULL`. See the same trap in [LEFT JOIN section].
 
 ### 3. Counting per role — count the probe, not `(*)`
 
@@ -517,14 +517,14 @@ ORDER BY direct_reports DESC;
 
 **Expected result:**
 
-| name   | direct_reports |
-|--------|----------------|
-| Dana   | 2              |
-| Erin   | 2              |
-| Frank  | 1              |
-| Grace  | 0              |
-| Henry  | 0              |
-| Ivy    | 0              |
+| name  | direct_reports |
+| ----- | -------------- |
+| Dana  | 2              |
+| Erin  | 2              |
+| Frank | 1              |
+| Grace | 0              |
+| Henry | 0              |
+| Ivy   | 0              |
 
 `COUNT(column)` skips NULLs, `COUNT(*)` does not (see [COUNT section]). With the LEFT join, the probe column is `NULL` for leaves, so `COUNT(e.employee_id)` zeroes them; `COUNT(*)` would wrongly give every leaf a "1". This is exactly the distinction from [COUNT(*) vs COUNT(column)].
 
@@ -535,13 +535,13 @@ ORDER BY direct_reports DESC;
 1. **Empty table.** A self-join of a table with zero rows returns zero rows, regardless of join type except FULL/CROSS subtleties (a CROSS self-join of zero rows is still zero rows).
 
 2. **Single-row table.**
-   - INNER self-join on a unique key with `A.id = B.id`: one row (usually *not* what you want — it pairs the row with itself).
+   - INNER self-join on a unique key with `A.id = B.id`: one row (usually _not_ what you want — it pairs the row with itself).
    - INNER self-join with `A.id < B.id`: zero rows, because no second row exists.
    - CROSS self-join: exactly 1 row (the row paired with itself).
 
 3. **Self-loop (a row that is its own manager).** If `manager_id = employee_id` for some row, an equality self-join pairs the row with itself, producing a self-referential "employee is their own manager" row. This is almost always a **data integrity bug** (add a CHECK constraint or fix the ETL).
 
-4. **Cycles (A manages B, B manages A).** One-level self-joins still return rows, but they are logically nonsense (`Grace`s manager being `Henry`'s report, etc.). A *recursive* CTE over a cycle will loop forever unless you add cycle detection (e.g., `CYCLE` in PostgreSQL 14+, or an explicit visited-path guard). See [Recursive CTE section].
+4. **Cycles (A manages B, B manages A).** One-level self-joins still return rows, but they are logically nonsense (`Grace`s manager being `Henry`'s report, etc.). A _recursive_ CTE over a cycle will loop forever unless you add cycle detection (e.g., `CYCLE` in PostgreSQL 14+, or an explicit visited-path guard). See [Recursive CTE section].
 
 5. **Duplicate keys on the join column.** Self-joins multiply: `k` duplicate values on one side × `l` on the other gives `k × l` pairs. This is the source of every "my report suddenly has 10× rows" incident.
 
@@ -572,14 +572,14 @@ ORDER BY direct_reports DESC;
 
 ## Comparison: Self-Join vs the Alternatives
 
-| Need                                    | Self-Join                              | Better alternative              | Why                                       |
-|-----------------------------------------|----------------------------------------|---------------------------------|-------------------------------------------|
-| Direct child/parent (one level)         | `JOIN` on self-FK                     | — (this *is* the pattern)       | Relationships are key-based, not order-based |
-| Arbitrary depth hierarchy               | `N` joins (unmaintainable)             | Recursive CTE / Oracle `CONNECT BY` | Self-join is depth-limited; CTE walks to any depth |
-| Previous / next row                     | Equality join on day-1                 | `LAG` / `LEAD`                  | Unambiguous, NULL-safe first row, no fan-out |
-| Existence check inside same table       | Self-join + `DISTINCT`                 | `EXISTS` / correlated subquery  | Fewer rows produced, no pair fan-out      |
-| Unordered pair list                     | Self-join + `A.key < B.key`            | — (canonical)                   | `<` dedupes orientation & self-pairs      |
-| Interval overlap                        | Self-join with range condition          | Specialized index types (e.g., GiST range types in PG) | Range inequality can be N²; verify with plan |
+| Need                              | Self-Join                      | Better alternative                                     | Why                                                |
+| --------------------------------- | ------------------------------ | ------------------------------------------------------ | -------------------------------------------------- |
+| Direct child/parent (one level)   | `JOIN` on self-FK              | — (this _is_ the pattern)                              | Relationships are key-based, not order-based       |
+| Arbitrary depth hierarchy         | `N` joins (unmaintainable)     | Recursive CTE / Oracle `CONNECT BY`                    | Self-join is depth-limited; CTE walks to any depth |
+| Previous / next row               | Equality join on day-1         | `LAG` / `LEAD`                                         | Unambiguous, NULL-safe first row, no fan-out       |
+| Existence check inside same table | Self-join + `DISTINCT`         | `EXISTS` / correlated subquery                         | Fewer rows produced, no pair fan-out               |
+| Unordered pair list               | Self-join + `A.key < B.key`    | — (canonical)                                          | `<` dedupes orientation & self-pairs               |
+| Interval overlap                  | Self-join with range condition | Specialized index types (e.g., GiST range types in PG) | Range inequality can be N²; verify with plan       |
 
 ---
 
@@ -776,7 +776,7 @@ flowchart TD
 
 24. True or false: an equality self-join cannot fan out if the join column is the primary key on both copies. Explain.
 25. Given `employees`, write "list all employees whose manager earns less than their subordinate count multiplied by 5000" in one shot, or explain why it cannot be done in one query without a step.
-26. Two different self-joins of the *same* table on the same column but with swapped `ON` directions both return rows. They answer two different questions. What are the two questions for `employees.manager_id`?
+26. Two different self-joins of the _same_ table on the same column but with swapped `ON` directions both return rows. They answer two different questions. What are the two questions for `employees.manager_id`?
 27. Consider `daily_metrics` with two rows for the same date as a partitioning bug. Predict the row count of the JOIN-based day-over-day query and explain the arithmetic of the fan-out.
 
 ## Output Prediction

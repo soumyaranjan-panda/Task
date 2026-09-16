@@ -8,7 +8,7 @@
 
 ### The one-paragraph answer
 
-`GROUP BY` collapses rows into **groSection 41 written to `sql-handbook/5-Aggregation/41-GROUP-BY-vs-DISTINCT.md`.
+`GROUP BY` collapses rows into \*\*groSection 41 written to `sql-handbook/5-Aggregation/41-GROUP-BY-vs-DISTINCT.md`.
 
 Covered: equivalence rule (`GROUP BY` == `DISTINCT` only when SELECT = GROUP BY list, no aggregates), sample tables with stated grain, NULL bucket and the `COUNT(DISTINCT)` vs grouped-`COUNT(*)` trap, execution-order internals, fan-out/double-counting via JOIN, engine-specific divergences (PostgreSQL functional dependency, MySQL `ONLY_FULL_GROUP_BY`, `DISTINCT ON`, multi-column `COUNT(DISTINCT)`), performance guidance framed around `EXPLAIN` (no absolute claims), comparison tables, a Mermaid decision diagram, BAD vs BETTER approaches, and unanswered practice questions across all 8 levels.
 regate is used. The moment you add `SUM(...)`, `HAVING`, or any column outside the group key, the tools diverge completely: `GROUP BY` aggregates, `DISTINCT` cannot.
@@ -21,12 +21,12 @@ regate is used. The moment you add `SUM(...)`, `HAVING`, or any column outside t
 
 Every other use is different by construction:
 
-| What you need | Tool |
-|---|---|
-| Remove duplicate rows | `DISTINCT` |
-| One summary per group key | `GROUP BY` + aggregate |
-| Filter on group-level facts (e.g. "groups with more than 3") | `GROUP BY` + `HAVING` |
-| Count distinct values | `COUNT(DISTINCT col)` (the one aggregate the `DISTINCT` word is allowed inside) |
+| What you need                                                | Tool                                                                            |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------- |
+| Remove duplicate rows                                        | `DISTINCT`                                                                      |
+| One summary per group key                                    | `GROUP BY` + aggregate                                                          |
+| Filter on group-level facts (e.g. "groups with more than 3") | `GROUP BY` + `HAVING`                                                           |
+| Count distinct values                                        | `COUNT(DISTINCT col)` (the one aggregate the `DISTINCT` word is allowed inside) |
 
 ---
 
@@ -64,10 +64,10 @@ GROUP BY group_col
 ### The key grammar constraint
 
 - `DISTINCT` appears **immediately after `SELECT`** and opens a dedup over the final projected rows.
-- `GROUP BY` is a **clause at the tail** of the statement and operates on input rows *before* the `SELECT` list is computed.
-- You can combine them: `SELECT DISTINCT ... GROUP BY ...` is legal, but `DISTINCT` then only re-dedups the already-grouped rows — almost always redundant (see *Common mistakes*).
+- `GROUP BY` is a **clause at the tail** of the statement and operates on input rows _before_ the `SELECT` list is computed.
+- You can combine them: `SELECT DISTINCT ... GROUP BY ...` is legal, but `DISTINCT` then only re-dedups the already-grouped rows — almost always redundant (see _Common mistakes_).
 
-One more grammar fact: `DISTINCT` as a row-level keyword and `DISTINCT` inside `COUNT(DISTINCT x)` are **different features**. `COUNT(DISTINCT x)` is a distinct *aggregate*; it belongs to the `GROUP BY` world even though it uses the word "DISTINCT". It can appear alongside `GROUP BY`, which `SELECT DISTINCT` redundancy cannot usefully do.
+One more grammar fact: `DISTINCT` as a row-level keyword and `DISTINCT` inside `COUNT(DISTINCT x)` are **different features**. `COUNT(DISTINCT x)` is a distinct _aggregate_; it belongs to the `GROUP BY` world even though it uses the word "DISTINCT". It can appear alongside `GROUP BY`, which `SELECT DISTINCT` redundancy cannot usefully do.
 
 ---
 
@@ -153,11 +153,11 @@ ORDER BY department_id;
 ```
 
 | department_id |
-|---|
-| 1 |
-| 2 |
-| 3 |
-| NULL |
+| ------------- |
+| 1             |
+| 2             |
+| 3             |
+| NULL          |
 
 ```sql
 SELECT department_id
@@ -184,14 +184,14 @@ ORDER BY department_id, is_active;
 Employees yield the value pairs `(1,T),(1,T),(2,T),(2,F),(3,T),(3,T),(NULL,T)`, so **both** return:
 
 | department_id | is_active |
-|---|---|
-| 1 | TRUE |
-| 2 | FALSE |
-| 2 | TRUE |
-| 3 | TRUE |
-| NULL | TRUE |
+| ------------- | --------- |
+| 1             | TRUE      |
+| 2             | FALSE     |
+| 2             | TRUE      |
+| 3             | TRUE      |
+| NULL          | TRUE      |
 
-5 rows. Note how the *composite* key keeps `(2,FALSE)` and `(2,TRUE)` as separate rows — neither tool collapses across the pair.
+5 rows. Note how the _composite_ key keeps `(2,FALSE)` and `(2,TRUE)` as separate rows — neither tool collapses across the pair.
 
 ### Example 3 — where they diverge: aggregation
 
@@ -209,11 +209,11 @@ ORDER BY department_id;
 ```
 
 | department_id | headcount |
-|---|---|
-| 1 | 2 |
-| 2 | 2 |
-| 3 | 2 |
-| NULL | 1 |
+| ------------- | --------- |
+| 1             | 2         |
+| 2             | 2         |
+| 3             | 2         |
+| NULL          | 1         |
 
 This is the crux: `DISTINCT` removes duplicate rows; it has no way to compute a summary **within** a bucket.
 
@@ -237,15 +237,15 @@ The grouped result already has one row per `department_id`, so `DISTINCT` has no
 
 ## Where the results genuinely differ
 
-| Situation | `DISTINCT` | `GROUP BY` |
-|---|---|---|
-| `SUM`/`AVG`/`MIN`/`MAX`/`COUNT(*)` per group | Impossible | The whole point |
-| Filtering groups (`HAVING COUNT(*) > 1`) | Impossible | Native |
+| Situation                                                                       | `DISTINCT`            | `GROUP BY`                                                       |
+| ------------------------------------------------------------------------------- | --------------------- | ---------------------------------------------------------------- |
+| `SUM`/`AVG`/`MIN`/`MAX`/`COUNT(*)` per group                                    | Impossible            | The whole point                                                  |
+| Filtering groups (`HAVING COUNT(*) > 1`)                                        | Impossible            | Native                                                           |
 | Selecting a column **not** in the dedup key (`SELECT b FROM t` deduping by `a`) | Impossible standardly | Error in strict engines; MySQL may allow arbitrarily (see below) |
-| `SELECT DISTINCT a, b` vs `SELECT a, b GROUP BY a, b` | Same rows | Same rows |
-| `SELECT a GROUP BY a` vs `SELECT DISTINCT a` | Same rows | Same rows |
+| `SELECT DISTINCT a, b` vs `SELECT a, b GROUP BY a, b`                           | Same rows             | Same rows                                                        |
+| `SELECT a GROUP BY a` vs `SELECT DISTINCT a`                                    | Same rows             | Same rows                                                        |
 
-The two *only* overlap on the bottom rows of that table — pure dedup.
+The two _only_ overlap on the bottom rows of that table — pure dedup.
 
 ---
 
@@ -273,17 +273,17 @@ FROM (
 -- 4  (the GROUP BY subquery includes the NULL bucket)
 ```
 
-> Interview trap: "`COUNT(DISTINCT col)` and `COUNT(*)` over `GROUP BY col` are the same, right?" No. `COUNT(DISTINCT col)` **ignores NULL** (see section 39), while a `GROUP BY` *does* create a NULL group. So they differ exactly by whether the NULL bucket counts.
+> Interview trap: "`COUNT(DISTINCT col)` and `COUNT(*)` over `GROUP BY col` are the same, right?" No. `COUNT(DISTINCT col)` **ignores NULL** (see section 39), while a `GROUP BY` _does_ create a NULL group. So they differ exactly by whether the NULL bucket counts.
 
-If you need "distinct values *including* NULL": use the subquery form. If you need "distinct known values": `COUNT(DISTINCT col)`.
+If you need "distinct values _including_ NULL": use the subquery form. If you need "distinct known values": `COUNT(DISTINCT col)`.
 
 ### NULL as a group key vs distinct key
 
-| Query form | NULL handling |
-|---|---|
-| `SELECT DISTINCT col` | one NULL row |
-| `SELECT col ... GROUP BY col` | one NULL group |
-| `COUNT(DISTINCT col)` | NULLs ignored |
+| Query form                     | NULL handling      |
+| ------------------------------ | ------------------ |
+| `SELECT DISTINCT col`          | one NULL row       |
+| `SELECT col ... GROUP BY col`  | one NULL group     |
+| `COUNT(DISTINCT col)`          | NULLs ignored      |
 | `COUNT(*)` over `GROUP BY col` | NULL group counted |
 
 > PostgreSQL / MySQL / SQL Server / Oracle
@@ -312,20 +312,21 @@ FROM  →  WHERE  →  GROUP BY  →  HAVING  →  SELECT (incl. DISTINCT)  → 
 ```
 
 - `GROUP BY` collapses **input rows** into groups, then aggregates run per group.
-- `DISTINCT` dedups the **final projected rows** — i.e., *after* `GROUP BY`, *after* aggregates, at the same level as `SELECT`.
+- `DISTINCT` dedups the **final projected rows** — i.e., _after_ `GROUP BY`, _after_ aggregates, at the same level as `SELECT`.
 
-This ordering is why `SELECT DISTINCT a, COUNT(*) ... GROUP BY a` is legal but pointless, and why `DISTINCT` can *never* hide double counting that lives inside the aggregate computation — the aggregate is finished before `DISTINCT` runs.
+This ordering is why `SELECT DISTINCT a, COUNT(*) ... GROUP BY a` is legal but pointless, and why `DISTINCT` can _never_ hide double counting that lives inside the aggregate computation — the aggregate is finished before `DISTINCT` runs.
 
 ### How the engine does the work (conceptually)
 
 Both effects are implemented with the same two families of algorithms:
 
-| Algorithm | What it does | Typical node names in plans |
-|---|---|---|
-| **Hash-based** | Build a hash table keyed by the distinct/group values | `HashAggregate` (PostgreSQL), `HASH GROUP BY` / `HASH UNIQUE` (Oracle) |
-| **Sort-based** | Sort by the key, then collapse adjacent equal rows | `Sort + Unique`, `GroupAggregate` (PostgreSQL), `Distinct Sort`, `Stream Aggregate` (SQL Server) |
+| Algorithm      | What it does                                          | Typical node names in plans                                                                      |
+| -------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| **Hash-based** | Build a hash table keyed by the distinct/group values | `HashAggregate` (PostgreSQL), `HASH GROUP BY` / `HASH UNIQUE` (Oracle)                           |
+| **Sort-based** | Sort by the key, then collapse adjacent equal rows    | `Sort + Unique`, `GroupAggregate` (PostgreSQL), `Distinct Sort`, `Stream Aggregate` (SQL Server) |
 
-Because both tools reduce a set of rows down to one row per **key value**, the database often reuses the *same* operator for both:
+Because both tools reduce a set of rows down to one row per **key value**, the database often reuses the _same_ operator for both:
+
 - PostgreSQL may plan `SELECT DISTINCT col` and `SELECT col ... GROUP BY col` as the same `HashAggregate` node.
 - SQL Server often plans both through an `Aggregate`/`Distinct` stream node.
 
@@ -381,10 +382,10 @@ ORDER BY customer_id;
 ```
 
 | customer_id | revenue |
-|---|---|
-| 1 | 250.00 |
-| 2 | 600.00 |
-| 3 | 40.00 |
+| ----------- | ------- |
+| 1           | 250.00  |
+| 2           | 600.00  |
+| 3           | 40.00   |
 
 There is no `DISTINCT`-only formulation for this. Anyone who tries to "make it distinct" has already lost the plot.
 
@@ -447,9 +448,9 @@ HAVING COUNT(*) > 1;
 ```
 
 | department_id | headcount |
-|---|---|
-| 1 | 2 |
-| 2 | 2 |
+| ------------- | --------- |
+| 1             | 2         |
+| 2             | 2         |
 
 `DISTINCT` cannot filter groups by their size. Full `HAVING` details: section 37.
 
@@ -461,15 +462,15 @@ FROM orders
 ORDER BY customer_id, status;
 ```
 
-| customer_id | status |
-|---|---|
-| 1 | cancelled |
-| 1 | shipped |
-| 2 | shipped |
-| 3 | pending |
-| 3 | shipped |
+| customer_id | status    |
+| ----------- | --------- |
+| 1           | cancelled |
+| 1           | shipped   |
+| 2           | shipped   |
+| 3           | pending   |
+| 3           | shipped   |
 
-Same output via `SELECT customer_id, status ... GROUP BY customer_id, status`. Note `customer 2` has only `shipped` (two such orders collapse into one row) — the dedup is on the *pair*.
+Same output via `SELECT customer_id, status ... GROUP BY customer_id, status`. Note `customer 2` has only `shipped` (two such orders collapse into one row) — the dedup is on the _pair_.
 
 ---
 
@@ -490,7 +491,7 @@ WHERE o.status = 'shipped';
 
 Order 1 belongs to customer 1 and has **2** line items, so customer 1 appears twice in the join result; `DISTINCT` collapses it. Both `DISTINCT` and `GROUP BY o.customer_id` return `{1, 2, 3}`.
 
-> Production pitfall: this "works" and hides the fan-out. `DISTINCT` (or a no-aggregate `GROUP BY`) masks a join that duplicated rows. If the row count was *supposed* to be one per customer, the join is defective — de-duplicating at the end is treating the symptom. Prefer `EXISTS` when you only need existence (see sections 24 and 30).
+> Production pitfall: this "works" and hides the fan-out. `DISTINCT` (or a no-aggregate `GROUP BY`) masks a join that duplicated rows. If the row count was _supposed_ to be one per customer, the join is defective — de-duplicating at the end is treating the symptom. Prefer `EXISTS` when you only need existence (see sections 24 and 30).
 
 ### Aggregation across a fan-out — the danger of "just make it distinct"
 
@@ -503,11 +504,11 @@ WHERE o.status = 'shipped'
 GROUP BY o.customer_id;
 ```
 
-| customer_id | revenue |
-|---|---|
-| 1 | 500.00   ← WRONG (order total counted once per line item) |
-| 2 | 600.00 |
-| 3 | 40.00 |
+| customer_id | revenue                                                 |
+| ----------- | ------------------------------------------------------- |
+| 1           | 500.00 ← WRONG (order total counted once per line item) |
+| 2           | 600.00                                                  |
+| 3           | 40.00                                                   |
 
 Customer 1's single order of 250.00 is added twice because order 1 has two line items. The value **should be 250.00**.
 
@@ -520,12 +521,12 @@ GROUP BY customer_id;
 ```
 
 | customer_id | revenue |
-|---|---|
-| 1 | 250.00 |
-| 2 | 600.00 |
-| 3 | 40.00 |
+| ----------- | ------- |
+| 1           | 250.00  |
+| 2           | 600.00  |
+| 3           | 40.00   |
 
-If you really need line-item columns too, aggregate the child table to the parent grain *first* (CTE/subquery), then join — the fix from sections 21 and 36.
+If you really need line-item columns too, aggregate the child table to the parent grain _first_ (CTE/subquery), then join — the fix from sections 21 and 36.
 
 > Interview trap: "Fix this with `DISTINCT`." You can't. `DISTINCT` removes duplicate rows; the aggregate was already computed on the duplicated rows, so the wrong number is already burned in. The fix is the grain, not a dedup.
 
@@ -533,17 +534,17 @@ If you really need line-item columns too, aggregate the child table to the paren
 
 ## Common mistakes
 
-| Mistake | Why it bites |
-|---|---|
-| Believing `GROUP BY` removes duplicates | No — it groups; without aggregates it overlaps with `DISTINCT`, but that's a coincidence of the SELECT shape |
-| Using `SELECT DISTINCT` to "fix" an aggregate query | Aggregates run before `DISTINCT`; wrong totals stay wrong |
-| `SELECT DISTINCT dept, COUNT(*)` without `GROUP BY` | Syntax error |
-| `SELECT DISTINCT dept, COUNT(*) ... GROUP BY dept` | Legal but the `DISTINCT` is dead weight |
-| `COUNT(DISTINCT col)` vs `COUNT(*)` over the groups | Differ by one exactly when NULLs exist |
-| Grouping by fewer columns than you dedup by | `GROUP BY a` and `DISTINCT a` are equivalent, but `GROUP BY a, b` ≠ `DISTINCT a` — different grains |
-| Assuming either tool orders output | Neither orders anything; add `ORDER BY` |
-| Using `DISTINCT` to hide a fan-out join | Masks the bug, keeps the cost, and only "works" in no-aggregate queries |
-| `SELECT DISTINCT *` on a table with a unique key | No-op that still spends a distinct pass |
+| Mistake                                             | Why it bites                                                                                                 |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Believing `GROUP BY` removes duplicates             | No — it groups; without aggregates it overlaps with `DISTINCT`, but that's a coincidence of the SELECT shape |
+| Using `SELECT DISTINCT` to "fix" an aggregate query | Aggregates run before `DISTINCT`; wrong totals stay wrong                                                    |
+| `SELECT DISTINCT dept, COUNT(*)` without `GROUP BY` | Syntax error                                                                                                 |
+| `SELECT DISTINCT dept, COUNT(*) ... GROUP BY dept`  | Legal but the `DISTINCT` is dead weight                                                                      |
+| `COUNT(DISTINCT col)` vs `COUNT(*)` over the groups | Differ by one exactly when NULLs exist                                                                       |
+| Grouping by fewer columns than you dedup by         | `GROUP BY a` and `DISTINCT a` are equivalent, but `GROUP BY a, b` ≠ `DISTINCT a` — different grains          |
+| Assuming either tool orders output                  | Neither orders anything; add `ORDER BY`                                                                      |
+| Using `DISTINCT` to hide a fan-out join             | Masks the bug, keeps the cost, and only "works" in no-aggregate queries                                      |
+| `SELECT DISTINCT *` on a table with a unique key    | No-op that still spends a distinct pass                                                                      |
 
 ---
 
@@ -562,7 +563,7 @@ Both return zero rows — no groups, no distinct values. But note:
 SELECT COUNT(*) FROM employees WHERE 1 = 0;   -- 1 row: 0
 ```
 
-A bare aggregate *without* `GROUP BY` is one conceptual group even over zero rows. With `GROUP BY`, zero groups → zero output rows. This is a classic "why is my dashboard empty for January?" gotcha (forces of sparse calendars: section 36).
+A bare aggregate _without_ `GROUP BY` is one conceptual group even over zero rows. With `GROUP BY`, zero groups → zero output rows. This is a classic "why is my dashboard empty for January?" gotcha (forces of sparse calendars: section 36).
 
 ### 2. Grouping/dedup on an expression
 
@@ -632,7 +633,7 @@ Do not trust folklore here. The honest position:
 
 1. **For pure dedup**, `SELECT DISTINCT cols` and `SELECT cols ... GROUP BY cols` usually reduce to the same operator and can have **near-identical plans**. Some engines actively rewrite one into the other. Neither is "always faster".
 
-2. **When you need aggregation**, `GROUP BY` is mandatory — there is no performance *choice*, so oracle debates only matter for the no-aggregate case.
+2. **When you need aggregation**, `GROUP BY` is mandatory — there is no performance _choice_, so oracle debates only matter for the no-aggregate case.
 
 3. Both cost centers are the same: a **hash table** (memory) or a **sort** (CPU + I/O) over the whole intermediate result. The decisive factors are key width, cardinality, memory settings (`work_mem` / `sort_buffer_size`), statistics, and whether an index can supply pre-sorted or compact key streams.
 
@@ -647,6 +648,7 @@ SELECT customer_id FROM orders GROUP BY customer_id;
 ```
 
 Compare the plan node shapes:
+
 - Same node type (e.g., `HashAggregate` for both in PostgreSQL) → they are the same query, stop optimizing.
 - Different nodes (e.g., `Unique` after an index scan vs a guessed `GroupAggregate`) → let actual rows/cost decide, and check which respects the index.
 - Watch for `Sort` nodes: an index already ordered by the key can remove them; a `GROUP BY DATE(col)` or `GROUP BY` an expression usually cannot use a plain index on `col` directly (non-sargable for grouping order) — see the index and sargability sections (72–77).
@@ -668,15 +670,15 @@ Compare the plan node shapes:
 
 ## Comparison table
 
-| Aspect | `DISTINCT` | `GROUP BY` (no aggregate) | `GROUP BY` (with aggregate) |
-|---|---|---|---|
-| Purpose | remove duplicate rows | group rows; (accidentally) dedups when SELECT = GROUP BY | compute one summary per group |
-| Aggregates | not allowed (`COUNT(DISTINCT ...)` aside) | not used | core feature |
-| `HAVING` filter | impossible | possible but pointless without aggregates | the intended partner |
-| Output grain | distinct projected row | distinct grouping key (must cover all selected non-aggregates) | one row per group key |
-| SELECT-list rule | whole list is the key | every non-aggregate must be in `GROUP BY` | same |
-| Reads as intent | "unique values" | ambiguous | "summarize per key" |
-| Redundancy risk | `DISTINCT` on grouped rows is no-op | no-aggregate `GROUP BY` is often a `DISTINCT` in disguise | none |
+| Aspect           | `DISTINCT`                                | `GROUP BY` (no aggregate)                                      | `GROUP BY` (with aggregate)   |
+| ---------------- | ----------------------------------------- | -------------------------------------------------------------- | ----------------------------- |
+| Purpose          | remove duplicate rows                     | group rows; (accidentally) dedups when SELECT = GROUP BY       | compute one summary per group |
+| Aggregates       | not allowed (`COUNT(DISTINCT ...)` aside) | not used                                                       | core feature                  |
+| `HAVING` filter  | impossible                                | possible but pointless without aggregates                      | the intended partner          |
+| Output grain     | distinct projected row                    | distinct grouping key (must cover all selected non-aggregates) | one row per group key         |
+| SELECT-list rule | whole list is the key                     | every non-aggregate must be in `GROUP BY`                      | same                          |
+| Reads as intent  | "unique values"                           | ambiguous                                                      | "summarize per key"           |
+| Redundancy risk  | `DISTINCT` on grouped rows is no-op       | no-aggregate `GROUP BY` is often a `DISTINCT` in disguise      | none                          |
 
 ---
 
@@ -799,4 +801,4 @@ GROUP BY status;
 32. Why is `GROUP BY` kind of a natural fit for an index on the grouping columns, while `GROUP BY DATE(created_at)` almost never is? What schema change could fix the latter, and how would you verify?
 33. `COUNT(DISTINCT department_id)` in PostgreSQL may produce a single `HashAggregate` — but `COUNT(DISTINCT a, b)` over a large table is regularly much slower. Explain the extra work and what approximation options trade correctness for cost.
 
-*(Questions 23–33 are practice — reason them out against the sample tables and an actual `EXPLAIN` before peeking at results.)*
+_(Questions 23–33 are practice — reason them out against the sample tables and an actual `EXPLAIN` before peeking at results.)_

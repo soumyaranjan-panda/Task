@@ -2,6 +2,7 @@ Now I have a clear picture of the existing handbook format and the empty placeho
 The section is complete. Written 1,561 lines to `12-COALESCE-NULLIF.md`.
 
 Coverage summary:
+
 - **COALESCE & NULLIF** — fundamentals, internal `CASE`-expansion mechanics, short-circuit evaluation, type resolution, syntax
 - **Sample data** with stated grain (`employees`, `products`, `orders`) and expected output for every example (incl. output for both `AVG(quantity)` variants)
 - **Edge cases** incl. the non-intuitive `NULLIF(1, NULL) = 1`, `COALESCE(0, 5) = 0`, collation-sensitive `NULLIF('abc','ABC')`
@@ -12,7 +13,7 @@ Coverage summary:
 - **BAD vs BETTER** patterns (division, display fallback, empty-string normalization, safe average)
 - **Labeled** misconceptions, interview traps, production pitfalls
 - **50 interview questions** across all 8 categories (answers withheld for practice)
-](#interview-questions)
+  ](#interview-questions)
 
 ---
 
@@ -20,10 +21,10 @@ Coverage summary:
 
 `COALESCE` and `NULLIF` are the two most important NULL-handling scalar functions in SQL. They are inverses of each other in spirit:
 
-| Function | Purpose | Analogy |
-|----------|---------|---------|
-| `COALESCE` | "Give me the first value that is not NULL" | A chain of fallbacks |
-| `NULLIF` | "If two values are equal, make it NULL" | A conditional NULL-converter |
+| Function   | Purpose                                    | Analogy                      |
+| ---------- | ------------------------------------------ | ---------------------------- |
+| `COALESCE` | "Give me the first value that is not NULL" | A chain of fallbacks         |
+| `NULLIF`   | "If two values are equal, make it NULL"    | A conditional NULL-converter |
 
 Both are part of the ANSI SQL:1992 standard and are supported by PostgreSQL, MySQL, SQL Server, and Oracle without modification.
 
@@ -61,15 +62,15 @@ INSERT INTO employees VALUES
 
 **Grain:** One row = one employee.
 
-| id | name    | nickname | email          | salary  | bonus  | dept_id | manager_id |
-|----|---------|----------|----------------|---------|--------|---------|------------|
-| 1  | Alice   | Ali      | alice@corp.com | 95000   | 5000   | 1       | NULL       |
-| 2  | Bob     | NULL     | bob@corp.com   | 72000   | NULL   | 1       | 1          |
-| 3  | Charlie | Chuck    | NULL           | 88000   | 8000   | 2       | 1          |
-| 4  | Diana   | NULL     | diana@corp.com | NULL    | NULL   | 2       | 3          |
-| 5  | Eve     | NULL     | NULL           | 110000  | 10000  | 3       | NULL       |
-| 6  | Frank   | NULL     | NULL           | 55000   | NULL   | NULL    | NULL       |
-| 7  | Grace   | NULL     | NULL           | NULL    | NULL   | NULL    | NULL       |
+| id  | name    | nickname | email          | salary | bonus | dept_id | manager_id |
+| --- | ------- | -------- | -------------- | ------ | ----- | ------- | ---------- |
+| 1   | Alice   | Ali      | alice@corp.com | 95000  | 5000  | 1       | NULL       |
+| 2   | Bob     | NULL     | bob@corp.com   | 72000  | NULL  | 1       | 1          |
+| 3   | Charlie | Chuck    | NULL           | 88000  | 8000  | 2       | 1          |
+| 4   | Diana   | NULL     | diana@corp.com | NULL   | NULL  | 2       | 3          |
+| 5   | Eve     | NULL     | NULL           | 110000 | 10000 | 3       | NULL       |
+| 6   | Frank   | NULL     | NULL           | 55000  | NULL  | NULL    | NULL       |
+| 7   | Grace   | NULL     | NULL           | NULL   | NULL  | NULL    | NULL       |
 
 ### products
 
@@ -92,13 +93,13 @@ INSERT INTO products VALUES
 
 **Grain:** One row = one product.
 
-| product_id | name          | sku_code | price  | quantity |
-|------------|---------------|----------|--------|----------|
-| 1          | Widget        | W-001    | 29.99  | 10       |
-| 2          | Gadget        |          | 49.99  | 0        |
-| 3          | Doohickey     | D-002    | NULL   | 15       |
-| 4          | Thingamajig   | NULL     | 19.99  | 5        |
-| 5          | Whatsit       | W-003    | 99.99  | NULL     |
+| product_id | name        | sku_code | price | quantity |
+| ---------- | ----------- | -------- | ----- | -------- |
+| 1          | Widget      | W-001    | 29.99 | 10       |
+| 2          | Gadget      |          | 49.99 | 0        |
+| 3          | Doohickey   | D-002    | NULL  | 15       |
+| 4          | Thingamajig | NULL     | 19.99 | 5        |
+| 5          | Whatsit     | W-003    | 99.99 | NULL     |
 
 ### orders
 
@@ -121,13 +122,13 @@ INSERT INTO orders VALUES
 
 **Grain:** One row = one order.
 
-| order_id | customer_id | order_date  | shipped_date | total  |
-|----------|-------------|-------------|--------------|--------|
-| 101      | 1           | 2025-01-10  | 2025-01-13   | 150.00 |
-| 102      | 2           | 2025-01-12  | NULL         | 220.50 |
-| 103      | 1           | 2025-02-01  | 2025-02-03   | 89.99  |
-| 104      | NULL        | 2025-02-05  | NULL         | NULL   |
-| 105      | 3           | 2025-03-10  | NULL         | 300.00 |
+| order_id | customer_id | order_date | shipped_date | total  |
+| -------- | ----------- | ---------- | ------------ | ------ |
+| 101      | 1           | 2025-01-10 | 2025-01-13   | 150.00 |
+| 102      | 2           | 2025-01-12 | NULL         | 220.50 |
+| 103      | 1           | 2025-02-01 | 2025-02-03   | 89.99  |
+| 104      | NULL        | 2025-02-05 | NULL         | NULL   |
+| 105      | 3           | 2025-03-10 | NULL         | 300.00 |
 
 ---
 
@@ -143,21 +144,21 @@ NULL represents "no value." When you need a displayable, computable, or reportab
 
 ### When to use it
 
-| Use case | Example |
-|----------|---------|
-| Display fallback | Show "N/A" when a nickname is missing |
-| Aggregate zeroing | `COALESCE(SUM(amount), 0)` so empty groups show 0 not NULL |
-| Date fallback | Prefer shipped date, fall back to order date |
-| Pivot defaults | Fill NULLs in crosstab queries |
-| Comparison normalization | Treat NULL as a default before comparing |
+| Use case                 | Example                                                    |
+| ------------------------ | ---------------------------------------------------------- |
+| Display fallback         | Show "N/A" when a nickname is missing                      |
+| Aggregate zeroing        | `COALESCE(SUM(amount), 0)` so empty groups show 0 not NULL |
+| Date fallback            | Prefer shipped date, fall back to order date               |
+| Pivot defaults           | Fill NULLs in crosstab queries                             |
+| Comparison normalization | Treat NULL as a default before comparing                   |
 
 ### When NOT to use it
 
-| Anti-pattern | Why |
-|--------------|-----|
-| `COALESCE(col, default)` in `WHERE` | Wraps `col` in a function → defeats index usage (see [Performance Implications](#performance-implications)) |
-| `COALESCE` to fix a NOT IN NULL trap | The correct fix is `NOT EXISTS`, not COALESCE |
-| Using it to distinguish NULL from 0 | `COALESCE(NULL, 0)` returns 0; you lose the ability to tell "unknown" from "zero" downstream |
+| Anti-pattern                         | Why                                                                                                         |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| `COALESCE(col, default)` in `WHERE`  | Wraps `col` in a function → defeats index usage (see [Performance Implications](#performance-implications)) |
+| `COALESCE` to fix a NOT IN NULL trap | The correct fix is `NOT EXISTS`, not COALESCE                                                               |
+| Using it to distinguish NULL from 0  | `COALESCE(NULL, 0)` returns 0; you lose the ability to tell "unknown" from "zero" downstream                |
 
 ---
 
@@ -183,7 +184,7 @@ END
 
 3. **Argument count:** At least one argument is required. Many engines allow up to 128 or 255 arguments (PostgreSQL: 128, SQL Server: 128, MySQL: unlimited in practice, Oracle: unlimited).
 
-4. **Not lazy on argument parsing:** The engine *parses* all arguments at compile time. It only *evaluates* them left-to-right at runtime, stopping early. This means the syntax is validated for all arguments even though later ones may never be evaluated.
+4. **Not lazy on argument parsing:** The engine _parses_ all arguments at compile time. It only _evaluates_ them left-to-right at runtime, stopping early. This means the syntax is validated for all arguments even though later ones may never be evaluated.
 
 > **PostgreSQL / MySQL / SQL Server / Oracle**
 > All four engines implement `COALESCE` with `CASE`-equivalent semantics. PostgreSQL documentation explicitly states it is equivalent to `CASE`. Oracle also has `NVL(a, b)` (two arguments only) and `NVL2(a, b, c)`. SQL Server has `ISNULL(a, b)` (two arguments only). These are not interchangeable with `COALESCE` in all type-resolution scenarios — prefer `COALESCE` for portability.
@@ -196,10 +197,10 @@ END
 COALESCE(expr1, expr2 [, expr3, ... exprN])
 ```
 
-| Parameter | Description |
-|-----------|-------------|
-| `expr1` | The expression to try first |
-| `expr2` | The first fallback if `expr1` is NULL |
+| Parameter  | Description                              |
+| ---------- | ---------------------------------------- |
+| `expr1`    | The expression to try first              |
+| `expr2`    | The first fallback if `expr1` is NULL    |
 | `expr3..N` | Additional fallbacks, evaluated in order |
 
 **Return type:** The common type of all arguments (determined by implicit type promotion rules of the engine).
@@ -233,7 +234,7 @@ FROM employees;
 **How it works:** For each row, if `nickname` is not NULL, use it. Otherwise, use `name` (which is `NOT NULL` by constraint, so this chain always resolves).
 
 | name    | display_name |
-|---------|--------------|
+| ------- | ------------ |
 | Alice   | Ali          |
 | Bob     | Bob          |
 | Charlie | Chuck        |
@@ -251,14 +252,14 @@ FROM employees;
 ```
 
 | name    | best_contact       |
-|---------|---------------------|
-| Alice   | alice@corp.com      |
-| Bob     | bob@corp.com        |
-| Charlie | Chuck               |
-| Diana   | diana@corp.com      |
-| Eve     | No contact on file  |
-| Frank   | No contact on file  |
-| Grace   | No contact on file  |
+| ------- | ------------------ |
+| Alice   | alice@corp.com     |
+| Bob     | bob@corp.com       |
+| Charlie | Chuck              |
+| Diana   | diana@corp.com     |
+| Eve     | No contact on file |
+| Frank   | No contact on file |
+| Grace   | No contact on file |
 
 **Grain note:** Each output row still represents one employee. The `COALESCE` picks the first available contact method.
 
@@ -287,7 +288,7 @@ FROM orders;
 ```
 
 | order_id | effective_date |
-|----------|----------------|
+| -------- | -------------- |
 | 101      | 2025-01-13     |
 | 102      | 2025-01-12     |
 | 103      | 2025-02-03     |
@@ -308,16 +309,16 @@ FROM employees;
 ```
 
 | name    | total_compensation |
-|---------|---------------------|
-| Alice   | 100000              |
-| Bob     | 72000               |
-| Charlie | 96000               |
-| Diana   | 0                   |
-| Eve     | 120000              |
-| Frank   | 55000               |
-| Grace   | 0                   |
+| ------- | ------------------ |
+| Alice   | 100000             |
+| Bob     | 72000              |
+| Charlie | 96000              |
+| Diana   | 0                  |
+| Eve     | 120000             |
+| Frank   | 55000              |
+| Grace   | 0                  |
 
-**Important:** Diana and Grace have NULL salary *and* NULL bonus. Treating both as 0 produces `0` total compensation. Is that correct? Maybe Diana and Grace should show NULL (unknown), not 0. The `COALESCE` here has *hidden the unknown* — be deliberate.
+**Important:** Diana and Grace have NULL salary _and_ NULL bonus. Treating both as 0 produces `0` total compensation. Is that correct? Maybe Diana and Grace should show NULL (unknown), not 0. The `COALESCE` here has _hidden the unknown_ — be deliberate.
 
 ```sql
 -- BETTER: only coerce NULLs where the business rule demands it
@@ -366,13 +367,13 @@ GROUP BY COALESCE(dept_id, 0);
 ```
 
 | dept_id | headcount |
-|---------|-----------|
+| ------- | --------- |
 | 0       | 3         |
 | 1       | 2         |
 | 2       | 1         |
 | 3       | 1         |
 
-**Semantic change:** By wrapping `dept_id` in `COALESCE`, you have merged all NULL-department employees into a group labeled `0`. This is a *presentation* choice, not a data fix. If the original NULL grouping is meaningful (e.g. "dept not yet assigned"), keeping the NULL group visible and labeling it at the report layer may be better.
+**Semantic change:** By wrapping `dept_id` in `COALESCE`, you have merged all NULL-department employees into a group labeled `0`. This is a _presentation_ choice, not a data fix. If the original NULL grouping is meaningful (e.g. "dept not yet assigned"), keeping the NULL group visible and labeling it at the report layer may be better.
 
 ### 4. COALESCE in CASE — pivots
 
@@ -399,6 +400,7 @@ WHERE id = 4;
 ```
 
 This is equivalent to:
+
 ```sql
 UPDATE employees
 SET salary = CASE WHEN salary IS NULL THEN 50000 ELSE salary END
@@ -430,20 +432,20 @@ LEFT JOIN departments d
 
 ### Edge case table
 
-| Expression | Result | Why |
-|------------|--------|-----|
-| `COALESCE(1, 2)` | `1` | First arg is non-NULL |
-| `COALESCE(NULL, 2)` | `2` | First arg is NULL, second is not |
-| `COALESCE(NULL, NULL)` | `NULL` | Both are NULL |
-| `COALESCE(NULL, NULL, NULL)` | `NULL` | All NULL |
-| `COALESCE(0, 5)` | `0` | 0 is non-NULL — it is a valid value |
-| `COALESCE('', 'fallback')` | `''` | Empty string is NOT NULL |
-| `COALESCE(FALSE, TRUE)` | `FALSE` | `FALSE` is non-NULL |
-| `COALESCE(NULL, 'a', 'b')` | `'a'` | Stops at first non-NULL |
-| `COALESCE(NULL, NULL, 1)` | `1` | Third arg is the first non-NULL |
+| Expression                   | Result  | Why                                 |
+| ---------------------------- | ------- | ----------------------------------- |
+| `COALESCE(1, 2)`             | `1`     | First arg is non-NULL               |
+| `COALESCE(NULL, 2)`          | `2`     | First arg is NULL, second is not    |
+| `COALESCE(NULL, NULL)`       | `NULL`  | Both are NULL                       |
+| `COALESCE(NULL, NULL, NULL)` | `NULL`  | All NULL                            |
+| `COALESCE(0, 5)`             | `0`     | 0 is non-NULL — it is a valid value |
+| `COALESCE('', 'fallback')`   | `''`    | Empty string is NOT NULL            |
+| `COALESCE(FALSE, TRUE)`      | `FALSE` | `FALSE` is non-NULL                 |
+| `COALESCE(NULL, 'a', 'b')`   | `'a'`   | Stops at first non-NULL             |
+| `COALESCE(NULL, NULL, 1)`    | `1`     | Third arg is the first non-NULL     |
 
 > **Common misconception**
-> "COALESCE returns the first *truthy* value, like in programming languages." — No. It returns the first **non-NULL** value. `0`, `''`, and `FALSE` are non-NULL and **will be returned** even though they are "falsy" in most programming languages. There is no truthiness check.
+> "COALESCE returns the first _truthy_ value, like in programming languages." — No. It returns the first **non-NULL** value. `0`, `''`, and `FALSE` are non-NULL and **will be returned** even though they are "falsy" in most programming languages. There is no truthiness check.
 
 ### NULLIF returns NULL — what COALESCE does with it
 
@@ -559,20 +561,20 @@ SQL has no built-in "make this value NULL if it matches a sentinel." `NULLIF` fi
 
 ### When to use it
 
-| Use case | Pattern |
-|----------|---------|
-| Prevent division by zero | `revenue / NULLIF(qty, 0)` |
-| Convert empty string to NULL | `NULLIF(email, '')` |
-| Convert sentinel value to NULL | `NULLIF(status, -1)` |
-| Create a NULL-aware default | `COALESCE(NULLIF(a, sentinel), fallback)` |
+| Use case                       | Pattern                                   |
+| ------------------------------ | ----------------------------------------- |
+| Prevent division by zero       | `revenue / NULLIF(qty, 0)`                |
+| Convert empty string to NULL   | `NULLIF(email, '')`                       |
+| Convert sentinel value to NULL | `NULLIF(status, -1)`                      |
+| Create a NULL-aware default    | `COALESCE(NULLIF(a, sentinel), fallback)` |
 
 ### When NOT to use it
 
-| Anti-pattern | Why |
-|--------------|-----|
-| `NULLIF(col, col)` | Always returns NULL (a value is always equal to itself) — almost certainly a bug |
-| `NULLIF` to filter out bad data | Use `WHERE` to filter; `NULLIF` converts values, it doesn't remove rows |
-| Overuse in WHERE clauses | `WHERE NULLIF(col, 0) IS NOT NULL` is equivalent to `WHERE col <> 0 AND col IS NOT NULL`; the latter is clearer |
+| Anti-pattern                    | Why                                                                                                             |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `NULLIF(col, col)`              | Always returns NULL (a value is always equal to itself) — almost certainly a bug                                |
+| `NULLIF` to filter out bad data | Use `WHERE` to filter; `NULLIF` converts values, it doesn't remove rows                                         |
+| Overuse in WHERE clauses        | `WHERE NULLIF(col, 0) IS NOT NULL` is equivalent to `WHERE col <> 0 AND col IS NOT NULL`; the latter is clearer |
 
 ---
 
@@ -602,10 +604,10 @@ CASE WHEN a = b THEN NULL ELSE a END
 NULLIF(expr_a, expr_b)
 ```
 
-| Parameter | Description |
-|-----------|-------------|
-| `expr_a` | The expression to return (or convert to NULL) |
-| `expr_b` | The value to compare against; if equal to `expr_a`, NULL is returned |
+| Parameter | Description                                                          |
+| --------- | -------------------------------------------------------------------- |
+| `expr_a`  | The expression to return (or convert to NULL)                        |
+| `expr_b`  | The value to compare against; if equal to `expr_a`, NULL is returned |
 
 ```sql
 -- Basic
@@ -642,7 +644,7 @@ FROM products;
 ```
 
 | product_id | price | quantity | unit_cost |
-|------------|-------|----------|-----------|
+| ---------- | ----- | -------- | --------- |
 | 1          | 29.99 | 10       | 2.999     |
 | 2          | 49.99 | 0        | NULL      |
 | 3          | NULL  | 15       | NULL      |
@@ -650,6 +652,7 @@ FROM products;
 | 5          | 99.99 | NULL     | NULL      |
 
 **Interpretation:**
+
 - Product 2: quantity is zero → `NULLIF(0, 0)` = NULL → `49.99 / NULL` = NULL (meaningful: "undefined unit cost for zero quantity").
 - Product 3: price is NULL → `NULL / 15` = NULL (meaningful: "price unknown").
 - Product 5: quantity is NULL → `NULLIF(NULL, 0)` = NULL → `99.99 / NULL` = NULL.
@@ -666,7 +669,7 @@ FROM products;
 ```
 
 | product_id | clean_sku |
-|------------|-----------|
+| ---------- | --------- |
 | 1          | W-001     |
 | 2          | NULL      |
 | 3          | D-002     |
@@ -706,10 +709,10 @@ FROM products;
 -- AVG = (10 + 15 + 5) / 3 = 10
 ```
 
-| Query | Result | Why |
-|-------|--------|-----|
-| `AVG(quantity)` | `7.5` | 30 / 4 (zero is a real value, included) |
-| `AVG(NULLIF(quantity, 0))` | `10` | 30 / 3 (zero converted to NULL, excluded) |
+| Query                      | Result | Why                                       |
+| -------------------------- | ------ | ----------------------------------------- |
+| `AVG(quantity)`            | `7.5`  | 30 / 4 (zero is a real value, included)   |
+| `AVG(NULLIF(quantity, 0))` | `10`   | 30 / 3 (zero converted to NULL, excluded) |
 
 ### Example 5: NULLIF in UPDATE — conditional null-out
 
@@ -721,6 +724,7 @@ WHERE bonus = 0;
 ```
 
 This is equivalent to:
+
 ```sql
 UPDATE employees
 SET bonus = CASE WHEN bonus = 0 THEN NULL ELSE bonus END
@@ -791,20 +795,20 @@ SELECT COALESCE(NULLIF(user_input, ''), 'default_value') AS effective_value;
 
 ### Edge case table
 
-| Expression | Result | Why |
-|------------|--------|-----|
-| `NULLIF(1, 1)` | `NULL` | Equal → returns NULL |
-| `NULLIF(1, 2)` | `1` | Not equal → returns `a` |
-| `NULLIF(NULL, 1)` | `NULL` | `NULL = 1` is UNKNOWN → returns `a` (which is NULL) |
-| `NULLIF(1, NULL)` | `1` | `1 = NULL` is UNKNOWN → returns `a` |
-| `NULLIF(NULL, NULL)` | `NULL` | `NULL = NULL` is UNKNOWN → returns `a` (which is NULL) |
-| `NULLIF('', '')` | `NULL` | `'' = ''` is TRUE → returns NULL |
-| `NULLIF(0, 0)` | `NULL` | Equal → returns NULL |
+| Expression             | Result  | Why                                                      |
+| ---------------------- | ------- | -------------------------------------------------------- |
+| `NULLIF(1, 1)`         | `NULL`  | Equal → returns NULL                                     |
+| `NULLIF(1, 2)`         | `1`     | Not equal → returns `a`                                  |
+| `NULLIF(NULL, 1)`      | `NULL`  | `NULL = 1` is UNKNOWN → returns `a` (which is NULL)      |
+| `NULLIF(1, NULL)`      | `1`     | `1 = NULL` is UNKNOWN → returns `a`                      |
+| `NULLIF(NULL, NULL)`   | `NULL`  | `NULL = NULL` is UNKNOWN → returns `a` (which is NULL)   |
+| `NULLIF('', '')`       | `NULL`  | `'' = ''` is TRUE → returns NULL                         |
+| `NULLIF(0, 0)`         | `NULL`  | Equal → returns NULL                                     |
 | `NULLIF('abc', 'ABC')` | `'abc'` | Case-sensitive comparison → not equal in most collations |
-| `NULLIF(1.0, 1)` | `NULL` | Numeric equality: 1.0 = 1 is TRUE → NULL |
+| `NULLIF(1.0, 1)`       | `NULL`  | Numeric equality: 1.0 = 1 is TRUE → NULL                 |
 
 > **Interview trap**
-> `NULLIF(NULL, NULL)` — "both are NULL so they are equal, right?" — In `NULLIF`'s internal `CASE`, the comparison `NULL = NULL` is `UNKNOWN`, so the CASE returns `a` (which is NULL). The *result* happens to be NULL, but the reasoning is different from what you might expect. If `a` were non-NULL, `NULLIF(a, NULL)` would always return `a` (never NULL), because `a = NULL` is always `UNKNOWN`.
+> `NULLIF(NULL, NULL)` — "both are NULL so they are equal, right?" — In `NULLIF`'s internal `CASE`, the comparison `NULL = NULL` is `UNKNOWN`, so the CASE returns `a` (which is NULL). The _result_ happens to be NULL, but the reasoning is different from what you might expect. If `a` were non-NULL, `NULLIF(a, NULL)` would always return `a` (never NULL), because `a = NULL` is always `UNKNOWN`.
 
 > **Interview trap**
 > `NULLIF(1, NULL)` returns `1`, not NULL. Many candidates assume "NULLIF with NULL as the second arg means 'make it NULL.'" It does not. The comparison `1 = NULL` is `UNKNOWN`, so the function returns `a` = `1`.
@@ -904,7 +908,7 @@ FROM products;
 ```
 
 | product_id | display_sku |
-|------------|-------------|
+| ---------- | ----------- |
 | 1          | W-001       |
 | 2          | NO-SKU      |
 | 3          | D-002       |
@@ -912,6 +916,7 @@ FROM products;
 | 5          | W-003       |
 
 **How it works:**
+
 1. `NULLIF(sku_code, '')` — if `sku_code` is `''`, returns NULL; if `sku_code` is NULL, returns NULL; otherwise returns `sku_code`.
 2. `COALESCE(..., 'NO-SKU')` — if the result is NULL, use `'NO-SKU'`.
 
@@ -926,7 +931,7 @@ FROM products;
 ```
 
 | product_id | raw_ratio | safe_ratio |
-|------------|-----------|------------|
+| ---------- | --------- | ---------- |
 | 1          | 2.999     | 2.999      |
 | 2          | NULL      | 0          |
 | 3          | NULL      | 0          |
@@ -981,15 +986,15 @@ flowchart TD
 
 ## COALESCE vs Other NULL-Handling Functions
 
-| Function | Arguments | Behavior | Portability |
-|----------|-----------|----------|-------------|
-| `COALESCE(a, b, c, ...)` | 1+ | First non-NULL | ANSI SQL:1992; all 4 engines |
-| `NVL(a, b)` | 2 | Returns `b` if `a` is NULL, else `a` | Oracle only |
-| `NVL2(a, b, c)` | 3 | Returns `b` if `a` is not NULL, else `c` | Oracle only |
-| `IFNULL(a, b)` | 2 | Returns `b` if `a` is NULL, else `a` | MySQL only |
-| `ISNULL(a, b)` | 2 | Returns `b` if `a` is NULL, else `a` | SQL Server only |
-| `NULLIF(a, b)` | 2 | Returns NULL if `a = b`, else `a` | ANSI SQL:1992; all 4 engines |
-| `IF(cond, a, b)` | 3 | Returns `a` if cond is TRUE, else `b` | MySQL, PostgreSQL (not SQL Server, not Oracle standard) |
+| Function                 | Arguments | Behavior                                 | Portability                                             |
+| ------------------------ | --------- | ---------------------------------------- | ------------------------------------------------------- |
+| `COALESCE(a, b, c, ...)` | 1+        | First non-NULL                           | ANSI SQL:1992; all 4 engines                            |
+| `NVL(a, b)`              | 2         | Returns `b` if `a` is NULL, else `a`     | Oracle only                                             |
+| `NVL2(a, b, c)`          | 3         | Returns `b` if `a` is not NULL, else `c` | Oracle only                                             |
+| `IFNULL(a, b)`           | 2         | Returns `b` if `a` is NULL, else `a`     | MySQL only                                              |
+| `ISNULL(a, b)`           | 2         | Returns `b` if `a` is NULL, else `a`     | SQL Server only                                         |
+| `NULLIF(a, b)`           | 2         | Returns NULL if `a = b`, else `a`        | ANSI SQL:1992; all 4 engines                            |
+| `IF(cond, a, b)`         | 3         | Returns `a` if cond is TRUE, else `b`    | MySQL, PostgreSQL (not SQL Server, not Oracle standard) |
 
 > **Common misconception**
 > "`ISNULL(a, b)` in SQL Server is the same as `COALESCE(a, b)`." — They behave the same for two arguments in most cases, but their **type resolution** differs. `ISNULL` uses the type of the first argument; `COALESCE` uses the common type of both. This can cause subtle bugs with implicit conversions. Prefer `COALESCE` for portability.
@@ -1001,17 +1006,17 @@ flowchart TD
 
 ## Database-Specific Differences
 
-| Feature | PostgreSQL | MySQL | SQL Server | Oracle |
-|---------|-----------|-------|------------|--------|
-| `COALESCE` | Yes | Yes | Yes | Yes |
-| `NULLIF` | Yes | Yes | Yes | Yes |
-| `NVL` | No | No | No | Yes |
-| `NVL2` | No | No | No | Yes |
-| `IFNULL` | No | Yes | No | No |
-| `ISNULL` | No | No | Yes | No |
-| `COALESCE` arg limit | 128 | ~unlimited | 128 | unlimited |
-| Type resolution | common type | common type | first arg type (ISNULL) / common type (COALESCE) | common type |
-| `COALESCE` short-circuit | Yes (CASE semantics) | Yes | Yes | Yes |
+| Feature                  | PostgreSQL           | MySQL       | SQL Server                                       | Oracle      |
+| ------------------------ | -------------------- | ----------- | ------------------------------------------------ | ----------- |
+| `COALESCE`               | Yes                  | Yes         | Yes                                              | Yes         |
+| `NULLIF`                 | Yes                  | Yes         | Yes                                              | Yes         |
+| `NVL`                    | No                   | No          | No                                               | Yes         |
+| `NVL2`                   | No                   | No          | No                                               | Yes         |
+| `IFNULL`                 | No                   | Yes         | No                                               | No          |
+| `ISNULL`                 | No                   | No          | Yes                                              | No          |
+| `COALESCE` arg limit     | 128                  | ~unlimited  | 128                                              | unlimited   |
+| Type resolution          | common type          | common type | first arg type (ISNULL) / common type (COALESCE) | common type |
+| `COALESCE` short-circuit | Yes (CASE semantics) | Yes         | Yes                                              | Yes         |
 
 ### PostgreSQL specifics
 
@@ -1471,18 +1476,21 @@ EXPLAIN PLAN FOR SELECT ...;  -- Oracle
 Given the sample `employees` table, predict the output of each query:
 
 36.
+
 ```sql
 SELECT name, COALESCE(salary, 0) + COALESCE(bonus, 0) AS total_comp
 FROM employees WHERE id IN (1, 4, 7);
 ```
 
 37.
+
 ```sql
 SELECT name, salary / NULLIF(bonus, 0) AS salary_to_bonus
 FROM employees WHERE id IN (1, 3, 5);
 ```
 
 38.
+
 ```sql
 SELECT name,
        COALESCE(NULLIF(email, ''), 'no email') AS contact
@@ -1490,6 +1498,7 @@ FROM employees WHERE id IN (3, 5, 7);
 ```
 
 39.
+
 ```sql
 SELECT name,
        NULLIF(COALESCE(nickname, ''), '') AS nick
@@ -1497,6 +1506,7 @@ FROM employees WHERE id IN (1, 2, 4);
 ```
 
 40.
+
 ```sql
 SELECT product_id,
        COALESCE(NULLIF(sku_code, ''), 'MISSING') AS sku,
@@ -1509,12 +1519,14 @@ FROM products WHERE product_id IN (1, 2, 5);
 41. A query `SELECT * FROM employees WHERE COALESCE(dept_id, 0) = 1` is slow on a table with 10 million rows. Identify the problem and rewrite the query.
 
 42. A report shows `total_compensation = 0` for employees whose salary is not yet determined. Identify the bug in:
+
 ```sql
 SELECT name, COALESCE(salary, 0) + COALESCE(bonus, 0) AS total_compensation
 FROM employees;
 ```
 
 43. A division query does not error but returns unexpected NULLs:
+
 ```sql
 SELECT product_id, price / NULLIF(quantity, 0) AS unit_cost
 FROM products;
@@ -1522,6 +1534,7 @@ FROM products;
 ```
 
 44. A NOT IN query returns zero rows even though there should be matches:
+
 ```sql
 SELECT name FROM employees
 WHERE dept_id NOT IN (SELECT dept_id FROM departments WHERE manager_id IS NULL);
@@ -1529,6 +1542,7 @@ WHERE dept_id NOT IN (SELECT dept_id FROM departments WHERE manager_id IS NULL);
 ```
 
 45. Explain why this query may silently produce wrong results:
+
 ```sql
 SELECT AVG(COALESCE(quantity, 0)) FROM products;
 ```
@@ -1538,6 +1552,7 @@ SELECT AVG(COALESCE(quantity, 0)) FROM products;
 46. You have a query with `WHERE COALESCE(status, 'unknown') = 'active'` on a table with 50 million rows and an index on `status`. Write a sargable equivalent and explain why it should be faster.
 
 47. Compare the following two queries on a table with 100 million rows and an index on `dept_id`. Which is likely faster and why?
+
 ```sql
 -- Query A
 SELECT * FROM employees WHERE COALESCE(dept_id, -1) = 5;

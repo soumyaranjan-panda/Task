@@ -9,9 +9,9 @@ Section `07-Filtering-Operators` is complete at `sql-handbook/1-Fundamentals/07-
 - **55 interview questions** across Beginner / Intermediate / Advanced / Scenario / Tricky / Output Prediction / Debugging / Performance.
 
 Both `07` files existed in the `sql-handbook` tree as empty placeholders, so the generated content now fills one of them (the canonical handbook location, consistent with prior sections).
-se-specific extensions. It explains not just syntax, but the *semantics*, *NULL behavior*, *performance*, and *edge cases* of each operator.
+se-specific extensions. It explains not just syntax, but the _semantics_, _NULL behavior_, _performance_, and _edge cases_ of each operator.
 
-> **Grain reminder:** Before writing a filter, ask: *"What does one row in my result represent?"* A filter that ignores the grain produces wrong answers.
+> **Grain reminder:** Before writing a filter, ask: _"What does one row in my result represent?"_ A filter that ignores the grain produces wrong answers.
 
 > **Cross-reference:** For the logical order of query processing — why `WHERE` runs before `SELECT` aliases exist, before `GROUP BY`, and before `DISTINCT` — see [06 — Logical Query Processing Order](./06-Logical-Query-Processing-Order.md).
 
@@ -23,38 +23,38 @@ All examples use the following tables.
 
 ### employees
 
-| id | name        | dept_id | salary | hire_date  | manager_id | is_active | nickname |
-|----|-------------|---------|--------|------------|------------|-----------|----------|
-| 1  | Alice       | 1       | 95000  | 2019-03-15 | NULL       | TRUE      | Ali      |
-| 2  | Bob         | 1       | 72000  | 2021-06-01 | 1          | TRUE      | Robert   |
-| 3  | Charlie     | 2       | 88000  | 2020-01-20 | 1          | TRUE      | Chuck    |
-| 4  | Diana       | 2       | 67000  | 2022-11-10 | 3          | TRUE      | Di       |
-| 5  | Eve         | 3       | 110000 | 2018-07-04 | NULL       | FALSE     | Evelyn   |
-| 6  | Frank       | NULL    | 55000  | 2023-02-28 | NULL       | TRUE      | Frankie  |
-| 7  | Grace       | NULL    | NULL   | 2024-01-10 | NULL       | TRUE      | NULL     |
+| id  | name    | dept_id | salary | hire_date  | manager_id | is_active | nickname |
+| --- | ------- | ------- | ------ | ---------- | ---------- | --------- | -------- |
+| 1   | Alice   | 1       | 95000  | 2019-03-15 | NULL       | TRUE      | Ali      |
+| 2   | Bob     | 1       | 72000  | 2021-06-01 | 1          | TRUE      | Robert   |
+| 3   | Charlie | 2       | 88000  | 2020-01-20 | 1          | TRUE      | Chuck    |
+| 4   | Diana   | 2       | 67000  | 2022-11-10 | 3          | TRUE      | Di       |
+| 5   | Eve     | 3       | 110000 | 2018-07-04 | NULL       | FALSE     | Evelyn   |
+| 6   | Frank   | NULL    | 55000  | 2023-02-28 | NULL       | TRUE      | Frankie  |
+| 7   | Grace   | NULL    | NULL   | 2024-01-10 | NULL       | TRUE      | NULL     |
 
 **Grain:** One row = one employee. Each employee belongs to at most one department.
 
 ### departments
 
-| id | name        | budget  |
-|----|-------------|---------|
-| 1  | Engineering | 500000  |
-| 2  | Marketing   | 300000  |
-| 3  | Executive   | 800000  |
-| 4  | Sales       | 200000  |
+| id  | name        | budget |
+| --- | ----------- | ------ |
+| 1   | Engineering | 500000 |
+| 2   | Marketing   | 300000 |
+| 3   | Executive   | 800000 |
+| 4   | Sales       | 200000 |
 
 **Grain:** One row = one department.
 
 ### orders
 
-| id | customer_id | product  | amount | status    | order_date |
-|----|-------------|----------|--------|-----------|------------|
-| 101| 1           | Widget A | 250.00 | shipped   | 2024-11-15 |
-| 102| 1           | Widget B | 120.50 | shipped   | 2024-12-01 |
-| 103| 2           | Widget A | 250.00 | pending   | 2024-12-05 |
-| 104| 3           | Widget C | 89.99  | NULL      | 2025-01-10 |
-| 105| 3           | Widget A | 250.00 | cancelled | 2025-01-20 |
+| id  | customer_id | product  | amount | status    | order_date |
+| --- | ----------- | -------- | ------ | --------- | ---------- |
+| 101 | 1           | Widget A | 250.00 | shipped   | 2024-11-15 |
+| 102 | 1           | Widget B | 120.50 | shipped   | 2024-12-01 |
+| 103 | 2           | Widget A | 250.00 | pending   | 2024-12-05 |
+| 104 | 3           | Widget C | 89.99  | NULL      | 2025-01-10 |
+| 105 | 3           | Widget A | 250.00 | cancelled | 2025-01-20 |
 
 **Grain:** One row = one order line.
 
@@ -69,7 +69,7 @@ The six fundamental operators that compare two values and return `TRUE`, `FALSE`
 ### Syntax
 
 | Operator | Meaning                  | ANSI | PostgreSQL | MySQL | SQL Server | Oracle |
-|----------|--------------------------|------|------------|-------|------------|--------|
+| -------- | ------------------------ | ---- | ---------- | ----- | ---------- | ------ |
 | `=`      | Equal                    | Yes  | Yes        | Yes   | Yes        | Yes    |
 | `<>`     | Not equal                | Yes  | Yes        | Yes   | Yes        | Yes    |
 | `!=`     | Not equal (non-standard) | No   | Yes        | Yes   | Yes        | Yes    |
@@ -93,7 +93,7 @@ WHERE dept_id = 1;
 ```
 
 | name  | salary |
-|-------|--------|
+| ----- | ------ |
 | Alice | 95000  |
 | Bob   | 72000  |
 
@@ -105,13 +105,13 @@ FROM employees
 WHERE salary <> 88000;
 ```
 
-| name    | salary |
-|---------|--------|
-| Alice   | 95000  |
-| Bob     | 72000  |
-| Diana   | 67000  |
-| Eve     | 110000 |
-| Frank   | 55000  |
+| name  | salary |
+| ----- | ------ |
+| Alice | 95000  |
+| Bob   | 72000  |
+| Diana | 67000  |
+| Eve   | 110000 |
+| Frank | 55000  |
 
 > Charlie (88000) is excluded. Grace has `NULL` salary — `NULL <> 88000` evaluates to `UNKNOWN`, so she is also excluded.
 
@@ -124,7 +124,7 @@ WHERE salary > 80000;
 ```
 
 | name    | salary |
-|---------|--------|
+| ------- | ------ |
 | Alice   | 95000  |
 | Charlie | 88000  |
 | Eve     | 110000 |
@@ -133,13 +133,13 @@ WHERE salary > 80000;
 
 Every comparison operator produces `UNKNOWN` when either operand is `NULL`. This is the single most important rule of filtering:
 
-| Expression        | Result   |
-|-------------------|----------|
-| `NULL = NULL`     | UNKNOWN  |
-| `NULL <> NULL`    | UNKNOWN  |
-| `NULL > 5`        | UNKNOWN  |
-| `NULL <= 5`       | UNKNOWN  |
-| `NULL = 5`        | UNKNOWN  |
+| Expression     | Result  |
+| -------------- | ------- |
+| `NULL = NULL`  | UNKNOWN |
+| `NULL <> NULL` | UNKNOWN |
+| `NULL > 5`     | UNKNOWN |
+| `NULL <= 5`    | UNKNOWN |
+| `NULL = 5`     | UNKNOWN |
 
 `UNKNOWN` is filtered out by `WHERE` — the row does not appear in results.
 
@@ -231,7 +231,7 @@ WHERE salary BETWEEN 70000 AND 95000;
 ```
 
 | name    | salary |
-|---------|--------|
+| ------- | ------ |
 | Alice   | 95000  |
 | Bob     | 72000  |
 | Charlie | 88000  |
@@ -247,7 +247,7 @@ WHERE hire_date BETWEEN '2020-01-01' AND '2021-12-31';
 ```
 
 | name | hire_date  |
-|------|------------|
+| ---- | ---------- |
 | Bob  | 2021-06-01 |
 
 ### The Timestamp Boundary Trap
@@ -285,11 +285,11 @@ FROM employees
 WHERE name BETWEEN 'A' AND 'M';
 ```
 
-| name  |
-|-------|
-| Alice |
-| Bob   |
-| Charlie|
+| name    |
+| ------- |
+| Alice   |
+| Bob     |
+| Charlie |
 
 String comparison is lexicographic (based on collation). `BETWEEN 'A' AND 'M'` includes all names where the first character is in the range A–M.
 
@@ -323,11 +323,11 @@ FROM employees
 WHERE salary NOT BETWEEN 70000 AND 95000;
 ```
 
-| name    | salary |
-|---------|--------|
-| Diana   | 67000  |
-| Eve     | 110000 |
-| Frank   | 55000  |
+| name  | salary |
+| ----- | ------ |
+| Diana | 67000  |
+| Eve   | 110000 |
+| Frank | 55000  |
 
 Equivalent to `salary < 70000 OR salary > 95000`. NULLs are excluded — `NULL NOT BETWEEN` is `UNKNOWN`.
 
@@ -385,11 +385,11 @@ FROM employees
 WHERE dept_id IN (1, 3);
 ```
 
-| name | dept_id |
-|------|---------|
-| Alice| 1       |
-| Bob  | 1       |
-| Eve  | 3       |
+| name  | dept_id |
+| ----- | ------- |
+| Alice | 1       |
+| Bob   | 1       |
+| Eve   | 3       |
 
 **NOT IN:**
 
@@ -400,7 +400,7 @@ WHERE dept_id NOT IN (1, 3);
 ```
 
 | name    | dept_id |
-|---------|---------|
+| ------- | ------- |
 | Charlie | 2       |
 | Diana   | 2       |
 
@@ -415,7 +415,7 @@ WHERE dept_id IN (SELECT id FROM departments WHERE budget > 300000);
 ```
 
 | name  |
-|-------|
+| ----- |
 | Alice |
 | Bob   |
 | Eve   |
@@ -485,12 +485,12 @@ WHERE dept_id NOT IN (
 
 ### NOT IN vs NOT EXISTS
 
-| Aspect | NOT IN | NOT EXISTS |
-|--------|--------|------------|
-| NULL safety | DANGEROUS — returns zero rows if subquery has NULL | Safe — NULLs handled naturally |
-| Semantics | "value must not equal every value in the list" | "no matching row exists" |
-| Optimization | Optimizer may rewrite to JOIN or semi-join | Typically implemented as semi-join |
-| Readability | Simple for small lists | Slightly more verbose |
+| Aspect       | NOT IN                                             | NOT EXISTS                         |
+| ------------ | -------------------------------------------------- | ---------------------------------- |
+| NULL safety  | DANGEROUS — returns zero rows if subquery has NULL | Safe — NULLs handled naturally     |
+| Semantics    | "value must not equal every value in the list"     | "no matching row exists"           |
+| Optimization | Optimizer may rewrite to JOIN or semi-join         | Typically implemented as semi-join |
+| Readability  | Simple for small lists                             | Slightly more verbose              |
 
 > **Interview trap:** "What's the difference between `NOT IN` and `NOT EXISTS`?" The answer involves NULLs. With a non-NULL subquery, they are equivalent. With NULLs in the subquery, `NOT IN` returns zero rows while `NOT EXISTS` returns the expected results.
 
@@ -538,12 +538,12 @@ expression NOT LIKE pattern
 
 ### Wildcards
 
-| Wildcard | Meaning                          | Example         | Matches                          |
-|----------|----------------------------------|-----------------|----------------------------------|
-| `%`      | Zero or more characters          | `'A%'`          | 'Alice', 'A', 'AB'              |
-| `_`      | Exactly one character            | `'A_'`          | 'Al', 'Ab', but NOT 'A' or 'Ali'|
-| `%%`     | Literal `%` (escape)             | `'100%%'`       | '100%'                           |
-| `/_`     | Literal `_` (escape)             | `'a/_b'`        | 'a_b'                            |
+| Wildcard | Meaning                 | Example   | Matches                          |
+| -------- | ----------------------- | --------- | -------------------------------- |
+| `%`      | Zero or more characters | `'A%'`    | 'Alice', 'A', 'AB'               |
+| `_`      | Exactly one character   | `'A_'`    | 'Al', 'Ab', but NOT 'A' or 'Ali' |
+| `%%`     | Literal `%` (escape)    | `'100%%'` | '100%'                           |
+| `/_`     | Literal `_` (escape)    | `'a/_b'`  | 'a_b'                            |
 
 > **PostgreSQL:** Use `ESCAPE` clause for custom escape: `LIKE '%100#%' ESCAPE '#'`.
 > **MySQL:** Default escape character is `\`.
@@ -559,7 +559,7 @@ SELECT name FROM employees WHERE name LIKE 'A%';
 ```
 
 | name  |
-|-------|
+| ----- |
 | Alice |
 
 **Contains:**
@@ -569,7 +569,7 @@ SELECT name FROM employees WHERE name LIKE '%ch%';
 ```
 
 | name    |
-|---------|
+| ------- |
 | Charlie |
 
 **Ends with:**
@@ -579,7 +579,7 @@ SELECT name FROM employees WHERE name LIKE '%e';
 ```
 
 | name    |
-|---------|
+| ------- |
 | Alice   |
 | Charlie |
 | Eve     |
@@ -592,7 +592,7 @@ SELECT name FROM employees WHERE name LIKE '___';
 ```
 
 | name |
-|------|
+| ---- |
 | Bob  |
 | Eve  |
 
@@ -603,7 +603,7 @@ SELECT name FROM employees WHERE name LIKE 'A____';
 ```
 
 | name  |
-|-------|
+| ----- |
 | Alice |
 
 ### NULL Behavior
@@ -616,12 +616,12 @@ Grace (`nickname = NULL`) is excluded. `NULL LIKE '%li%'` is `UNKNOWN`.
 
 ### Case Sensitivity
 
-| Database    | LIKE Behavior                                     |
-|-------------|---------------------------------------------------|
-| PostgreSQL  | Case-sensitive. Use `ILIKE` for case-insensitive. |
-| MySQL       | Case-insensitive by default (with `utf8` collation). |
-| SQL Server  | Depends on collation (often case-insensitive).    |
-| Oracle      | Case-sensitive. Use `UPPER(col) LIKE '%FOO%'`.    |
+| Database   | LIKE Behavior                                        |
+| ---------- | ---------------------------------------------------- |
+| PostgreSQL | Case-sensitive. Use `ILIKE` for case-insensitive.    |
+| MySQL      | Case-insensitive by default (with `utf8` collation). |
+| SQL Server | Depends on collation (often case-insensitive).       |
+| Oracle     | Case-sensitive. Use `UPPER(col) LIKE '%FOO%'`.       |
 
 ### NOT LIKE
 
@@ -630,7 +630,7 @@ SELECT name FROM employees WHERE name NOT LIKE 'A%';
 ```
 
 | name    |
-|---------|
+| ------- |
 | Bob     |
 | Charlie |
 | Diana   |
@@ -713,7 +713,7 @@ WHERE manager_id IS NULL;
 ```
 
 | name  | manager_id |
-|-------|------------|
+| ----- | ---------- |
 | Alice | NULL       |
 | Eve   | NULL       |
 | Frank | NULL       |
@@ -728,7 +728,7 @@ WHERE dept_id IS NOT NULL;
 ```
 
 | name    | dept_id |
-|---------|---------|
+| ------- | ------- |
 | Alice   | 1       |
 | Bob     | 1       |
 | Charlie | 2       |
@@ -739,23 +739,23 @@ WHERE dept_id IS NOT NULL;
 
 `IS NULL` and `IS NOT NULL` are the **only** operators where `NULL` produces `TRUE` or `FALSE` (not `UNKNOWN`):
 
-| Expression           | Result  |
-|----------------------|---------|
-| `NULL IS NULL`       | TRUE    |
-| `NULL IS NOT NULL`   | FALSE   |
-| `5 IS NULL`          | FALSE   |
-| `5 IS NOT NULL`      | TRUE    |
+| Expression         | Result |
+| ------------------ | ------ |
+| `NULL IS NULL`     | TRUE   |
+| `NULL IS NOT NULL` | FALSE  |
+| `5 IS NULL`        | FALSE  |
+| `5 IS NOT NULL`    | TRUE   |
 
 ### IS NULL and Indexes
 
 > **Database-specific**
 
-| Database    | IS NULL uses index? |
-|-------------|---------------------|
-| PostgreSQL  | Yes — B-tree indexes include NULL entries. |
-| MySQL InnoDB| Yes — NULLs are indexed. |
-| SQL Server  | Yes — NULLs are indexed. |
-| Oracle      | Yes — NULLs are indexed (except in certain bitmap cases). |
+| Database     | IS NULL uses index?                                       |
+| ------------ | --------------------------------------------------------- |
+| PostgreSQL   | Yes — B-tree indexes include NULL entries.                |
+| MySQL InnoDB | Yes — NULLs are indexed.                                  |
+| SQL Server   | Yes — NULLs are indexed.                                  |
+| Oracle       | Yes — NULLs are indexed (except in certain bitmap cases). |
 
 Most modern databases can use an index for `IS NULL` and `IS NOT NULL` checks. Verify with `EXPLAIN` if performance is a concern.
 
@@ -781,7 +781,7 @@ FROM employees;
 ```
 
 | total_rows | rows_with_manager | rows_without_manager |
-|------------|-------------------|----------------------|
+| ---------- | ----------------- | -------------------- |
 | 7          | 3                 | 4                    |
 
 `COUNT(column)` ignores `NULLs`. `COUNT(*)` counts all rows.
@@ -795,7 +795,7 @@ WHERE salary IS NOT NULL;
 ```
 
 | name    | salary |
-|---------|--------|
+| ------- | ------ |
 | Alice   | 95000  |
 | Bob     | 72000  |
 | Charlie | 88000  |
@@ -845,13 +845,13 @@ WHERE column_a IS NOT DISTINCT FROM column_b
 
 ### How They Work
 
-| A     | B     | A = B | A IS NOT DISTINCT FROM B | A IS DISTINCT FROM B |
-|-------|-------|-------|--------------------------|----------------------|
-| 1     | 1     | TRUE  | TRUE                     | FALSE                |
-| 1     | 2     | FALSE | FALSE                    | TRUE                 |
-| NULL  | NULL  | UNK   | TRUE                     | FALSE                |
-| NULL  | 1     | UNK   | FALSE                    | TRUE                 |
-| 1     | NULL  | UNK   | FALSE                    | TRUE                 |
+| A    | B    | A = B | A IS NOT DISTINCT FROM B | A IS DISTINCT FROM B |
+| ---- | ---- | ----- | ------------------------ | -------------------- |
+| 1    | 1    | TRUE  | TRUE                     | FALSE                |
+| 1    | 2    | FALSE | FALSE                    | TRUE                 |
+| NULL | NULL | UNK   | TRUE                     | FALSE                |
+| NULL | 1    | UNK   | FALSE                    | TRUE                 |
+| 1    | NULL | UNK   | FALSE                    | TRUE                 |
 
 ### Examples
 
@@ -887,25 +887,25 @@ JOIN employees b ON a.id < b.id
 WHERE a.dept_id IS NOT DISTINCT FROM b.dept_id;
 ```
 
-| name  | name    | dept_id |
-|-------|---------|---------|
-| Alice | Bob     | 1       |
-| Charlie| Diana  | 2       |
-| Frank | Grace   | NULL    |
+| name    | name  | dept_id |
+| ------- | ----- | ------- |
+| Alice   | Bob   | 1       |
+| Charlie | Diana | 2       |
+| Frank   | Grace | NULL    |
 
 Frank and Grace both have `dept_id = NULL`. `IS NOT DISTINCT FROM` treats them as matching.
 
 ### Database Support
 
-| Database    | IS DISTINCT FROM | IS NOT DISTINCT FROM |
-|-------------|------------------|----------------------|
-| PostgreSQL  | Yes              | Yes                  |
-| MySQL       | Yes (8.0+)       | Yes (8.0+)           |
-| SQLite      | Yes              | Yes                  |
-| BigQuery    | Yes              | Yes                  |
-| SQL Server  | **No**           | **No**               |
-| Oracle      | **No**           | **No**               |
-| Firebird    | Yes              | Yes                  |
+| Database   | IS DISTINCT FROM | IS NOT DISTINCT FROM |
+| ---------- | ---------------- | -------------------- |
+| PostgreSQL | Yes              | Yes                  |
+| MySQL      | Yes (8.0+)       | Yes (8.0+)           |
+| SQLite     | Yes              | Yes                  |
+| BigQuery   | Yes              | Yes                  |
+| SQL Server | **No**           | **No**               |
+| Oracle     | **No**           | **No**               |
+| Firebird   | Yes              | Yes                  |
 
 > **SQL Server / Oracle workaround:** Use `COALESCE(a, sentinel) = COALESCE(b, sentinel)` or `(a = b OR (a IS NULL AND b IS NULL))`.
 
@@ -934,7 +934,7 @@ WHERE COALESCE(a, -999999) = COALESCE(b, -999999)
 
 ### What They Are
 
-`EXISTS` returns `TRUE` if the subquery returns **at least one row**. `NOT EXISTS` returns `TRUE` if the subquery returns **zero rows**. They are semantically different from `IN` — they test for *row existence*, not *value membership*.
+`EXISTS` returns `TRUE` if the subquery returns **at least one row**. `NOT EXISTS` returns `TRUE` if the subquery returns **zero rows**. They are semantically different from `IN` — they test for _row existence_, not _value membership_.
 
 ### Syntax
 
@@ -965,7 +965,7 @@ WHERE EXISTS (
 ```
 
 | name    | dept_id |
-|---------|---------|
+| ------- | ------- |
 | Alice   | 1       |
 | Bob     | 1       |
 | Charlie | 2       |
@@ -985,7 +985,7 @@ WHERE EXISTS (
 ```
 
 | name        |
-|-------------|
+| ----------- |
 | Engineering |
 | Marketing   |
 | Executive   |
@@ -1003,7 +1003,7 @@ WHERE NOT EXISTS (
 ```
 
 | name  |
-|-------|
+| ----- |
 | Sales |
 
 ### NULL Behavior
@@ -1025,13 +1025,13 @@ When `e.dept_id` is `NULL`, the condition `e2.dept_id = NULL` is `UNKNOWN`, the 
 
 ### EXISTS vs IN
 
-| Aspect | EXISTS | IN |
-|--------|--------|----|
-| NULL safety | Safe | Unsafe with `NOT IN` |
-| Correlation | Always correlated | Can be non-correlated |
-| Optimization | Typically semi-join | May be converted to semi-join |
-| Readability | More verbose | Simpler for small lists |
-| Semantic | "Does a matching row exist?" | "Is this value in the set?" |
+| Aspect       | EXISTS                       | IN                            |
+| ------------ | ---------------------------- | ----------------------------- |
+| NULL safety  | Safe                         | Unsafe with `NOT IN`          |
+| Correlation  | Always correlated            | Can be non-correlated         |
+| Optimization | Typically semi-join          | May be converted to semi-join |
+| Readability  | More verbose                 | Simpler for small lists       |
+| Semantic     | "Does a matching row exist?" | "Is this value in the set?"   |
 
 > **Verify with EXPLAIN.** On modern databases, the optimizer often produces the same execution plan for `EXISTS` and `IN` subqueries. But the NULL behavior is fundamentally different for `NOT EXISTS` vs `NOT IN`.
 
@@ -1065,14 +1065,14 @@ expression > ALL (subquery)
 
 `ANY` is semantically similar to `IN` (for `=`) or a chained `OR`. `ALL` is semantically similar to a chained `AND`.
 
-| Operator | Meaning                              | Equivalent            |
-|----------|--------------------------------------|-----------------------|
-| `= ANY`  | Equal to at least one                | `IN`                  |
-| `<> ALL` | Not equal to all                     | `NOT IN`              |
-| `> ANY`  | Greater than at least one            | `> MIN(subquery)`     |
-| `> ALL`  | Greater than all                     | `> MAX(subquery)`     |
-| `< ANY`  | Less than at least one               | `< MAX(subquery)`     |
-| `< ALL`  | Less than all                        | `< MIN(subquery)`     |
+| Operator | Meaning                   | Equivalent        |
+| -------- | ------------------------- | ----------------- |
+| `= ANY`  | Equal to at least one     | `IN`              |
+| `<> ALL` | Not equal to all          | `NOT IN`          |
+| `> ANY`  | Greater than at least one | `> MIN(subquery)` |
+| `> ALL`  | Greater than all          | `> MAX(subquery)` |
+| `< ANY`  | Less than at least one    | `< MAX(subquery)` |
+| `< ALL`  | Less than all             | `< MIN(subquery)` |
 
 ### Examples
 
@@ -1085,7 +1085,7 @@ WHERE dept_id = ANY (1, 3);
 ```
 
 | name  |
-|-------|
+| ----- |
 | Alice |
 | Bob   |
 | Eve   |
@@ -1099,7 +1099,7 @@ WHERE salary > ANY (70000, 88000);
 ```
 
 | name    | salary |
-|---------|--------|
+| ------- | ------ |
 | Alice   | 95000  |
 | Charlie | 88000  |
 | Eve     | 110000 |
@@ -1107,7 +1107,7 @@ WHERE salary > ANY (70000, 88000);
 Salary 72000 (Bob) is > 70000, so Bob qualifies. Wait — let me recheck: Bob's salary is 72000 which is > 70000. Actually Bob should be included:
 
 | name    | salary |
-|---------|--------|
+| ------- | ------ |
 | Alice   | 95000  |
 | Bob     | 72000  |
 | Charlie | 88000  |
@@ -1124,7 +1124,7 @@ WHERE salary > ALL (70000, 88000);
 ```
 
 | name  | salary |
-|-------|--------|
+| ----- | ------ |
 | Alice | 95000  |
 | Eve   | 110000 |
 
@@ -1151,12 +1151,12 @@ SELECT * FROM employees WHERE salary > ALL (70000, NULL);
 
 ### ANY vs ALL Comparison
 
-| Expression     | ANY                | ALL                |
-|----------------|--------------------|--------------------|
-| `= ANY (1,3)` | Same as `IN (1,3)` | Only if value = 1 AND value = 3 (impossible unless 1=3) |
-| `<> ANY (1,3)` | Value <> 1 OR <> 3 | Same as `NOT IN (1,3)` |
-| `> ANY (1,3)` | Value > 1 (the min) | Value > 3 (the max) |
-| `> ALL (1,3)` | Value > 3 (the max) | Value > 3 (the max) |
+| Expression     | ANY                 | ALL                                                     |
+| -------------- | ------------------- | ------------------------------------------------------- |
+| `= ANY (1,3)`  | Same as `IN (1,3)`  | Only if value = 1 AND value = 3 (impossible unless 1=3) |
+| `<> ANY (1,3)` | Value <> 1 OR <> 3  | Same as `NOT IN (1,3)`                                  |
+| `> ANY (1,3)`  | Value > 1 (the min) | Value > 3 (the max)                                     |
+| `> ALL (1,3)`  | Value > 3 (the max) | Value > 3 (the max)                                     |
 
 ### When to Use
 
@@ -1199,7 +1199,7 @@ WHERE (dept_id, salary) = (1, 95000);
 ```
 
 | name  | dept_id | salary |
-|-------|---------|--------|
+| ----- | ------- | ------ |
 | Alice | 1       | 95000  |
 
 **Find employees where (dept_id, salary) is "greater than" a tuple:**
@@ -1211,7 +1211,7 @@ WHERE (dept_id, salary) > (1, 72000);
 ```
 
 | name    | dept_id | salary |
-|---------|---------|--------|
+| ------- | ------- | ------ |
 | Alice   | 1       | 95000  |
 | Charlie | 2       | 88000  |
 | Diana   | 2       | 67000  |
@@ -1228,9 +1228,9 @@ FROM employees
 WHERE (dept_id, salary) <= (1, 80000);
 ```
 
-| name  | dept_id | salary |
-|-------|---------|--------|
-| Bob   | 1       | 72000  |
+| name | dept_id | salary |
+| ---- | ------- | ------ |
+| Bob  | 1       | 72000  |
 
 `(1, 95000) <= (1, 80000)` → first equal, second: 95000 <= 80000 → FALSE.
 `(1, 72000) <= (1, 80000)` → first equal, second: 72000 <= 80000 → TRUE.
@@ -1251,12 +1251,12 @@ WHERE (dept_id, salary) IS NOT DISTINCT FROM (NULL, 95000);
 
 ### Database Support
 
-| Database    | Row Value Expressions |
-|-------------|----------------------|
-| PostgreSQL  | Full support         |
-| MySQL       | Limited (in `WHERE` only, no `UPDATE ... FROM`) |
-| SQL Server  | Limited (equality only, in `IN` lists) |
-| Oracle      | Full support         |
+| Database   | Row Value Expressions                           |
+| ---------- | ----------------------------------------------- |
+| PostgreSQL | Full support                                    |
+| MySQL      | Limited (in `WHERE` only, no `UPDATE ... FROM`) |
+| SQL Server | Limited (equality only, in `IN` lists)          |
+| Oracle     | Full support                                    |
 
 ### Index Usage
 
@@ -1292,12 +1292,12 @@ Regular expression matching for complex pattern searches that `LIKE` cannot hand
 
 ### Syntax
 
-| Database    | Operator        | Syntax                             |
-|-------------|-----------------|------------------------------------|
-| PostgreSQL  | `~` / `~*`      | `column ~ 'pattern'` (case-sensitive), `column ~* 'pattern'` (case-insensitive) |
-| MySQL       | `REGEXP` / `RLIKE` | `column REGEXP 'pattern'`       |
-| SQL Server  | `LIKE` with patterns (no native REGEXP) | Use `PATINDEX` or CLR |
-| Oracle      | `REGEXP_LIKE`   | `REGEXP_LIKE(column, 'pattern')`   |
+| Database   | Operator                                | Syntax                                                                          |
+| ---------- | --------------------------------------- | ------------------------------------------------------------------------------- |
+| PostgreSQL | `~` / `~*`                              | `column ~ 'pattern'` (case-sensitive), `column ~* 'pattern'` (case-insensitive) |
+| MySQL      | `REGEXP` / `RLIKE`                      | `column REGEXP 'pattern'`                                                       |
+| SQL Server | `LIKE` with patterns (no native REGEXP) | Use `PATINDEX` or CLR                                                           |
+| Oracle     | `REGEXP_LIKE`                           | `REGEXP_LIKE(column, 'pattern')`                                                |
 
 ### Examples
 
@@ -1315,7 +1315,7 @@ SELECT name FROM employees WHERE REGEXP_LIKE(name, '[aeiou]l');
 ```
 
 | name  |
-|-------|
+| ----- |
 | Alice |
 
 **Find email-like patterns:**
@@ -1356,17 +1356,17 @@ This section consolidates NULL behavior across all filtering operators.
 
 SQL uses three truth values: `TRUE`, `FALSE`, and `UNKNOWN`. `UNKNOWN` arises whenever `NULL` is involved in a comparison.
 
-| A     | B     | A = B | A <> B | A > B | A AND B | A OR B | NOT A |
-|-------|-------|-------|--------|-------|---------|--------|-------|
-| TRUE  | TRUE  | TRUE  | FALSE  | varies| TRUE    | TRUE    | FALSE |
-| TRUE  | FALSE | FALSE | TRUE   | varies| FALSE   | TRUE    | FALSE |
-| TRUE  | UNK   | UNK   | UNK    | UNK   | UNK     | TRUE    | FALSE |
-| FALSE | TRUE  | FALSE | TRUE   | varies| FALSE   | TRUE    | TRUE  |
-| FALSE | FALSE | FALSE | TRUE   | varies| FALSE   | FALSE   | TRUE  |
-| FALSE | UNK   | UNK   | UNK    | UNK   | FALSE   | UNK    | TRUE  |
-| UNK   | TRUE  | UNK   | UNK    | UNK   | UNK     | TRUE    | UNK   |
-| UNK   | FALSE | UNK   | UNK    | UNK   | FALSE   | UNK    | UNK   |
-| UNK   | UNK   | UNK   | UNK    | UNK   | UNK     | UNK    | UNK   |
+| A     | B     | A = B | A <> B | A > B  | A AND B | A OR B | NOT A |
+| ----- | ----- | ----- | ------ | ------ | ------- | ------ | ----- |
+| TRUE  | TRUE  | TRUE  | FALSE  | varies | TRUE    | TRUE   | FALSE |
+| TRUE  | FALSE | FALSE | TRUE   | varies | FALSE   | TRUE   | FALSE |
+| TRUE  | UNK   | UNK   | UNK    | UNK    | UNK     | TRUE   | FALSE |
+| FALSE | TRUE  | FALSE | TRUE   | varies | FALSE   | TRUE   | TRUE  |
+| FALSE | FALSE | FALSE | TRUE   | varies | FALSE   | FALSE  | TRUE  |
+| FALSE | UNK   | UNK   | UNK    | UNK    | FALSE   | UNK    | TRUE  |
+| UNK   | TRUE  | UNK   | UNK    | UNK    | UNK     | TRUE   | UNK   |
+| UNK   | FALSE | UNK   | UNK    | UNK    | FALSE   | UNK    | UNK   |
+| UNK   | UNK   | UNK   | UNK    | UNK    | UNK     | UNK    | UNK   |
 
 ### WHERE Filters UNKNOWN Out
 
@@ -1393,14 +1393,14 @@ SELECT CONCAT(NULL, 'text'); -- NULL (MySQL, PostgreSQL)
 
 ### Aggregate Functions and NULL
 
-| Function          | NULL behavior                          |
-|-------------------|----------------------------------------|
-| `COUNT(*)`        | Counts all rows, including NULLs       |
-| `COUNT(column)`   | Ignores NULL values                    |
-| `COUNT(DISTINCT col)` | Ignores NULL values              |
-| `SUM(column)`     | Ignores NULL values                    |
-| `AVG(column)`     | Ignores NULL values (sum/count of non-NULL) |
-| `MIN/MAX(column)` | Ignores NULL values                    |
+| Function              | NULL behavior                               |
+| --------------------- | ------------------------------------------- |
+| `COUNT(*)`            | Counts all rows, including NULLs            |
+| `COUNT(column)`       | Ignores NULL values                         |
+| `COUNT(DISTINCT col)` | Ignores NULL values                         |
+| `SUM(column)`         | Ignores NULL values                         |
+| `AVG(column)`         | Ignores NULL values (sum/count of non-NULL) |
+| `MIN/MAX(column)`     | Ignores NULL values                         |
 
 ```sql
 SELECT COUNT(*) AS total,
@@ -1411,7 +1411,7 @@ FROM employees;
 ```
 
 | total | with_salary | total_salary | avg_salary |
-|-------|-------------|--------------|------------|
+| ----- | ----------- | ------------ | ---------- |
 | 7     | 6           | 487000       | 81166.67   |
 
 Grace (salary = NULL) is counted by `COUNT(*)` but excluded from `COUNT(salary)`, `SUM`, and `AVG`.
@@ -1432,16 +1432,16 @@ WHERE NULL > ALL (1, 2, 3)  -- UNKNOWN
 
 ### NULL-Safe Operators Summary
 
-| Operator | NULL-safe? | NULL=NULL result |
-|----------|-----------|------------------|
-| `=`      | No        | UNKNOWN          |
-| `<>`     | No        | UNKNOWN          |
-| `IS NULL` | Yes      | TRUE             |
-| `IS NOT NULL` | Yes   | FALSE            |
-| `IS NOT DISTINCT FROM` | Yes | TRUE      |
-| `IS DISTINCT FROM` | Yes | FALSE        |
-| `EXISTS` (with NULL in subquery) | Yes | Depends on row existence |
-| `NOT EXISTS` | Yes    | Depends on row existence |
+| Operator                         | NULL-safe? | NULL=NULL result         |
+| -------------------------------- | ---------- | ------------------------ |
+| `=`                              | No         | UNKNOWN                  |
+| `<>`                             | No         | UNKNOWN                  |
+| `IS NULL`                        | Yes        | TRUE                     |
+| `IS NOT NULL`                    | Yes        | FALSE                    |
+| `IS NOT DISTINCT FROM`           | Yes        | TRUE                     |
+| `IS DISTINCT FROM`               | Yes        | FALSE                    |
+| `EXISTS` (with NULL in subquery) | Yes        | Depends on row existence |
+| `NOT EXISTS`                     | Yes        | Depends on row existence |
 
 ### COALESCE and NULLIF
 
@@ -1453,7 +1453,7 @@ FROM employees;
 ```
 
 | name    | display_name |
-|---------|--------------|
+| ------- | ------------ |
 | Alice   | Ali          |
 | Bob     | Robert       |
 | Charlie | Chuck        |
@@ -1510,24 +1510,24 @@ WHERE LEFT(name, 3) = 'Ali'
 
 ### Operator Sargability Table
 
-| Operator/Pattern | SARGable? | Notes |
-|------------------|-----------|-------|
-| `=` | Yes | B-tree index lookup |
-| `<>` / `!=` | Sometimes | Many optimizers don't use index for inequality (may do index scan + filter) |
-| `>` / `<` / `>=` / `<=` | Yes | B-tree index range scan |
-| `BETWEEN` | Yes | Equivalent to `>= AND <=` |
-| `IN (literal list)` | Yes | Multiple index lookups or range scan |
-| `IN (subquery)` | Depends | May be converted to semi-join |
-| `LIKE 'prefix%'` | Yes | B-tree range scan |
-| `LIKE '%substring%'` | No | Full table/index scan |
-| `IS NULL` | Yes | Most databases index NULLs |
-| `IS NOT NULL` | Sometimes | Depends on selectivity and optimizer |
-| `EXISTS` | Yes (semi-join) | Typically optimized to semi-join |
-| `NOT EXISTS` | Yes (anti-join) | Typically optimized to anti-join |
-| `NOT IN` | Depends | May not be optimized well with NULLs |
-| `REGEXP` / `~` | No | Full scan (unless specialized index) |
-| `column + N > M` | No | Rewrite as `column > M - N` |
-| `function(column) = X` | No | Rewrite or use functional index |
+| Operator/Pattern        | SARGable?       | Notes                                                                       |
+| ----------------------- | --------------- | --------------------------------------------------------------------------- |
+| `=`                     | Yes             | B-tree index lookup                                                         |
+| `<>` / `!=`             | Sometimes       | Many optimizers don't use index for inequality (may do index scan + filter) |
+| `>` / `<` / `>=` / `<=` | Yes             | B-tree index range scan                                                     |
+| `BETWEEN`               | Yes             | Equivalent to `>= AND <=`                                                   |
+| `IN (literal list)`     | Yes             | Multiple index lookups or range scan                                        |
+| `IN (subquery)`         | Depends         | May be converted to semi-join                                               |
+| `LIKE 'prefix%'`        | Yes             | B-tree range scan                                                           |
+| `LIKE '%substring%'`    | No              | Full table/index scan                                                       |
+| `IS NULL`               | Yes             | Most databases index NULLs                                                  |
+| `IS NOT NULL`           | Sometimes       | Depends on selectivity and optimizer                                        |
+| `EXISTS`                | Yes (semi-join) | Typically optimized to semi-join                                            |
+| `NOT EXISTS`            | Yes (anti-join) | Typically optimized to anti-join                                            |
+| `NOT IN`                | Depends         | May not be optimized well with NULLs                                        |
+| `REGEXP` / `~`          | No              | Full scan (unless specialized index)                                        |
+| `column + N > M`        | No              | Rewrite as `column > M - N`                                                 |
+| `function(column) = X`  | No              | Rewrite or use functional index                                             |
 
 > **Always verify with EXPLAIN / EXPLAIN ANALYZE.** Sargability is a guideline, not a guarantee. The optimizer may transform your query in ways you don't expect.
 
@@ -1727,28 +1727,28 @@ Always use explicit `JOIN ... ON`.
 
 ### Factors Affecting Filter Performance
 
-| Factor | Impact |
-|--------|--------|
-| Indexes | A well-placed index can turn O(n) into O(log n) |
-| Statistics | Optimizer relies on cardinality estimates |
-| Data distribution | Skewed data may cause poor plan choices |
-| Predicate sargability | Non-SARGable predicates force scans |
-| Selectivity | A filter that matches 1% of rows is more index-friendly than one matching 90% |
-| Result size | Returning millions of rows is slow regardless |
-| Query shape | `SELECT *` is slower than `SELECT col1, col2` |
-| Database engine | Different optimizers make different choices |
-| Cache / buffer pool | Hot data is faster than cold data |
+| Factor                | Impact                                                                        |
+| --------------------- | ----------------------------------------------------------------------------- |
+| Indexes               | A well-placed index can turn O(n) into O(log n)                               |
+| Statistics            | Optimizer relies on cardinality estimates                                     |
+| Data distribution     | Skewed data may cause poor plan choices                                       |
+| Predicate sargability | Non-SARGable predicates force scans                                           |
+| Selectivity           | A filter that matches 1% of rows is more index-friendly than one matching 90% |
+| Result size           | Returning millions of rows is slow regardless                                 |
+| Query shape           | `SELECT *` is slower than `SELECT col1, col2`                                 |
+| Database engine       | Different optimizers make different choices                                   |
+| Cache / buffer pool   | Hot data is faster than cold data                                             |
 
 ### Execution Plan Verification
 
 > **Always verify with execution plans:**
 
-| Database    | Command                                                    |
-|-------------|------------------------------------------------------------|
-| PostgreSQL  | `EXPLAIN ANALYZE` or `EXPLAIN (ANALYZE, BUFFERS)`         |
-| MySQL       | `EXPLAIN ANALYZE` (8.0+) or `EXPLAIN`                     |
-| SQL Server  | `SET STATISTICS IO ON;` or `SET STATISTICS TIME ON;` or press Ctrl+M in SSMS |
-| Oracle      | `EXPLAIN PLAN FOR <query>; SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);` |
+| Database   | Command                                                                      |
+| ---------- | ---------------------------------------------------------------------------- |
+| PostgreSQL | `EXPLAIN ANALYZE` or `EXPLAIN (ANALYZE, BUFFERS)`                            |
+| MySQL      | `EXPLAIN ANALYZE` (8.0+) or `EXPLAIN`                                        |
+| SQL Server | `SET STATISTICS IO ON;` or `SET STATISTICS TIME ON;` or press Ctrl+M in SSMS |
+| Oracle     | `EXPLAIN PLAN FOR <query>; SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);`         |
 
 ### What to Look For in the Plan
 
@@ -1829,7 +1829,7 @@ FROM employees e
 JOIN departments d ON e.dept_id = d.id;
 ```
 
-### BAD: SELECT * Then Filtering in Application
+### BAD: SELECT \* Then Filtering in Application
 
 ```sql
 -- BAD
@@ -1848,43 +1848,43 @@ WHERE salary > 80000;
 
 ### Filtering Operators at a Glance
 
-| Operator | NULL-safe? | Index-friendly? | Best for |
-|----------|-----------|-----------------|----------|
-| `=` | No | Yes | Exact match |
-| `<>` / `!=` | No | Sometimes | Exclusion |
-| `<`, `>`, `<=`, `>=` | No | Yes | Range comparison |
-| `BETWEEN` | No | Yes | Inclusive range |
-| `IN` | No | Yes (small lists) | Value in set |
-| `NOT IN` | **No (DANGEROUS)** | Yes | Value not in set (no NULLs) |
-| `LIKE` | No | Prefix only | Pattern matching |
-| `IS NULL` | **Yes** | Yes | NULL test |
-| `IS NOT NULL` | **Yes** | Yes | Not-NULL test |
-| `IS NOT DISTINCT FROM` | **Yes** | Depends | NULL-safe equality |
-| `EXISTS` | **Yes** | Yes (semi-join) | Row existence |
-| `NOT EXISTS` | **Yes** | Yes (anti-join) | Row absence |
-| `ANY` / `ALL` | No | Depends | Comparison against subquery |
-| `REGEXP` / `~` | No | No (specialized index possible) | Complex patterns |
-| Row value expression | No | Yes (composite index) | Multi-column comparison |
+| Operator               | NULL-safe?         | Index-friendly?                 | Best for                    |
+| ---------------------- | ------------------ | ------------------------------- | --------------------------- |
+| `=`                    | No                 | Yes                             | Exact match                 |
+| `<>` / `!=`            | No                 | Sometimes                       | Exclusion                   |
+| `<`, `>`, `<=`, `>=`   | No                 | Yes                             | Range comparison            |
+| `BETWEEN`              | No                 | Yes                             | Inclusive range             |
+| `IN`                   | No                 | Yes (small lists)               | Value in set                |
+| `NOT IN`               | **No (DANGEROUS)** | Yes                             | Value not in set (no NULLs) |
+| `LIKE`                 | No                 | Prefix only                     | Pattern matching            |
+| `IS NULL`              | **Yes**            | Yes                             | NULL test                   |
+| `IS NOT NULL`          | **Yes**            | Yes                             | Not-NULL test               |
+| `IS NOT DISTINCT FROM` | **Yes**            | Depends                         | NULL-safe equality          |
+| `EXISTS`               | **Yes**            | Yes (semi-join)                 | Row existence               |
+| `NOT EXISTS`           | **Yes**            | Yes (anti-join)                 | Row absence                 |
+| `ANY` / `ALL`          | No                 | Depends                         | Comparison against subquery |
+| `REGEXP` / `~`         | No                 | No (specialized index possible) | Complex patterns            |
+| Row value expression   | No                 | Yes (composite index)           | Multi-column comparison     |
 
 ### NOT IN vs NOT EXISTS
 
-| Scenario | NOT IN | NOT EXISTS |
-|----------|--------|------------|
-| Subquery has no NULLs | Correct | Correct |
-| Subquery has NULLs | **Returns zero rows** | Correct |
-| Performance | Often similar | Often similar |
-| Readability | Simpler | Slightly verbose |
-| Recommendation | Only with guaranteed non-NULL subquery | **Always prefer** |
+| Scenario              | NOT IN                                 | NOT EXISTS        |
+| --------------------- | -------------------------------------- | ----------------- |
+| Subquery has no NULLs | Correct                                | Correct           |
+| Subquery has NULLs    | **Returns zero rows**                  | Correct           |
+| Performance           | Often similar                          | Often similar     |
+| Readability           | Simpler                                | Slightly verbose  |
+| Recommendation        | Only with guaranteed non-NULL subquery | **Always prefer** |
 
 ### IN vs EXISTS
 
-| Scenario | IN | EXISTS |
-|----------|-----|--------|
-| Static list of values | Preferred | Overkill |
-| Subquery may have NULLs | Safe (for IN, not NOT IN) | Safe |
-| Large subquery | May be slower (materializes list) | Semi-join (may be faster) |
-| Correlated subquery | Cannot be correlated | Can be correlated |
-| Recommendation | Small static lists; non-NULL subqueries | Large/correlated subqueries; NULL safety |
+| Scenario                | IN                                      | EXISTS                                   |
+| ----------------------- | --------------------------------------- | ---------------------------------------- |
+| Static list of values   | Preferred                               | Overkill                                 |
+| Subquery may have NULLs | Safe (for IN, not NOT IN)               | Safe                                     |
+| Large subquery          | May be slower (materializes list)       | Semi-join (may be faster)                |
+| Correlated subquery     | Cannot be correlated                    | Can be correlated                        |
+| Recommendation          | Small static lists; non-NULL subqueries | Large/correlated subqueries; NULL safety |
 
 ---
 

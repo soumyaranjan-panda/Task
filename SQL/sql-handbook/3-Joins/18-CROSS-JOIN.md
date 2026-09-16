@@ -90,7 +90,7 @@ In practice, most databases implement this as a **nested loop** where:
 ### `colors`
 
 | color_id | color_name |
-|----------|------------|
+| -------- | ---------- |
 | 1        | Red        |
 | 2        | Blue       |
 | 3        | Green      |
@@ -100,7 +100,7 @@ In practice, most databases implement this as a **nested loop** where:
 ### `sizes`
 
 | size_id | size_name |
-|---------|-----------|
+| ------- | --------- |
 | 1       | Small     |
 | 2       | Medium    |
 | 3       | Large     |
@@ -110,24 +110,24 @@ In practice, most databases implement this as a **nested loop** where:
 
 ### `employees`
 
-| emp_id | emp_name   | dept_id |
-|--------|------------|---------|
-| 101    | Alice      | 1       |
-| 102    | Bob        | 1       |
-| 103    | Carol      | 2       |
-| 104    | Dave       | 3       |
-| 105    | Eve        | NULL    |
+| emp_id | emp_name | dept_id |
+| ------ | -------- | ------- |
+| 101    | Alice    | 1       |
+| 102    | Bob      | 1       |
+| 103    | Carol    | 2       |
+| 104    | Dave     | 3       |
+| 105    | Eve      | NULL    |
 
 **Grain:** One row = one employee. 5 rows.
 
 ### `departments`
 
-| dept_id | dept_name  |
-|---------|------------|
-| 1       | Engineering|
-| 2       | Marketing  |
-| 3       | Sales      |
-| 4       | HR         |
+| dept_id | dept_name   |
+| ------- | ----------- |
+| 1       | Engineering |
+| 2       | Marketing   |
+| 3       | Sales       |
+| 4       | HR          |
 
 **Grain:** One row = one department. 4 rows.
 
@@ -148,7 +148,7 @@ CROSS JOIN sizes s;
 **Expected Result (12 rows):**
 
 | color_name | size_name |
-|------------|-----------|
+| ---------- | --------- |
 | Red        | Small     |
 | Red        | Medium    |
 | Red        | Large     |
@@ -188,7 +188,7 @@ CROSS JOIN departments d;
 **Expected Result (20 rows):**
 
 | emp_name | dept_name   |
-|----------|-------------|
+| -------- | ----------- |
 | Alice    | Engineering |
 | Alice    | Marketing   |
 | Alice    | Sales       |
@@ -243,7 +243,7 @@ ORDER BY m.month_num;
 **Expected Result (12 rows):**
 
 | year_val | month_name |
-|----------|------------|
+| -------- | ---------- |
 | 2026     | January    |
 | 2026     | February   |
 | 2026     | March      |
@@ -278,23 +278,23 @@ ORDER BY e.emp_name, p.project_name;
 
 **Expected Result (15 rows):**
 
-| emp_name | project_name |
-|----------|--------------|
-| Alice    | Project Alpha|
-| Alice    | Project Beta |
-| Alice    | Project Gamma|
-| Bob      | Project Alpha|
-| Bob      | Project Beta |
-| Bob      | Project Gamma|
-| Carol    | Project Alpha|
-| Carol    | Project Beta |
-| Carol    | Project Gamma|
-| Dave     | Project Alpha|
-| Dave     | Project Beta |
-| Dave     | Project Gamma|
-| Eve      | Project Alpha|
-| Eve      | Project Beta |
-| Eve      | Project Gamma|
+| emp_name | project_name  |
+| -------- | ------------- |
+| Alice    | Project Alpha |
+| Alice    | Project Beta  |
+| Alice    | Project Gamma |
+| Bob      | Project Alpha |
+| Bob      | Project Beta  |
+| Bob      | Project Gamma |
+| Carol    | Project Alpha |
+| Carol    | Project Beta  |
+| Carol    | Project Gamma |
+| Dave     | Project Alpha |
+| Dave     | Project Beta  |
+| Dave     | Project Gamma |
+| Eve      | Project Alpha |
+| Eve      | Project Beta  |
+| Eve      | Project Gamma |
 
 > **Real-world use:** This might represent a "pre-assignment matrix" that is then filtered or joined with an `assignments` table to show only actual assignments.
 
@@ -312,20 +312,20 @@ ORDER BY c.color_name, s.size_name;
 
 **Expected Result:**
 
-| sku              |
-|------------------|
-| Blue-Large       |
-| Blue-Medium      |
-| Blue-Small       |
-| Blue-X-Large     |
-| Green-Large      |
-| Green-Medium     |
-| Green-Small      |
-| Green-X-Large    |
-| Red-Large        |
-| Red-Medium       |
-| Red-Small        |
-| Red-X-Large      |
+| sku           |
+| ------------- |
+| Blue-Large    |
+| Blue-Medium   |
+| Blue-Small    |
+| Blue-X-Large  |
+| Green-Large   |
+| Green-Medium  |
+| Green-Small   |
+| Green-X-Large |
+| Red-Large     |
+| Red-Medium    |
+| Red-Small     |
+| Red-X-Large   |
 
 > **PostgreSQL:** `||` is the string concatenation operator.
 > **MySQL:** Use `CONCAT(c.color_name, '-', s.size_name)`.
@@ -336,13 +336,13 @@ ORDER BY c.color_name, s.size_name;
 
 ## CROSS JOIN vs Explicit Cartesian Product
 
-| Feature | `CROSS JOIN` | Comma syntax | `WHERE 1=1` |
-|---------|-------------|--------------|-------------|
-| ANSI standard | ✅ Yes | ✅ Yes (older) | No |
-| Clarity of intent | High | Low | Low |
-| Can use `ON` | No | No | N/A |
-| Prone to accidental omission of filter | Low | **High** | Medium |
-| Execution plan difference | None | None | None |
+| Feature                                | `CROSS JOIN` | Comma syntax   | `WHERE 1=1` |
+| -------------------------------------- | ------------ | -------------- | ----------- |
+| ANSI standard                          | ✅ Yes       | ✅ Yes (older) | No          |
+| Clarity of intent                      | High         | Low            | Low         |
+| Can use `ON`                           | No           | No             | N/A         |
+| Prone to accidental omission of filter | Low          | **High**       | Medium      |
+| Execution plan difference              | None         | None           | None        |
 
 All three produce the same Cartesian product. The execution plan is identical across all three syntaxes.
 
@@ -364,7 +364,7 @@ WHERE e.dept_id = d.dept_id;
 **Expected Result:**
 
 | emp_name | dept_name   |
-|----------|-------------|
+| -------- | ----------- |
 | Alice    | Engineering |
 | Bob      | Engineering |
 | Carol    | Marketing   |
@@ -396,7 +396,7 @@ GROUP BY c.color_name;
 **Expected Result:**
 
 | color_name | combination_count |
-|------------|-------------------|
+| ---------- | ----------------- |
 | Red        | 4                 |
 | Blue       | 4                 |
 | Green      | 4                 |
@@ -418,20 +418,20 @@ CROSS JOIN sizes s;
 
 **Expected Result:**
 
-| color_name | size_name | rn |
-|------------|-----------|----|
-| Blue       | Large     | 1  |
-| Blue       | Medium    | 2  |
-| Blue       | Small     | 3  |
-| Blue       | X-Large   | 4  |
-| Green      | Large     | 5  |
-| Green      | Medium    | 6  |
-| Green      | Small     | 7  |
-| Green      | X-Large   | 8  |
-| Red        | Large     | 9  |
-| Red        | Medium    | 10 |
-| Red        | Small     | 11 |
-| Red        | X-Large   | 12 |
+| color_name | size_name | rn  |
+| ---------- | --------- | --- |
+| Blue       | Large     | 1   |
+| Blue       | Medium    | 2   |
+| Blue       | Small     | 3   |
+| Blue       | X-Large   | 4   |
+| Green      | Large     | 5   |
+| Green      | Medium    | 6   |
+| Green      | Small     | 7   |
+| Green      | X-Large   | 8   |
+| Red        | Large     | 9   |
+| Red        | Medium    | 10  |
+| Red        | Small     | 11  |
+| Red        | X-Large   | 12  |
 
 ---
 
@@ -464,7 +464,7 @@ CROSS JOIN colors b;
 **Expected Result (9 rows):**
 
 | color_a | color_b |
-|---------|---------|
+| ------- | ------- |
 | Red     | Red     |
 | Red     | Blue    |
 | Red     | Green   |
@@ -526,7 +526,7 @@ WHERE e.emp_name = 'Eve';
 **Expected Result:**
 
 | emp_name | dept_name   |
-|----------|-------------|
+| -------- | ----------- |
 | Eve      | Engineering |
 | Eve      | Marketing   |
 | Eve      | Sales       |
@@ -577,7 +577,7 @@ CROSS JOIN departments d
 WHERE e.dept_id = d.dept_id;
 ```
 
-While this works, it is misleading. The `CROSS JOIN` creates 20 rows first, then the `WHERE` filters to 4. The optimizer *may* convert this to an `INNER JOIN` internally, but you should not rely on that.
+While this works, it is misleading. The `CROSS JOIN` creates 20 rows first, then the `WHERE` filters to 4. The optimizer _may_ convert this to an `INNER JOIN` internally, but you should not rely on that.
 
 **BETTER APPROACH:**
 
@@ -644,6 +644,7 @@ If `orders` has 10 million rows and `customers` has 1 million rows, an accidenta
 - Potentially lock resources and affect other users
 
 **Prevention:**
+
 - Always use `INNER JOIN ... ON` instead of comma syntax
 - Run `EXPLAIN` or `EXPLAIN ANALYZE` before executing unfamiliar queries
 - Set query timeouts in production
@@ -655,6 +656,7 @@ If `orders` has 10 million rows and `customers` has 1 million rows, an accidenta
 A view defined with a cross join inherits its Cartesian product. Anyone querying the view gets multiplied rows without understanding why.
 
 **Prevention:**
+
 - Document views that intentionally use CROSS JOIN
 - Avoid accidental cross joins in view definitions
 - Use `LIMIT` or `COUNT(*)` during development to check row counts
@@ -666,6 +668,7 @@ A view defined with a cross join inherits its Cartesian product. Anyone querying
 Some ORMs generate comma-separated JOINs that can accidentally produce cross joins if join conditions are not configured correctly.
 
 **Prevention:**
+
 - Review generated SQL in development
 - Use `EXPLAIN` on generated queries
 - Configure ORM relationships with explicit foreign keys
@@ -677,11 +680,11 @@ Some ORMs generate comma-separated JOINs that can accidentally produce cross joi
 ### Row Count Explosion
 
 | Table A rows | Table B rows | Result rows    |
-|-------------|-------------|----------------|
-| 100         | 100         | 10,000         |
-| 1,000       | 1,000       | 1,000,000      |
-| 10,000      | 10,000      | 100,000,000    |
-| 100,000     | 100,000     | 10,000,000,000 |
+| ------------ | ------------ | -------------- |
+| 100          | 100          | 10,000         |
+| 1,000        | 1,000        | 1,000,000      |
+| 10,000       | 10,000       | 100,000,000    |
+| 100,000      | 100,000      | 10,000,000,000 |
 
 The growth is **quadratic** (M × N). This is the most important performance fact about CROSS JOIN.
 
@@ -728,6 +731,7 @@ SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);
 ```
 
 Look for:
+
 - **Nested Loop** with no filter — confirms Cartesian product
 - **Row estimate** matching actual — confirms statistics are accurate
 - **High cost** — confirms the engine recognizes the expense
@@ -740,21 +744,21 @@ Look for:
 
 ### CROSS JOIN vs Other JOIN Types
 
-| Feature | CROSS JOIN | INNER JOIN | LEFT JOIN | FULL JOIN |
-|---------|-----------|------------|-----------|-----------|
-| Join condition required | No | Yes (ON) | Yes (ON) | Yes (ON) |
-| Rows produced | M × N (before filter) | Matching rows only | All left + matching right | All rows from both |
-| NULL handling in join | N/A | Rows without match excluded | Unmatched right = NULL | Unmatched from either = NULL |
-| Use case | Cartesian products | Relational lookups | Preserve all from one table | Preserve all from both |
-| Risk of row explosion | **High** | Low (with proper indexes) | Low | Low |
+| Feature                 | CROSS JOIN            | INNER JOIN                  | LEFT JOIN                   | FULL JOIN                    |
+| ----------------------- | --------------------- | --------------------------- | --------------------------- | ---------------------------- |
+| Join condition required | No                    | Yes (ON)                    | Yes (ON)                    | Yes (ON)                     |
+| Rows produced           | M × N (before filter) | Matching rows only          | All left + matching right   | All rows from both           |
+| NULL handling in join   | N/A                   | Rows without match excluded | Unmatched right = NULL      | Unmatched from either = NULL |
+| Use case                | Cartesian products    | Relational lookups          | Preserve all from one table | Preserve all from both       |
+| Risk of row explosion   | **High**              | Low (with proper indexes)   | Low                         | Low                          |
 
 ### CROSS JOIN vs Subquery Approach
 
-| Approach | Syntax | Performance | Readability |
-|----------|--------|-------------|-------------|
-| CROSS JOIN | `FROM a CROSS JOIN b` | Same (optimizer equivalent) | High |
-| Correlated subquery | `FROM a, (SELECT ... FROM b)` | Depends on optimizer | Medium |
-| Comma syntax | `FROM a, b` | Same | Low |
+| Approach            | Syntax                        | Performance                 | Readability |
+| ------------------- | ----------------------------- | --------------------------- | ----------- |
+| CROSS JOIN          | `FROM a CROSS JOIN b`         | Same (optimizer equivalent) | High        |
+| Correlated subquery | `FROM a, (SELECT ... FROM b)` | Depends on optimizer        | Medium      |
+| Comma syntax        | `FROM a, b`                   | Same                        | Low         |
 
 In most databases, these produce identical execution plans.
 
@@ -834,11 +838,13 @@ CROSS JOIN (SELECT val FROM big_table_b WHERE condition) b;
 18. Your team lead asks you to "pair every customer with every product for a survey." The `customers` table has 50,000 rows and `products` has 5,000 rows. What concerns should you raise?
 
 19. A developer writes:
+
 ```sql
 SELECT *
 FROM orders, customers
 WHERE orders.customer_id = customers.id;
 ```
+
 What is wrong with this query? How would you rewrite it?
 
 20. You need to generate a grid of all possible two-letter codes where the first letter is A–D and the second letter is 1–5. Write the query.
@@ -852,6 +858,7 @@ What is wrong with this query? How would you rewrite it?
 23. Write a query that uses CROSS JOIN to create a "rotation schedule" where every employee works with every other employee exactly once (no duplicates, no self-pairs).
 
 24. What is the result of:
+
 ```sql
 SELECT COUNT(*)
 FROM (SELECT 1 UNION SELECT 2 UNION SELECT 3) a
@@ -873,6 +880,7 @@ INSERT INTO y VALUES (10), (20);
 ```
 
 What is the output of:
+
 ```sql
 SELECT x.val + y.val AS total
 FROM x
@@ -881,6 +889,7 @@ ORDER BY x.val, y.val;
 ```
 
 27. What is the output of:
+
 ```sql
 SELECT COUNT(*) AS cnt
 FROM (SELECT * FROM x) a
@@ -889,6 +898,7 @@ CROSS JOIN (SELECT * FROM x) c;
 ```
 
 28. Predict the number of rows:
+
 ```sql
 SELECT *
 FROM (SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3) a
@@ -898,6 +908,7 @@ CROSS JOIN (SELECT 1 UNION ALL SELECT 1) b;
 29. Given tables with 0, 1, and 5 rows respectively, what is the result of chaining two CROSS JOINs?
 
 30. What does this query return?
+
 ```sql
 SELECT a.id, b.id
 FROM (SELECT NULL AS id) a
@@ -911,11 +922,13 @@ CROSS JOIN (SELECT NULL AS id) b;
 32. You see a CROSS JOIN in a production query that appears intentional. How would you verify it is correct?
 
 33. A query uses:
+
 ```sql
 FROM table_a a, table_b b
 WHERE a.col1 = b.col1
 AND a.col2 = b.col2
 ```
+
 What problems might this cause? Rewrite it properly.
 
 34. A LEFT JOIN query was accidentally written as a CROSS JOIN. The result shows more rows than expected but no errors. How would you identify and fix this?
@@ -929,6 +942,7 @@ What problems might this cause? Rewrite it properly.
 37. If you must generate a Cartesian product of two large tables, what strategies can you use to make it manageable?
 
 38. Compare the performance of these three queries:
+
 ```sql
 -- Query 1
 SELECT * FROM a CROSS JOIN b WHERE a.id = b.id;
@@ -939,6 +953,7 @@ SELECT * FROM a INNER JOIN b ON a.id = b.id;
 -- Query 3
 SELECT * FROM a, b WHERE a.id = b.id;
 ```
+
 Will they have the same execution plan? Under what circumstances might they differ?
 
 39. You have a CROSS JOIN that produces 100 million rows. You only need rows where `a.category = 'premium'`. Should you filter before or after the CROSS JOIN? Write the optimized query.

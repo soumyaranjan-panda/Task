@@ -11,7 +11,7 @@ Key teaching points covered:
 - **Comparison tables** — LEFT vs INNER/RIGHT/FULL/CROSS/NOT EXISTS + ON vs WHERE placement
 - **Chained LEFT JOINs**, degenerate `ON 1=1` Cartesian, COALESCE-for-display-only
 - **Interview Questions** — Beginner → Performance (left unanswered for practice)
-ly an outer join provides.
+  ly an outer join provides.
 
 ### The mental model
 
@@ -19,7 +19,7 @@ Think in three steps:
 
 1. Start from the **left** (also called the **preserved** or **driving**) table — every row here is guaranteed to survive into the result, at least once.
 2. For each left row, look for matching rows on the right using the `ON` condition.
-3. If zero matches: emit the left row once, with all right columns set to `NULL`. If *one or more* matches: emit the left row **once per match** (fan-out — see [Fan-Out and Double Counting]).
+3. If zero matches: emit the left row once, with all right columns set to `NULL`. If _one or more_ matches: emit the left row **once per match** (fan-out — see [Fan-Out and Double Counting]).
 
 ```
 LEFT(A, B)  =
@@ -28,7 +28,7 @@ LEFT(A, B)  =
    { (a, NULL...) : a ∈ A, and no b ∈ B satisfies condition(a,b) }
 ```
 
-> The "Venn diagram" intuition — a LEFT JOIN as "everything in A, plus the intersection" — is useful but incomplete: when a left row matches *multiple* right rows, the left row is repeated, which no set diagram captures. A join produces combinations, not sets.
+> The "Venn diagram" intuition — a LEFT JOIN as "everything in A, plus the intersection" — is useful but incomplete: when a left row matches _multiple_ right rows, the left row is repeated, which no set diagram captures. A join produces combinations, not sets.
 
 ---
 
@@ -36,47 +36,47 @@ LEFT(A, B)  =
 
 Before any join, state the grain. We reuse the tables from the INNER JOIN section so the contrast is direct.
 
-**customers** — *one row per customer.*
+**customers** — _one row per customer._
 
 | customer_id | name  | country |
-|-------------|-------|---------|
+| ----------- | ----- | ------- |
 | 1           | Alice | USA     |
 | 2           | Bob   | UK      |
 | 3           | Carol | Germany |
 | 4           | Dave  | NULL    |
 
-**orders** — *one row per order.*
+**orders** — _one row per order._
 
 | order_id | customer_id | order_date | amount |
-|----------|-------------|------------|--------|
+| -------- | ----------- | ---------- | ------ |
 | 101      | 1           | 2026-01-05 | 250.00 |
 | 102      | 2           | 2026-01-07 | 120.50 |
-| 103      | 1           | 2026-01-12 |  89.99 |
+| 103      | 1           | 2026-01-12 | 89.99  |
 | 104      | 3           | 2026-01-20 | 450.00 |
-| 105      | NULL        | 2026-02-01 |  30.00 |
+| 105      | NULL        | 2026-02-01 | 30.00  |
 | 106      | 5           | 2026-02-03 | 610.00 |
 
-**payments** — *one row per payment.*
+**payments** — _one row per payment._
 
-| payment_id | order_id | amount | paid_at |
-|------------|----------|--------|---------|
+| payment_id | order_id | amount | paid_at    |
+| ---------- | -------- | ------ | ---------- |
 | 1          | 101      | 100.00 | 2026-01-06 |
 | 2          | 101      | 150.00 | 2026-01-08 |
 | 3          | 102      | 120.50 | 2026-01-09 |
 
-**employees** — *one row per employee.*
+**employees** — _one row per employee._
 
 | employee_id | name  | department_id |
-|-------------|-------|---------------|
+| ----------- | ----- | ------------- |
 | 1           | Alice | 10            |
 | 2           | Bob   | 10            |
 | 3           | Carol | 20            |
 | 4           | Dave  | NULL          |
 
-**departments** — *one row per department.*
+**departments** — _one row per department._
 
 | department_id | dept_name   |
-|---------------|-------------|
+| ------------- | ----------- |
 | 10            | Engineering |
 | 20            | Sales       |
 | 30            | Marketing   |
@@ -89,7 +89,7 @@ Before any join, state the grain. We reuse the tables from the INNER JOIN sectio
 - `employees.department_id` can be NULL (Dave); a department can have zero employees (Marketing).
 - `payments` is one-to-many from `orders`: order 101 has two payments.
 
-> Internalize this: a LEFT JOIN never *removes* rows from the left table, but it *can* duplicate them. Only the right side can be NULL-padded.
+> Internalize this: a LEFT JOIN never _removes_ rows from the left table, but it _can_ duplicate them. Only the right side can be NULL-padded.
 
 ---
 
@@ -139,9 +139,9 @@ ORDER BY c.customer_id, o.order_id;
 ### Expected result
 
 | customer_id | name  | order_id | amount |
-|-------------|-------|----------|--------|
+| ----------- | ----- | -------- | ------ |
 | 1           | Alice | 101      | 250.00 |
-| 1           | Alice | 103      |  89.99 |
+| 1           | Alice | 103      | 89.99  |
 | 2           | Bob   | 102      | 120.50 |
 | 3           | Carol | 104      | 450.00 |
 | 4           | Dave  | NULL     | NULL   |
@@ -159,7 +159,7 @@ Compare directly with the INNER JOIN section: the only difference from `INNER JO
 
 ## Internal Working
 
-Like an INNER JOIN, the engine executes a LEFT JOIN with a physical algorithm chosen by the **optimizer** — but with one extra requirement: **the left table's rows must never be lost**, and each left row must be *null-extended* for any unmatched right columns. Always confirm the actual algorithm with `EXPLAIN` / `EXPLAIN ANALYZE` (or the engine's plan tool).
+Like an INNER JOIN, the engine executes a LEFT JOIN with a physical algorithm chosen by the **optimizer** — but with one extra requirement: **the left table's rows must never be lost**, and each left row must be _null-extended_ for any unmatched right columns. Always confirm the actual algorithm with `EXPLAIN` / `EXPLAIN ANALYZE` (or the engine's plan tool).
 
 ### 1. Nested Loop Left Join
 
@@ -206,7 +206,7 @@ LEFT JOIN orders o ON o.customer_id = c.customer_id;
 
 In a PostgreSQL plan you will see a node literally named `Hash Left Join`, `Nested Loop Left Join`, or `Merge Left Join` — the word **Left** is the signal that unmatched left rows are preserved. In MySQL's `EXPLAIN`, look for the join type and how table order changed; in SQL Server, the operator shows `Left Outer Join`.
 
-> Common misconception: "The engine always keeps the order of the two tables as written in the query." It does **not**. The optimizer may scan the right table *first* and hash the left table, or reorder to a "right-first" strategy internally. Whatever the physical order, the *logical* semantics (every left row preserved) stay the same — inspect the plan to see the physical reality.
+> Common misconception: "The engine always keeps the order of the two tables as written in the query." It does **not**. The optimizer may scan the right table _first_ and hash the left table, or reorder to a "right-first" strategy internally. Whatever the physical order, the _logical_ semantics (every left row preserved) stay the same — inspect the plan to see the physical reality.
 
 > Interview trap: `EXPLAIN` order of tables does **not** tell you which table is "logically left." Only the plan's outer-join node, or the actual semantics, does.
 
@@ -214,7 +214,7 @@ In a PostgreSQL plan you will see a node literally named `Hash Left Join`, `Nest
 
 ## ON vs WHERE — The Difference That Matters (Left → Inner Join Trap)
 
-For an INNER JOIN, moving a predicate between `ON` and `WHERE` usually yields the same *final* result. **For a LEFT JOIN it decides whether the query is still an outer join at all.**
+For an INNER JOIN, moving a predicate between `ON` and `WHERE` usually yields the same _final_ result. **For a LEFT JOIN it decides whether the query is still an outer join at all.**
 
 The logical processing order matters (see the [Logical Query Processing Order section]):
 
@@ -254,7 +254,7 @@ ORDER BY c.customer_id, o.order_id;
 **Expected result:**
 
 | name  | order_id | amount |
-|-------|----------|--------|
+| ----- | -------- | ------ |
 | Alice | 101      | 250.00 |
 | Bob   | 102      | 120.50 |
 | Carol | NULL     | NULL   |
@@ -262,22 +262,22 @@ ORDER BY c.customer_id, o.order_id;
 
 - Carol had one order (104, amount 450) — wait, that's `> 100`, so why NULL? It is not: Carol's order 104 is `450.00 > 100` → matches. Let's recheck.
 
-Hold on — recompute carefully. `o.amount > 100`: order 101 (250) matches, 102 (120.50) matches, 103 (89.99) *does not*, 104 (450) matches.
+Hold on — recompute carefully. `o.amount > 100`: order 101 (250) matches, 102 (120.50) matches, 103 (89.99) _does not_, 104 (450) matches.
 
 **Correct expected result:**
 
 | name  | order_id | amount |
-|-------|----------|--------|
+| ----- | -------- | ------ |
 | Alice | 101      | 250.00 |
 | Bob   | 102      | 120.50 |
 | Carol | 104      | 450.00 |
 | Dave  | NULL     | NULL   |
 
-- Alice's cheap order 103 is *not joined* → Alice only shows order 101 (her left row is preserved either way).
+- Alice's cheap order 103 is _not joined_ → Alice only shows order 101 (her left row is preserved either way).
 - Dave still has no matching order at all → NULL-padded.
 - Because the filter lives in `ON`, customers with only cheap orders are **kept** (with NULL padding) instead of disappearing.
 
-> Rule of thumb: if you need a filter on the *right* table but you do **not** want to lose the left rows, move that filter into `ON`. If you *want* inner-join behavior, `WHERE` is fine — but then `LEFT JOIN` is the wrong tool.
+> Rule of thumb: if you need a filter on the _right_ table but you do **not** want to lose the left rows, move that filter into `ON`. If you _want_ inner-join behavior, `WHERE` is fine — but then `LEFT JOIN` is the wrong tool.
 
 > Interview trap: "Can `WHERE` on a NULL-padded column turn a LEFT JOIN into an INNER JOIN?" Yes — any condition that rejects `NULL` on the nullable side does. The optimizer may even formally rewrite the query to an inner join. This is not a bug in the database; it is the semantics of `WHERE` running after the padding.
 
@@ -285,13 +285,13 @@ Hold on — recompute carefully. `o.amount > 100`: order 101 (250) matches, 102 
 
 Many engines recognize when a LEFT JOIN's `WHERE` filters make it semantically equal to an INNER JOIN, and **rewrite the plan** to a plain inner join (this is called outer-join elimination / flattening; MySQL explicitly documents this when using `EXPLAIN`).
 
-> Production pitfall: if you *relied* on a LEFT JOIN preventing the optimizer from reordering tables, the plan may not show an outer join at all. Rely on semantics, not on forcing the physical order.
+> Production pitfall: if you _relied_ on a LEFT JOIN preventing the optimizer from reordering tables, the plan may not show an outer join at all. Rely on semantics, not on forcing the physical order.
 
 ---
 
 ## NULL Behavior
 
-In a LEFT JOIN, three different cases produce NULLs — each with a *different cause* and a *same-looking outcome*.
+In a LEFT JOIN, three different cases produce NULLs — each with a _different cause_ and a _same-looking outcome_.
 
 ### Case 1 — No matching row on the right
 
@@ -303,7 +303,7 @@ An `orders LEFT JOIN customers` (left side is `orders`) includes order 105, whos
 
 ### Case 3 — The right table contains NULL where a row did match
 
-If a matched row actually *stores* a NULL (e.g., `customers.country` is NULL for Dave's customer record — but Dave has no order, so the padding dominates). The general point: NULL can arrive in the result either because of a genuine NULL *value* in the right table, or because of *padding*. **You cannot distinguish them with SQL** — use `COALESCE` for display, or split into two queries if the distinction matters for business logic.
+If a matched row actually _stores_ a NULL (e.g., `customers.country` is NULL for Dave's customer record — but Dave has no order, so the padding dominates). The general point: NULL can arrive in the result either because of a genuine NULL _value_ in the right table, or because of _padding_. **You cannot distinguish them with SQL** — use `COALESCE` for display, or split into two queries if the distinction matters for business logic.
 
 ### Matching NULLs explicitly
 
@@ -319,9 +319,9 @@ LEFT JOIN customers c
 
 > PostgreSQL and SQLite 3.39+ support `IS NOT DISTINCT FROM`; MySQL uses `<=>`; Oracle added it in 23c.
 
-### COUNT(*) vs COUNT(column) vs COUNT(table.*)
+### COUNT(_) vs COUNT(column) vs COUNT(table._)
 
-Because the absence of a match produces NULLs, the counting functions diverge *only because of the LEFT JOIN*:
+Because the absence of a match produces NULLs, the counting functions diverge _only because of the LEFT JOIN_:
 
 ```sql
 SELECT c.name,
@@ -334,7 +334,7 @@ GROUP BY c.name;
 ```
 
 | name  | rows_returned | orders_with_id | orders_rows |
-|-------|---------------|----------------|-------------|
+| ----- | ------------- | -------------- | ----------- |
 | Alice | 2             | 2              | 2           |
 | Bob   | 1             | 1              | 1           |
 | Carol | 1             | 1              | 1           |
@@ -372,7 +372,7 @@ ORDER BY order_count DESC;
 ```
 
 | name  | order_count |
-|-------|-------------|
+| ----- | ----------- |
 | Alice | 2           |
 | Bob   | 1           |
 | Carol | 1           |
@@ -391,7 +391,7 @@ WHERE o.order_id IS NULL;      -- NOT `o.customer_id = NULL` !
 
 Result: `(4, Dave)`.
 
-Why it works: in a LEFT JOIN, *unmatched* rows have all-null `order_id`; `o.order_id IS NULL` singles them out. The pattern is called an **anti-join**.
+Why it works: in a LEFT JOIN, _unmatched_ rows have all-null `order_id`; `o.order_id IS NULL` singles them out. The pattern is called an **anti-join**.
 
 Requirement: `order_id` (the column tested) must be `NOT NULL` for genuinely matched rows. If `order_id` could be NULL, matched rows would also pass the `IS NULL` test and produce false positives. Use a `NOT NULL` column like a primary key, or `NOT EXISTS`.
 
@@ -407,7 +407,7 @@ WHERE customer_id NOT IN (SELECT customer_id FROM orders WHERE customer_id IS NO
 
 > `NOT IN` silently drops rows if the subquery can contain NULL (see [NOT IN + NULL section]). Prefer `NOT EXISTS` or the LEFT JOIN anti-join unless you validate the subquery for NULLs.
 
-> Interview trap: "Why is `= NULL` wrong here, and why must the anti-join test `IS NULL` rather than `IS NOT NULL`?" `= NULL` is UNKNOWN, so `WHERE o.order_id = NULL` returns nothing. `IS NOT NULL` would return the *matched* orders instead.
+> Interview trap: "Why is `= NULL` wrong here, and why must the anti-join test `IS NULL` rather than `IS NOT NULL`?" `= NULL` is UNKNOWN, so `WHERE o.order_id = NULL` returns nothing. `IS NOT NULL` would return the _matched_ orders instead.
 
 ### Scenario D — All orders and how much each has been paid (fan-out avoided by pre-aggregation)
 
@@ -442,17 +442,17 @@ ORDER BY o.order_id;
 ```
 
 | order_id | order_amount | paid_amount |
-|----------|--------------|-------------|
+| -------- | ------------ | ----------- |
 | 101      | 250.00       | 250.00      |
 | 102      | 120.50       | 120.50      |
-| 103      |  89.99       | NULL        |
+| 103      | 89.99        | NULL        |
 | 104      | 450.00       | NULL        |
-| 105      |  30.00       | NULL        |
+| 105      | 30.00        | NULL        |
 | 106      | 610.00       | NULL        |
 
 All six orders survive (the LEFT JOIN). Unpaid orders show `NULL`, not a missing row. The pre-aggregated subquery keeps grain at one row per order.
 
-> Production pitfall: this is the LEFT JOIN flavor of the **fan-out / double-counting** bug from the INNER JOIN section. `LEFT` protects the left table from *disappearing*, not from being *multiplied*.
+> Production pitfall: this is the LEFT JOIN flavor of the **fan-out / double-counting** bug from the INNER JOIN section. `LEFT` protects the left table from _disappearing_, not from being _multiplied_.
 
 ### Scenario E — Orphan/anonymous orders: LEFT JOIN with `orders` as the left table
 
@@ -464,12 +464,12 @@ ORDER BY o.order_id;
 ```
 
 | order_id | amount | customer |
-|----------|--------|----------|
+| -------- | ------ | -------- |
 | 101      | 250.00 | Alice    |
 | 102      | 120.50 | Bob      |
-| 103      |  89.99 | Alice    |
+| 103      | 89.99  | Alice    |
 | 104      | 450.00 | Carol    |
-| 105      |  30.00 | NULL     |
+| 105      | 30.00  | NULL     |
 | 106      | 610.00 | NULL     |
 
 Order 105's `customer_id` is NULL (never matches — [Case 2]); order 106 references a customer that doesn't exist in the data (no match — [Case 1]). Both keep their rows and show `NULL` for the customer name. Every order is present: this is the outer join that the plain INNER JOIN example dropped two rows from.
@@ -485,12 +485,12 @@ ORDER BY d.dept_name;
 ```
 
 | dept_name   | headcount |
-|-------------|-----------|
+| ----------- | --------- |
 | Engineering | 2         |
 | Marketing   | 0         |
 | Sales       | 1         |
 
-Marketing has no employees yet still appears with `0`. Note also that Dave (employee 4, NULL department) is dropped here because `departments` is the left table — to include *unassigned* employees, flip the join (employees LEFT JOIN departments) or use a FULL OUTER JOIN (see [Comparison Table]).
+Marketing has no employees yet still appears with `0`. Note also that Dave (employee 4, NULL department) is dropped here because `departments` is the left table — to include _unassigned_ employees, flip the join (employees LEFT JOIN departments) or use a FULL OUTER JOIN (see [Comparison Table]).
 
 ### Scenario G — COALESCE for presentation (never to "fix" data)
 
@@ -502,14 +502,15 @@ LEFT JOIN customers c ON c.customer_id = o.customer_id
 ORDER BY o.order_id;
 ```
 
-| order_id | customer        |
-|----------|-----------------|
-| 101      | Alice           |
-| ...
-| 105      | Unknown customer |
-| 106      | Unknown customer |
+| order_id | customer |
+| -------- | -------- |
+| 101      | Alice    |
 
-`COALESCE` only changes display. It does **not** tell you *why* the name is missing (NULL key vs missing row) — treat reporting reasons with care (see [NULL Behavior]).
+| ...
+| 105 | Unknown customer |
+| 106 | Unknown customer |
+
+`COALESCE` only changes display. It does **not** tell you _why_ the name is missing (NULL key vs missing row) — treat reporting reasons with care (see [NULL Behavior]).
 
 ---
 
@@ -532,7 +533,7 @@ Identical outcome to the empty right side: all left rows survive, all NULL-padde
 
 ### 3. Duplicate keys on the right (fan-out)
 
-If a left row matches *n* right rows, it is emitted **n times** — the LEFT JOIN does not remove duplicates, and `COUNT(*)` after the join counts padded rows too:
+If a left row matches _n_ right rows, it is emitted **n times** — the LEFT JOIN does not remove duplicates, and `COUNT(*)` after the join counts padded rows too:
 
 ```sql
 -- If customers c1 had 3 matching orders, c1 appears 3 times.
@@ -541,7 +542,7 @@ FROM customers c
 LEFT JOIN orders o ON o.customer_id = c.customer_id;
 ```
 
-Alice appears twice here. The "guarantee" of a LEFT JOIN is *at least one row per left row* — not *exactly one*.
+Alice appears twice here. The "guarantee" of a LEFT JOIN is _at least one row per left row_ — not _exactly one_.
 
 ### 4. Duplicate keys on the left
 
@@ -573,7 +574,7 @@ A degenerate ON condition produces every combination (a Cartesian product). The 
 
 ### 8. NULL join keys on both sides
 
-Even if a left row and a right row both have `NULL` in the join key, plain `=` never pairs them (three-valued logic). Only `IS NOT DISTINCT FROM` / `<=>` joins NULLs to NULLs — which is almost always *not* what you want with nullable FKs, because every NULL would pair with every NULL.
+Even if a left row and a right row both have `NULL` in the join key, plain `=` never pairs them (three-valued logic). Only `IS NOT DISTINCT FROM` / `<=>` joins NULLs to NULLs — which is almost always _not_ what you want with nullable FKs, because every NULL would pair with every NULL.
 
 ---
 
@@ -609,13 +610,13 @@ The same caveats as everywhere in this handbook apply — performance depends on
 - It must produce **at least one output row per left row**, even when nothing matches → the engine tracks which left rows have/haven't been matched (in hash/merge left joins this is an explicit "return the unmatched" pass).
 - NULL-padding work for every unmatched tuple.
 
-So a LEFT JOIN is generally *more* work than the equivalent inner join — but that difference is usually small compared with the cost of bad indexes.
+So a LEFT JOIN is generally _more_ work than the equivalent inner join — but that difference is usually small compared with the cost of bad indexes.
 
 > Common misconception: "A LEFT JOIN scans the whole left table because it has to keep everything." Yes, it visits every left row by definition — but on the right side it still uses whatever the optimizer picks: an index, a hash build, or a merge.
 
 ### LEFT JOIN ... IS NULL (anti-join) vs NOT EXISTS
 
-Logically the same; *plans differ*. In most engines the optimizer can rewrite
+Logically the same; _plans differ_. In most engines the optimizer can rewrite
 
 ```sql
 SELECT c.customer_id, c.name
@@ -645,21 +646,21 @@ Wrapping the join column in a function (e.g., `ON TRIM(o.customer_id) = c.custom
 
 ## Comparison Table
 
-| Operation | Result shape | NULL handling | When to prefer |
-|-----------|--------------|---------------|----------------|
-| `INNER JOIN` | Only matching combinations | NULLs never match; unmatched dropped | Only rows that *both* tables agree on |
-| `LEFT JOIN` | All left rows + matched right; unmatched right → NULL | Left side preserved, right side NULL-padded | "All of A, with B if any" |
-| `RIGHT JOIN` | Mirror image of LEFT | Right side preserved | The rare case where logic reads better right-to-left; otherwise swap the tables and use LEFT |
-| `FULL OUTER JOIN` | Both sides preserved | Both sides NULL-padded | Compare two sets, showing differences on **both** sides |
-| `NOT EXISTS` | Rows of A with no match | Uses standard equality / index search | Anti-join where you stop at the first match |
-| `NOT IN (subquery)` | Rows of A not in subquery | **Dangerous with NULL** in subquery | Only with a guaranteed-NOT-NULL subquery column |
-| `CROSS JOIN` | Every combination | All combinations | Deliberate Cartesian products |
+| Operation           | Result shape                                          | NULL handling                               | When to prefer                                                                               |
+| ------------------- | ----------------------------------------------------- | ------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `INNER JOIN`        | Only matching combinations                            | NULLs never match; unmatched dropped        | Only rows that _both_ tables agree on                                                        |
+| `LEFT JOIN`         | All left rows + matched right; unmatched right → NULL | Left side preserved, right side NULL-padded | "All of A, with B if any"                                                                    |
+| `RIGHT JOIN`        | Mirror image of LEFT                                  | Right side preserved                        | The rare case where logic reads better right-to-left; otherwise swap the tables and use LEFT |
+| `FULL OUTER JOIN`   | Both sides preserved                                  | Both sides NULL-padded                      | Compare two sets, showing differences on **both** sides                                      |
+| `NOT EXISTS`        | Rows of A with no match                               | Uses standard equality / index search       | Anti-join where you stop at the first match                                                  |
+| `NOT IN (subquery)` | Rows of A not in subquery                             | **Dangerous with NULL** in subquery         | Only with a guaranteed-NOT-NULL subquery column                                              |
+| `CROSS JOIN`        | Every combination                                     | All combinations                            | Deliberate Cartesian products                                                                |
 
-| Placement | Behavior in LEFT JOIN |
-|-----------|------------------------|
-| Filter on right table in `ON` | Still a LEFT JOIN; unmatched right rows are excluded from matching but **left rows are preserved** (NULL) |
-| Filter on right table in `WHERE` | LEFT JOIN effectively becomes an INNER JOIN (left rows dropped on no match) |
-| Filter on left table in `WHERE` | Safe: reduces left rows before/during the join; left rows that fail the filter are gone regardless |
+| Placement                        | Behavior in LEFT JOIN                                                                                     |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Filter on right table in `ON`    | Still a LEFT JOIN; unmatched right rows are excluded from matching but **left rows are preserved** (NULL) |
+| Filter on right table in `WHERE` | LEFT JOIN effectively becomes an INNER JOIN (left rows dropped on no match)                               |
+| Filter on left table in `WHERE`  | Safe: reduces left rows before/during the join; left rows that fail the filter are gone regardless        |
 
 Key difference from the INNER JOIN section: for INNER JOIN the two placements are usually equivalent; **for LEFT JOIN they are not.**
 
@@ -669,7 +670,7 @@ Key difference from the INNER JOIN section: for INNER JOIN the two placements ar
 
 - You need "every row from A, with data from B when available": customer lists, order lists, department headcounts including empties.
 - You are building anti-joins ("A with no B") when the plan favors it.
-- You want to see *and count* absence explicitly (e.g., pending/unpaid orders with NULL payment amounts).
+- You want to see _and count_ absence explicitly (e.g., pending/unpaid orders with NULL payment amounts).
 - You are assembling a report whose left table is the "subject" of the report (e.g., "each employee's last login," "each product's total sales").
 
 ## When NOT to Use LEFT JOIN
@@ -677,14 +678,14 @@ Key difference from the INNER JOIN section: for INNER JOIN the two placements ar
 - You only want matching pairs → INNER JOIN (a LEFT JOIN achieves it only by accidentally filtering in WHERE).
 - You want the symmetry of both sides shown → FULL OUTER JOIN.
 - You are doing existence checks and don't want fan-out → use `EXISTS`.
-- Your analysis will *aggregate* a one-to-many right side → LEFT JOIN forces you into the double-counting minefield; prefer a pre-aggregated subquery/CTE joined with LEFT JOIN (Scenario D).
+- Your analysis will _aggregate_ a one-to-many right side → LEFT JOIN forces you into the double-counting minefield; prefer a pre-aggregated subquery/CTE joined with LEFT JOIN (Scenario D).
 - The left table is huge and the "is there a match?" question can be answered with an index-favorable `EXISTS` → compare plans.
 
 ---
 
 ## Best Practices
 
-1. **State the grain** of both tables and decide *which table is the subject of the output*. Make that the left table.
+1. **State the grain** of both tables and decide _which table is the subject of the output_. Make that the left table.
 2. **Decide the semantics first**: "do I need to preserve every left row?" If yes → LEFT JOIN; if no → INNER JOIN.
 3. **Keep filters on the right table in `ON`** when left-row survival matters; keep global row filters in `WHERE` when you intend inner semantics.
 4. **Count with `COUNT(right.key)`** — never `COUNT(*)` — when counting right-side matches, and prefer a `NOT NULL` key.
@@ -728,7 +729,7 @@ Use the sample tables above (`customers`, `orders`, `payments`, `employees`, `de
 
 ## Beginner
 
-1. Write a query that returns **all** customers with their orders, *including* customers who never ordered.
+1. Write a query that returns **all** customers with their orders, _including_ customers who never ordered.
 2. What does the word "preserved" mean for the left table of a LEFT JOIN?
 3. In the sample data, `customers LEFT JOIN orders`: what do Dave's `order_id` and `amount` columns show, and why?
 4. What is the difference between `LEFT JOIN` and `LEFT OUTER JOIN`?
@@ -746,7 +747,7 @@ Use the sample tables above (`customers`, `orders`, `payments`, `employees`, `de
 
 11. Explain how a "Hash Left Join" preserves unmatched left rows, mechanically.
 12. A LEFT JOIN followed by `WHERE right_table.nullable_col IS NULL` can produce false positives. Why, and what is the correct fix?
-13. Describe how the optimizer can *flatten* a LEFT JOIN into an INNER JOIN, and how you would detect that in `EXPLAIN`.
+13. Describe how the optimizer can _flatten_ a LEFT JOIN into an INNER JOIN, and how you would detect that in `EXPLAIN`.
 14. When would you choose `NOT EXISTS` over `LEFT JOIN ... WHERE ... IS NULL` for an anti-join? Design a test to decide, and state what you would read in the plan.
 15. Can a LEFT JOIN output more rows than the left table, fewer, or exactly as many? Give concrete conditions for each.
 

@@ -37,20 +37,20 @@ TRUE AND UNKNOWN AND TRUE → UNKNOWN → row is filtered out
 
 ### employees
 
-| employee_id | name        | department_id | salary |
-|-------------|-------------|---------------|--------|
-| 1           | Alice       | 10            | 90000  |
-| 2           | Bob         | 20            | 85000  |
-| 3           | Carol       | NULL          | 72000  |
-| 4           | Dave        | 10            | 88000  |
-| 5           | Eve         | 30            | 95000  |
+| employee_id | name  | department_id | salary |
+| ----------- | ----- | ------------- | ------ |
+| 1           | Alice | 10            | 90000  |
+| 2           | Bob   | 20            | 85000  |
+| 3           | Carol | NULL          | 72000  |
+| 4           | Dave  | 10            | 88000  |
+| 5           | Eve   | 30            | 95000  |
 
 **Grain:** One row per employee.
 
 ### departments
 
 | department_id | department_name |
-|---------------|-----------------|
+| ------------- | --------------- |
 | 10            | Engineering     |
 | 20            | Marketing       |
 | NULL          | Unassigned      |
@@ -79,7 +79,7 @@ We expect employees whose `department_id` is not in the departments list. Depart
 ### Actual result
 
 | employee_id | name |
-|-------------|------|
+| ----------- | ---- |
 | _(empty)_   |      |
 
 **Zero rows.** The query silently returns nothing.
@@ -126,7 +126,7 @@ WHERE department_id NOT IN (
 ### Result
 
 | employee_id | name |
-|-------------|------|
+| ----------- | ---- |
 | 5           | Eve  |
 
 Only Eve has a `department_id` (30) that is genuinely not in the departments table.
@@ -145,9 +145,9 @@ WHERE NOT EXISTS (
 
 ### Result
 
-| employee_id | name |
-|-------------|------|
-| 5           | Eve  |
+| employee_id | name  |
+| ----------- | ----- |
+| 5           | Eve   |
 | 3           | Carol |
 
 Notice Carol appears here because `NULL = NULL` is `UNKNOWN` (not `TRUE`), so the correlated subquery never matches her, and she is included in `NOT EXISTS`. This is the correct ANSI behavior: Carol's department is not "in" the departments list.
@@ -170,7 +170,7 @@ AND e.department_id IS NOT NULL;
 ### Result
 
 | employee_id | name |
-|-------------|------|
+| ----------- | ---- |
 | 5           | Eve  |
 
 ---
@@ -180,21 +180,21 @@ AND e.department_id IS NOT NULL;
 ### Truth table for `col NOT IN (v1, NULL)`
 
 | col value | col <> v1 | col <> NULL | col NOT IN (v1, NULL) |
-|-----------|-----------|-------------|----------------------|
-| v1        | FALSE     | UNKNOWN     | FALSE                |
-| other     | TRUE      | UNKNOWN     | UNKNOWN (row removed)|
-| NULL      | UNKNOWN   | UNKNOWN     | UNKNOWN (row removed)|
+| --------- | --------- | ----------- | --------------------- |
+| v1        | FALSE     | UNKNOWN     | FALSE                 |
+| other     | TRUE      | UNKNOWN     | UNKNOWN (row removed) |
+| NULL      | UNKNOWN   | UNKNOWN     | UNKNOWN (row removed) |
 
 **Every row is eliminated** regardless of its value.
 
 ### `NOT IN` vs `NOT EXISTS` — NULL handling
 
-| Scenario | `NOT IN` with NULL in list | `NOT EXISTS` |
-|----------|---------------------------|--------------|
-| Matching row exists | FALSE | FALSE |
-| No matching row, no NULLs in source | TRUE | TRUE |
+| Scenario                               | `NOT IN` with NULL in list | `NOT EXISTS`        |
+| -------------------------------------- | -------------------------- | ------------------- |
+| Matching row exists                    | FALSE                      | FALSE               |
+| No matching row, no NULLs in source    | TRUE                       | TRUE                |
 | No matching row, NULLs exist in source | **UNKNOWN (filtered out)** | **TRUE (included)** |
-| Row value is NULL | **UNKNOWN (filtered out)** | **TRUE (included)** |
+| Row value is NULL                      | **UNKNOWN (filtered out)** | **TRUE (included)** |
 
 ---
 
@@ -204,16 +204,16 @@ AND e.department_id IS NOT NULL;
 
 **customers**
 
-| customer_id | name    |
-|-------------|---------|
-| 1           | Alice   |
-| 2           | Bob     |
-| 3           | Carol   |
+| customer_id | name  |
+| ----------- | ----- |
+| 1           | Alice |
+| 2           | Bob   |
+| 3           | Carol |
 
 **orders**
 
 | order_id | customer_id | amount |
-|----------|-------------|--------|
+| -------- | ----------- | ------ |
 | 101      | 1           | 500    |
 | 102      | NULL        | 300    |
 
@@ -245,7 +245,7 @@ WHERE NOT EXISTS (
 **Result:**
 
 | customer_id | name  |
-|-------------|-------|
+| ----------- | ----- |
 | 2           | Bob   |
 | 3           | Carol |
 
@@ -256,7 +256,7 @@ Both Bob and Carol have no orders. Carol is correctly included because no row in
 **products**
 
 | product_id | name   | category_id |
-|------------|--------|-------------|
+| ---------- | ------ | ----------- |
 | 1          | Widget | 100         |
 | 2          | Gadget | NULL        |
 | 3          | Doohic | 300         |
@@ -264,7 +264,7 @@ Both Bob and Carol have no orders. Carol is correctly included because no row in
 **active_categories**
 
 | category_id |
-|-------------|
+| ----------- |
 | 100         |
 | 200         |
 | NULL        |
@@ -298,7 +298,7 @@ WHERE p.category_id IS NOT NULL
 **Result:**
 
 | product_id | name   |
-|------------|--------|
+| ---------- | ------ |
 | 3          | Doohic |
 
 Widget (100) is in `active_categories`. Gadget has `NULL` category_id, explicitly excluded. Doohic (300) is not in any active category.
@@ -379,14 +379,14 @@ If **either** subquery contains a `NULL`, the entire `WHERE` clause evaluates to
 
 ## Common Mistakes
 
-| # | Mistake | Why it fails |
-|---|---------|-------------|
-| 1 | Assuming `NOT IN` ignores NULLs | It doesn't. `NULL` in the list poisons the entire result. |
-| 2 | Using `NOT IN` on a column that may contain NULLs | Even if the left side is NULL, `NULL NOT IN (...)` → UNKNOWN. |
-| 3 | Forgetting that `NOT IN` with empty list returns all rows | Can cause unexpected data duplication in batch operations. |
-| 4 | Using `NOT IN` in a `DELETE` or `UPDATE` | Silently deletes/updates fewer (or zero) rows than expected. |
-| 5 | Using `NOT IN` on multi-column comparisons | NULL in **any** column of the subquery poisons the result. |
-| 6 | Not checking subquery results for NULLs before using `NOT IN` | Always verify `SELECT COUNT(*) WHERE col IS NULL FROM ...`. |
+| #   | Mistake                                                       | Why it fails                                                  |
+| --- | ------------------------------------------------------------- | ------------------------------------------------------------- |
+| 1   | Assuming `NOT IN` ignores NULLs                               | It doesn't. `NULL` in the list poisons the entire result.     |
+| 2   | Using `NOT IN` on a column that may contain NULLs             | Even if the left side is NULL, `NULL NOT IN (...)` → UNKNOWN. |
+| 3   | Forgetting that `NOT IN` with empty list returns all rows     | Can cause unexpected data duplication in batch operations.    |
+| 4   | Using `NOT IN` in a `DELETE` or `UPDATE`                      | Silently deletes/updates fewer (or zero) rows than expected.  |
+| 5   | Using `NOT IN` on multi-column comparisons                    | NULL in **any** column of the subquery poisons the result.    |
+| 6   | Not checking subquery results for NULLs before using `NOT IN` | Always verify `SELECT COUNT(*) WHERE col IS NULL FROM ...`.   |
 
 ---
 
@@ -436,12 +436,12 @@ If `archived_events` has NULL event_ids (e.g., from a failed merge), no events a
 
 ## Performance Implications
 
-| Factor | `NOT IN` | `NOT EXISTS` | `LEFT JOIN ... IS NULL` |
-|--------|----------|--------------|------------------------|
-| NULL handling | Dangerous | Safe | Safe |
-| Optimizer rewriting | Many optimizers rewrite to anti-join | Many optimizers rewrite to anti-join | Optimized as anti-join |
-| Index usage | Depends on optimizer | Depends on optimizer | Depends on optimizer |
-| Readability | Simple | Slightly more verbose | Most verbose |
+| Factor              | `NOT IN`                             | `NOT EXISTS`                         | `LEFT JOIN ... IS NULL` |
+| ------------------- | ------------------------------------ | ------------------------------------ | ----------------------- |
+| NULL handling       | Dangerous                            | Safe                                 | Safe                    |
+| Optimizer rewriting | Many optimizers rewrite to anti-join | Many optimizers rewrite to anti-join | Optimized as anti-join  |
+| Index usage         | Depends on optimizer                 | Depends on optimizer                 | Depends on optimizer    |
+| Readability         | Simple                               | Slightly more verbose                | Most verbose            |
 
 > Important: Performance depends on optimizer, indexes, statistics, cardinality, data distribution, query shape, and the database engine. Always verify with `EXPLAIN ANALYZE` (PostgreSQL), `EXPLAIN` (MySQL), or `EXPLAIN` (SQL Server).
 
@@ -467,26 +467,26 @@ WHERE d.department_id IS NULL;
 
 ## Comparison: `NOT IN` vs `NOT EXISTS` vs `LEFT JOIN ... IS NULL`
 
-| Aspect | `NOT IN` | `NOT EXISTS` | `LEFT JOIN ... IS NULL` |
-|--------|----------|--------------|------------------------|
-| NULL-safe | No | Yes | Yes |
-| Subquery type | Scalar list | Correlated | Correlated |
-| Handles empty subquery | Returns all rows | Returns all rows | Returns all rows |
-| NULL on left side | Excluded | Included | Included |
-| NULL in subquery | Poisons result | Safe | Safe |
-| Multi-column support | Limited | Full | Full |
-| ANSI standard | Yes | Yes | Yes |
+| Aspect                 | `NOT IN`         | `NOT EXISTS`     | `LEFT JOIN ... IS NULL` |
+| ---------------------- | ---------------- | ---------------- | ----------------------- |
+| NULL-safe              | No               | Yes              | Yes                     |
+| Subquery type          | Scalar list      | Correlated       | Correlated              |
+| Handles empty subquery | Returns all rows | Returns all rows | Returns all rows        |
+| NULL on left side      | Excluded         | Included         | Included                |
+| NULL in subquery       | Poisons result   | Safe             | Safe                    |
+| Multi-column support   | Limited          | Full             | Full                    |
+| ANSI standard          | Yes              | Yes              | Yes                     |
 
 ---
 
 ## `NOT IN` vs `NOT EXISTS` Behavior Summary
 
-| employee.department_id | departments has matching row? | `NOT IN (subquery)` | `NOT EXISTS (subquery)` |
-|------------------------|-------------------------------|---------------------|------------------------|
-| 10                     | Yes                           | FALSE               | FALSE                  |
-| 20                     | Yes                           | FALSE               | FALSE                  |
-| 30                     | No (but NULLs in subquery)    | **UNKNOWN** (excluded) | **TRUE** (included)  |
-| NULL                   | No                            | **UNKNOWN** (excluded) | **TRUE** (included)  |
+| employee.department_id | departments has matching row? | `NOT IN (subquery)`    | `NOT EXISTS (subquery)` |
+| ---------------------- | ----------------------------- | ---------------------- | ----------------------- |
+| 10                     | Yes                           | FALSE                  | FALSE                   |
+| 20                     | Yes                           | FALSE                  | FALSE                   |
+| 30                     | No (but NULLs in subquery)    | **UNKNOWN** (excluded) | **TRUE** (included)     |
+| NULL                   | No                            | **UNKNOWN** (excluded) | **TRUE** (included)     |
 
 ---
 
@@ -571,16 +571,16 @@ WHERE d.department_id IS NULL;
 
 17. Given:
 
-    | id | region |
-    |----|--------|
-    | 1  | East   |
-    | 2  | West   |
-    | 3  | NULL   |
+    | id  | region |
+    | --- | ------ |
+    | 1   | East   |
+    | 2   | West   |
+    | 3   | NULL   |
 
     And:
 
     | region |
-    |--------|
+    | ------ |
     | East   |
     | NULL   |
 

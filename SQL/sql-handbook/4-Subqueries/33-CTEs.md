@@ -2,13 +2,14 @@ psql/mysql clients exist. Let me see if a server is running so I can validate th
 PostgreSQL 17 is running. I'll validate the examples against it.
 Let me inspect execution plans so the performance discussion is grounded in real behavior.
 Plan behavior confirmed with real output. Let me verify a couple of MySQL-specific claims from the docs to stay accurate on cross-engine differences.
+
 # 4 · Subqueries — 33 · CTEs (Common Table Expressions)
 
 ---
 
 ## In one sentence
 
-A **CTE (Common Table Expression)** is a *named, statement-local subquery* that you define once at the top of a query with `WITH`, and then reference as if it were a table (or a view defined inline) inside that same statement.
+A **CTE (Common Table Expression)** is a _named, statement-local subquery_ that you define once at the top of a query with `WITH`, and then reference as if it were a table (or a view defined inline) inside that same statement.
 
 ```sql
 WITH dept_avg AS (
@@ -26,7 +27,7 @@ FROM dept_avg;
 
 A CTE gives a subquery a **name** and a **scope**. The scope is exactly one statement — the whole `SELECT` (or `INSERT ... SELECT`, `UPDATE`, `DELETE`, `MERGE` in some engines) that follows the `WITH` clause. Outside that statement, the name does not exist.
 
-A CTE is *logically* a named result set. *Physically*, the optimizer decides whether to:
+A CTE is _logically_ a named result set. _Physically_, the optimizer decides whether to:
 
 - **Inline / merge** it: fuse the CTE's text into the main query and plan it as one unit, or
 - **Materialize** it: compute the CTE result once (usually into memory or a temporary storage area) and read the stored result.
@@ -40,9 +41,9 @@ Which of the two happens is **engine-dependent** and is exactly what this sectio
 1. **Readability** — replaces deeply nested subqueries with linear, top-to-bottom, named steps.
 2. **Reuse within a statement** — the same named result can be referenced several times (a derived table cannot).
 3. **Recursion** — the primary reason the standard introduced CTEs (a query that references itself).
-4. **Encapsulation of transformation steps** — aggregation, dedup, window ranking, then join the *result* downstream.
+4. **Encapsulation of transformation steps** — aggregation, dedup, window ranking, then join the _result_ downstream.
 5. **Data-modifying pipelines** — in some engines a CTE can return `RETURNING` rows from an `UPDATE`/`DELETE`/`INSERT` and feed them into another statement. See the DML section below.
-6. **Self-documentation** — the name of a CTE can state the *grain* of its output: `order_totals` says "one row per order".
+6. **Self-documentation** — the name of a CTE can state the _grain_ of its output: `order_totals` says "one row per order".
 
 CTEs and **derived tables** (subqueries in `FROM`) are close cousins; the practical differences (reuse, recursion, readability) are covered in the comparison table at the end.
 
@@ -72,9 +73,9 @@ Read from bottom-up mentally: the optimizer, using **statistics, indexes, cardin
 
 - A CTE can only reference CTEs defined **earlier** in the same `WITH` clause, plus base tables. Forward references are not allowed in any mainstream engine.
 
-> MySQL explicitly documents: *"A CTE can refer to CTEs defined earlier in the same WITH clause, but not those defined later."* This rules out mutual recursion (`cte1` ↔ `cte2`).
+> MySQL explicitly documents: _"A CTE can refer to CTEs defined earlier in the same WITH clause, but not those defined later."_ This rules out mutual recursion (`cte1` ↔ `cte2`).
 
-- A CTE name **shadows** base tables, temporary tables, and views. Inside the statement, `FROM employees` now means the CTE, *unless* you schema-qualify the table name (`public.employees`).
+- A CTE name **shadows** base tables, temporary tables, and views. Inside the statement, `FROM employees` now means the CTE, _unless_ you schema-qualify the table name (`public.employees`).
 - A derived table defined in the same statement shadows a CTE of the same name.
 - A CTE can be referenced inside a nested subquery of the main query, and inner query blocks can see CTEs from outer blocks.
 - CTE names must be unique within a single `WITH` clause.
@@ -83,7 +84,7 @@ Read from bottom-up mentally: the optimizer, using **statistics, indexes, cardin
 
 > Common misconception: "The DB computes the CTE first, then runs the main query."
 
-Wrong — that is a *logical* description, not a physical one. When a CTE is inlined, there is literally no "CTE step" in the plan; the subquery is compiled into the main query. Even when materialized, the CTE node can appear anywhere in the plan and might be **pruned entirely** if unreferenced. Never reason about ordering of execution from the text.
+Wrong — that is a _logical_ description, not a physical one. When a CTE is inlined, there is literally no "CTE step" in the plan; the subquery is compiled into the main query. Even when materialized, the CTE node can appear anywhere in the plan and might be **pruned entirely** if unreferenced. Never reason about ordering of execution from the text.
 
 ---
 
@@ -104,14 +105,14 @@ SELECT ... FROM cte_name ... ;      -- the "main" statement
 
 ### Grammar notes
 
-| Piece | Meaning |
-|---|---|
-| `WITH` | Opens the clause. PostgreSQL requires *no* extra keyword for ordinary CTEs. |
-| `WITH RECURSIVE` | Required in **PostgreSQL** and **MySQL** when a CTE references itself. |
+| Piece               | Meaning                                                                                                                                                                                                     |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `WITH`              | Opens the clause. PostgreSQL requires _no_ extra keyword for ordinary CTEs.                                                                                                                                 |
+| `WITH RECURSIVE`    | Required in **PostgreSQL** and **MySQL** when a CTE references itself.                                                                                                                                      |
 | `cte_name [(cols)]` | Optional column list renaming the CTE's output columns. If you use it, the number of names **must** match the subquery's column count (otherwise PostgreSQL, MySQL, and Oracle raise a column-count error). |
-| `AS ( ... )` | The subquery body. It may itself contain a `WITH`. |
-| `,` | Separates multiple CTEs. Each can reference any CTE defined *before* it. |
-| main statement | The `SELECT` / DML that consumes the CTEs. A `WITH` clause with no consuming statement is a syntax error. |
+| `AS ( ... )`        | The subquery body. It may itself contain a `WITH`.                                                                                                                                                          |
+| `,`                 | Separates multiple CTEs. Each can reference any CTE defined _before_ it.                                                                                                                                    |
+| main statement      | The `SELECT` / DML that consumes the CTEs. A `WITH` clause with no consuming statement is a syntax error.                                                                                                   |
 
 **PostgreSQL extension:**
 
@@ -186,12 +187,12 @@ INSERT INTO order_items VALUES
 
 ### Statement of grain (read before writing any aggregation)
 
-| Table | One row represents |
-|---|---|
-| `departments` | one department |
-| `employees` | one employee (0 or 1 department, salary nullable) |
-| `orders` | one order |
-| `order_items` | one line item (an order has ≥ 1 line item here) |
+| Table         | One row represents                                |
+| ------------- | ------------------------------------------------- |
+| `departments` | one department                                    |
+| `employees`   | one employee (0 or 1 department, salary nullable) |
+| `orders`      | one order                                         |
+| `order_items` | one line item (an order has ≥ 1 line item here)   |
 
 Join failures and double-counting in this section are all explained by these grains.
 
@@ -216,8 +217,8 @@ WHERE da.avg_salary > (SELECT AVG(salary) FROM employees);
 **Expected result:**
 
 | department_name | avg_salary | headcount |
-|---|---|---|
-| Engineering | 108333.33 | 3 |
+| --------------- | ---------- | --------- |
+| Engineering     | 108333.33  | 3         |
 
 Notes:
 
@@ -252,13 +253,13 @@ WHERE global_rank <= 3;
 
 **Expected result:**
 
-| customer_id | order_id | total |
-|---|---|---|
-| 1 | 100 | 720.00 |
-| 3 | 103 | 500.00 |
-| 2 | 102 | 300.00 |
+| customer_id | order_id | total  |
+| ----------- | -------- | ------ |
+| 1           | 100      | 720.00 |
+| 3           | 103      | 500.00 |
+| 2           | 102      | 300.00 |
 
-Because `order_totals` reduces to order grain *before* the rank is computed, the ranking never sees the duplicated line-item rows. This is exactly the kind of accident avoided by pre-aggregating inside a CTE.
+Because `order_totals` reduces to order grain _before_ the rank is computed, the ranking never sees the duplicated line-item rows. This is exactly the kind of accident avoided by pre-aggregating inside a CTE.
 
 > Interview trap: "What is the grain of `ranked_orders`?" If you cannot answer clearly, you probably have a fan-out bug.
 
@@ -287,11 +288,11 @@ ORDER BY s.department_id;
 
 **Expected result:**
 
-| department_id | dept_avg | above_avg |
-|---|---|---|
-| 1 | 108333.33 | 2 |
-| 2 | 75000.00 | 1 |
-| 3 | 60000.00 | 0 |
+| department_id | dept_avg  | above_avg |
+| ------------- | --------- | --------- |
+| 1             | 108333.33 | 2         |
+| 2             | 75000.00  | 1         |
+| 3             | 60000.00  | 0         |
 
 Does the engine compute the aggregation **once** or does it recompute per reference? **It depends — verify with the plan.** What the "correct" interview answer is, differs by engine (see Performance implications — PostgreSQL materializes a multi-referenced CTE; MySQL typically does too; SQL Server and Oracle often fuse/merge).
 
@@ -319,11 +320,11 @@ WHERE r.rn = 1;
 
 **Expected result:**
 
-| department_name | employee_name | salary |
-|---|---|---|
-| Engineering | Ada | 120000.00 |
-| Sales | Katherine | 80000.00 |
-| Marketing | Sheryl | 60000.00 |
+| department_name | employee_name | salary    |
+| --------------- | ------------- | --------- |
+| Engineering     | Ada           | 120000.00 |
+| Sales           | Katherine     | 80000.00  |
+| Marketing       | Sheryl        | 60000.00  |
 
 Compare: if ties matter, use `RANK() OVER (...)` and filter `WHERE rn = 1` — both tied employees appear. With `ROW_NUMBER()` you silently keep only one. (This is a favorite interview answer-discussion; see Interview Questions.)
 
@@ -347,16 +348,16 @@ ORDER BY employee_id;
 
 **Expected result:**
 
-| employee_id | employee_name | salary | running_total |
-|---|---|---|---|
-| 1 | Ada | 120000.00 | 120000.00 |
-| 2 | Grace | 110000.00 | 230000.00 |
-| 3 | Alan | 95000.00 | 325000.00 |
-| 4 | Margaret | 70000.00 | 395000.00 |
-| 5 | Katherine | 80000.00 | 475000.00 |
-| 6 | Sheryl | 60000.00 | 535000.00 |
+| employee_id | employee_name | salary    | running_total |
+| ----------- | ------------- | --------- | ------------- |
+| 1           | Ada           | 120000.00 | 120000.00     |
+| 2           | Grace         | 110000.00 | 230000.00     |
+| 3           | Alan          | 95000.00  | 325000.00     |
+| 4           | Margaret      | 70000.00  | 395000.00     |
+| 5           | Katherine     | 80000.00  | 475000.00     |
+| 6           | Sheryl        | 60000.00  | 535000.00     |
 
-Note Barbara is excluded *inside* the CTE via `WHERE salary IS NOT NULL`; running totals ignore her. Had we used `SUM(...) OVER (... ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)` with a NULL salary included, the NULL would simply be ignored by `SUM` but the employee row retained.
+Note Barbara is excluded _inside_ the CTE via `WHERE salary IS NOT NULL`; running totals ignore her. Had we used `SUM(...) OVER (... ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)` with a NULL salary included, the NULL would simply be ignored by `SUM` but the employee row retained.
 
 ---
 
@@ -378,10 +379,10 @@ ORDER BY employee_id;
 
 **Expected result:**
 
-| employee_id | employee_name | salary |
-|---|---|---|
-| 4 | Margaret | 73500.00 |
-| 5 | Katherine | 84000.00 |
+| employee_id | employee_name | salary   |
+| ----------- | ------------- | -------- |
+| 4           | Margaret      | 73500.00 |
+| 5           | Katherine     | 84000.00 |
 
 Common real use: an upsert that stores the affected rows and then re-associates or logs them. The `RETURNING` CTE turns a "changed rows" statement into a "result set" that the rest of the query can join.
 
@@ -425,7 +426,7 @@ JOIN departments d ON d.department_id = da.department_id
 WHERE da.avg_salary > (SELECT AVG(salary) FROM employees);
 ```
 
-**Why it's better:** the business step ("average per department") is now a *named, testable unit*; the main query reads like English. Readability, not speed, is the reason — the engine may produce an identical plan for both.
+**Why it's better:** the business step ("average per department") is now a _named, testable unit_; the main query reads like English. Readability, not speed, is the reason — the engine may produce an identical plan for both.
 
 ### Pattern B — repeated scalar subquery replaced by one reused CTE
 
@@ -468,7 +469,7 @@ WHERE e.salary > c.v
 
 ## NULL behavior
 
-CTEs do not add special NULL rules — the subquery *inside* the CTE obeys ordinary three-valued logic, and so does the outer query. But CTEs concentrate several classic NULL traps:
+CTEs do not add special NULL rules — the subquery _inside_ the CTE obeys ordinary three-valued logic, and so does the outer query. But CTEs concentrate several classic NULL traps:
 
 1. **`GROUP BY` produces a NULL group.** Barbara's `department_id IS NULL` forms its own group inside a CTE:
 
@@ -487,15 +488,15 @@ SELECT * FROM dept_avg ORDER BY department_id NULLS LAST;
 **Expected result:**
 
 | department_id | avg_salary | headcount | sal_count |
-|---|---|---|---|
-| 1 | 108333.33 | 3 | 3 |
-| 2 | 75000.00 | 2 | 2 |
-| 3 | 60000.00 | 1 | 1 |
-| NULL | NULL | 1 | 0 |
+| ------------- | ---------- | --------- | --------- |
+| 1             | 108333.33  | 3         | 3         |
+| 2             | 75000.00   | 2         | 2         |
+| 3             | 60000.00   | 1         | 1         |
+| NULL          | NULL       | 1         | 0         |
 
 Note the NULL group: `COUNT(*)` counts the row, `COUNT(salary)` counts only non-NULL. `AVG` of the single NULL salary is `NULL`.
 
-2. **`AVG` returns `NULL` for an empty group**, but with `GROUP BY` there simply *is no row* for a group with zero rows. Distinguish "no row" (HR has no employees → absent) from "row with NULL" (employees with NULL department → present with NULL values). Filters like `WHERE avg_salary > ...` remove both.
+2. **`AVG` returns `NULL` for an empty group**, but with `GROUP BY` there simply _is no row_ for a group with zero rows. Distinguish "no row" (HR has no employees → absent) from "row with NULL" (employees with NULL department → present with NULL values). Filters like `WHERE avg_salary > ...` remove both.
 
 3. **Comparisons with NULL inside/outside a CTE.** `WHERE da.avg_salary > 50000` drops the row where `avg_salary IS NULL` (because `NULL > 50000` is `UNKNOWN`). If a NULL average should pass the filter, use `COALESCE(da.avg_salary, 0)` — or rephrase the logic.
 
@@ -507,18 +508,18 @@ Note the NULL group: `COUNT(*)` counts the row, `COUNT(salary)` counts only non-
 
 ## Edge cases
 
-| Case | Behavior |
-|---|---|
-| CTE returns zero rows | INNER JOIN to it → zero rows. LEFT JOIN to it → all outer rows, CTE columns `NULL`. |
-| CTE defined but never referenced | Optimizer may prune it entirely (PostgreSQL does — it is *not executed*). Never rely on a CTE running "for its side effect". |
-| Column-count mismatch with aliases | `WITH c(a, b) AS (SELECT x, y, z ...)` → error in all engines; alias count must equal column count. |
-| CTE name equals a base table | The CTE wins inside the statement. Reach the real table with a schema qualifier: `public.orders`. |
-| `ORDER BY` inside a CTE | Pointless — row order is not guaranteed unless a consumer like `TOP`/`LIMIT`/`OFFSET` depends on it. Window `ORDER BY` belongs inside the `OVER(...)` clause. |
-| `LIMIT` inside a CTE | Legally truncates rows; makes materialization semantics explicit in most engines; but be aware the truncated set is what downstream joins see. |
-| Forward reference | Not allowed (standard + MySQL/PostgreSQL/SQL Server/Oracle). |
-| Recursive reference without `WITH RECURSIVE` | Syntax/planning error in PostgreSQL and MySQL; the standard says `WITH` non-recursive, SQL Server and Oracle allow recursion without the keyword. |
-| Data types | Column types come from the CTE subquery; `numeric`/`decimal` widths and `NULL` typing bumps (e.g. `UNION` with NULL literal) are resolved by the usual rules. |
-| CTE inside a subquery | Allowed; inner blocks can read outer CTEs; the CTE dies with the full statement. |
+| Case                                         | Behavior                                                                                                                                                      |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CTE returns zero rows                        | INNER JOIN to it → zero rows. LEFT JOIN to it → all outer rows, CTE columns `NULL`.                                                                           |
+| CTE defined but never referenced             | Optimizer may prune it entirely (PostgreSQL does — it is _not executed_). Never rely on a CTE running "for its side effect".                                  |
+| Column-count mismatch with aliases           | `WITH c(a, b) AS (SELECT x, y, z ...)` → error in all engines; alias count must equal column count.                                                           |
+| CTE name equals a base table                 | The CTE wins inside the statement. Reach the real table with a schema qualifier: `public.orders`.                                                             |
+| `ORDER BY` inside a CTE                      | Pointless — row order is not guaranteed unless a consumer like `TOP`/`LIMIT`/`OFFSET` depends on it. Window `ORDER BY` belongs inside the `OVER(...)` clause. |
+| `LIMIT` inside a CTE                         | Legally truncates rows; makes materialization semantics explicit in most engines; but be aware the truncated set is what downstream joins see.                |
+| Forward reference                            | Not allowed (standard + MySQL/PostgreSQL/SQL Server/Oracle).                                                                                                  |
+| Recursive reference without `WITH RECURSIVE` | Syntax/planning error in PostgreSQL and MySQL; the standard says `WITH` non-recursive, SQL Server and Oracle allow recursion without the keyword.             |
+| Data types                                   | Column types come from the CTE subquery; `numeric`/`decimal` widths and `NULL` typing bumps (e.g. `UNION` with NULL literal) are resolved by the usual rules. |
+| CTE inside a subquery                        | Allowed; inner blocks can read outer CTEs; the CTE dies with the full statement.                                                                              |
 
 ---
 
@@ -530,7 +531,7 @@ Note the NULL group: `COUNT(*)` counts the row, `COUNT(salary)` counts only non-
 4. **Using a CTE as if it were a temporary table** — it is not addressable by later statements, cannot be indexed directly, and disappears at the end of the statement.
 5. **Unintentionally shadowing a base table** by naming a CTE the same as the table, then wondering why the real table seems to be missing.
 6. **`ORDER BY` inside a CTE to "sort the final report"** — ordering is a property of the outermost query (and even there only guaranteed with a final `ORDER BY`).
-7. **Aggregating at the wrong grain** — e.g. summing line items in a CTE, then joining to orders *again*, producing double counts.
+7. **Aggregating at the wrong grain** — e.g. summing line items in a CTE, then joining to orders _again_, producing double counts.
 8. **Comparing a CTE aggregate against `NULL`** and silently losing rows.
 9. **Chaining 15 CTEs into one monster statement** — a readability win becomes a debugging nightmare.
 10. **Assuming reuse is free** — a twice-referenced CTE may recompute (inlining) or spawn materialization where you did not expect it. Measure, don't assume.
@@ -541,7 +542,7 @@ Note the NULL group: `COUNT(*)` counts the row, `COUNT(salary)` counts only non-
 
 > Production pitfall: fan-out / double counting across CTE boundaries.
 
-The `order_items` join multiplies rows. Inside a CTE this is fine *if* you re-aggregate to order grain before returning. If you don't, the outer query counts phantom rows:
+The `order_items` join multiplies rows. Inside a CTE this is fine _if_ you re-aggregate to order grain before returning. If you don't, the outer query counts phantom rows:
 
 ```sql
 -- wrong: counts completed orders = 4, but there are only 3
@@ -553,13 +554,13 @@ GROUP BY o.status;
 
 **Expected result (the bug):**
 
-| status | rows_after_join |
-|---|---|
-| completed | 4 |
-| pending | 1 |
-| cancelled | 1 |
+| status    | rows_after_join |
+| --------- | --------------- |
+| completed | 4               |
+| pending   | 1               |
+| cancelled | 1               |
 
-Order 100 has two line items, so it is counted twice. The CTE fix is to reach order grain *inside* the CTE (see Example 2) or use `COUNT(DISTINCT o.order_id)`.
+Order 100 has two line items, so it is counted twice. The CTE fix is to reach order grain _inside_ the CTE (see Example 2) or use `COUNT(DISTINCT o.order_id)`.
 
 > Production pitfall: CTE materialization can blow memory / temp space.
 
@@ -585,12 +586,12 @@ Recursive CTEs in production need explicit depth guards (PostgreSQL `search_dept
 
 Everything about CTE performance reduces to this decision, and the four engines make it differently:
 
-| Engine | Default behavior of a non-recursive CTE |
-|---|---|
+| Engine               | Default behavior of a non-recursive CTE                                                                                                                                                                                                                           |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **PostgreSQL (12+)** | Inlines (merges) a CTE referenced once, if it has no hazards (no volatile functions, no DML, not recursive, referenced once). **Materializes** when referenced more than once or when hazardous. Pre-12 it always materialized (the famous "optimization fence"). |
-| **MySQL (8.0+)** | Merges by default. **Materializes** when referenced more than once, or when the body contains constructs that block merging (`UNION`, `DISTINCT`, window functions, `GROUP BY` in many cases, recursion — recursion is always materialized). |
-| **SQL Server** | Treats a CTE like an inline view: it is expanded/fused into the query. May trigger spools or temp-workfile materialization depending on the plan. No `MATERIALIZED` keyword. |
-| **Oracle** | Fuses CTEs into the query by default (they behave like named inline views). `NO_MERGE` hint can force separate handling. |
+| **MySQL (8.0+)**     | Merges by default. **Materializes** when referenced more than once, or when the body contains constructs that block merging (`UNION`, `DISTINCT`, window functions, `GROUP BY` in many cases, recursion — recursion is always materialized).                      |
+| **SQL Server**       | Treats a CTE like an inline view: it is expanded/fused into the query. May trigger spools or temp-workfile materialization depending on the plan. No `MATERIALIZED` keyword.                                                                                      |
+| **Oracle**           | Fuses CTEs into the query by default (they behave like named inline views). `NO_MERGE` hint can force separate handling.                                                                                                                                          |
 
 ### What the plan actually showed (PostgreSQL 17, verified)
 
@@ -641,12 +642,12 @@ WITH cte AS NOT MATERIALIZED ( ... )  -- inline the text
 
 ### EXPLAIN equivalents per engine
 
-| Engine | Tool |
-|---|---|
-| PostgreSQL | `EXPLAIN (ANALYZE, BUFFERS, COSTS) SELECT ...` |
-| MySQL (8.0.18+) | `EXPLAIN ANALYZE SELECT ...` / `EXPLAIN FORMAT=TREE SELECT ...` |
-| SQL Server | `SET STATISTICS IO, TIME ON;` + graphical execution plan / `SHOWPLAN` |
-| Oracle | `EXPLAIN PLAN FOR ...; SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);` or `DBMS_XPLAN.DISPLAY_CURSOR` |
+| Engine          | Tool                                                                                            |
+| --------------- | ----------------------------------------------------------------------------------------------- |
+| PostgreSQL      | `EXPLAIN (ANALYZE, BUFFERS, COSTS) SELECT ...`                                                  |
+| MySQL (8.0.18+) | `EXPLAIN ANALYZE SELECT ...` / `EXPLAIN FORMAT=TREE SELECT ...`                                 |
+| SQL Server      | `SET STATISTICS IO, TIME ON;` + graphical execution plan / `SHOWPLAN`                           |
+| Oracle          | `EXPLAIN PLAN FOR ...; SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);` or `DBMS_XPLAN.DISPLAY_CURSOR` |
 
 **Key plan signals to look for:** a `CTE`/`Derived`/`Table Spool`/`Temp` node (materialization happened) vs. the CTE pasted into a scan (`Merge`, `Subquery Scan`, `Nested Loop` re-evaluating a subplan). Also check **rows × loops**: a second execution of a "recomputed" subplan appears as extra loops.
 
@@ -656,24 +657,24 @@ WITH cte AS NOT MATERIALIZED ( ... )  -- inline the text
 - **CTE referenced several times** vs **repeated subqueries**: engines behave differently (PG/MySQL typically materialize the multi-ref CTE and may fuse repeated subqueries). Golden scenario for `EXPLAIN ANALYZE` comparison.
 - **CTE** vs **temporary table** vs **view**: CTE cannot be indexed and lives one statement; a temp table can be indexed (covering index!), survives across statements, and is reusable in a multi-step process or in a procedure. CTEs win on syntax simplicity and transactional hygiene (no CREATE/DROP bookkeeping, invisible to other sessions).
 
-**Rule of thumb for the book, not a guarantee:** if you keep reusing a heavy intermediate result across *several statements* or need an index on the intermediate, reach for a temp table; if the intermediate is inside one logical statement, a CTE is usually the cleaner choice — then confirm with the plan.
+**Rule of thumb for the book, not a guarantee:** if you keep reusing a heavy intermediate result across _several statements_ or need an index on the intermediate, reach for a temp table; if the intermediate is inside one logical statement, a CTE is usually the cleaner choice — then confirm with the plan.
 
 ---
 
 ## Behavior differences across engines
 
-| Feature | PostgreSQL | MySQL (8.0+) | SQL Server | Oracle |
-|---|---|---|---|---|
-| `WITH` syntax (non-recursive) | yes | yes | yes | yes (since 9i) |
-| `RECURSIVE` keyword required | yes | yes | no | no |
-| Forward reference to a later CTE | no | no | no | no |
-| Multiple references in one statement | yes (materializes) | yes (materializes) | yes | yes |
-| Default strategy | inline once / materialize multi-ref | merge, materialize multi-ref | fuse (inline) | fuse (merge) |
-| Force materialize | `AS MATERIALIZED` | no keyword (hints/no-merge may apply) | no | `NO_MERGE` hint (partial) |
-| Force inline | `AS NOT MATERIALIZED` | no keyword | no | `MERGE` hint |
-| Modifying CTE (DML inside `WITH` + `RETURNING`/`OUTPUT`) | yes | no (read-only CTE in DML) | yes | no |
-| `WITH` before `UPDATE`/`DELETE` | via main statement | yes (read-only CTE joined) | yes | no |
-| Recursion depth guard | terminator predicate / `search_depth` | `cte_max_recursion_depth` | `OPTION (MAXRECURSION n)` | depth via `CONNECT BY` or recursion logic |
+| Feature                                                  | PostgreSQL                            | MySQL (8.0+)                          | SQL Server                | Oracle                                    |
+| -------------------------------------------------------- | ------------------------------------- | ------------------------------------- | ------------------------- | ----------------------------------------- |
+| `WITH` syntax (non-recursive)                            | yes                                   | yes                                   | yes                       | yes (since 9i)                            |
+| `RECURSIVE` keyword required                             | yes                                   | yes                                   | no                        | no                                        |
+| Forward reference to a later CTE                         | no                                    | no                                    | no                        | no                                        |
+| Multiple references in one statement                     | yes (materializes)                    | yes (materializes)                    | yes                       | yes                                       |
+| Default strategy                                         | inline once / materialize multi-ref   | merge, materialize multi-ref          | fuse (inline)             | fuse (merge)                              |
+| Force materialize                                        | `AS MATERIALIZED`                     | no keyword (hints/no-merge may apply) | no                        | `NO_MERGE` hint (partial)                 |
+| Force inline                                             | `AS NOT MATERIALIZED`                 | no keyword                            | no                        | `MERGE` hint                              |
+| Modifying CTE (DML inside `WITH` + `RETURNING`/`OUTPUT`) | yes                                   | no (read-only CTE in DML)             | yes                       | no                                        |
+| `WITH` before `UPDATE`/`DELETE`                          | via main statement                    | yes (read-only CTE joined)            | yes                       | no                                        |
+| Recursion depth guard                                    | terminator predicate / `search_depth` | `cte_max_recursion_depth`             | `OPTION (MAXRECURSION n)` | depth via `CONNECT BY` or recursion logic |
 
 > The `MATERIALIZED`/`NOT MATERIALIZED` keywords are PostgreSQL-specific. If you write them in MySQL/SQL Server/Oracle, it is a syntax error.
 
@@ -681,18 +682,18 @@ WITH cte AS NOT MATERIALIZED ( ... )  -- inline the text
 
 ## Comparison table — CTE vs derived table vs temp table vs view
 
-| Capability | CTE | Derived table (subquery in `FROM`) | Temporary table | View |
-|---|---|---|---|---|
-| Named result in one statement | yes | no (anonymous) | yes | yes |
-| Referenced multiple times in one statement | yes | no (must repeat the subquery) | yes | yes |
-| Survives past the statement | no | no | yes (session) | yes (persists as schema object) |
-| Recursion support | yes (recursive CTE) | no | no | no (recursive views need workarounds) |
-| Can be indexed | no | no | yes | no (usually; indexed views special) |
-| DML against it | only modifying CTE engines | no | yes | depends on view updatability |
-| Definition lives in SQL text of one query | yes | yes | DDL to create/drop | schema DDL |
-| Security / reuse across applications | no | no | no | yes |
-| Empty/edge semantics | same as subquery | same as subquery | real table semantics | same as subquery |
-| Typical cost | merge or materialize | merge or materialize | physical table in tempdb/catalog | same as subquery |
+| Capability                                 | CTE                        | Derived table (subquery in `FROM`) | Temporary table                  | View                                  |
+| ------------------------------------------ | -------------------------- | ---------------------------------- | -------------------------------- | ------------------------------------- |
+| Named result in one statement              | yes                        | no (anonymous)                     | yes                              | yes                                   |
+| Referenced multiple times in one statement | yes                        | no (must repeat the subquery)      | yes                              | yes                                   |
+| Survives past the statement                | no                         | no                                 | yes (session)                    | yes (persists as schema object)       |
+| Recursion support                          | yes (recursive CTE)        | no                                 | no                               | no (recursive views need workarounds) |
+| Can be indexed                             | no                         | no                                 | yes                              | no (usually; indexed views special)   |
+| DML against it                             | only modifying CTE engines | no                                 | yes                              | depends on view updatability          |
+| Definition lives in SQL text of one query  | yes                        | yes                                | DDL to create/drop               | schema DDL                            |
+| Security / reuse across applications       | no                         | no                                 | no                               | yes                                   |
+| Empty/edge semantics                       | same as subquery           | same as subquery                   | real table semantics             | same as subquery                      |
+| Typical cost                               | merge or materialize       | merge or materialize               | physical table in tempdb/catalog | same as subquery                      |
 
 **When to prefer each (rough guide; confirm in the plan):**
 
@@ -707,7 +708,7 @@ WITH cte AS NOT MATERIALIZED ( ... )  -- inline the text
 
 1. **Name the grain.** A CTE named `order_line_totals` communicates "one row per line item"; `order_totals` = "one row per order". When reviewers see a CTE name, they should know the grain instantly.
 2. **One transformation step per CTE.** "define raw → aggregate → rank → join labels" beats one 200-line `WITH`.
-3. **Compose linearly; avoid giant fan-out inside CTEs.** Reach the final grain *before* the main query joins.
+3. **Compose linearly; avoid giant fan-out inside CTEs.** Reach the final grain _before_ the main query joins.
 4. **Put filtering as early as it is semantically safe** (WHERE positions, ON vs WHERE section applies inside CTEs too), but verify push-down behavior with the plan.
 5. **Do not add `ORDER BY` to CTEs unless the rows must be ordered for `TOP`/`LIMIT`/`OFFSET` semantics.**
 6. **Handle NULL groups explicitly** (`GROUP BY` includes the NULL group; decide whether to `COALESCE` or filter).
@@ -734,7 +735,7 @@ WITH cte AS NOT MATERIALIZED ( ... )  -- inline the text
 
 # Interview Questions
 
-*Attempt these before reading further. For any performance claim, answer "how would you verify it?" with that engine's `EXPLAIN` tool.*
+_Attempt these before reading further. For any performance claim, answer "how would you verify it?" with that engine's `EXPLAIN` tool._
 
 ## Beginner
 
@@ -742,7 +743,7 @@ WITH cte AS NOT MATERIALIZED ( ... )  -- inline the text
 2. Write a query with a CTE that returns each department name together with its employee count.
 3. Can a CTE be referenced more than once in the same query? What does that let you do that a derived table cannot?
 4. Why do PostgreSQL and MySQL require the keyword in `WITH RECURSIVE`, but SQL Server and Oracle do not?
-5. True or false: *"The database always computes the CTE first, then runs the main query."* Justify your answer using execution-plan reasoning.
+5. True or false: _"The database always computes the CTE first, then runs the main query."_ Justify your answer using execution-plan reasoning.
 
 ## Intermediate
 
@@ -804,11 +805,11 @@ Predict the output of Example 1's NULL-group query and the values of `headcount`
 
 ## Performance
 
-1. For a CTE referenced once in PostgreSQL, what does each plan look like for inlined vs `MATERIALIZED`? When would forcing `MATERIALIZED` be a *bad* idea (index push-down loss) and when a good one (repeated expensive computation)?
+1. For a CTE referenced once in PostgreSQL, what does each plan look like for inlined vs `MATERIALIZED`? When would forcing `MATERIALIZED` be a _bad_ idea (index push-down loss) and when a good one (repeated expensive computation)?
 2. Same logical query three ways — CTE referenced twice, subquery duplicated twice, temporary table — say when each would win and exactly what you would measure (`EXPLAIN ANALYZE` timings, loops, buffers, rows) to decide.
 3. `ORDER BY` appended inside a large CTE followed by an outer `JOIN` — explain why the plan may show an expensive sort with no benefit, and what the plan looks like when optimization works correctly.
 4. Design the experiment to test "CTE vs repeated subquery" for your own database: dataset, indexes, the two SQL variants, the plan metrics to compare, and how many runs you need to trust timing.
 
 ---
 
-*End of Section 33 (CTEs). Next: Section 34 — Recursive CTEs.*
+_End of Section 33 (CTEs). Next: Section 34 — Recursive CTEs._

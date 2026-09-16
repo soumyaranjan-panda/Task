@@ -84,13 +84,13 @@ window_function() OVER (
 
 ### Key points
 
-| Element | Required? | Purpose |
-|---|---|---|
-| `window_function()` | Yes | The function to compute (e.g., `ROW_NUMBER`, `SUM`, `AVG`) |
-| `OVER (...)` | Yes | Marks this as a window function |
-| `PARTITION BY` | No | Divides rows into groups for independent computation |
-| `ORDER BY` | No | Orders rows within each partition (required for ranking and frame functions) |
-| `frame_clause` | No | Defines which rows within the partition the function operates on |
+| Element             | Required? | Purpose                                                                      |
+| ------------------- | --------- | ---------------------------------------------------------------------------- |
+| `window_function()` | Yes       | The function to compute (e.g., `ROW_NUMBER`, `SUM`, `AVG`)                   |
+| `OVER (...)`        | Yes       | Marks this as a window function                                              |
+| `PARTITION BY`      | No        | Divides rows into groups for independent computation                         |
+| `ORDER BY`          | No        | Orders rows within each partition (required for ranking and frame functions) |
+| `frame_clause`      | No        | Defines which rows within the partition the function operates on             |
 
 If `PARTITION BY` is omitted, the entire result set is treated as a single partition.
 
@@ -139,6 +139,7 @@ Window functions execute at **step 4**. This means:
 ```
 
 For each output row:
+
 1. The database identifies which partition the row belongs to (based on `PARTITION BY` column values).
 2. It applies the window function only to rows in that partition.
 3. It returns the result for the current row.
@@ -149,24 +150,24 @@ For each output row:
 
 ### employees
 
-| employee_id | name    | department | salary | hire_date  |
-|-------------|---------|------------|--------|------------|
-| 1           | Alice   | Engineering| 90000  | 2019-03-15 |
-| 2           | Bob     | Engineering| 85000  | 2020-06-01 |
-| 3           | Charlie | Engineering| 95000  | 2018-01-20 |
-| 4           | Diana   | Marketing  | 70000  | 2021-02-10 |
-| 5           | Eve     | Marketing  | 75000  | 2020-08-22 |
-| 6           | Frank   | Marketing  | 72000  | 2019-11-05 |
-| 7           | Grace   | Sales      | 65000  | 2022-01-12 |
-| 8           | Hank    | Sales      | 68000  | 2021-07-19 |
-| 9           | Ivy     | Sales      | 71000  | 2020-03-30 |
+| employee_id | name    | department  | salary | hire_date  |
+| ----------- | ------- | ----------- | ------ | ---------- |
+| 1           | Alice   | Engineering | 90000  | 2019-03-15 |
+| 2           | Bob     | Engineering | 85000  | 2020-06-01 |
+| 3           | Charlie | Engineering | 95000  | 2018-01-20 |
+| 4           | Diana   | Marketing   | 70000  | 2021-02-10 |
+| 5           | Eve     | Marketing   | 75000  | 2020-08-22 |
+| 6           | Frank   | Marketing   | 72000  | 2019-11-05 |
+| 7           | Grace   | Sales       | 65000  | 2022-01-12 |
+| 8           | Hank    | Sales       | 68000  | 2021-07-19 |
+| 9           | Ivy     | Sales       | 71000  | 2020-03-30 |
 
 **Grain:** One row = one employee.
 
 ### orders
 
 | order_id | customer_id | order_date | amount |
-|----------|-------------|------------|--------|
+| -------- | ----------- | ---------- | ------ |
 | 101      | 1           | 2024-01-15 | 250    |
 | 102      | 1           | 2024-02-20 | 180    |
 | 103      | 2           | 2024-01-18 | 320    |
@@ -178,13 +179,13 @@ For each output row:
 
 ### logins
 
-| login_id | user_id | login_time           |
-|----------|---------|----------------------|
-| 1        | 100     | 2024-01-01 08:00:00  |
-| 2        | 100     | 2024-01-01 12:30:00  |
-| 3        | 101     | 2024-01-01 09:00:00  |
-| 4        | 100     | 2024-01-02 07:45:00  |
-| 5        | 101     | 2024-01-02 10:15:00  |
+| login_id | user_id | login_time          |
+| -------- | ------- | ------------------- |
+| 1        | 100     | 2024-01-01 08:00:00 |
+| 2        | 100     | 2024-01-01 12:30:00 |
+| 3        | 101     | 2024-01-01 09:00:00 |
+| 4        | 100     | 2024-01-02 07:45:00 |
+| 5        | 101     | 2024-01-02 10:15:00 |
 
 **Grain:** One row = one login event.
 
@@ -212,7 +213,7 @@ FROM employees;
 **Expected Output:**
 
 | employee_id | name    | department  | salary | salary_rank |
-|-------------|---------|-------------|--------|-------------|
+| ----------- | ------- | ----------- | ------ | ----------- |
 | 3           | Charlie | Engineering | 95000  | 1           |
 | 1           | Alice   | Engineering | 90000  | 2           |
 | 2           | Bob     | Engineering | 85000  | 3           |
@@ -246,7 +247,7 @@ FROM orders;
 **Expected Output:**
 
 | order_id | customer_id | order_date | amount | running_total |
-|----------|-------------|------------|--------|---------------|
+| -------- | ----------- | ---------- | ------ | ------------- |
 | 101      | 1           | 2024-01-15 | 250    | 250           |
 | 102      | 1           | 2024-02-20 | 180    | 430           |
 | 104      | 1           | 2024-03-10 | 400    | 830           |
@@ -292,7 +293,7 @@ FROM employees;
 ```
 
 | name    | department  | salary | row_num | rank_val | dense_rank_val |
-|---------|-------------|--------|---------|----------|----------------|
+| ------- | ----------- | ------ | ------- | -------- | -------------- |
 | Charlie | Engineering | 95000  | 1       | 1        | 1              |
 | Alice   | Engineering | 90000  | 2       | 2        | 2              |
 | Bob     | Engineering | 85000  | 3       | 3        | 3              |
@@ -319,7 +320,7 @@ FROM employees;
 ```
 
 | name    | department  | salary | dept_avg | dept_total | dept_count |
-|---------|-------------|--------|----------|------------|------------|
+| ------- | ----------- | ------ | -------- | ---------- | ---------- |
 | Alice   | Engineering | 90000  | 90000.00 | 270000     | 3          |
 | Bob     | Engineering | 85000  | 90000.00 | 270000     | 3          |
 | Charlie | Engineering | 95000  | 90000.00 | 270000     | 3          |
@@ -379,14 +380,14 @@ The partition is now: "all orders for the same customer in the same month."
 
 This is one of the most important distinctions in SQL.
 
-| Aspect | `GROUP BY` | `PARTITION BY` |
-|--------|-----------|----------------|
-| Row count | Collapses rows into groups | Preserves all rows |
-| Output rows per group | One row per group | One row per input row |
-| Non-aggregated columns | Must be in GROUP BY or aggregated | freely accessible |
-| Purpose | Aggregate data | Compute per-group values while keeping detail |
-| Can mix detail and aggregate? | No (without tricks) | Yes |
-| Execution phase | Step 3 (before SELECT) | Step 4 (during SELECT) |
+| Aspect                        | `GROUP BY`                        | `PARTITION BY`                                |
+| ----------------------------- | --------------------------------- | --------------------------------------------- |
+| Row count                     | Collapses rows into groups        | Preserves all rows                            |
+| Output rows per group         | One row per group                 | One row per input row                         |
+| Non-aggregated columns        | Must be in GROUP BY or aggregated | freely accessible                             |
+| Purpose                       | Aggregate data                    | Compute per-group values while keeping detail |
+| Can mix detail and aggregate? | No (without tricks)               | Yes                                           |
+| Execution phase               | Step 3 (before SELECT)            | Step 4 (during SELECT)                        |
 
 ### BAD APPROACH: GROUP BY that loses detail
 
@@ -440,13 +441,13 @@ SUM(salary) OVER (PARTITION BY department)
 
 ### Frame clause reference
 
-| Frame | Meaning |
-|-------|---------|
-| `ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW` | From the first row of the partition to the current row |
-| `ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING` | From the current row to the last row of the partition |
-| `ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING` | The row before, the current row, and the row after |
-| `RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW` | All rows in the partition whose ORDER BY value is ≤ the current row's value |
-| `ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING` | All rows in the entire partition |
+| Frame                                                      | Meaning                                                                     |
+| ---------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`         | From the first row of the partition to the current row                      |
+| `ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING`         | From the current row to the last row of the partition                       |
+| `ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING`                 | The row before, the current row, and the row after                          |
+| `RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`        | All rows in the partition whose ORDER BY value is ≤ the current row's value |
+| `ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING` | All rows in the entire partition                                            |
 
 ---
 
@@ -473,12 +474,13 @@ FROM employees;
 ```
 
 | name    | department  | salary | row_num | rank_val | dense_rank_val |
-|---------|-------------|--------|---------|----------|----------------|
+| ------- | ----------- | ------ | ------- | -------- | -------------- |
 | Charlie | Engineering | 95000  | 1       | 1        | 1              |
 | Alice   | Engineering | 90000  | 2       | 2        | 2              |
 | Bob     | Engineering | 90000  | 3       | **2**    | **2**          |
 
 Notice:
+
 - `ROW_NUMBER()` always gives unique numbers, even with ties. It arbitrarily picks an order (non-deterministic unless you add a tiebreaker to `ORDER BY`).
 - `RANK()` gives both tied rows the same rank (2), then **skips** the next rank (3 is skipped).
 - `DENSE_RANK()` gives both tied rows the same rank (2), then **does not skip** (next rank would be 3).
@@ -504,7 +506,7 @@ FROM employees;
 ```
 
 | name    | department  | salary | pct_of_dept_total |
-|---------|-------------|--------|-------------------|
+| ------- | ----------- | ------ | ----------------- |
 | Alice   | Engineering | 90000  | 33.33             |
 | Bob     | Engineering | 85000  | 31.48             |
 | Charlie | Engineering | 95000  | 35.19             |
@@ -539,7 +541,7 @@ FROM employees;
 ```
 
 | name    | department  | salary | prev_salary | next_salary |
-|---------|-------------|--------|-------------|-------------|
+| ------- | ----------- | ------ | ----------- | ----------- |
 | Bob     | Engineering | 85000  | NULL        | 90000       |
 | Alice   | Engineering | 90000  | 85000       | 95000       |
 | Charlie | Engineering | 95000  | 90000       | NULL        |
@@ -592,7 +594,7 @@ FROM employees;
 ```
 
 | name    | department  | salary | salary_tier |
-|---------|-------------|--------|-------------|
+| ------- | ----------- | ------ | ----------- |
 | Charlie | Engineering | 95000  | 1           |
 | Alice   | Engineering | 90000  | 2           |
 | Bob     | Engineering | 85000  | 3           |
@@ -620,7 +622,7 @@ WHERE rnk = 1;
 ```
 
 | employee_id | name    | department  | salary | rnk |
-|-------------|---------|-------------|--------|-----|
+| ----------- | ------- | ----------- | ------ | --- |
 | 3           | Charlie | Engineering | 95000  | 1   |
 | 5           | Eve     | Marketing   | 75000  | 1   |
 | 9           | Ivy     | Sales       | 71000  | 1   |
@@ -716,16 +718,17 @@ All employees with `NULL` department end up in the same partition and are ranked
 
 NULLs sort differently depending on the database:
 
-| Database | NULL sort behavior |
-|----------|--------------------|
+| Database   | NULL sort behavior                                                                                               |
+| ---------- | ---------------------------------------------------------------------------------------------------------------- |
 | PostgreSQL | NULLs sort **last** by default (ASC), **first** by default (DESC). Use `NULLS FIRST` / `NULLS LAST` to override. |
-| MySQL | NULLs sort **first** in ASC, **last** in DESC (opposite of PostgreSQL). |
-| SQL Server | NULLs sort **first** in ASC, **last** in DESC (same as MySQL). |
-| Oracle | NULLs sort **last** in ASC, **first** in DESC (same as PostgreSQL). |
+| MySQL      | NULLs sort **first** in ASC, **last** in DESC (opposite of PostgreSQL).                                          |
+| SQL Server | NULLs sort **first** in ASC, **last** in DESC (same as MySQL).                                                   |
+| Oracle     | NULLs sort **last** in ASC, **first** in DESC (same as PostgreSQL).                                              |
 
 ### NULLs in aggregate window functions
 
 `SUM`, `COUNT`, `AVG`, etc. follow standard NULL handling:
+
 - `SUM` ignores NULLs (sums only non-NULL values)
 - `COUNT(column)` ignores NULLs, `COUNT(*)` counts all rows
 - `AVG` ignores NULLs (average of non-NULL values)
@@ -948,13 +951,13 @@ Window functions cannot appear in `WHERE`, `HAVING`, or `ON` clauses. You must w
 
 ### What to check with EXPLAIN ANALYZE
 
-| Execution plan element | What it means |
-|------------------------|---------------|
-| `WindowAgg` | The database is computing a window function. Check its cost and rows. |
-| `Sort` (before WindowAgg) | The database is sorting data for `ORDER BY` within partitions. Check if an index can eliminate this sort. |
-| `HashAggregate` | Aggregation is being performed (possibly for GROUP BY before window functions). |
-| `Temp Written` / `external merge` | The sort spilled to disk. Indicates memory pressure from large partitions. |
-| `Subquery Scan` | The window function is in a subquery. This is normal but check the subquery's cost. |
+| Execution plan element            | What it means                                                                                             |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `WindowAgg`                       | The database is computing a window function. Check its cost and rows.                                     |
+| `Sort` (before WindowAgg)         | The database is sorting data for `ORDER BY` within partitions. Check if an index can eliminate this sort. |
+| `HashAggregate`                   | Aggregation is being performed (possibly for GROUP BY before window functions).                           |
+| `Temp Written` / `external merge` | The sort spilled to disk. Indicates memory pressure from large partitions.                                |
+| `Subquery Scan`                   | The window function is in a subquery. This is normal but check the subquery's cost.                       |
 
 ### Factors affecting performance
 
@@ -1016,7 +1019,7 @@ SUM(salary) OVER (PARTITION BY department ORDER BY hire_date)
 SUM(salary) OVER (PARTITION BY department)
 ```
 
-### Trap 4: COUNT(*) vs COUNT(column) in window functions
+### Trap 4: COUNT(\*) vs COUNT(column) in window functions
 
 ```sql
 -- COUNT(*) counts all rows in the partition, including those with NULL department

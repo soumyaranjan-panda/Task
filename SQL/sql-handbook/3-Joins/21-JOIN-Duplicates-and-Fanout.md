@@ -2,8 +2,8 @@
 
 > Category: 3-Joins
 > Cross-references: [15-INNER-JOIN], [16-LEFT-JOINNow I'll write the comprehensive section 21.
-Let me verify the sample data arithmetic I used in a few spots — I spotted some inconsistencies (an order 104 that isn't in the sample, and a `COUNT(DISTINCT user_id)` claim).
-Wrote `sql-handbook/3-Joins/21-JOIN-Duplicates-and-Fanout.md` (replacing the empty file), matching the style of the existing Join sections.
+> Let me verify the sample data arithmetic I used in a few spots — I spotted some inconsistencies (an order 104 that isn't in the sample, and a `COUNT(DISTINCT user_id)` claim).
+> Wrote `sql-handbook/3-Joins/21-JOIN-Duplicates-and-Fanout.md` (replacing the empty file), matching the style of the existing Join sections.
 
 Key coverage:
 
@@ -19,19 +19,19 @@ Verified all sample-data arithmetic (order 101 cross-product = 4 rows, correct t
 me `order_id` stored twice in `orders` |
 | Multi-path duplication | Two separate 1:N relationships joined in one query, so N × M rows appear where N and M were each legitimately 1:N | `orders JOIN order_items JOIN payments` |
 
-All three *look* the same in the output (rows that appear more than once) but are diagnosed and fixed completely differently. Most of this section distinguishes them.
+All three _look_ the same in the output (rows that appear more than once) but are diagnosed and fixed completely differently. Most of this section distinguishes them.
 
 ---
 
 ## The mental model
 
-| Question to ask | Answer that prevents fan-out bugs |
-|---|---|
-| What does one row of each *input table* represent? (the grain) | If a table has two relationships that can both have multiple rows per driving row, a join multiplies |
-| Does my `ON` condition identify **at most one** row on the right? | If yes → no fan-out. If no → expect fan-out |
-| Is your driving row **unique** in practice? | Even "optional" duplications (e.g., `user_id` repeated in a table that only *usually* has one row per user) still multiply when they occur |
-| Do I aggregate over a column that lives on the **detail (fanned-out) side**? | Then the aggregate is computed over the *multiplied* copies — the result is inflated |
-| Do I only need counts? | `COUNT(DISTINCT ...)` recovers the base grain, but cannot help `SUM` of amounts |
+| Question to ask                                                              | Answer that prevents fan-out bugs                                                                                                          |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| What does one row of each _input table_ represent? (the grain)               | If a table has two relationships that can both have multiple rows per driving row, a join multiplies                                       |
+| Does my `ON` condition identify **at most one** row on the right?            | If yes → no fan-out. If no → expect fan-out                                                                                                |
+| Is your driving row **unique** in practice?                                  | Even "optional" duplications (e.g., `user_id` repeated in a table that only _usually_ has one row per user) still multiply when they occur |
+| Do I aggregate over a column that lives on the **detail (fanned-out) side**? | Then the aggregate is computed over the _multiplied_ copies — the result is inflated                                                       |
+| Do I only need counts?                                                       | `COUNT(DISTINCT ...)` recovers the base grain, but cannot help `SUM` of amounts                                                            |
 
 ---
 
@@ -55,10 +55,10 @@ many-to-many   → correct only via junction table; otherwise explosion
 
 State the grain of every table before writing any join. These four tables are used throughout the section.
 
-- **users** — *one row per registered user.*
-- **orders** — *one row per order.*
-- **order_items** — *one row per product line inside an order.*
-- **payments** — *one row per payment transaction against an order.*
+- **users** — _one row per registered user._
+- **orders** — _one row per order._
+- **order_items** — _one row per product line inside an order._
+- **payments** — _one row per payment transaction against an order._
 
 ```sql
 CREATE TABLE users (
@@ -112,36 +112,36 @@ INSERT INTO payments (payment_id, order_id, amount) VALUES
 **users** — one row per user.
 
 | user_id | user_name |
-|--------:|:----------|
-| 1 | Ana |
-| 2 | Ben |
-| 3 | Cid |
+| ------: | :-------- |
+|       1 | Ana       |
+|       2 | Ben       |
+|       3 | Cid       |
 
 **orders** — one row per order.
 
 | order_id | user_id | order_date |
-|---------:|--------:|:-----------|
-| 101      | 1       | 2024-01-05 |
-| 102      | 1       | 2024-02-10 |
-| 103      | 2       | 2024-01-20 |
+| -------: | ------: | :--------- |
+|      101 |       1 | 2024-01-05 |
+|      102 |       1 | 2024-02-10 |
+|      103 |       2 | 2024-01-20 |
 
 **order_items** — one row per product line.
 
 | item_id | order_id | product_id | qty | unit_price |
-|--------:|---------:|-----------:|----:|-----------:|
-| 5001    | 101      | 7          | 2   | 10.00 |
-| 5002    | 101      | 9          | 1   | 20.00 |
-| 5003    | 102      | 7          | 1   | 10.00 |
-| 5004    | 103      | 5          | 3   |  8.00 |
+| ------: | -------: | ---------: | --: | ---------: |
+|    5001 |      101 |          7 |   2 |      10.00 |
+|    5002 |      101 |          9 |   1 |      20.00 |
+|    5003 |      102 |          7 |   1 |      10.00 |
+|    5004 |      103 |          5 |   3 |       8.00 |
 
 **payments** — one row per payment.
 
 | payment_id | order_id | amount |
-|-----------:|---------:|-------:|
-| 9001       | 101      | 25.00  |
-| 9002       | 101      | 15.00  |
-| 9003       | 102      | 10.00  |
-| 9004       | 103      | 24.00  |
+| ---------: | -------: | -----: |
+|       9001 |      101 |  25.00 |
+|       9002 |      101 |  15.00 |
+|       9003 |      102 |  10.00 |
+|       9004 |      103 |  24.00 |
 
 Note the relationships:
 
@@ -163,10 +163,10 @@ ORDER BY u.user_id, o.order_id;
 Result:
 
 | user_name | order_id | order_date |
-|:----------|---------:|:-----------|
-| Ana       | 101      | 2024-01-05 |
-| Ana       | 102      | 2024-02-10 |
-| Ben       | 103      | 2024-01-20 |
+| :-------- | -------: | :--------- |
+| Ana       |      101 | 2024-01-05 |
+| Ana       |      102 | 2024-02-10 |
+| Ben       |      103 | 2024-01-20 |
 
 Ana appears **twice** — once per order. That is not a bug; the output grain is "one row per user–order pair". What would be a bug is counting users here:
 
@@ -207,13 +207,13 @@ WHERE o.order_id = 101;
 Result:
 
 | order_id | product_id | line_total | payment_amount |
-|---------:|-----------:|-----------:|---------------:|
-| 101      | 7          | 20.00      | 25.00 |
-| 101      | 7          | 20.00      | 15.00 |
-| 101      | 9          | 20.00      | 25.00 |
-| 101      | 9          | 20.00      | 15.00 |
+| -------: | ---------: | ---------: | -------------: |
+|      101 |          7 |      20.00 |          25.00 |
+|      101 |          7 |      20.00 |          15.00 |
+|      101 |          9 |      20.00 |          25.00 |
+|      101 |          9 |      20.00 |          15.00 |
 
-Output grain: **one row per (order_line × payment) pair**. Every line is paired with *every* payment — 2 × 2 = 4 rows. So far, the raw output is arguably "fine" if that is what you asked for.
+Output grain: **one row per (order_line × payment) pair**. Every line is paired with _every_ payment — 2 × 2 = 4 rows. So far, the raw output is arguably "fine" if that is what you asked for.
 
 The disaster happens the moment you aggregate:
 
@@ -233,12 +233,12 @@ ORDER BY o.order_id;
 Result:
 
 | order_id | line_total | payment_total |
-|---------:|-----------:|--------------:|
-| 101      | **80.00**  | **80.00**     |
-| 102      | **10.00**  | **10.00**     |
-| 103      | **24.00**  | **24.00**     |
+| -------: | ---------: | ------------: |
+|      101 |  **80.00** |     **80.00** |
+|      102 |  **10.00** |     **10.00** |
+|      103 |  **24.00** |     **24.00** |
 
-For order 101 the *true* values are:
+For order 101 the _true_ values are:
 
 - line total = `20.00 + 20.00` = `40.00` (not 80!)
 - payment total = `25.00 + 15.00` = `40.00` (the 80 is a coincidence of this data — a person inspecting only 101 might believe it!)
@@ -290,16 +290,16 @@ ORDER BY o.order_id;
 Result (now correct):
 
 | order_id | line_total | payment_total |
-|---------:|-----------:|--------------:|
-| 101      | 40.00      | 40.00 |
-| 102      | 10.00      | 10.00 |
-| 103      | 24.00      | 24.00 |
+| -------: | ---------: | ------------: |
+|      101 |      40.00 |         40.00 |
+|      102 |      10.00 |         10.00 |
+|      103 |      24.00 |         24.00 |
 
 `LEFT JOIN` (instead of `JOIN`) is used so an order with no items or no payments still appears, padded with `NULL`. Any order with neither appears with two NULLs.
 
 > **Common misconception**
 > "Using `DISTINCT` or `COUNT(DISTINCT order_id)` fixes double counting."
-> It fixes *row counts* (how many orders/users appear) but never fixes `SUM`/`AVG` of amounts inflated by the cross-product. `SUM(p.amount)` over 4 multiplied rows ≠ `SUM(amount)` over the genuine payments table. The only robust fix is to aggregate at the correct grain (pre-aggregate, or run the sums over the detail tables separately).
+> It fixes _row counts_ (how many orders/users appear) but never fixes `SUM`/`AVG` of amounts inflated by the cross-product. `SUM(p.amount)` over 4 multiplied rows ≠ `SUM(amount)` over the genuine payments table. The only robust fix is to aggregate at the correct grain (pre-aggregate, or run the sums over the detail tables separately).
 
 ---
 
@@ -307,13 +307,13 @@ Result (now correct):
 
 Given the fan-out in the previous example, ask "did I expect this count?"
 
-| Query | Result | Right interpretation |
-|---|---|---|
-| `SELECT COUNT(*) FROM orders;` | 3 | order grain |
-| `SELECT COUNT(*) FROM orders o JOIN order_items oi ON oi.order_id = o.order_id;` | 4 | order-line grain (correct fan-out) |
-| `SELECT COUNT(*) FROM orders o JOIN order_items oi ... JOIN payments p ...;` | 6 | line×payment pairs (2×2 = 4 for order 101, 1 for each of 102 and 103) — accidentally multiplied |
-| `SELECT COUNT(DISTINCT oi.order_id) FROM order_items oi;` | 3 | recovered order grain from detail |
-| `SELECT COUNT(DISTINCT p.order_id) FROM payments p;` | 3 | recovered order grain from detail |
+| Query                                                                            | Result | Right interpretation                                                                            |
+| -------------------------------------------------------------------------------- | ------ | ----------------------------------------------------------------------------------------------- |
+| `SELECT COUNT(*) FROM orders;`                                                   | 3      | order grain                                                                                     |
+| `SELECT COUNT(*) FROM orders o JOIN order_items oi ON oi.order_id = o.order_id;` | 4      | order-line grain (correct fan-out)                                                              |
+| `SELECT COUNT(*) FROM orders o JOIN order_items oi ... JOIN payments p ...;`     | 6      | line×payment pairs (2×2 = 4 for order 101, 1 for each of 102 and 103) — accidentally multiplied |
+| `SELECT COUNT(DISTINCT oi.order_id) FROM order_items oi;`                        | 3      | recovered order grain from detail                                                               |
+| `SELECT COUNT(DISTINCT p.order_id) FROM payments p;`                             | 3      | recovered order grain from detail                                                               |
 
 Pattern to internalize:
 
@@ -344,7 +344,7 @@ products(product_id, product_code, product_name, price):
 2, 'A1', 'Widget', 10.00   -- same natural key, different PK → hits BOTH rows on join
 ```
 
-Joining `order_items.product_id` to `products` on `product_code` (matching the *natural* key) now fans out every line to **both** product rows. Same symptom as Example 2 (rows multiply), but the *cause* is dirty dimensions, not relational cardinality.
+Joining `order_items.product_id` to `products` on `product_code` (matching the _natural_ key) now fans out every line to **both** product rows. Same symptom as Example 2 (rows multiply), but the _cause_ is dirty dimensions, not relational cardinality.
 
 Diagnosis — find duplicates in the source:
 
@@ -398,7 +398,7 @@ FROM students s
 JOIN classes c ON s.homeroom = c.teacher;   -- invented key
 ```
 
-If 3 students and 2 classes each share a homeroom teacher, you get a mini Cartesian product — those rows are *invented*, not real enrollments.
+If 3 students and 2 classes each share a homeroom teacher, you get a mini Cartesian product — those rows are _invented_, not real enrollments.
 
 **BETTER APPROACH**
 
@@ -418,7 +418,7 @@ Output grain: **one row per (student, class) enrollment pair** — the grain def
 
 ## Example 6 — SQL reasoning walkthrough on a real report
 
-Requirement: *"For each user, show their total spend on paid and their total gateway fees, including users with no orders."*
+Requirement: _"For each user, show their total spend on paid and their total gateway fees, including users with no orders."_
 
 Apply the [SQL Reasoning] checklist:
 
@@ -480,20 +480,20 @@ The offense is only aggregating **after** an unintended multiplication.
 
 > **Common misconception**
 > "A join that returns more rows than the driving table is always a bug."
-> Not true. `users JOIN orders` legitimately returns more rows than users. The bug lives in the *interpretation*: what you claim each output row represents afterward.
+> Not true. `users JOIN orders` legitimately returns more rows than users. The bug lives in the _interpretation_: what you claim each output row represents afterward.
 
 ---
 
 ## NULL behavior
 
-| Situation | Behavior |
-|---|---|
-| `LEFT JOIN` with zero matches | Left row appears once, right columns `NULL` — **no multiplication** |
-| `LEFT JOIN` with N matches | Left row appears N times with real right values — multiplication |
-| `SUM(right_col)` | `NULL` contributions ignored; leftover `NULL` for no-match group; wrap with `COALESCE` for display |
-| `COUNT(*)` after `LEFT JOIN` | counts the NULL-padded rows too (includes users with no orders) |
-| `COUNT(right_col)` / `COUNT(order_id)` | counts only non-NULL → users with no orders contribute 0 (often exactly what you want) |
-| Right-table filter in `WHERE` | unmatched rows dropped → LEFT becomes INNER (see [20-ON-vs-WHERE]) |
+| Situation                              | Behavior                                                                                           |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `LEFT JOIN` with zero matches          | Left row appears once, right columns `NULL` — **no multiplication**                                |
+| `LEFT JOIN` with N matches             | Left row appears N times with real right values — multiplication                                   |
+| `SUM(right_col)`                       | `NULL` contributions ignored; leftover `NULL` for no-match group; wrap with `COALESCE` for display |
+| `COUNT(*)` after `LEFT JOIN`           | counts the NULL-padded rows too (includes users with no orders)                                    |
+| `COUNT(right_col)` / `COUNT(order_id)` | counts only non-NULL → users with no orders contribute 0 (often exactly what you want)             |
+| Right-table filter in `WHERE`          | unmatched rows dropped → LEFT becomes INNER (see [20-ON-vs-WHERE])                                 |
 
 > When the joined key itself is `NULL` (e.g. an `order.user_id IS NULL` because of an orphan), that order still **pairs** with whatever matches — never with `NULL`. `NULL = NULL` is `UNKNOWN`, so orphan keys never join. Works "correctly" but delete-orphan reports must use anti-join patterns (`WHERE parent_id IS NULL` after `LEFT JOIN`, or `NOT EXISTS`). See [09-NULL-Deep-Dive].
 
@@ -531,10 +531,11 @@ Fan-out is also a **performance** problem, not just a correctness one:
 
 - More joined rows means more rows flow through the join and any downstream aggregate: more CPU, more memory (a `Hash Join` on the builder side, a wider Nested Loop), more temporary-file spills when the estimate is wrong.
 - The optimizer guesses row counts from **statistics**. If statistics are stale (or the fan-out factor is underestimated), the planner may pick a Nested Loop where a Hash Join is right — or vice-versa.
-- Pre-aggregating the detail side usually *shrinks* the join input (fewer, smaller rows) and often *also* improves the plan.
+- Pre-aggregating the detail side usually _shrinks_ the join input (fewer, smaller rows) and often _also_ improves the plan.
 - None of this is a guarantee. Two identical-looking queries can plan differently depending on data distribution, indexes, and statistics.
 
 > Always verify with the engine's plan tool before and after refactoring:
+>
 > - **PostgreSQL**: `EXPLAIN (ANALYZE, BUFFERS)`; compare `rows` (estimated) to `actual rows` on each node.
 > - **MySQL**: `EXPLAIN ANALYZE` (8.0.18+) or `EXPLAIN FORMAT=TREE`.
 > - **SQL Server**: Actual Execution Plan; watch "Actual Rows vs Estimated Rows" in the tooltip.
@@ -546,35 +547,35 @@ Fan-out is also a **performance** problem, not just a correctness one:
 
 ## Dedup patterns compared
 
-| Technique | Fixes what | Won't fix | Caveat |
-|---|---|---|---|
-| `SELECT DISTINCT ...` | Removes *exact row repeats* in result | `SUM`/`AVG` computed before DISTINCT; repeats that differ in other selected columns | Hides symptoms, does not repair wrong aggregates |
-| `COUNT(DISTINCT col)` | Recovers counts at a grain | Summed money/quantities | Requires unique key on the driving grain |
-| Pre-aggregate child (CTE/subquery) | Both counts AND sums — the real fix | Nothing once at the right grain | Write one subquery per 1:N child |
-| `GROUP BY` the driving key | Collapses fanned-out rows | Still sums over multiplied rows — **NOT** safe for the double-counting bomb | See BAD approach in Example 2 |
-| Unique constraint on join key | Prevents source-duplicate fan-out | Nothing, that's the point | Must fit the data's real uniqueness |
-| Junction table | Correct many-to-many grain | Nothing | Verify grain = one row per pair |
-| `ROW_NUMBER()` keyed dedup | In-table duplicate removal | Wrong SUMs (see DISTINCT) | Window-function dedup is per-row, not per-amount |
+| Technique                          | Fixes what                            | Won't fix                                                                           | Caveat                                           |
+| ---------------------------------- | ------------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------ |
+| `SELECT DISTINCT ...`              | Removes _exact row repeats_ in result | `SUM`/`AVG` computed before DISTINCT; repeats that differ in other selected columns | Hides symptoms, does not repair wrong aggregates |
+| `COUNT(DISTINCT col)`              | Recovers counts at a grain            | Summed money/quantities                                                             | Requires unique key on the driving grain         |
+| Pre-aggregate child (CTE/subquery) | Both counts AND sums — the real fix   | Nothing once at the right grain                                                     | Write one subquery per 1:N child                 |
+| `GROUP BY` the driving key         | Collapses fanned-out rows             | Still sums over multiplied rows — **NOT** safe for the double-counting bomb         | See BAD approach in Example 2                    |
+| Unique constraint on join key      | Prevents source-duplicate fan-out     | Nothing, that's the point                                                           | Must fit the data's real uniqueness              |
+| Junction table                     | Correct many-to-many grain            | Nothing                                                                             | Verify grain = one row per pair                  |
+| `ROW_NUMBER()` keyed dedup         | In-table duplicate removal            | Wrong SUMs (see DISTINCT)                                                           | Window-function dedup is per-row, not per-amount |
 
 ---
 
 ## When to use / when NOT to use
 
-| You need… | Use | Avoid |
-|---|---|---|
-| line-level detail per order | `orders JOIN order_items` (+ product), one 1:N hop | joining a second 1:N child in the same statement |
-| per-order totals of items AND payments | pre-aggregate each child; then `LEFT JOIN` at order grain | `GROUP BY` after single unfiltered 3-way join |
-| count of users | `COUNT(*) FROM users` or `COUNT(DISTINCT)` | `COUNT(*)` after any fan-out join |
-| all users even with no orders | `LEFT JOIN` (see [16-LEFT-JOIN]) | `JOIN` (drops them) or `LEFT JOIN` + child filter in `WHERE` (becomes INNER) |
-| all student×class pairs | correct membership junction | direct `students JOIN classes` on a guessed key |
-| dedupe a dirty dimension table | enforce unique constraint or `ROW_NUMBER()` dedup | `SELECT DISTINCT *` on a wide row where "duplicates" differ |
+| You need…                              | Use                                                       | Avoid                                                                        |
+| -------------------------------------- | --------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| line-level detail per order            | `orders JOIN order_items` (+ product), one 1:N hop        | joining a second 1:N child in the same statement                             |
+| per-order totals of items AND payments | pre-aggregate each child; then `LEFT JOIN` at order grain | `GROUP BY` after single unfiltered 3-way join                                |
+| count of users                         | `COUNT(*) FROM users` or `COUNT(DISTINCT)`                | `COUNT(*)` after any fan-out join                                            |
+| all users even with no orders          | `LEFT JOIN` (see [16-LEFT-JOIN])                          | `JOIN` (drops them) or `LEFT JOIN` + child filter in `WHERE` (becomes INNER) |
+| all student×class pairs                | correct membership junction                               | direct `students JOIN classes` on a guessed key                              |
+| dedupe a dirty dimension table         | enforce unique constraint or `ROW_NUMBER()` dedup         | `SELECT DISTINCT *` on a wide row where "duplicates" differ                  |
 
 ---
 
 ## Best practices
 
-1. **State the grain first.** Write, in a comment or in your head, what each input row and each *output* row represents. Outline output grains before the query.
-2. **Count the hops.** For every table joined to the driving table, ask *"can one driving row match many rows here?"*. If more than one such table is joined at once, you have a product, not a lookup.
+1. **State the grain first.** Write, in a comment or in your head, what each input row and each _output_ row represents. Outline output grains before the query.
+2. **Count the hops.** For every table joined to the driving table, ask _"can one driving row match many rows here?"_. If more than one such table is joined at once, you have a product, not a lookup.
 3. **Aggregate before you multiply.** Pre-aggregate each 1:N child to the driving key; then join 1:1. If you can't avoid multiple detail hops, never `SUM`/`AVG`/`COUNT(*)` over the multiplied stream.
 4. **Prefer `COUNT(DISTINCT key)` when reporting counts after a fan-out join.**
 5. **Treat `DISTINCT` as a smell.** If you need it to "fix" a join, hunt the cause: wrong grain, missing join condition, dirty source, or skipped junction — instead of the symptom.
@@ -587,8 +588,8 @@ Fan-out is also a **performance** problem, not just a correctness one:
 
 1. **Double counting via two 1:N hops** — summing both child sides in one grouped query (Example 2). The single most common join bug in analytics.
 2. **`COUNT(*)` after a fan-out** instead of `COUNT(DISTINCT key)` or counting the driving table.
-3. **Believing `DISTINCT` repairs `SUM`** — it only changes which rows you *see*, not how the aggregate was computed.
-4. **JOIN instead of LEFT JOIN** when the spec says *"including rows with no matches"* — zero-match rows vanish.
+3. **Believing `DISTINCT` repairs `SUM`** — it only changes which rows you _see_, not how the aggregate was computed.
+4. **JOIN instead of LEFT JOIN** when the spec says _"including rows with no matches"_ — zero-match rows vanish.
 5. **LEFT JOIN + child filter in WHERE** — morphs into INNER and silently drops rows (see [20-ON-vs-WHERE]).
 6. **Joining tables with no true relationship** on an invented key — accidental Cartesian product ([24-cartesian-products]).
 7. **Ignoring source duplicates** — assuming base tables obey uniqueness that the schema never enforced.
@@ -603,7 +604,7 @@ Fan-out is also a **performance** problem, not just a correctness one:
 - **Right side has duplicate keys** (two product rows with same code): every line silently multiplies by 2 — surface it with the `HAVING COUNT(*) > 1` check.
 - **Both tables are expanded tables of the same entity** (`orders` and `order_archive`) — joining them produces duplicates of every order; use `UNION ALL` instead of `JOIN` ([UNION vs UNION ALL] elsewhere in the handbook).
 - **Junction with duplicate pairs** (enrollment row inserted twice): many-to-many output still doubles; enforce a unique `(student_id, class_id)` constraint.
-- **Perfectly balanced data hiding the bug**: when line count == payment count, both "wrong" sums are equal — the result *looks* sane while being wrong.
+- **Perfectly balanced data hiding the bug**: when line count == payment count, both "wrong" sums are equal — the result _looks_ sane while being wrong.
 - **`COUNT(DISTINCT a, b)`** syntax differs per engine (`COUNT(DISTINCT a || b)` in some, `CONCAT` in MySQL), and can overflow or collide; prefer two separate counts or `DISTINCT` over the pair where supported.
 
 ---
@@ -662,7 +663,7 @@ flowchart TD
 9. Rebuild the "line_total and payment_total" query for order 101 using pre-aggregation so both sums are correct. Explain the resulting join cardinality (1:1 at order grain).
 10. Distinguish three causes of "the result has duplicate rows": relationship fan-out, source-data duplicates, and skipped-junction many-to-many. How do the fixes differ for each?
 11. A dimension table and its fact table both have multiple rows per natural key. How do you decide which side is the source of the multiplication?
-12. When is a "duplicate" row in a `users JOIN orders` result actually *correct*? What determines the correct grain after a join to a junction table?
+12. When is a "duplicate" row in a `users JOIN orders` result actually _correct_? What determines the correct grain after a join to a junction table?
 
 ## Scenario Based
 
@@ -673,7 +674,7 @@ flowchart TD
 
 ## Tricky
 
-17. Two tables both 1:1 in the *clean* data but one of them occasionally stores multiple rows for the correct key because a FK was dropped. How would you detect the fan-out factor in the execution plan output?
+17. Two tables both 1:1 in the _clean_ data but one of them occasionally stores multiple rows for the correct key because a FK was dropped. How would you detect the fan-out factor in the execution plan output?
 18. Explain why `COUNT(p.amount)` and `COUNT(*)` can disagree after a `LEFT JOIN users → orders`, and which one is usually closer to "activity" intent.
 19. Data is arranged so the number of line-items equals the number of payments per order. A naive grouped query then prints equal—and wrong—totals on both sides. How could the bug survive a code review?
 20. `DISTINCT` on `(u.user_id, o.order_id)` "fixes" the output count after a broken 3-table join, but the SUM is still wrong. Explain exactly at which stage of logical query processing the damage occurred.
@@ -696,7 +697,7 @@ Using the sample tables above:
 
 ## Performance
 
-29. Why can fan-out inflate a Hash Join's build side or a Nested Loop's iteration count? How would you *measure* the fan-out factor from an execution plan rather than trusting intuition?
+29. Why can fan-out inflate a Hash Join's build side or a Nested Loop's iteration count? How would you _measure_ the fan-out factor from an execution plan rather than trusting intuition?
 30. After pre-aggregating a child table, the join input shrinks. Describe the plan-level effect you'd expect and the EXPLAIN output you would check to confirm the improvement.
 31. When statistics are outdated, the planner underestimates fan-out. What consequence does an underestimated cardinality produce, and which plan node attribute reveals it?
 32. Why does adding a unique constraint or correcting a missing FK on the joined side reduce both duplicate output AND often improve plan quality? Frame your answer in terms of what the optimizer can now assume.

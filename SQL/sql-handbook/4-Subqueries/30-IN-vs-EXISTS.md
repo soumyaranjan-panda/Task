@@ -1,18 +1,18 @@
 # 30. IN vs EXISTS (Subqueries)
 
 > Category: 4-Subqueries
-> Cross-references: `IN` is one of the most misused constructs in SQL because of how the optimizer treats it and — far more importantly — because of **NULL**. This section deep-dives into `IN` vs `EXISTS` (and `NOT IN` vs `NOT EXISTS`). For the foundation of subqueries generally, see *Section 29: Subquery Fundamentals*; for the machinery behind `IN`, see *Section 8: NULL & Three-Valued Logic*; for the join alternative, see *Section 22: SQL JOINs Deep Dive*; for the anti-join style using `LEFT JOIN`, see *Section 24: Anti-Joins and the ON-vs-WHERE Trap*.
+> Cross-references: `IN` is one of the most misused constructs in SQL because of how the optimizer treats it and — far more importantly — because of **NULL**. This section deep-dives into `IN` vs `EXISTS` (and `NOT IN` vs `NOT EXISTS`). For the foundation of subqueries generally, see _Section 29: Subquery Fundamentals_; for the machinery behind `IN`, see _Section 8: NULL & Three-Valued Logic_; for the join alternative, see _Section 22: SQL JOINs Deep Dive_; for the anti-join style using `LEFT JOIN`, see _Section 24: Anti-Joins and the ON-vs-WHERE Trap_.
 
 ---
 
 ## 1. TL;DR — memorize this first
 
-| Construct | Really asks | Returns one row when | Safe with NULLs? |
-|---|---|---|---|
-| `x IN (subquery)` | "Is `x` one of the values this set returns?" | `x` equals **some** returned value | Mostly (except `x` itself being NULL) |
-| `NOT IN (subquery)` | "Is `x` none of the values?" | `x` is different from **every** returned value | **NO — dangerous if the subquery can return NULL** |
-| `EXISTS (subquery)` | "Does this subquery return at least one row?" | subquery returns ≥ 1 row | Yes |
-| `NOT EXISTS (subquery)` | "Does this subquery return zero rows?" | subquery returns 0 rows | Yes |
+| Construct               | Really asks                                   | Returns one row when                           | Safe with NULLs?                                   |
+| ----------------------- | --------------------------------------------- | ---------------------------------------------- | -------------------------------------------------- |
+| `x IN (subquery)`       | "Is `x` one of the values this set returns?"  | `x` equals **some** returned value             | Mostly (except `x` itself being NULL)              |
+| `NOT IN (subquery)`     | "Is `x` none of the values?"                  | `x` is different from **every** returned value | **NO — dangerous if the subquery can return NULL** |
+| `EXISTS (subquery)`     | "Does this subquery return at least one row?" | subquery returns ≥ 1 row                       | Yes                                                |
+| `NOT EXISTS (subquery)` | "Does this subquery return zero rows?"        | subquery returns 0 rows                        | Yes                                                |
 
 > Interview trap: the single most tested fact in this entire section is: **`NOT IN` returns zero rows if the subquery returns even one `NULL`.** `NOT EXISTS` never has this problem.
 
@@ -22,16 +22,16 @@
 
 ### 2.1 What `IN` is
 
-`IN` is a **membership test**. It takes a value on the left, and a *set of values* on the right:
+`IN` is a **membership test**. It takes a value on the left, and a _set of values_ on the right:
 
 - a literal list: `WHERE status IN ('active', 'pending')`
 - a subquery result: `WHERE department_id IN (SELECT department_id FROM departments)`
 
-Semantically both are the same thing: `x IN (a, b, c)` is just sugar for `x = a OR x = b OR x = c`. The right-hand side is always conceptually a *set*.
+Semantically both are the same thing: `x IN (a, b, c)` is just sugar for `x = a OR x = b OR x = c`. The right-hand side is always conceptually a _set_.
 
 ### 2.2 What `EXISTS` is
 
-`EXISTS` is an **existence test**. It only checks *whether* the subquery produces at least one row. It does not return data, does not read the SELECT list, and has no "membership" semantics:
+`EXISTS` is an **existence test**. It only checks _whether_ the subquery produces at least one row. It does not return data, does not read the SELECT list, and has no "membership" semantics:
 
 ```sql
 WHERE EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.customer_id)
@@ -46,9 +46,9 @@ The outer row survives **if the subquery found a match**, and nothing else about
 
 These sound nearly identical. In practice, for the common case, **they return the same rows**. The differences live in:
 
-1. NULL handling (mainly in the `NOT` variants) — a *correctness* difference.
+1. NULL handling (mainly in the `NOT` variants) — a _correctness_ difference.
 2. Expressiveness — `EXISTS` can express correlated conditions that are not simple equality.
-3. Execution plans — a *performance* difference, but only a real one in specific shapes (see §11).
+3. Execution plans — a _performance_ difference, but only a real one in specific shapes (see §11).
 
 ### 2.4 The key sentence
 
@@ -185,9 +185,9 @@ WHERE department_id IN (1, 3);
 ```
 
 | department_name |
-|---|
-| Engineering |
-| HR |
+| --------------- |
+| Engineering     |
+| HR              |
 
 If the literal list contains NULL, it is simply **never matched**:
 
@@ -197,7 +197,7 @@ FROM departments
 WHERE department_id IN (1, NULL);   -- '1' OR 'NULL' -> TRUE OR UNKNOWN -> TRUE
 ```
 
-→ Returns only `Engineering`. Because `department_id = NULL` is *UNKNOWN*, never `TRUE`, the `NULL` in the list is inert. This is the simplest example of three-valued logic leaking through `IN`.
+→ Returns only `Engineering`. Because `department_id = NULL` is _UNKNOWN_, never `TRUE`, the `NULL` in the list is inert. This is the simplest example of three-valued logic leaking through `IN`.
 
 ---
 
@@ -215,19 +215,19 @@ WHERE customer_id IN (SELECT customer_id FROM orders);
 Expected result:
 
 | customer_id | customer_name |
-|---|---|
-| 1 | Alpha |
-| 2 | Beta |
-| 3 | Gamma |
+| ----------- | ------------- |
+| 1           | Alpha         |
+| 2           | Beta          |
+| 3           | Gamma         |
 
-How to read it: for each customer, take its `customer_id`, and ask *"is it a member of the set of all `customer_id`s in orders?"* Customers with a matching id survive; `Delta` (4) does not.
+How to read it: for each customer, take its `customer_id`, and ask _"is it a member of the set of all `customer_id`s in orders?"_ Customers with a matching id survive; `Delta` (4) does not.
 
 Notice: this `IN` subquery is **non-correlated / uncorrelated** — it does not reference the outer table. It is evaluated once (conceptually) as a set of values.
 
 ### 6.2 What `IN` silently ignores
 
 - **Duplicates in the subquery result don't matter.** `IN (1,1,1)` behaves like `IN (1)`. It's set membership, not counting.
-- **If the subquery returns a NULL**, it does *not* break simple `IN` — because of the `OR` short-circuit: `5 IN (5, NULL)` → `(5=5) OR (5=NULL)` → `TRUE OR UNKNOWN` → `TRUE`. The NULL only matters when the value matches *nothing* — or in `NOT IN`. (See §8.)
+- **If the subquery returns a NULL**, it does _not_ break simple `IN` — because of the `OR` short-circuit: `5 IN (5, NULL)` → `(5=5) OR (5=NULL)` → `TRUE OR UNKNOWN` → `TRUE`. The NULL only matters when the value matches _nothing_ — or in `NOT IN`. (See §8.)
 
 ---
 
@@ -247,15 +247,15 @@ WHERE EXISTS (
 
 Expected result:
 
-| employee_id | name |
-|---|---|
-| 101 | Alice |
-| 103 | Carol |
-| 104 | Dave |
+| employee_id | name  |
+| ----------- | ----- |
+| 101         | Alice |
+| 103         | Carol |
+| 104         | Dave  |
 
-This query is **correlated**: for *each* employee `e`, the engine runs the inner query "does any employee `m` point their `manager_id` at `e.employee_id`?" The outer alias `e` is visible inside the subquery. That's the defining trait of a correlated subquery.
+This query is **correlated**: for _each_ employee `e`, the engine runs the inner query "does any employee `m` point their `manager_id` at `e.employee_id`?" The outer alias `e` is visible inside the subquery. That's the defining trait of a correlated subquery.
 
-> Remember the grain: `manager_id` is a *self*-reference to `employees`. So `EXISTS` "is there at least one row that treats this employee as its manager" — which means "is this employee a manager?"
+> Remember the grain: `manager_id` is a _self_-reference to `employees`. So `EXISTS` "is there at least one row that treats this employee as its manager" — which means "is this employee a manager?"
 
 The `IN` equivalent is possible but less natural:
 
@@ -265,7 +265,7 @@ FROM employees
 WHERE employee_id IN (SELECT DISTINCT manager_id FROM employees);
 ```
 
-Both return the same 3 rows. Note the `DISTINCT` isn't required for correctness (duplicates don't matter to `IN`), but it makes the *intent* clearer: "my id is in the set of people who are someone's manager."
+Both return the same 3 rows. Note the `DISTINCT` isn't required for correctness (duplicates don't matter to `IN`), but it makes the _intent_ clearer: "my id is in the set of people who are someone's manager."
 
 ### 7.2 `EXISTS` is more expressive than `IN`
 
@@ -285,13 +285,13 @@ WHERE EXISTS (
 ```
 
 | department_id | department_name |
-|---|---|
-| 1 | Engineering |
-| 2 | Sales |
+| ------------- | --------------- |
+| 1             | Engineering     |
+| 2             | Sales           |
 
 You cannot write ">= 2" as an `IN`. Whenever your condition is anything other than simple value equality, `EXISTS` is the natural tool.
 
-> Edge case: if you write `EXISTS` with a `GROUP BY` subquery and *no* `HAVING`, the subquery always contains at least one group per correlated department as soon as that department has ≥1 employee — so it degenerates to "at least one row". That's fine as long as you understand it; `GROUP BY` inside `EXISTS` is usually just noise unless you add `HAVING`.
+> Edge case: if you write `EXISTS` with a `GROUP BY` subquery and _no_ `HAVING`, the subquery always contains at least one group per correlated department as soon as that department has ≥1 employee — so it degenerates to "at least one row". That's fine as long as you understand it; `GROUP BY` inside `EXISTS` is usually just noise unless you add `HAVING`.
 
 ### 7.3 `EXISTS` never returns data — it only returns TRUE/FALSE
 
@@ -322,7 +322,7 @@ WHERE d.department_id NOT IN (SELECT department_id FROM employees);
 
 Expected result **intuitively**: `Finance`.
 
-**Actual result:** *no rows at all.*
+**Actual result:** _no rows at all._
 
 Why? Because `employees.department_id` contains a **NULL** (Dave, employee 104, is unassigned).
 
@@ -336,10 +336,10 @@ AND d.department_id <> NULL      -- <-- this term is UNKNOWN
 ```
 
 - `department_id <> 1/2/3` evaluates to TRUE for department 4.
-- `department_id <> NULL` evaluates to **UNKNOWN** for *every* value, because comparing anything with `<>` against NULL is never TRUE.
+- `department_id <> NULL` evaluates to **UNKNOWN** for _every_ value, because comparing anything with `<>` against NULL is never TRUE.
 - So the chain becomes `TRUE AND TRUE AND TRUE AND UNKNOWN` = **UNKNOWN** = filtered out.
 
-Even worse: if Dave had been assigned to a real department and only one *other* employee was unassigned, **every department** would vanish — including ones that legitimately had employees.
+Even worse: if Dave had been assigned to a real department and only one _other_ employee was unassigned, **every department** would vanish — including ones that legitimately had employees.
 
 > **Interview trap:** `NOT IN` returns the empty result set whenever the subquery returns a **non-empty** set that contains at least one NULL.
 
@@ -356,10 +356,10 @@ WHERE NOT EXISTS (
 ```
 
 | department_id | department_name |
-|---|---|
-| 4 | Finance |
+| ------------- | --------------- |
+| 4             | Finance         |
 
-Why is this safe? `NOT EXISTS` never compares values. It runs the subquery and checks the *count of returned rows*: if zero rows come back, that department survives. A NULL in `e.department_id` makes the `=` comparison UNKNOWN, so that particular row contributes no match — and Dave simply doesn't prevent Finance from being returned.
+Why is this safe? `NOT EXISTS` never compares values. It runs the subquery and checks the _count of returned rows_: if zero rows come back, that department survives. A NULL in `e.department_id` makes the `=` comparison UNKNOWN, so that particular row contributes no match — and Dave simply doesn't prevent Finance from being returned.
 
 There is also a NULL-safe alternative that doesn't use subqueries (anti-join), see Section 24:
 
@@ -372,12 +372,12 @@ WHERE e.employee_id IS NULL;
 
 ### 8.2 The empty-set edge cases
 
-| Situation | `NOT IN (subquery)` | `NOT EXISTS (subquery)` |
-|---|---|---|
-| Subquery returns **no rows** | Returns **all** outer rows (nothing to contradict; even NULL outer values survive!) | Returns all rows whose inner lookup finds nothing |
-| Subquery returns only NULLs | Returns **nothing** (every comparison is UNKNOWN) | Returns all rows (no inner row exists) |
-| Subquery returns values *and* at least one NULL | Returns **nothing** | Returns the correct anti-answer |
-| Subquery values are NOT NULL | Correct anti-answer | Same |
+| Situation                                       | `NOT IN (subquery)`                                                                 | `NOT EXISTS (subquery)`                           |
+| ----------------------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------- |
+| Subquery returns **no rows**                    | Returns **all** outer rows (nothing to contradict; even NULL outer values survive!) | Returns all rows whose inner lookup finds nothing |
+| Subquery returns only NULLs                     | Returns **nothing** (every comparison is UNKNOWN)                                   | Returns all rows (no inner row exists)            |
+| Subquery returns values _and_ at least one NULL | Returns **nothing**                                                                 | Returns the correct anti-answer                   |
+| Subquery values are NOT NULL                    | Correct anti-answer                                                                 | Same                                              |
 
 > The subtle "empty subquery" quirk: `3 NOT IN (SELECT c FROM t WHERE 1=2)` is **TRUE**, because with zero elements the condition "not equal to none" is vacuously satisfied.
 
@@ -412,7 +412,7 @@ Both give Alpha/Beta/Gamma. Why is the NULL never a problem here? Because:
 **They can produce different results only when:**
 
 1. You use the `NOT` variants and the inner set can contain NULL (Section 8) — the big one.
-2. The outer column itself is NULL *and* you want `NULL` to match `NULL`. Neither `x IN (...)` nor `x = x` does this, because `NULL = NULL` is UNKNOWN, not TRUE.
+2. The outer column itself is NULL _and_ you want `NULL` to match `NULL`. Neither `x IN (...)` nor `x = x` does this, because `NULL = NULL` is UNKNOWN, not TRUE.
 
 For case 2, on PostgreSQL you can use `IS NOT DISTINCT FROM`:
 
@@ -455,7 +455,7 @@ This probing is cheap **only if the inner side is indexed** on the join column. 
 
 ### 10.2 Semi Join (typical for uncorrelated `IN`)
 
-Because `IN (subquery)` is a *set operation*, the optimizer can:
+Because `IN (subquery)` is a _set operation_, the optimizer can:
 
 - build the inner set once (materialize bucket / hash table), and
 - **hash-probe** or **merge-probe** the outer rows against it, keeping an outer row only on membership.
@@ -464,20 +464,20 @@ This is called a **semi join** (deduplicated — outer rows are never quadrupled
 
 ### 10.3 Anti Join (for `NOT IN` / `NOT EXISTS`)
 
-Both `NOT` variants can be executed as an **anti join**: keep an outer row only when *no* inner row joins.
+Both `NOT` variants can be executed as an **anti join**: keep an outer row only when _no_ inner row joins.
 
 - Safe anti-join (NOT EXISTS, or NOT IN on a NOT NULL column) → correct.
-- One huge caveat: many engines **cannot** automatically use an anti-join for `NOT IN` unless they can prove the inner column is non-null. If they cannot, they fall back to a per-row UNKNOWN evaluation — which is why `NOT IN` with NULLs returns nothing, *and* why it can be slower.
+- One huge caveat: many engines **cannot** automatically use an anti-join for `NOT IN` unless they can prove the inner column is non-null. If they cannot, they fall back to a per-row UNKNOWN evaluation — which is why `NOT IN` with NULLs returns nothing, _and_ why it can be slower.
 
 ### 10.4 The rewrite that makes IN and EXISTS identical
 
 Modern optimizers are smart:
 
 - **PostgreSQL** rewrites correlated `IN` to semi-join and can turn an uncorrelated `IN` into a hash semi join; it may also convert between `IN` and `EXISTS` forms internally.
-- **SQL Server** since 2005 frequently produces the *same* plan for `IN` and `EXISTS`.
+- **SQL Server** since 2005 frequently produces the _same_ plan for `IN` and `EXISTS`.
 - **MySQL** transforms `IN (subquery)` into a semi-join (MySQL 5.6+/8); older versions executed it as `EXISTS` per row, which caused the famous "IN is slow on large lists" folklore.
 
-> **Production pitfall:** "IN vs EXISTS speed" folklore is engine-version-specific. Always confirm with the execution plan on *your* engine and data. A claim like "EXISTS is always faster" is a myth in every engine.
+> **Production pitfall:** "IN vs EXISTS speed" folklore is engine-version-specific. Always confirm with the execution plan on _your_ engine and data. A claim like "EXISTS is always faster" is a myth in every engine.
 
 ---
 
@@ -517,12 +517,12 @@ If `big_inner.key` has no index, the plan typically shows a nested loop with a f
 
 ### 11.5 What to verify, per engine
 
-| Engine | Tool |
-|---|---|
-| PostgreSQL | `EXPLAIN (ANALYZE, BUFFERS) SELECT ...` |
-| MySQL | `EXPLAIN ANALYZE SELECT ...` (8.0.18+) or `EXPLAIN FORMAT=JSON ...` |
-| SQL Server | `SET STATISTICS IO, TIME ON;` + include actual execution plan |
-| Oracle | `EXPLAIN PLAN` + `SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY_CURSOR(...))` with `/*+ GATHER_PLAN_STATISTICS */` |
+| Engine     | Tool                                                                                                        |
+| ---------- | ----------------------------------------------------------------------------------------------------------- |
+| PostgreSQL | `EXPLAIN (ANALYZE, BUFFERS) SELECT ...`                                                                     |
+| MySQL      | `EXPLAIN ANALYZE SELECT ...` (8.0.18+) or `EXPLAIN FORMAT=JSON ...`                                         |
+| SQL Server | `SET STATISTICS IO, TIME ON;` + include actual execution plan                                               |
+| Oracle     | `EXPLAIN PLAN` + `SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY_CURSOR(...))` with `/*+ GATHER_PLAN_STATISTICS */` |
 
 Look for: **semi join** vs **anti join** vs **nested loop with early exit** vs **hash build**; the number of executions of the subplan (should be 1 for uncorrelated); and index usage.
 
@@ -549,29 +549,33 @@ Look for: **semi join** vs **anti join** vs **nested loop with early exit** vs *
 
 > **Production pitfall (huge literal `IN` lists):** thousands of literals can blow operator parameters, memory, and plan compile time. Historically Oracle capped an `IN` list at **1000 elements** (older versions; newer ones still recommend below it); drivers (e.g., JDBC/ODBC) have parameter-count limits in every engine. Batch the list or rewrite with a temp table / `VALUES` / `UNNEST`.
 
-> **Production pitfall (migration across engine versions):** MySQL < 5.6 executed `IN (subquery)` by *rewriting it to `EXISTS`* per row, which randomly hit inner rows differently (two executions guaranteed). If you upgraded from such a version, re-EXPLAIN your `IN` queries — plans change across versions.
+> **Production pitfall (migration across engine versions):** MySQL < 5.6 executed `IN (subquery)` by _rewriting it to `EXISTS`_ per row, which randomly hit inner rows differently (two executions guaranteed). If you upgraded from such a version, re-EXPLAIN your `IN` queries — plans change across versions.
 
 ---
 
 ## 14. Database-specific behavior
 
 > **PostgreSQL**
+>
 > - `IN (subquery)` → semi join; `NOT IN` on NOT NULL columns → anti join.
 > - Supports `IS NOT DISTINCT FROM` for NULL-safe correlation inside `EXISTS`.
 > - `x = ANY (SELECT ...)` is equivalent to `x IN (SELECT ...)`.
 > - Uncorrelated `EXISTS` of a constant is evaluated once.
 
 > **MySQL**
+>
 > - Modern `IN (subquery)` is rewritten to a semi join (8.0); historically it emulated `EXISTS` per row (a known optimizer quirk in 5.5 and earlier).
 > - Materialized temp-tables involved in non-correlated `IN` may persist in plan as `Materialize` nodes.
 > - Correlated subqueries can't be executed with hash semantics in older optimizers — always use `EXPLAIN` on 5.7.
 
 > **SQL Server**
+>
 > - Since ~2005 the optimizer often trivially derives **the same plan** for `IN` and `EXISTS` (self-joins and the `Merge Join` transformation). Performance folklore here is the least reliable.
 > - `NOT IN` is safe to an anti-join only when the inner column is provably NOT NULL; with a NULLable column the engine cannot simplify.
 > - No `IS DISTINCT FROM` until 2022.
 
 > **Oracle**
+>
 > - Historically the optimizer itself rewrites: uncorrelated `IN` may be transformed into an anti/semi join; correlated `EXISTS` and `IN` both become hash/lookup joins depending on stats. `DBMS_XPLAN` is your friend.
 > - `IN` literal lists: 1000-element cap in classic engines (documented); multi-column `IN` has been supported for row-value comparisons.
 
@@ -581,33 +585,33 @@ Look for: **semi join** vs **anti join** vs **nested loop with early exit** vs *
 
 ### 15.1 Feature matrix: `IN (subquery)` vs `EXISTS`
 
-| Aspect | `IN (subquery)` | `EXISTS (subquery)` |
-|---|---|---|
-| Conceptual model | value membership in a set | set-of-rows non-empty |
-| Subquery correlation | optional (usually non-correlated) | usually correlated |
-| Subquery columns | must return exactly 1 column | SELECT list ignored |
-| Matches NULL values | `x = NULL` never TRUE | `=` against NULL never TRUE (needs `IS NOT DISTINCT FROM`) |
-| `NOT` + NULL in inner set | **returns nothing** | safe |
-| Expressiveness | value equality only (or row-value, non-portable) | any predicate, referencing outer columns |
-| Duplicates in inner set | irrelevant | irrelevant |
-| Typical plan node | Semi Join (hash/merge) | Nested Loop Semi Join w/ early exit |
-| Can be written without subquery? | yes (literal list) | no |
+| Aspect                           | `IN (subquery)`                                  | `EXISTS (subquery)`                                        |
+| -------------------------------- | ------------------------------------------------ | ---------------------------------------------------------- |
+| Conceptual model                 | value membership in a set                        | set-of-rows non-empty                                      |
+| Subquery correlation             | optional (usually non-correlated)                | usually correlated                                         |
+| Subquery columns                 | must return exactly 1 column                     | SELECT list ignored                                        |
+| Matches NULL values              | `x = NULL` never TRUE                            | `=` against NULL never TRUE (needs `IS NOT DISTINCT FROM`) |
+| `NOT` + NULL in inner set        | **returns nothing**                              | safe                                                       |
+| Expressiveness                   | value equality only (or row-value, non-portable) | any predicate, referencing outer columns                   |
+| Duplicates in inner set          | irrelevant                                       | irrelevant                                                 |
+| Typical plan node                | Semi Join (hash/merge)                           | Nested Loop Semi Join w/ early exit                        |
+| Can be written without subquery? | yes (literal list)                               | no                                                         |
 
 ### 15.2 NULL behavior matrix (all four forms)
 
-| Condition | Value involved | Result kept? |
-|---|---|---|
-| `x IN (1,2)` | x = 1 | ✔ kept |
-| `x IN (1,2,NULL)` | x = 1 | ✔ kept (TRUE OR ...) |
-| `x IN (1,2)` | x = NULL | ✘ dropped |
-| `x IN (empty set)` | anything | ✘ none |
-| `x IN (set of only NULLs)` | anything | ✘ none |
-| `x NOT IN (1,2)` | x = 3 | ✔ kept |
-| `x NOT IN (1,2)` | x = NULL | ✘ dropped (UNKNOWN) |
-| `x NOT IN (1,2,NULL)` | **any** x | **✘ none — the classic trap** |
-| `x NOT IN (empty set)` | anything (even NULL) | ✔ kept (vacuous truth) |
-| `EXISTS(subquery)` | any row | ✔ if ≥ 1 inner row |
-| `NOT EXISTS(subquery)` | any row | ✔ if 0 inner rows |
+| Condition                  | Value involved       | Result kept?                  |
+| -------------------------- | -------------------- | ----------------------------- |
+| `x IN (1,2)`               | x = 1                | ✔ kept                        |
+| `x IN (1,2,NULL)`          | x = 1                | ✔ kept (TRUE OR ...)          |
+| `x IN (1,2)`               | x = NULL             | ✘ dropped                     |
+| `x IN (empty set)`         | anything             | ✘ none                        |
+| `x IN (set of only NULLs)` | anything             | ✘ none                        |
+| `x NOT IN (1,2)`           | x = 3                | ✔ kept                        |
+| `x NOT IN (1,2)`           | x = NULL             | ✘ dropped (UNKNOWN)           |
+| `x NOT IN (1,2,NULL)`      | **any** x            | **✘ none — the classic trap** |
+| `x NOT IN (empty set)`     | anything (even NULL) | ✔ kept (vacuous truth)        |
+| `EXISTS(subquery)`         | any row              | ✔ if ≥ 1 inner row            |
+| `NOT EXISTS(subquery)`     | any row              | ✔ if 0 inner rows             |
 
 ### 15.3 Decision flowchart
 
@@ -633,7 +637,7 @@ flowchart TD
 
 1. What does one output row represent?
 2. Does the subquery depend on the outer row (correlated) or not?
-3. Do I only need to know *whether* a match exists? → `EXISTS`.
+3. Do I only need to know _whether_ a match exists? → `EXISTS`.
 4. Does the inner column I'm membership-testing contain NULL? → avoid `NOT IN`.
 5. Do I want NULLs to match NULLs? → `IS NOT DISTINCT FROM` inside `EXISTS`.
 6. Can my empty-set edge case change the answer? (§8.2)
@@ -673,7 +677,7 @@ flowchart TD
 
 7. Explain how a hash semi-join executes `SELECT * FROM customers WHERE customer_id IN (SELECT customer_id FROM orders)` — what is built, what is probed, and why outer rows are not duplicated when an inner set has many matches.
 8. When can `IN (subquery)` outperform a correlated `EXISTS` for the same logical question, even though "EXISTS short-circuits"? Give a concrete data shape.
-9. You need `NULL = NULL` to *match* inside an `EXISTS` predicate. Write the three engine-specific answers (PostgreSQL / SQL Server / MySQL or Oracle).
+9. You need `NULL = NULL` to _match_ inside an `EXISTS` predicate. Write the three engine-specific answers (PostgreSQL / SQL Server / MySQL or Oracle).
 
 ### Scenario Based
 
@@ -683,7 +687,7 @@ flowchart TD
 ### Tricky
 
 12. Predict: `SELECT 'yes' WHERE 1 IN (2, 3, NULL);` — how many rows?
-13. Predict: `SELECT 'yes' WHERE 1 NOT IN (2, 3);` and then *with* a NULL: `WHERE 1 NOT IN (2, 3, NULL);`
+13. Predict: `SELECT 'yes' WHERE 1 NOT IN (2, 3);` and then _with_ a NULL: `WHERE 1 NOT IN (2, 3, NULL);`
 14. Predict: `SELECT 'yes' WHERE NULL NOT IN (SELECT c FROM t WHERE 1=0);` (empty subquery, NULL on the left).
 15. What is the difference between `x IN (SELECT y FROM t)` and `x IN (1, 2, ..., 100000)` when the literal list is generated at build time vs `EXISTS`?
 
@@ -754,4 +758,4 @@ WHERE customer_id NOT IN (SELECT customer_id FROM orders);
 
 ---
 
-*End of Section 30. Next up in the category: `NOT IN` vs `NOT EXISTS` beyond this section's scope — see the Anti-Join deep dive (Section 24 in Section 3-JOINs) and NULL & Three-Valued Logic (Section 8).*
+_End of Section 30. Next up in the category: `NOT IN` vs `NOT EXISTS` beyond this section's scope — see the Anti-Join deep dive (Section 24 in Section 3-JOINs) and NULL & Three-Valued Logic (Section 8)._

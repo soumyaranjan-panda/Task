@@ -5,16 +5,18 @@
 `SELECT DISTINCT` removes duplicate rows from the result set. Only distinct combinations of the columns you select are returned.
 
 What it is:
+
 - `SELECT DISTINCT` collapses rows that are identical **across every selected column** into a single row.
 
 Why it exists:
-- Relational data and `JOIN`s routinely produce duplicate rows. `DISTINCT` is the simplest way to ask: "What are the *unique* values here?"
+
+- Relational data and `JOIN`s routinely produce duplicate rows. `DISTINCT` is the simplest way to ask: "What are the _unique_ values here?"
 
 Critical to understand from day one:
 
 > `DISTINCT col` de-duplicates by the **entire row**, not by `col` alone.
 
-`SELECT DISTINCT id, name` and `SELECT DISTINCT id`` are *different queries*. The first returns distinct `(id, name)` pairs. If each `id` has many `name`s, the first returns far more rows than the second.
+`SELECT DISTINCT id, name` and `SELECT DISTINCT id`` are *different queries*. The first returns distinct `(id, name)`pairs. If each`id`has many`name`s, the first returns far more rows than the second.
 
 ---
 
@@ -142,7 +144,7 @@ dept_count
 2
 ```
 
-> Note: `COUNT(DISTINCT ...)` **ignores NULLs** (see NULL behavior below), so `Grace`'s NULL department is not counted. If you want the distinct department *values including NULL*, you'd need `COUNT(DISTINCT department_id) + fuzzy handling` or query the list directly.
+> Note: `COUNT(DISTINCT ...)` **ignores NULLs** (see NULL behavior below), so `Grace`'s NULL department is not counted. If you want the distinct department _values including NULL_, you'd need `COUNT(DISTINCT department_id) + fuzzy handling` or query the list directly.
 
 ### 3. Distinct pairs
 
@@ -216,7 +218,7 @@ Practical consequences:
 
 > Logical order of operations (conceptually): `FROM` → `WHERE` → `GROUP BY` → `HAVING` → `SELECT` (+ `DISTINCT`) → `ORDER BY`.
 
-So `DISTINCT` removes duplicates in the *final projected result set*, after `WHERE`, joins, and aggregations have already run. This is why `SELECT DISTINCT a.* FROM a JOIN b ...` de-duplicates full joined rows, not "the a-side rows".
+So `DISTINCT` removes duplicates in the _final projected result set_, after `WHERE`, joins, and aggregations have already run. This is why `SELECT DISTINCT a.* FROM a JOIN b ...` de-duplicates full joined rows, not "the a-side rows".
 
 ---
 
@@ -244,7 +246,7 @@ customer_id
 
 ### Scenario 2 — "Which product categories have ever been sold?"
 
-Match on the join key but show the *joined* column:
+Match on the join key but show the _joined_ column:
 
 ```sql
 SELECT DISTINCT p.category
@@ -295,17 +297,18 @@ SELECT department_id FROM employees GROUP BY department_id;
 
 Both return one row per department. Differences noted as general guidance (verify with execution plans in your engine):
 
-| Aspect | `DISTINCT` | `GROUP BY` |
-|---|---|---|
-| Goal | remove duplicate rows | group rows + allow aggregation |
-| Aggregates | none (`COUNT(DISTINCT ...)` aside) | yes (`SUM`, `AVG`, `MAX`, ...) |
-| HAVING | not applicable | applicable |
-| One row per | distinct row combination | distinct grouping key combination |
-| Semantic intent | "what unique values exist?" | "summarize data per key" |
+| Aspect          | `DISTINCT`                         | `GROUP BY`                        |
+| --------------- | ---------------------------------- | --------------------------------- |
+| Goal            | remove duplicate rows              | group rows + allow aggregation    |
+| Aggregates      | none (`COUNT(DISTINCT ...)` aside) | yes (`SUM`, `AVG`, `MAX`, ...)    |
+| HAVING          | not applicable                     | applicable                        |
+| One row per     | distinct row combination           | distinct grouping key combination |
+| Semantic intent | "what unique values exist?"        | "summarize data per key"          |
 
-Best-practice note: if you need only to enumerate unique values, `DISTINCT` expresses intent more clearly. If you plan to aggregate, prefer `GROUP BY`. Many optimizers convert `DISTINCT` to `GROUP BY` (and vice versa) internally, so *neither is axiomatically faster*; measure.
+Best-practice note: if you need only to enumerate unique values, `DISTINCT` expresses intent more clearly. If you plan to aggregate, prefer `GROUP BY`. Many optimizers convert `DISTINCT` to `GROUP BY` (and vice versa) internally, so _neither is axiomatically faster_; measure.
 
 > Avoid the anti-pattern:
+>
 > ```sql
 > -- BAD APPROACH
 > SELECT DISTINCT department_id, COUNT(*) FROM employees;  -- invalid on most engines
@@ -319,7 +322,7 @@ The most common production misuse of `DISTINCT` is **hiding join defects**.
 
 > Production pitfall: `DISTINCT` silently masks a JOIN that produces duplicate rows.
 
-Example. Ask *"how much did each customer spend?"* but write it badly:
+Example. Ask _"how much did each customer spend?"_ but write it badly:
 
 ```sql
 -- BAD APPROACH -- joins orders to a table with more than one
@@ -329,9 +332,9 @@ SELECT DISTINCT o.customer_id, SUM(o.amount) ...
 
 `DISTINCT` removes whole-row duplicates. If you `DISTINCT` on a row containing an aggregate, the row is not duplicated, so `DISTINCT` gives **false confidence** while the aggregate is still wrong.
 
-Correct mental model: `DISTINCT` de-duplicates at the row level; it **never validates whether the duplicates were legitimate or caused by a bad join**. When the number of rows *should not* change after a join, `DISTINCT` on top often means the join is wrong.
+Correct mental model: `DISTINCT` de-duplicates at the row level; it **never validates whether the duplicates were legitimate or caused by a bad join**. When the number of rows _should not_ change after a join, `DISTINCT` on top often means the join is wrong.
 
-> Good practice — instead of slapping `DISTINCT` on, find the source of the duplicating join. A classic correct replacement when you only need existence (see the `EXISTS` cross-reference in the *Subqueries* section) is:
+> Good practice — instead of slapping `DISTINCT` on, find the source of the duplicating join. A classic correct replacement when you only need existence (see the `EXISTS` cross-reference in the _Subqueries_ section) is:
 >
 > ```sql
 > -- Often a better pattern for "customers with orders":
@@ -400,7 +403,7 @@ SELECT COUNT(*) FROM (
 
 > Interview trap: `SELECT DISTINCT ... ROW_NUMBER() OVER (...)` is a logical error waiting to happen.
 
-`ROW_NUMBER()` is computed per row before `DISTINCT` strips duplicates (logical order: window functions apply after `WHERE`/`GROUP BY`/`HAVING` but are evaluated as part of `SELECT`; `DISTINCT` then removes identical rows). Since row numbers are unique per partition, `DISTINCT` virtually never collapses them, so `SELECT DISTINCT` is pointless *and* the result still contains one row per source row.
+`ROW_NUMBER()` is computed per row before `DISTINCT` strips duplicates (logical order: window functions apply after `WHERE`/`GROUP BY`/`HAVING` but are evaluated as part of `SELECT`; `DISTINCT` then removes identical rows). Since row numbers are unique per partition, `DISTINCT` virtually never collapses them, so `SELECT DISTINCT` is pointless _and_ the result still contains one row per source row.
 
 ```sql
 -- Misleading: row_number distinct is meaningless here
@@ -409,7 +412,7 @@ SELECT DISTINCT department_id,
 FROM employees;
 ```
 
-If you intend "top N rows per department", use the window-function filtering pattern (see the *Window Functions* section):
+If you intend "top N rows per department", use the window-function filtering pattern (see the _Window Functions_ section):
 
 ```sql
 WITH ranked AS (
@@ -435,7 +438,7 @@ This is rarely what you want: `employee_id` is unique, so `DISTINCT *` here retu
 - Sends all columns to the sort/hash engine unnecessarily.
 - Is a strong signal the author is unsure why rows duplicated.
 
-> Production pitfall: `SELECT DISTINCT *` is almost always the wrong tool for debugging a duplicate-row problem. Investigate the join instead (use the *What is the grain of each table?* checklist).
+> Production pitfall: `SELECT DISTINCT *` is almost always the wrong tool for debugging a duplicate-row problem. Investigate the join instead (use the _What is the grain of each table?_ checklist).
 
 ---
 
@@ -453,7 +456,7 @@ UNION ALL                -- keeps all rows
 SELECT department_id FROM departments_ny;
 ```
 
-Cross-reference the *Set Operations* section. If you don't need the de-duplication, `UNION ALL` avoids an entire distinct/sort phase.
+Cross-reference the _Set Operations_ section. If you don't need the de-duplication, `UNION ALL` avoids an entire distinct/sort phase.
 
 ---
 
@@ -527,22 +530,22 @@ Look for a `HashAggregate` (PostgreSQL) or `Stream Aggregate` / `Table Spool` (S
 
 ### A common optimization idea — `DISTINCT` vs enforcing uniqueness upstream
 
-If duplicates only exist because of a join fan-out, the better fix is almost always to remove the fan-out (e.g., by joining on the correct unique key or by using `EXISTS`). De-duplicating at the outermost `SELECT` is often the *symptom*, and the expensive part (the join itself) still ran on duplicates.
+If duplicates only exist because of a join fan-out, the better fix is almost always to remove the fan-out (e.g., by joining on the correct unique key or by using `EXISTS`). De-duplicating at the outermost `SELECT` is often the _symptom_, and the expensive part (the join itself) still ran on duplicates.
 
 ---
 
 ## Common mistakes
 
-| Mistake | Explanation |
-|---|---|
-| Thinking `DISTINCT` de-dups by a single column | It de-dups the whole row |
-| Trusting `DISTINCT` to fix a duplicated JOIN aggregate | Aggregates run before de-dup; values stay wrong |
-| `SELECT DISTINCT *` for debugging | Uniqueness of the key makes it a no-op |
-| Forgetting NULLs collapse to one row | `DISTINCT` returns `NULL` once, `COUNT(DISTINCT)` returns zilch |
-| Assuming `DISTINCT` orders results | It does not; add `ORDER BY` |
-| Using `DISTINCT` where `GROUP BY` / `EXISTS` / `UNION ALL` fits better | Obscures intent and often costs a dedup pass |
-| `DISTINCT` with window functions | Near-meaningless pair |
-| No-usecase `DISTINCT` on a PK column | Wasted work; same rows returned |
+| Mistake                                                                | Explanation                                                     |
+| ---------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Thinking `DISTINCT` de-dups by a single column                         | It de-dups the whole row                                        |
+| Trusting `DISTINCT` to fix a duplicated JOIN aggregate                 | Aggregates run before de-dup; values stay wrong                 |
+| `SELECT DISTINCT *` for debugging                                      | Uniqueness of the key makes it a no-op                          |
+| Forgetting NULLs collapse to one row                                   | `DISTINCT` returns `NULL` once, `COUNT(DISTINCT)` returns zilch |
+| Assuming `DISTINCT` orders results                                     | It does not; add `ORDER BY`                                     |
+| Using `DISTINCT` where `GROUP BY` / `EXISTS` / `UNION ALL` fits better | Obscures intent and often costs a dedup pass                    |
+| `DISTINCT` with window functions                                       | Near-meaningless pair                                           |
+| No-usecase `DISTINCT` on a PK column                                   | Wasted work; same rows returned                                 |
 
 ---
 
@@ -560,7 +563,7 @@ If duplicates only exist because of a join fan-out, the better fix is almost alw
 
 ## The reasoning checklist for `DISTINCT`
 
-Run the SQL Reasoning scaffold (see the *SQL Reasoning* section in the handbook):
+Run the SQL Reasoning scaffold (see the _SQL Reasoning_ section in the handbook):
 
 1. **What does one output row represent?** → "One output row = one distinct combination of the selected columns."
 2. **What is the grain of each table?**
@@ -615,16 +618,20 @@ Cross-references: `GROUP BY` / `HAVING` (Section 38), `UNION` vs `UNION ALL` (Se
 ## Output Prediction
 
 21. Given the sample employees data, write down the exact output (rows and columns) of:
+
 ```sql
 SELECT DISTINCT department_id, manager_id
 FROM employees
 ORDER BY 1, 2;
 ```
+
 22. Predict the output of:
+
 ```sql
 SELECT COUNT(DISTINCT department_id), COUNT(DISTINCT manager_id)
 FROM employees;
 ```
+
 23. Predict the row count of `SELECT DISTINCT salary FROM employees;` given the numbers 70000, 55000, 60000, 72000, 48000, 62000, 90000.
 
 ## Debugging
@@ -637,5 +644,5 @@ FROM employees;
 
 27. A team says "`DISTINCT` always sorts the output." Correct or refine the claim.
 28. When might `SELECT DISTINCT product_id FROM orders` be served without reading every row of the table? What index-related and planner assumptions are involved, and how would you verify with `EXPLAIN`?
-29. Compare the *potential* cost difference between answering "which customers ordered?" via (a) `SELECT DISTINCT` on a fan-out join, and (b) `EXISTS`. What factors decide which is faster? How do you test it?
+29. Compare the _potential_ cost difference between answering "which customers ordered?" via (a) `SELECT DISTINCT` on a fan-out join, and (b) `EXISTS`. What factors decide which is faster? How do you test it?
 30. `COUNT(DISTINCT col)` on a 50-million-row table is slow. Write down the checking steps (statistics, index, plan, alternative queries) you would run before changing anything.

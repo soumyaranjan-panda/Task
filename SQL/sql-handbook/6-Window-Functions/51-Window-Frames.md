@@ -46,13 +46,13 @@ FUNCTION() OVER (
               Partition Frame    Frame boundaries
 ```
 
-The **partition** divides rows into independent groups. The **frame** then selects a sliding subset *within* that partition (or the whole partition if there is no `ORDER BY`).
+The **partition** divides rows into independent groups. The **frame** then selects a sliding subset _within_ that partition (or the whole partition if there is no `ORDER BY`).
 
-| Concept | Analogy |
-|---|---|
-| `PARTITION BY` | "Which classroom?" |
-| `ORDER BY` | "Seat students in a line" |
-| Frame | "Which students can this student see?" |
+| Concept        | Analogy                                |
+| -------------- | -------------------------------------- |
+| `PARTITION BY` | "Which classroom?"                     |
+| `ORDER BY`     | "Seat students in a line"              |
+| Frame          | "Which students can this student see?" |
 
 Without a frame, the database applies a **default** that may be `RANGE UNBOUNDED PRECEDING TO CURRENT ROW` — which can include more rows than you expect when values tie in `ORDER BY`.
 
@@ -81,11 +81,11 @@ Without a frame, the database applies a **default** that may be `RANGE UNBOUNDED
 
 **Valid combinations:**
 
-| Frame Start | Frame End Allowed |
-|---|---|
+| Frame Start           | Frame End Allowed                                     |
+| --------------------- | ----------------------------------------------------- |
 | `UNBOUNDED PRECEDING` | `CURRENT ROW`, `<n> FOLLOWING`, `UNBOUNDED FOLLOWING` |
-| `<n> PRECEDING` | `<n> FOLLOWING`, `UNBOUNDED FOLLOWING` |
-| `CURRENT ROW` | `<n> FOLLOWING`, `UNBOUNDED FOLLOWING` |
+| `<n> PRECEDING`       | `<n> FOLLOWING`, `UNBOUNDED FOLLOWING`                |
+| `CURRENT ROW`         | `<n> FOLLOWING`, `UNBOUNDED FOLLOWING`                |
 
 Invalid: `<n> FOLLOWING` as a start, or `CURRENT ROW` as an end when start is `<n> FOLLOWING` — the start must be ≤ the end conceptually.
 
@@ -93,11 +93,11 @@ Invalid: `<n> FOLLOWING` as a start, or `CURRENT ROW` as an end when start is `<
 
 ## Frame Types
 
-| Type | Unit of Measurement | Ties in ORDER BY |
-|---|---|---|
-| `ROWS` | Physical row position | Each row is independent — ties are ordered arbitrarily |
-| `RANGE` | Logical value range | All tied rows are included in the frame |
-| `GROUPS` | Groups of peer rows (same ORDER BY value) | All tied rows form one group |
+| Type     | Unit of Measurement                       | Ties in ORDER BY                                       |
+| -------- | ----------------------------------------- | ------------------------------------------------------ |
+| `ROWS`   | Physical row position                     | Each row is independent — ties are ordered arbitrarily |
+| `RANGE`  | Logical value range                       | All tied rows are included in the frame                |
+| `GROUPS` | Groups of peer rows (same ORDER BY value) | All tied rows form one group                           |
 
 > `GROUPS` was introduced in SQL:2011. PostgreSQL 11+ supports it. MySQL 8.0+ supports it. SQL Server does **not** support `GROUPS`. Oracle does **not** support `GROUPS`.
 
@@ -105,13 +105,13 @@ Invalid: `<n> FOLLOWING` as a start, or `CURRENT ROW` as an end when start is `<
 
 ## Frame Boundaries
 
-| Boundary | Meaning |
-|---|---|
-| `UNBOUNDED PRECEDING` | First row of the partition |
-| `<n> PRECEDING` | n rows (or groups) before the current row |
-| `CURRENT ROW` | The row currently being evaluated |
-| `<n> FOLLOWING` | n rows (or groups) after the current row |
-| `UNBOUNDED FOLLOWING` | Last row of the partition |
+| Boundary              | Meaning                                   |
+| --------------------- | ----------------------------------------- |
+| `UNBOUNDED PRECEDING` | First row of the partition                |
+| `<n> PRECEDING`       | n rows (or groups) before the current row |
+| `CURRENT ROW`         | The row currently being evaluated         |
+| `<n> FOLLOWING`       | n rows (or groups) after the current row  |
+| `UNBOUNDED FOLLOWING` | Last row of the partition                 |
 
 ---
 
@@ -119,10 +119,10 @@ Invalid: `<n> FOLLOWING` as a start, or `CURRENT ROW` as an end when start is `<
 
 This is **critical** and database-specific:
 
-| Condition | Default Frame |
-|---|---|
-| `ORDER BY` is **present** | `RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW` |
-| `ORDER BY` is **absent** | `ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING` (entire partition) |
+| Condition                 | Default Frame                                                                 |
+| ------------------------- | ----------------------------------------------------------------------------- |
+| `ORDER BY` is **present** | `RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`                           |
+| `ORDER BY` is **absent**  | `ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING` (entire partition) |
 
 > PostgreSQL, MySQL, SQL Server, Oracle — all follow this default.
 
@@ -204,12 +204,12 @@ WHERE product_id = 1;
 ```
 
 | product_id | sale_date  | amount | running_total |
-|---|---|---|---|
-| 1 | 2025-01-01 | 100.00 | 100.00 |
-| 1 | 2025-01-02 | 150.00 | 250.00 |
-| 1 | 2025-01-03 | 150.00 | 400.00 |
-| 1 | 2025-01-04 | 200.00 | 600.00 |
-| 1 | 2025-01-05 | 120.00 | 720.00 |
+| ---------- | ---------- | ------ | ------------- |
+| 1          | 2025-01-01 | 100.00 | 100.00        |
+| 1          | 2025-01-02 | 150.00 | 250.00        |
+| 1          | 2025-01-03 | 150.00 | 400.00        |
+| 1          | 2025-01-04 | 200.00 | 600.00        |
+| 1          | 2025-01-05 | 120.00 | 720.00        |
 
 Each row adds exactly its own `amount`. Clean, predictable, physical.
 
@@ -230,12 +230,12 @@ WHERE product_id = 1;
 ```
 
 | product_id | sale_date  | amount | range_running_total |
-|---|---|---|---|
-| 1 | 2025-01-01 | 100.00 | 100.00 |
-| 1 | 2025-01-02 | 150.00 | 400.00 |
-| 1 | 2025-01-03 | 150.00 | 400.00 | ← same! both 150s included
-| 1 | 2025-01-04 | 200.00 | 600.00 |
-| 1 | 2025-01-05 | 120.00 | 720.00 |
+| ---------- | ---------- | ------ | ------------------- | -------------------------- |
+| 1          | 2025-01-01 | 100.00 | 100.00              |
+| 1          | 2025-01-02 | 150.00 | 400.00              |
+| 1          | 2025-01-03 | 150.00 | 400.00              | ← same! both 150s included |
+| 1          | 2025-01-04 | 200.00 | 600.00              |
+| 1          | 2025-01-05 | 120.00 | 720.00              |
 
 Notice: rows with `amount = 150` both get `400.00` because `RANGE` includes all rows where the `ORDER BY` value ≤ the current row's value.
 
@@ -258,12 +258,12 @@ WHERE product_id = 1;
 ```
 
 | product_id | sale_date  | amount | moving_avg_3 |
-|---|---|---|---|
-| 1 | 2025-01-01 | 100.00 | 125.00 | ← (100+150)/2, only 1 row ahead
-| 1 | 2025-01-02 | 150.00 | 133.33 | ← (100+150+150)/3
-| 1 | 2025-01-03 | 150.00 | 166.67 | ← (150+150+200)/3
-| 1 | 2025-01-04 | 200.00 | 156.67 | ← (150+200+120)/3
-| 1 | 2025-01-05 | 120.00 | 160.00 | ← (200+120)/2, only 1 row behind
+| ---------- | ---------- | ------ | ------------ | -------------------------------- |
+| 1          | 2025-01-01 | 100.00 | 125.00       | ← (100+150)/2, only 1 row ahead  |
+| 1          | 2025-01-02 | 150.00 | 133.33       | ← (100+150+150)/3                |
+| 1          | 2025-01-03 | 150.00 | 166.67       | ← (150+150+200)/3                |
+| 1          | 2025-01-04 | 200.00 | 156.67       | ← (150+200+120)/3                |
+| 1          | 2025-01-05 | 120.00 | 160.00       | ← (200+120)/2, only 1 row behind |
 
 ---
 
@@ -306,12 +306,12 @@ WHERE product_id = 1;
 ```
 
 | sale_date  | amount | rows_total | range_total |
-|---|---|---|---|
-| 2025-01-01 | 100.00 | 100.00 | 100.00 |
-| 2025-01-02 | 150.00 | 250.00 | 400.00 |
-| 2025-01-03 | 150.00 | 400.00 | 400.00 |
-| 2025-01-04 | 200.00 | 600.00 | 600.00 |
-| 2025-01-05 | 120.00 | 720.00 | 720.00 |
+| ---------- | ------ | ---------- | ----------- |
+| 2025-01-01 | 100.00 | 100.00     | 100.00      |
+| 2025-01-02 | 150.00 | 250.00     | 400.00      |
+| 2025-01-03 | 150.00 | 400.00     | 400.00      |
+| 2025-01-04 | 200.00 | 600.00     | 600.00      |
+| 2025-01-05 | 120.00 | 720.00     | 720.00      |
 
 ```
 Interview trap: A question asks for a "running total." If the ORDER BY column
@@ -362,12 +362,12 @@ WHERE product_id = 1;
 ```
 
 | sale_date  | amount | groups_total |
-|---|---|---|
-| 2025-01-01 | 100.00 | 100.00 |
-| 2025-01-02 | 150.00 | 400.00 |
-| 2025-01-03 | 150.00 | 400.00 |
-| 2025-01-04 | 200.00 | 600.00 |
-| 2025-01-05 | 120.00 | 720.00 |
+| ---------- | ------ | ------------ |
+| 2025-01-01 | 100.00 | 100.00       |
+| 2025-01-02 | 150.00 | 400.00       |
+| 2025-01-03 | 150.00 | 400.00       |
+| 2025-01-04 | 200.00 | 600.00       |
+| 2025-01-05 | 120.00 | 720.00       |
 
 For `amount = 150`, both rows see the same result because they are in the same peer group.
 
@@ -397,12 +397,12 @@ WHERE product_id = 1;
 ```
 
 | sale_date  | amount | rows_in_frame |
-|---|---|---|
-| 2025-01-01 | 100.00 | 1 |
-| 2025-01-02 | 150.00 | 2 |
-| 2025-01-03 | 150.00 | 3 |
-| 2025-01-04 | 200.00 | 3 |
-| 2025-01-05 | 120.00 | 3 |
+| ---------- | ------ | ------------- |
+| 2025-01-01 | 100.00 | 1             |
+| 2025-01-02 | 150.00 | 2             |
+| 2025-01-03 | 150.00 | 3             |
+| 2025-01-04 | 200.00 | 3             |
+| 2025-01-05 | 120.00 | 3             |
 
 ### MIN / MAX with Frame
 
@@ -423,12 +423,12 @@ WHERE product_id = 1;
 ```
 
 | sale_date  | amount | local_min | local_max |
-|---|---|---|---|
-| 2025-01-01 | 100.00 | 100.00 | 150.00 |
-| 2025-01-02 | 150.00 | 100.00 | 150.00 |
-| 2025-01-03 | 150.00 | 150.00 | 200.00 |
-| 2025-01-04 | 200.00 | 150.00 | 200.00 |
-| 2025-01-05 | 120.00 | 200.00 | 120.00 | ← frame is only 2 rows: 200, 120
+| ---------- | ------ | --------- | --------- | -------------------------------- |
+| 2025-01-01 | 100.00 | 100.00    | 150.00    |
+| 2025-01-02 | 150.00 | 100.00    | 150.00    |
+| 2025-01-03 | 150.00 | 150.00    | 200.00    |
+| 2025-01-04 | 200.00 | 150.00    | 200.00    |
+| 2025-01-05 | 120.00 | 200.00    | 120.00    | ← frame is only 2 rows: 200, 120 |
 
 ---
 
@@ -554,12 +554,12 @@ The running total **resets** for each `product_id` because the frame is bounded 
 
 How `ORDER BY` handles `NULLs` affects which rows fall in the frame:
 
-| Database | Default NULL ordering |
-|---|---|
-| PostgreSQL | `NULLS LAST` (ASC), `NULLS FIRST` (DESC) |
-| MySQL | `NULL` treated as smallest value (first in ASC) |
+| Database   | Default NULL ordering                           |
+| ---------- | ----------------------------------------------- |
+| PostgreSQL | `NULLS LAST` (ASC), `NULLS FIRST` (DESC)        |
+| MySQL      | `NULL` treated as smallest value (first in ASC) |
 | SQL Server | `NULL` treated as smallest value (first in ASC) |
-| Oracle | `NULL` treated as largest value (last in ASC) |
+| Oracle     | `NULL` treated as largest value (last in ASC)   |
 
 ```sql
 -- PostgreSQL: NULLs go last in ascending order by default
@@ -801,27 +801,27 @@ Each `OVER` clause may cause a separate sort. Some databases can merge sorts if 
 
 ## Comparison Table
 
-| Feature | ROWS | RANGE | GROUPS |
-|---|---|---|---|
-| Unit | Physical rows | Logical values | Peer groups |
-| Ties handled | Individually (arbitrary order) | All included together | All included together |
-| Default with ORDER BY | No | Yes (default) | No |
-| Requires ORDER BY | Yes (for `CURRENT ROW`/`<n>` boundaries) | Yes | Yes |
-| PostgreSQL | ✅ | ✅ | ✅ (v11+) |
-| MySQL 8.0+ | ✅ | ✅ | ✅ |
-| SQL Server | ✅ | ✅ | ❌ |
-| Oracle | ✅ | ✅ | ❌ |
-| Performance | Generally best | May scan more rows | Between ROWS and RANGE |
-| Use case | Running totals, moving averages | Cumulative distribution, percentiles | Group-aware ranking |
+| Feature               | ROWS                                     | RANGE                                | GROUPS                 |
+| --------------------- | ---------------------------------------- | ------------------------------------ | ---------------------- |
+| Unit                  | Physical rows                            | Logical values                       | Peer groups            |
+| Ties handled          | Individually (arbitrary order)           | All included together                | All included together  |
+| Default with ORDER BY | No                                       | Yes (default)                        | No                     |
+| Requires ORDER BY     | Yes (for `CURRENT ROW`/`<n>` boundaries) | Yes                                  | Yes                    |
+| PostgreSQL            | ✅                                       | ✅                                   | ✅ (v11+)              |
+| MySQL 8.0+            | ✅                                       | ✅                                   | ✅                     |
+| SQL Server            | ✅                                       | ✅                                   | ❌                     |
+| Oracle                | ✅                                       | ✅                                   | ❌                     |
+| Performance           | Generally best                           | May scan more rows                   | Between ROWS and RANGE |
+| Use case              | Running totals, moving averages          | Cumulative distribution, percentiles | Group-aware ranking    |
 
 ### When to Use Which
 
-| Goal | Frame Type |
-|---|---|
-| Running sum/count over physical rows | `ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW` |
-| Moving average of last N rows | `ROWS BETWEEN (N-1) PRECEDING AND CURRENT ROW` |
-| Cumulative distribution / percentiles | `RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW` |
-| Group-aware cumulative count | `GROUPS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW` |
+| Goal                                    | Frame Type                                                                              |
+| --------------------------------------- | --------------------------------------------------------------------------------------- |
+| Running sum/count over physical rows    | `ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`                                      |
+| Moving average of last N rows           | `ROWS BETWEEN (N-1) PRECEDING AND CURRENT ROW`                                          |
+| Cumulative distribution / percentiles   | `RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`                                     |
+| Group-aware cumulative count            | `GROUPS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`                                    |
 | Entire partition aggregate (no running) | No `ORDER BY`, no frame (or `ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING`) |
 
 ---
@@ -835,11 +835,13 @@ Each `OVER` clause may cause a separate sort. Some databases can merge sorts if 
 3. **Use `RANGE`** only when you intentionally want tied values to be treated as a group (e.g., percentiles, cumulative distribution).
 
 4. **Add tiebreakers** to `ORDER BY` to ensure deterministic ordering:
+
    ```sql
    ORDER BY salary, emp_id  -- not just ORDER BY salary
    ```
 
 5. **Use `NULLS LAST` / `NULLS FIRST`** explicitly for portability:
+
    ```sql
    ORDER BY amount ASC NULLS LAST
    ```
@@ -921,12 +923,14 @@ What is the output of `SUM(amount) OVER (ORDER BY amount ROWS BETWEEN UNBOUNDED 
 21. What is the result of `SUM(amount) OVER (ORDER BY amount ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)`? How does it differ from `SUM(amount) OVER ()`?
 
 22. Consider:
+
 ```sql
 SELECT
     x,
     SUM(x) OVER (ORDER BY x ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING) AS frame_sum
 FROM (VALUES (1),(2),(2),(3)) AS t(x);
 ```
+
 What is the result? How does the frame handle the tie at x=2?
 
 23. Can a window frame produce **fewer** rows than expected? Under what conditions?
@@ -938,6 +942,7 @@ What is the result? How does the frame handle the tie at x=2?
 ## Output Prediction
 
 26. Given:
+
 ```sql
 CREATE TABLE t (id INT, val INT);
 INSERT INTO t VALUES (1,10),(2,20),(3,10),(4,30),(5,20);
@@ -946,27 +951,33 @@ SELECT id, val,
     ROW_NUMBER() OVER (ORDER BY val ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING) AS rn_frame
 FROM t;
 ```
+
 Predict the output.
 
 27. Given:
+
 ```sql
 SELECT id, val,
     COUNT(*) OVER (ORDER BY val ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS cnt
 FROM t;
 ```
+
 Predict the output for the same table.
 
 28. Given:
+
 ```sql
 SELECT id, val,
     COUNT(*) OVER (ORDER BY val RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS cnt
 FROM t;
 ```
+
 Predict the output. How does it differ from question 27?
 
 ## Debugging
 
 29. A developer writes:
+
 ```sql
 SELECT
     customer_id,
@@ -974,9 +985,11 @@ SELECT
     SUM(amount) OVER (ORDER BY order_date) AS running_total
 FROM orders;
 ```
+
 They report that some rows have the same running total. What is wrong and how do you fix it?
 
 30. A query returns correct results in PostgreSQL but different results in MySQL:
+
 ```sql
 SELECT
     id,
@@ -984,14 +997,17 @@ SELECT
     SUM(value) OVER (ORDER BY value) AS running_total
 FROM my_table;
 ```
+
 What could cause the difference?
 
 ## Performance
 
 31. You have a table with 100 million rows, partitioned by `user_id` (1 million distinct users, ~100 rows each). You write:
+
 ```sql
 SUM(amount) OVER (PARTITION BY user_id ORDER BY created_at ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
 ```
+
 What performance concerns might arise? What index would help?
 
 32. You have two window functions with different `ORDER BY` columns. How might this affect performance? What can you do to mitigate it?

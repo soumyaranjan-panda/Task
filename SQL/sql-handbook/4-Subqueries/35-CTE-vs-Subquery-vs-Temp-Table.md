@@ -2,17 +2,17 @@
 
 ## TL;DR
 
-| Tool | Scope | Persists after the statement? | Can be reused in a later statement? | Can you index it? | Has real statistics? |
-|------|-------|------------------------------|--------------------------------------|-------------------|----------------------|
-| **Subquery / derived table** | Current statement only | No | No | No | No (optimizer guesses) |
-| **CTE (`WITH`)** | Current statement only | No | No | No | No (optimizer guesses) |
-| **Temp table** | Session (or transaction) | Yes | Yes | Yes | Yes (if analyzed) |
+| Tool                         | Scope                    | Persists after the statement? | Can be reused in a later statement? | Can you index it? | Has real statistics?   |
+| ---------------------------- | ------------------------ | ----------------------------- | ----------------------------------- | ----------------- | ---------------------- |
+| **Subquery / derived table** | Current statement only   | No                            | No                                  | No                | No (optimizer guesses) |
+| **CTE (`WITH`)**             | Current statement only   | No                            | No                                  | No                | No (optimizer guesses) |
+| **Temp table**               | Session (or transaction) | Yes                           | Yes                                 | Yes               | Yes (if analyzed)      |
 
-The three tools can often produce **identical results**. What differs is *scope*, *readability*, *how many statements can see the result*, and — crucially — *how the optimizer treats them*.
+The three tools can often produce **identical results**. What differs is _scope_, _readability_, _how many statements can see the result_, and — crucially — _how the optimizer treats them_.
 
 > Common misconception
 > "A CTE is stored somewhere in memory; it's a faster temp table."
-> False. A CTE is a **named** subquery scoped to one statement. In many engines the CTE is *inlined* into the outer query and never materialized at all. A temp table is a real schema object with disk storage, statistics, and indexability.
+> False. A CTE is a **named** subquery scoped to one statement. In many engines the CTE is _inlined_ into the outer query and never materialized at all. A temp table is a real schema object with disk storage, statistics, and indexability.
 
 ---
 
@@ -20,20 +20,20 @@ The three tools can often produce **identical results**. What differs is *scope*
 
 ### What each thing is
 
-- **Subquery** — any `SELECT` nested inside another statement. Depending on *where* it appears it has a different name:
+- **Subquery** — any `SELECT` nested inside another statement. Depending on _where_ it appears it has a different name:
   - inside `SELECT` list → **scalar subquery** (must return 1 column, at most 1 row)
   - inside `FROM` → **derived table** (SQL Server / MySQL / ANSI) or **inline view** (Oracle) — must have an alias
   - inside `WHERE` / `HAVING` → comparison source, `IN`, `EXISTS`, etc.
   - **correlated** = references a column from the outer query
   - **non-correlated** = can run independently
 
-- **CTE (Common Table Expression)** — a subquery given a *name* using `WITH ... AS (...)`, scoped to the statement that follows it. It is the SQL-way to "declare a variable" for one query. Supports **recursion**.
+- **CTE (Common Table Expression)** — a subquery given a _name_ using `WITH ... AS (...)`, scoped to the statement that follows it. It is the SQL-way to "declare a variable" for one query. Supports **recursion**.
 
-- **Temp table** — an actual table created as a session/transaction-scoped object. You can insert into it, read it, update it, delete from it, index it, and reference it from *multiple* statements.
+- **Temp table** — an actual table created as a session/transaction-scoped object. You can insert into it, read it, update it, delete from it, index it, and reference it from _multiple_ statements.
 
 ### The mental model
 
-Everything you can do with a CTE, you can also do with a subquery, and vice versa. The CTE is mostly **syntactic sugar** (though engines add special behavior, see Internal Working). The temp table is a genuinely *different* creature: it outlives the statement.
+Everything you can do with a CTE, you can also do with a subquery, and vice versa. The CTE is mostly **syntactic sugar** (though engines add special behavior, see Internal Working). The temp table is a genuinely _different_ creature: it outlives the statement.
 
 Ask yourself: **"Do the intermediate results need to live past the current SQL statement?"**
 If no → subquery or CTE. If yes → temp table.
@@ -110,9 +110,9 @@ INSERT INTO orders (order_id, customer_id, order_date, amount, status) VALUES
 
 A subquery exists to answer a question **inline**, without creating any object. Examples:
 
-- "Which employees earn more than the *average*?" → the average is the subquery.
-- "Which departments have *no* employees?" → the emptiness check is the subquery.
-- "What is the *latest* order per customer?" → a derived table.
+- "Which employees earn more than the _average_?" → the average is the subquery.
+- "Which departments have _no_ employees?" → the emptiness check is the subquery.
+- "What is the _latest_ order per customer?" → a derived table.
 
 Why: it keeps related logic close together and lets one statement express ideas the basic `JOIN` syntax cannot (e.g., comparing each row against a computed constant).
 
@@ -145,6 +145,7 @@ WHERE EXISTS (SELECT 1 FROM orders o WHERE o.amount > e.salary);
 ```
 
 Rules:
+
 - A **scalar subquery** must return exactly **1 column** at runtime (SQL compilers reject 2+ columns) and at most **1 row** (multi-row → runtime error).
 - A **derived table** must have an **alias** in all engines.
 - Correlated subqueries can only reference tables visible to the outer block — always prefix with the outer alias to avoid confusion.
@@ -160,11 +161,11 @@ WHERE salary > (SELECT AVG(salary) FROM employees);
 
 Expected output:
 
-| name  | salary    |
-|-------|-----------|
-| Alice | 12000.00  |
-| Bob   | 11000.00  |
-| Carol |  9000.00  |
+| name  | salary   |
+| ----- | -------- |
+| Alice | 12000.00 |
+| Bob   | 11000.00 |
+| Carol | 9000.00  |
 
 `AVG(salary)` across all 6 employees = 53500 / 6 = 8916.67, so all three above it match.
 
@@ -183,20 +184,21 @@ WHERE e.salary > (
 
 Expected output:
 
-| name  | department_id | salary    |
-|-------|---------------|-----------|
-| Alice | 1             | 12000.00  |
-| Carol | 2             |  9000.00  |
+| name  | department_id | salary   |
+| ----- | ------------- | -------- |
+| Alice | 1             | 12000.00 |
+| Carol | 2             | 9000.00  |
 
 Explanation of every row:
+
 - Alice: dept 1 avg = 11500, 12000 > 11500 ✔
-- Bob:   dept 1 avg = 11500, 11000 ✘
-- Carol: dept 2 avg =  8750,  9000 >  8750 ✔
-- Dave:  dept 2 avg =  8750,  8500 ✘
-- Eve:   dept 3 avg =  7000,  7000 ✘ (equal is NOT greater)
+- Bob: dept 1 avg = 11500, 11000 ✘
+- Carol: dept 2 avg = 8750, 9000 > 8750 ✔
+- Dave: dept 2 avg = 8750, 8500 ✘
+- Eve: dept 3 avg = 7000, 7000 ✘ (equal is NOT greater)
 - Frank: dept NULL → inner query finds nothing → `AVG(...)` over zero rows is **NULL** → `6000 > NULL` is **UNKNOWN** → row filtered out.
 
-Between the lines: a **correlated** subquery depends on each outer row, so semantically it must be re-evaluated — the optimizer *usually* turns it into a `Nested Loop` + `Index/Index-only scan` on the inner side. If the inner column has no index, that is a per-row scan. See Performance.
+Between the lines: a **correlated** subquery depends on each outer row, so semantically it must be re-evaluated — the optimizer _usually_ turns it into a `Nested Loop` + `Index/Index-only scan` on the inner side. If the inner column has no index, that is a per-row scan. See Performance.
 
 ## Example 3 — derived table in FROM
 
@@ -214,26 +216,26 @@ JOIN (
 Expected output:
 
 | department_name | avg_salary |
-|-----------------|------------|
+| --------------- | ---------- |
 | Engineering     | 11500.00   |
-| Sales           |  8750.00   |
-| HR              |  7000.00   |
+| Sales           | 8750.00    |
+| HR              | 7000.00    |
 
 Note Marketing disappears: it has no employees, so the `JOIN` (inner) drops it. If you wanted Marketing with `NULL`, use `LEFT JOIN` and move semantics accordingly.
 
 ## Correlated vs non-correlated — comparison
 
-| Property | Non-correlated | Correlated |
-|----------|----------------|------------|
-| Depends on outer row | No | Yes |
-| Could run standalone | Yes | No |
-| Typically executed | Once (constant) or joined | Per outer row (semantically) |
-| Typical plan shape | Index scan, hash join, aggregate once | Nested loop with lookup per row |
-| Risk | Double evaluation if poorly factored | N+1-style work if no index |
+| Property             | Non-correlated                        | Correlated                      |
+| -------------------- | ------------------------------------- | ------------------------------- |
+| Depends on outer row | No                                    | Yes                             |
+| Could run standalone | Yes                                   | No                              |
+| Typically executed   | Once (constant) or joined             | Per outer row (semantically)    |
+| Typical plan shape   | Index scan, hash join, aggregate once | Nested loop with lookup per row |
+| Risk                 | Double evaluation if poorly factored  | N+1-style work if no index      |
 
 > Common misconception
 > "A correlated subquery always runs the inner SELECT once per row, so it's always slow."
-> Not necessarily. Engines may convert it to a join or reuse an aggregate. Conversely, a *non-correlated* aggregate can be re-computed if you repeat it carelessly. Verify with the execution plan — never assume.
+> Not necessarily. Engines may convert it to a join or reuse an aggregate. Conversely, a _non-correlated_ aggregate can be re-computed if you repeat it carelessly. Verify with the execution plan — never assume.
 
 ## Nested subqueries
 
@@ -269,6 +271,7 @@ SELECT ... FROM name ...;
 ```
 
 Why they exist:
+
 - **Readability** — name each logical step ("raw_data", "deduplicated", "aggregated").
 - **Reusability within one statement** — reference the CTE multiple times (joins, unions, comparisons).
 - **Recursion** — the only supported way across all major engines (see the Recursive CTE section).
@@ -295,9 +298,10 @@ LEFT JOIN cte2 c2 ON c2.department_id = e.department_id;
 ```
 
 Rules and gotchas:
+
 - Multiple CTEs are comma-separated. Only the last CTE is directly followed by the main statement.
-- A CTE name may shadow a real table *inside the same statement* in some engines (e.g., `WITH employees AS ...`). Qualify with schema name (`public.employees`) when you truly need the physical table.
-- A CTE must be **immediately followed** by the statement that consumes it. There is no way to say "SELECT a FROM cte" in a *later* statement — the name is dead after the statement ends.
+- A CTE name may shadow a real table _inside the same statement_ in some engines (e.g., `WITH employees AS ...`). Qualify with schema name (`public.employees`) when you truly need the physical table.
+- A CTE must be **immediately followed** by the statement that consumes it. There is no way to say "SELECT a FROM cte" in a _later_ statement — the name is dead after the statement ends.
 
 ## Example — the "top N per group" pattern (with a window function)
 
@@ -321,16 +325,17 @@ ORDER BY department_id, rn;
 
 Expected output:
 
-| name  | department_id | salary    |
-|-------|---------------|-----------|
-| Alice | 1             | 12000.00  |
-| Bob   | 1             | 11000.00  |
-| Carol | 2             |  9000.00  |
-| Dave  | 2             |  8500.00  |
-| Eve   | 3             |  7000.00  |
-| Frank | NULL          |  6000.00  |
+| name  | department_id | salary   |
+| ----- | ------------- | -------- |
+| Alice | 1             | 12000.00 |
+| Bob   | 1             | 11000.00 |
+| Carol | 2             | 9000.00  |
+| Dave  | 2             | 8500.00  |
+| Eve   | 3             | 7000.00  |
+| Frank | NULL          | 6000.00  |
 
 Three notes:
+
 - **Frank appears** because `PARTITION BY NULL department_id` makes its own single-row partition. If you do not want unassigned employees, add `WHERE department_id IS NOT NULL`.
 - Ties: `ROW_NUMBER()` picks arbitrarily among ties — use `RANK()` / `DENSE_RANK()` when ties must all survive.
 - Compare this against the same problem written with correlated subqueries: far more code and, depending on the plan, far more work. Cross-reference the **Window Functions** section.
@@ -369,19 +374,20 @@ WHERE e.salary > d.avg_salary;
 
 Expected output:
 
-| name  | diff    | bucket |
-|-------|---------|--------|
-| Alice |  500.00 | above  |
-| Carol |  250.00 | above  |
+| name  | diff   | bucket |
+| ----- | ------ | ------ |
+| Alice | 500.00 | above  |
+| Carol | 250.00 | above  |
 
 Why better:
+
 - **Maintenance**: change the aggregate logic in one place, not three or five.
 - **Correctness by construction**: the `JOIN` naturally excludes employees with no department, so Frank is gone without any special-casing.
-- **Plans usually improve**: a single grouped access path feeding the join is normally cheaper than three separate per-row aggregate rescans — *but confirm with the plan*, see Analysis.
+- **Plans usually improve**: a single grouped access path feeding the join is normally cheaper than three separate per-row aggregate rescans — _but confirm with the plan_, see Analysis.
 
 > Common misconception
 > "A CTE always runs exactly once, so it always saves work."
-> In several engines a CTE referenced once is **inlined** (treated like a mask over the same query). Only some engines materialize multi-referenced CTEs, and PostgreSQL 16 changed that behavior too. "Runs once" is a *symptom to be checked*, not a guarantee.
+> In several engines a CTE referenced once is **inlined** (treated like a mask over the same query). Only some engines materialize multi-referenced CTEs, and PostgreSQL 16 changed that behavior too. "Runs once" is a _symptom to be checked_, not a guarantee.
 
 ## CTEs with data-modifying statements
 
@@ -425,8 +431,9 @@ DELETE FROM cte;                 -- deletes through the CTE view
 A temp table is a **real table** created in a special per-session space (e.g., `tempdb` in SQL Server, `pg_temp` schema in PostgreSQL). It lives in your session (or transaction), holds real rows on disk, can be **indexed**, and can be read/modified by **multiple sequential statements**.
 
 Why they exist:
+
 - **Cross-statement reuse** — one pipeline: create → load → index → run query 1 → query 2 → query 3, all against the same materialized result.
-- **Real statistics** — the optimizer collects/estimates stats on a temp table, so join order and choices for a *large* intermediate result are usually more accurate.
+- **Real statistics** — the optimizer collects/estimates stats on a temp table, so join order and choices for a _large_ intermediate result are usually more accurate.
 - **Explicit materialization control** — you force the physical write; no optimizer guessing about inlining.
 - **Break very large/complex queries** into debuggable steps.
 
@@ -464,12 +471,12 @@ FROM employees GROUP BY department_id;
 
 Engine naming/scoping summary:
 
-| Engine | Syntax | Scope | Auto-cleaned |
-|--------|--------|-------|--------------|
-| SQL Server | `#name` (local), `##name` (global) | Local: connection. Global: shared across sessions while creator alive | Local: on disconnect. Global: on last session close |
-| PostgreSQL | `CREATE TEMP TABLE` | Session (or transaction with `ON COMMIT DROP`) | End of session |
-| MySQL | `CREATE TEMPORARY TABLE` | Session; can shadow a table with the same name | On connection close |
-| Oracle | `GLOBAL TEMPORARY TABLE` (definition in data dictionary) | Data per session/transaction | On commit (DELETE ROWS mode) / session end |
+| Engine     | Syntax                                                   | Scope                                                                 | Auto-cleaned                                        |
+| ---------- | -------------------------------------------------------- | --------------------------------------------------------------------- | --------------------------------------------------- |
+| SQL Server | `#name` (local), `##name` (global)                       | Local: connection. Global: shared across sessions while creator alive | Local: on disconnect. Global: on last session close |
+| PostgreSQL | `CREATE TEMP TABLE`                                      | Session (or transaction with `ON COMMIT DROP`)                        | End of session                                      |
+| MySQL      | `CREATE TEMPORARY TABLE`                                 | Session; can shadow a table with the same name                        | On connection close                                 |
+| Oracle     | `GLOBAL TEMPORARY TABLE` (definition in data dictionary) | Data per session/transaction                                          | On commit (DELETE ROWS mode) / session end          |
 
 ## Example — a reporting pipeline that needs the aggregate 3 times
 
@@ -512,6 +519,7 @@ SELECT status, MAX(amount)                            FROM #orders_2026 GROUP BY
 ```
 
 Why better:
+
 - The filter + extraction runs **once**, not three times.
 - You get a guaranteed consistent snapshot (all queries see the same rows).
 - The index lets the three aggregations re-scan efficiently.
@@ -525,7 +533,7 @@ Why better:
 Everything you know about tables applies: `INDEX`, constraints, `UPDATE`, `DELETE`, joins with other temp or regular tables, and — if in use — **transactions roll back their contents**.
 
 > Production pitfall (SQL Server)
-> `##global` temp tables are visible to *other sessions*. Two copies of your job running concurrently can collide on the same `##name` and step on each other's schema or data. Prefer `#local` unless you truly need cross-session sharing (and clean up in a `TRY/FINALLY`-style pattern).
+> `##global` temp tables are visible to _other sessions_. Two copies of your job running concurrently can collide on the same `##name` and step on each other's schema or data. Prefer `#local` unless you truly need cross-session sharing (and clean up in a `TRY/FINALLY`-style pattern).
 
 ---
 
@@ -533,36 +541,37 @@ Everything you know about tables applies: `INDEX`, constraints, `UPDATE`, `DELET
 
 The single biggest difference is **materialization vs inlining**:
 
-- **Inline**: the engine *rewrites* the subquery/CTE into the outer query, as if you pasted its SQL there. Cheap, no temp storage, filter pushdown possible, statistics come from the underlying tables.
+- **Inline**: the engine _rewrites_ the subquery/CTE into the outer query, as if you pasted its SQL there. Cheap, no temp storage, filter pushdown possible, statistics come from the underlying tables.
 - **Materialize**: the engine physically computes the intermediate result (memory, or spilled to temp space) and reads it like a table.
 
 You (almost always) do not control this for subqueries. You partially control it for CTEs. You always force it for temp tables.
 
-| Engine | Subquery / derived table | CTE | Temp table |
-|--------|--------------------------|-----|------------|
-| **PostgreSQL** | Optimizer merges/flattens where possible | v11 and earlier: **always materialized** (a "fence"). v12+: non-recursive single-reference CTEs may be **inlined**. v16+: even multi-reference CTEs may be inlined per reference. Control with `MATERIALIZED` / `NOT MATERIALIZED` keywords | Always real relation (in `pg_temp`) |
-| **MySQL** | May merge into the outer query, or materialize (e.g., when the derived table uses `LIMIT`, `DISTINCT`, `GROUP BY`, window functions) | Same optimizer logic as derived tables; no keyword to force either way | Always real relation |
-| **SQL Server** | Optimizer may flatten a simple subquery (e.g., turn an `IN` into a join/semi-join, `NOT EXISTS` into an anti-join) | Treated like an inline view per reference; the CTE is generally *expanded*, not stored. No `MATERIALIZE` hint. May spool as an execution-plan choice | Real table in `tempdb` with statistics/indexes |
-| **Oracle** | Optimizer flattens/merges aggressively; `NO_UNNEST` hint forces a nested-loop subquery evaluation | Subquery factoring: when referenced more than once, Oracle usually **materializes** it (see it in the plan); hints `MATERIALIZE` / `INLINE` force either way | `GTT` is a real table with per-session data segment |
+| Engine         | Subquery / derived table                                                                                                             | CTE                                                                                                                                                                                                                                         | Temp table                                          |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| **PostgreSQL** | Optimizer merges/flattens where possible                                                                                             | v11 and earlier: **always materialized** (a "fence"). v12+: non-recursive single-reference CTEs may be **inlined**. v16+: even multi-reference CTEs may be inlined per reference. Control with `MATERIALIZED` / `NOT MATERIALIZED` keywords | Always real relation (in `pg_temp`)                 |
+| **MySQL**      | May merge into the outer query, or materialize (e.g., when the derived table uses `LIMIT`, `DISTINCT`, `GROUP BY`, window functions) | Same optimizer logic as derived tables; no keyword to force either way                                                                                                                                                                      | Always real relation                                |
+| **SQL Server** | Optimizer may flatten a simple subquery (e.g., turn an `IN` into a join/semi-join, `NOT EXISTS` into an anti-join)                   | Treated like an inline view per reference; the CTE is generally _expanded_, not stored. No `MATERIALIZE` hint. May spool as an execution-plan choice                                                                                        | Real table in `tempdb` with statistics/indexes      |
+| **Oracle**     | Optimizer flattens/merges aggressively; `NO_UNNEST` hint forces a nested-loop subquery evaluation                                    | Subquery factoring: when referenced more than once, Oracle usually **materializes** it (see it in the plan); hints `MATERIALIZE` / `INLINE` force either way                                                                                | `GTT` is a real table with per-session data segment |
 
 Key consequence to remember:
 
 > Interview trap
-> "Name three reasons a temp table *can* (not must) beat a subquery for a big intermediate result."
+> "Name three reasons a temp table _can_ (not must) beat a subquery for a big intermediate result."
+>
 > 1. **Statistics** exist (cardinality estimates are accurate, so join order improves).
 > 2. **Indexability** — you can add exactly the index the later queries need.
 > 3. **One-time computation** — a heavy filter/aggregate is executed once and reused across many statements.
-> The liability is real disk/temp write + the fact that you must *build* it first. None of this is guaranteed to be faster in a given query — check the plan.
+>    The liability is real disk/temp write + the fact that you must _build_ it first. None of this is guaranteed to be faster in a given query — check the plan.
 
 ### Cardinality estimation
 
-- For inlined subqueries/CTEs, the optimizer estimates rows using the real base-table statistics *after pushing predicates down* — usually good.
+- For inlined subqueries/CTEs, the optimizer estimates rows using the real base-table statistics _after pushing predicates down_ — usually good.
 - For materialized CTEs without stats, engines fall back to **heuristics/guesses** for fan-out of a table expression.
-- For temp tables, statistics exist (or are `UPDATE STATISTICS`-able), which is what makes join order for *large* intermediates more trustworthy — at the cost of having to write + analyze the rows first.
+- For temp tables, statistics exist (or are `UPDATE STATISTICS`-able), which is what makes join order for _large_ intermediates more trustworthy — at the cost of having to write + analyze the rows first.
 
 ### What to look for in the execution plan
 
-- `EXPLAIN (ANALYZE, BUFFERS)` (PostgreSQL), `EXPLAIN ANALYZE` (MySQL), SQL Server *Estimated/Actual Execution Plan* (+ `SET STATISTICS IO, TIME ON`), Oracle `EXPLAIN PLAN FOR` + `DBMS_XPLAN` / `AUTOTRACE`.
+- `EXPLAIN (ANALYZE, BUFFERS)` (PostgreSQL), `EXPLAIN ANALYZE` (MySQL), SQL Server _Estimated/Actual Execution Plan_ (+ `SET STATISTICS IO, TIME ON`), Oracle `EXPLAIN PLAN FOR` + `DBMS_XPLAN` / `AUTOTRACE`.
 - Look for nodes labelled: `CTE Scan`, `Subquery Scan`, `Materialize`, `Spool`, `Derived`, `Inline View` — these tell you whether your CTE/subquery was inlined or materialized.
 - Check **estimated vs actual rows** at every node. A huge mismatch = a statistics problem, which is the classic temp-table justification.
 - Check **loops** in `Nested Loop` nodes: loops = "how many times this subquery was executed." A correlated subquery with a large loops count is your smoking gun.
@@ -590,21 +599,21 @@ You would typically see a `Nested Loop` node with `loops=6` (once per outer empl
 
 ## Feature comparison
 
-| Feature | Subquery / derived | CTE | Temp table |
-|---------|--------------------|-----|------------|
-| Named result | No | Yes | Yes |
-| Scope | One statement | One statement | Session / transaction |
-| Reference multiple times in one statement | Only by duplicate SQL | Yes (by name) | Yes |
-| Reference in later statements | No | No | Yes |
-| Recursion support | No | Yes (recursive CTE) | No (write a loop) |
-| Indexable | No | No | Yes |
-| Real statistics | Usually no | Usually no | Yes |
-| Physical storage | Usually none (inlined) | Maybe (materialized) | Always |
-| Optimizer materialization control | No | PG: `MATERIALIZED`; Oracle: hints | Forced |
-| Modifiable (DML/DDL) | No | Only via the wrapping statement | Yes, full |
-| Debuggable step in a pipeline | No | Sort of | Yes |
-| Readability when deeply nested | Poor | Good | Good |
-| Overhead | Lowest (usually none) | None if inlined, temp write if materialized | Temp write always |
+| Feature                                   | Subquery / derived     | CTE                                         | Temp table            |
+| ----------------------------------------- | ---------------------- | ------------------------------------------- | --------------------- |
+| Named result                              | No                     | Yes                                         | Yes                   |
+| Scope                                     | One statement          | One statement                               | Session / transaction |
+| Reference multiple times in one statement | Only by duplicate SQL  | Yes (by name)                               | Yes                   |
+| Reference in later statements             | No                     | No                                          | Yes                   |
+| Recursion support                         | No                     | Yes (recursive CTE)                         | No (write a loop)     |
+| Indexable                                 | No                     | No                                          | Yes                   |
+| Real statistics                           | Usually no             | Usually no                                  | Yes                   |
+| Physical storage                          | Usually none (inlined) | Maybe (materialized)                        | Always                |
+| Optimizer materialization control         | No                     | PG: `MATERIALIZED`; Oracle: hints           | Forced                |
+| Modifiable (DML/DDL)                      | No                     | Only via the wrapping statement             | Yes, full             |
+| Debuggable step in a pipeline             | No                     | Sort of                                     | Yes                   |
+| Readability when deeply nested            | Poor                   | Good                                        | Good                  |
+| Overhead                                  | Lowest (usually none)  | None if inlined, temp write if materialized | Temp write always     |
 
 ## When to use which — decision guide
 
@@ -623,6 +632,7 @@ flowchart TD
 ```
 
 Common real-world guidance (with the "optimizers vary" disclaimer baked in):
+
 - One-liner condition → **subquery** (`WHERE x > (SELECT AVG ...)`), `EXISTS`, `IN`.
 - Single statement with 3+ logical steps → **CTE** for readability.
 - The same heavy intermediate value is needed by several queries / a batch → **temp table**, once, indexed.
@@ -650,18 +660,18 @@ FROM employees e;
 
 Expected output:
 
-| name  | dept         |
-|-------|--------------|
-| Alice | Engineering  |
-| Bob   | Engineering  |
-| Carol | Sales        |
-| Dave  | Sales        |
-| Eve   | HR           |
-| Frank | Unassigned   |
+| name  | dept        |
+| ----- | ----------- |
+| Alice | Engineering |
+| Bob   | Engineering |
+| Carol | Sales       |
+| Dave  | Sales       |
+| Eve   | HR          |
+| Frank | Unassigned  |
 
 Because Frank's `department_id` is NULL, the scalar subquery returns NULL, and any comparison with NULL becomes **UNKNOWN** (e.g., `WHERE ... = (subquery)` would drop Frank silently). Use `IS NOT DISTINCT FROM` (PostgreSQL), `COALESCE`, or a `LEFT JOIN` when you need nullable matches to survive.
 
-## 6.2 The killer: `NOT IN` with a NULL in the list returns *nothing*
+## 6.2 The killer: `NOT IN` with a NULL in the list returns _nothing_
 
 Find employees who are **not** in a given list, e.g. "who is NOT in sales (dept 2) and also NOT in the group of unreviewed departments"?
 
@@ -690,7 +700,7 @@ WHERE NOT EXISTS (
 Expected output:
 
 | name  |
-|-------|
+| ----- |
 | Alice |
 | Bob   |
 | Eve   |
@@ -717,10 +727,10 @@ LEFT JOIN (
 ```
 
 | department_name | avg_salary |
-|-----------------|------------|
+| --------------- | ---------- |
 | Engineering     | 11500.00   |
-| Sales           |  8750.00   |
-| HR              |  7000.00   |
+| Sales           | 8750.00    |
+| HR              | 7000.00    |
 | Marketing       | NULL       |
 
 Wrapping with `COALESCE(AVG(salary), 0)` changes the semantics — pick deliberately.
@@ -737,7 +747,7 @@ Wrapping with `COALESCE(AVG(salary), 0)` changes the semantics — pick delibera
 
 1. **Empty source tables.** Every variant returns empty (or a single NULL row for an aggregate). `AVG`, `SUM`, `MAX` → NULL; `COUNT(*)` → 0. A sequence of CTEs over empty data cascades empty results — usually fine, but watch `COALESCE` calls downstream.
 
-2. **Scalar subquery returns more than one row** → runtime error, e.g. SQL Server: *"Subquery returned more than 1 value."* Everything that returns multiple rows must go through `FROM`/derived table or an aggregate.
+2. **Scalar subquery returns more than one row** → runtime error, e.g. SQL Server: _"Subquery returned more than 1 value."_ Everything that returns multiple rows must go through `FROM`/derived table or an aggregate.
 
 3. **Derived table with no alias** → syntax error in every engine. Always `AS alias`.
 
@@ -770,8 +780,8 @@ WHERE 1 = 1 -- placebo; real queries join or check exists below
 # 8. Common Mistakes
 
 1. **`NOT IN (...)` with a NULL-producing subquery** — silent zero rows. Use `NOT EXISTS`. (Section 6.2)
-2. **Uncorrelated subquery gaslighted into correlated** — or worse, forgetting the alias: `WHERE x.department_id = department_id` matches the *inner* table twice and behaves like a Cartesian product inside the subquery.
-3. **Assuming a CTE is a stored table** — then trying to use it in the *next* statement and getting *"relation ... does not exist"*. Scope = one statement.
+2. **Uncorrelated subquery gaslighted into correlated** — or worse, forgetting the alias: `WHERE x.department_id = department_id` matches the _inner_ table twice and behaves like a Cartesian product inside the subquery.
+3. **Assuming a CTE is a stored table** — then trying to use it in the _next_ statement and getting _"relation ... does not exist"_. Scope = one statement.
 4. **Counting on "runs once".** Materialization is engine- and version-dependent. Never ship an optimization claim on it without an execution plan.
 5. **Masking fan-out with `DISTINCT`.** If a subquery returns extra rows because of a one-to-many join, skipping `DISTINCT` hides the real bug. Cross-reference **Join Duplication / fan-out**.
 6. **Derived tables without aliases** — trivial but frequent syntax error.
@@ -784,7 +794,7 @@ WHERE 1 = 1 -- placebo; real queries join or check exists below
 
 # 9. Performance Implications
 
-Everything here is *potential* and must be verified with the execution plan for your engine/version/data. The recurring theme:
+Everything here is _potential_ and must be verified with the execution plan for your engine/version/data. The recurring theme:
 
 > Query text ≠ execution strategy. `WITH`, `IN`, `EXISTS`, and temp tables are all touchpoints into the optimizer — the plan decides what actually happens.
 
@@ -822,15 +832,15 @@ FROM sliced
 GROUP BY status;
 ```
 
-**Honest caveat**: in engines that *inline*, both versions produce nearly identical plans (the predicate gets pushed down automatically). In engines/versions that *materialize*, the difference can be enormous. Check `EXPLAIN`. The rule of thumb — *write the filter where the semantic intent lives* — is harmless in both worlds.
+**Honest caveat**: in engines that _inline_, both versions produce nearly identical plans (the predicate gets pushed down automatically). In engines/versions that _materialize_, the difference can be enormous. Check `EXPLAIN`. The rule of thumb — _write the filter where the semantic intent lives_ — is harmless in both worlds.
 
 Expected output (both):
 
 | status    | sum(amount) |
-|-----------|-------------|
-| pending   |   555.50    |
-| shipped   |   130.75    |
-| cancelled |   999.99    |
+| --------- | ----------- |
+| pending   | 555.50      |
+| shipped   | 130.75      |
+| cancelled | 999.99      |
 
 ## BAD vs BETTER — reuse across many checks
 
@@ -855,11 +865,13 @@ CREATE INDEX ix_orders_2026 ON #orders_2026(status);
 -- five reports read #orders_2026
 ```
 
-This *can* be dramatically faster when:
+This _can_ be dramatically faster when:
+
 - the slice is expensive (big filters, joins, dedup) and reused;
 - you add indexes purpose-built for the downstream queries.
 
-It *can* be a wash or slower when:
+It _can_ be a wash or slower when:
+
 - the slice is trivially cheap and the base table is already indexed;
 - you read it once and pay the temp write for nothing;
 - the optimizer would have pushed predicates out of an inlined CTE anyway.
@@ -881,15 +893,15 @@ It *can* be a wash or slower when:
 
 # 10. Production Pitfalls
 
-1. **Volatile functions inside CTEs and materialization.** A CTE capturing `now()`, `random()`, `nextval()`, or `getdate()` may be evaluated *once* (materialized) or *per reference* (inlined) → the same named CTE can return different values depending on the plan. In PostgreSQL after v16, a multi-referenced CTE can be inlined per reference, so a "snapshot" built inside a CTE is **not** guaranteed to be a snapshot. Materialize deliberately or pass the value as a bound parameter.
+1. **Volatile functions inside CTEs and materialization.** A CTE capturing `now()`, `random()`, `nextval()`, or `getdate()` may be evaluated _once_ (materialized) or _per reference_ (inlined) → the same named CTE can return different values depending on the plan. In PostgreSQL after v16, a multi-referenced CTE can be inlined per reference, so a "snapshot" built inside a CTE is **not** guaranteed to be a snapshot. Materialize deliberately or pass the value as a bound parameter.
 
-2. **Temp-table sprawl in `tempdb`.** SQL Server temp tables are stored in `tempdb`; creating thousands of them in high-concurrency OLTP code causes DDL and allocation contention. Use them for *reporting/batch* work, not hot request paths. Don't `SELECT INTO` inside inner loops.
+2. **Temp-table sprawl in `tempdb`.** SQL Server temp tables are stored in `tempdb`; creating thousands of them in high-concurrency OLTP code causes DDL and allocation contention. Use them for _reporting/batch_ work, not hot request paths. Don't `SELECT INTO` inside inner loops.
 
 3. **Global temp tables (`##`).** Shared across sessions → collision risk. See earlier pitfall.
 
 4. **Oracle GTT and commit semantics.** `ON COMMIT PRESERVE ROWS` keeps rows for your whole session; a miswritten job sees yesterday's leftovers. Prefer `ON COMMIT DELETE ROWS` for per-request scratch.
 
-5. **Stale stats on temp tables.** The plan decides *before* you might expect; a multi-million-row `#temp` created 3 lines ago has essentially no statistics. `UPDATE STATISTICS` (SQL Server) / `ANALYZE` (PG/others) after the load if the table is then joined heavily.
+5. **Stale stats on temp tables.** The plan decides _before_ you might expect; a multi-million-row `#temp` created 3 lines ago has essentially no statistics. `UPDATE STATISTICS` (SQL Server) / `ANALYZE` (PG/others) after the load if the table is then joined heavily.
 
 6. **Recursive CTEs as growing bombs.** Deep hierarchies + no max-depth guard → runaway CPU. Always bound recursion in production.
 
@@ -899,7 +911,7 @@ It *can* be a wash or slower when:
 
 # 11. Interview Traps
 
-1. **"Which is faster: CTE, subquery, or temp table?"** — There is no universal answer; it depends on optimizer, indexes, statistics, cardinality, and the specific plan. The safe answer demonstrates knowledge of *inlining vs materialization* and says "explain/measure."
+1. **"Which is faster: CTE, subquery, or temp table?"** — There is no universal answer; it depends on optimizer, indexes, statistics, cardinality, and the specific plan. The safe answer demonstrates knowledge of _inlining vs materialization_ and says "explain/measure."
 2. **"A CTE is stored in memory"** → false; it may be inlined or materialized depending on engine and version.
 3. **`NOT IN` with NULL returns empty set** — the classic silent-failure quiz. Expected answer: use `NOT EXISTS` or guarantee no NULLs.
 4. **Scalar subquery returning multiple rows throws** — "Subquery returned more than 1 value." Answers are binary: aggregates or row-limiting guaranteed single row, or move to derived table.
@@ -968,7 +980,7 @@ It *can* be a wash or slower when:
 1. **HR dashboard**: You must compute (a) headcount per department, (b) average salary per department, (c) employees above their department average — for a single report run from one query. Which tool(s) do you choose and why?
 2. **Daily ETL**: A scheduled job runs 20 queries, each starting with the same 3-table join filtered to today's date. Would you use a CTE, subquery, or temp table? Justify with statistics and consistency arguments.
 3. **Org chart**: Users can drill into a manager→employee hierarchy of arbitrary depth. Which tool is designed for this?
-4. **Anti-report**: Marketing wants all customers with *no* orders in the last 90 days. Contrast `NOT IN`, `NOT EXISTS`, and left-join approaches given a nullable `orders.customer_id`.
+4. **Anti-report**: Marketing wants all customers with _no_ orders in the last 90 days. Contrast `NOT IN`, `NOT EXISTS`, and left-join approaches given a nullable `orders.customer_id`.
 5. **Top per group**: Management wants the top 3 orders by amount per month. Show the CTE solution and explain how ties (`RANK` vs `ROW_NUMBER`) change output.
 6. **Bug report**: A dashboard shows double-counted revenue after a developer changed an `IN` to a correlated subquery inside a one-to-many join. Walk through how you would debug it (hint: fan-out, then `DISTINCT` masking it).
 
@@ -1034,7 +1046,7 @@ WHERE a.avg_salary IS NULL;
 
 1. A query worked on the dev server but returns **zero rows** in production. The only difference: the production lookup table contains rows with NULL key values. What changed, and which construct (`NOT IN`, `NOT EXISTS`, `LEFT JOIN`) should you standardize on?
 2. Query gets slower after migrating from a CTE to an equivalent temp table. Name three things to check in the plan (statistics, index usage, temp write cost) and how you would measure each.
-3. A CTE returns the same value on both references for `now()`, but after a PostgreSQL upgrade both references return *different* values. Explain what changed and how to force the old behavior deliberately.
+3. A CTE returns the same value on both references for `now()`, but after a PostgreSQL upgrade both references return _different_ values. Explain what changed and how to force the old behavior deliberately.
 4. "The report double-counts revenue when I switch from independent `IN`-subqueries to a multi-CTE rewrite." List the debugging steps, from checking grain and fan-out to examining the execution plan for the duplicate scan.
 5. `CREATE TEMPORARY TABLE` fails with "already exists" in a long-lived connection that re-runs your batch. How do you make the batch idempotent?
 
@@ -1043,6 +1055,6 @@ WHERE a.avg_salary IS NULL;
 1. Explain why "CTEs are always faster" is false, and name the exact plan nodes you would look for to prove it in your engine.
 2. When would a **stats-less** materialized CTE produce a catastrophically different join order than a temp table with freshly analyzed statistics? Give the cardinality-estimation reasoning.
 3. Contrast filter pushdown for a single-reference inlined CTE vs a forced materialization in one specific engine of your choice.
-4. Your correlated subquery does an unindexed inner lookup. Show the plan shape (per-row scan) and propose the fix, then explain why the optimizer *could* also have chosen a hash join.
+4. Your correlated subquery does an unindexed inner lookup. Show the plan shape (per-row scan) and propose the fix, then explain why the optimizer _could_ also have chosen a hash join.
 5. Design an A/B test to compare subquery vs temp table for a 5-statement reporting pipeline on real data. Which metrics do you capture (`SET STATISTICS IO, TIME ON`, `EXPLAIN (ANALYZE, BUFFERS)`, wall time), and what confounds would you control (caching, statistics state, concurrency)?
 6. Is a large `SELECT * FROM t WHERE ... LIMIT 10` inside a CTE free, cheap, or expensive — and does the answer change depending on whether the engine materializes the CTE (MySQL) or can push the limit down (PostgreSQL inlining)?

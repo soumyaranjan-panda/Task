@@ -48,13 +48,13 @@ INSERT INTO employees VALUES
 
 **Grain:** One row = one employee.
 
-| id | name | email | hire_date | manager_id |
-|----|------|-------|-----------|------------|
-| 1 | Alice | alice@co.com | 2020-01-15 | NULL |
-| 2 | Bob | bob@co.com | 2021-03-22 | 1 |
-| 3 | Charlie | NULL | 2022-07-01 | 1 |
-| 4 | Diana | diana@co.com | 2023-11-10 | NULL |
-| 5 | Eve | NULL | 2024-02-28 | 3 |
+| id  | name    | email        | hire_date  | manager_id |
+| --- | ------- | ------------ | ---------- | ---------- |
+| 1   | Alice   | alice@co.com | 2020-01-15 | NULL       |
+| 2   | Bob     | bob@co.com   | 2021-03-22 | 1          |
+| 3   | Charlie | NULL         | 2022-07-01 | 1          |
+| 4   | Diana   | diana@co.com | 2023-11-10 | NULL       |
+| 5   | Eve     | NULL         | 2024-02-28 | 3          |
 
 ---
 
@@ -62,13 +62,13 @@ INSERT INTO employees VALUES
 
 SQL uses **three-valued logic** (3VL): `TRUE`, `FALSE`, and `UNKNOWN`. Every comparison involving NULL produces `UNKNOWN`, not `TRUE` or `FALSE`.
 
-| A | B | A = B |
-|---|---|-------|
-| 10 | 10 | TRUE |
-| 10 | 20 | FALSE |
-| 10 | NULL | UNKNOWN |
+| A    | B    | A = B   |
+| ---- | ---- | ------- |
+| 10   | 10   | TRUE    |
+| 10   | 20   | FALSE   |
+| 10   | NULL | UNKNOWN |
 | NULL | NULL | UNKNOWN |
-| NULL | 10 | UNKNOWN |
+| NULL | 10   | UNKNOWN |
 
 In a `WHERE` clause, only rows where the condition evaluates to `TRUE` are returned. `FALSE` and `UNKNOWN` are both filtered out.
 
@@ -130,10 +130,10 @@ FROM employees
 WHERE manager_id IS NULL;
 ```
 
-| id | name | email |
-|----|------|-------|
-| 1 | Alice | alice@co.com |
-| 4 | Diana | diana@co.com |
+| id  | name  | email        |
+| --- | ----- | ------------ |
+| 1   | Alice | alice@co.com |
+| 4   | Diana | diana@co.com |
 
 ### Example: Finding employees with an email on file
 
@@ -143,11 +143,11 @@ FROM employees
 WHERE email IS NOT NULL;
 ```
 
-| id | name | email |
-|----|------|-------|
-| 1 | Alice | alice@co.com |
-| 2 | Bob | bob@co.com |
-| 4 | Diana | diana@co.com |
+| id  | name  | email        |
+| --- | ----- | ------------ |
+| 1   | Alice | alice@co.com |
+| 2   | Bob   | bob@co.com   |
+| 4   | Diana | diana@co.com |
 
 ### NULL Behavior
 
@@ -175,13 +175,13 @@ column1 IS NOT DISTINCT FROM column2 -- NULL-safe EQUAL
 
 ### Comparison Table
 
-| Expression | Normal Behavior | IS DISTINCT FROM Behavior |
-|------------|----------------|--------------------------|
-| `10 = 10` | TRUE | FALSE (not distinct) |
-| `10 = 20` | FALSE | TRUE (distinct) |
-| `10 = NULL` | UNKNOWN | TRUE (distinct) |
-| `NULL = NULL` | UNKNOWN | FALSE (not distinct) |
-| `NULL = 10` | UNKNOWN | TRUE (distinct) |
+| Expression    | Normal Behavior | IS DISTINCT FROM Behavior |
+| ------------- | --------------- | ------------------------- |
+| `10 = 10`     | TRUE            | FALSE (not distinct)      |
+| `10 = 20`     | FALSE           | TRUE (distinct)           |
+| `10 = NULL`   | UNKNOWN         | TRUE (distinct)           |
+| `NULL = NULL` | UNKNOWN         | FALSE (not distinct)      |
+| `NULL = 10`   | UNKNOWN         | TRUE (distinct)           |
 
 ### Example: Rows where email is either both NULL or both the same
 
@@ -197,16 +197,16 @@ WHERE e1.email IS NOT DISTINCT FROM e2.email
   AND e1.id < e2.id;
 ```
 
-| emp1 | emp2 | email1 | email2 |
-|------|------|--------|--------|
-| 3 | 5 | NULL | NULL |
-| 1 | 2 | alice@co.com | bob@co.com | — **no**, these differ |
+| emp1 | emp2 | email1       | email2     |
+| ---- | ---- | ------------ | ---------- | ---------------------- |
+| 3    | 5    | NULL         | NULL       |
+| 1    | 2    | alice@co.com | bob@co.com | — **no**, these differ |
 
 Actually corrected:
 
 | emp1 | emp2 | email1 | email2 |
-|------|------|--------|--------|
-| 3 | 5 | NULL | NULL |
+| ---- | ---- | ------ | ------ |
+| 3    | 5    | NULL   | NULL   |
 
 Only Charlie (3) and Eve (5) share the same email status (both NULL).
 
@@ -230,12 +230,14 @@ Returns all rows **except** Alice — including rows where email is NULL.
 > **PostgreSQL:** Supports `IS DISTINCT FROM` and `IS NOT DISTINCT FROM` natively.
 >
 > **MySQL:** Supports it since 5.7 using the `NULL-safe equality operator` `<=>`:
+>
 > ```sql
 > -- MySQL NULL-safe equality
 > SELECT * FROM employees WHERE email <=> NULL;
 > ```
 >
 > **SQL Server:** Does **not** support `IS DISTINCT FROM` natively. Use:
+>
 > ```sql
 > -- SQL Server equivalent
 > WHERE (column1 = column2) OR (column1 IS NULL AND column2 IS NULL)
@@ -260,20 +262,20 @@ SELECT
 ```
 
 | result1 | result2 | result3 | result4 |
-|---------|---------|---------|---------|
-| NULL | NULL | NULL | NULL |
+| ------- | ------- | ------- | ------- |
+| NULL    | NULL    | NULL    | NULL    |
 
 ### NULL in Boolean Expressions
 
-| Expression | Result |
-|------------|--------|
-| `NULL AND TRUE` | UNKNOWN |
-| `NULL AND FALSE` | FALSE |
-| `NULL OR TRUE` | TRUE |
-| `NULL OR FALSE` | UNKNOWN |
-| `NOT NULL` | UNKNOWN |
-| `NULL AND NULL` | UNKNOWN |
-| `NULL OR NULL` | UNKNOWN |
+| Expression       | Result  |
+| ---------------- | ------- |
+| `NULL AND TRUE`  | UNKNOWN |
+| `NULL AND FALSE` | FALSE   |
+| `NULL OR TRUE`   | TRUE    |
+| `NULL OR FALSE`  | UNKNOWN |
+| `NOT NULL`       | UNKNOWN |
+| `NULL AND NULL`  | UNKNOWN |
+| `NULL OR NULL`   | UNKNOWN |
 
 **Important:** `NULL AND FALSE` always returns `FALSE` (because at least one side is FALSE, so the AND is definitely false). `NULL OR TRUE` always returns `TRUE` (because at least one side is TRUE, so the OR is definitely true).
 
@@ -428,11 +430,11 @@ WHERE id NOT IN (
 
 ### Comparison Table
 
-| Scenario | IN | NOT IN | EXISTS | NOT EXISTS |
-|----------|-----|--------|--------|------------|
-| Subquery has no NULLs | Works | Works | Works | Works |
-| Subquery has NULLs | May miss rows | Returns nothing | Works | Works |
-| Subquery is empty | Returns nothing | Returns all rows | Returns nothing | Returns all rows |
+| Scenario              | IN              | NOT IN           | EXISTS          | NOT EXISTS       |
+| --------------------- | --------------- | ---------------- | --------------- | ---------------- |
+| Subquery has no NULLs | Works           | Works            | Works           | Works            |
+| Subquery has NULLs    | May miss rows   | Returns nothing  | Works           | Works            |
+| Subquery is empty     | Returns nothing | Returns all rows | Returns nothing | Returns all rows |
 
 ---
 
@@ -451,10 +453,10 @@ WHERE EXISTS (
 );
 ```
 
-| id | name | email | hire_date | manager_id |
-|----|------|-------|-----------|------------|
-| 1 | Alice | alice@co.com | 2020-01-15 | NULL |
-| 3 | Charlie | NULL | 2022-07-01 | 1 |
+| id  | name    | email        | hire_date  | manager_id |
+| --- | ------- | ------------ | ---------- | ---------- |
+| 1   | Alice   | alice@co.com | 2020-01-15 | NULL       |
+| 3   | Charlie | NULL         | 2022-07-01 | 1          |
 
 Alice manages Bob and Charlie. Charlie manages Eve.
 
@@ -469,13 +471,14 @@ WHERE NOT EXISTS (
 );
 ```
 
-| id | name | email | hire_date | manager_id |
-|----|------|-------|-----------|------------|
-| 2 | Bob | bob@co.com | 2021-03-22 | 1 |
-| 4 | Diana | diana@co.com | 2023-11-10 | NULL |
-| 5 | Eve | NULL | 2024-02-28 | 3 |
+| id  | name  | email        | hire_date  | manager_id |
+| --- | ----- | ------------ | ---------- | ---------- |
+| 2   | Bob   | bob@co.com   | 2021-03-22 | 1          |
+| 4   | Diana | diana@co.com | 2023-11-10 | NULL       |
+| 5   | Eve   | NULL         | 2024-02-28 | 3          |
 
 > **When to use EXISTS/NOT EXISTS over IN/NOT IN:**
+>
 > - When the subquery may return NULLs
 > - When you only need to check existence (not retrieve values)
 > - When the subquery is correlated and performance is better with an index on the join column
@@ -484,7 +487,7 @@ WHERE NOT EXISTS (
 
 ## NULL in Aggregate Functions
 
-### COUNT(*) vs COUNT(column)
+### COUNT(\*) vs COUNT(column)
 
 ```sql
 SELECT
@@ -495,8 +498,8 @@ FROM employees;
 ```
 
 | cnt_all | cnt_email | cnt_distinct_email |
-|---------|-----------|---------------------|
-| 5 | 3 | 3 |
+| ------- | --------- | ------------------ |
+| 5       | 3         | 3                  |
 
 - `COUNT(*)` counts all rows (including NULLs).
 - `COUNT(email)` counts only rows where `email IS NOT NULL`.
@@ -516,8 +519,8 @@ FROM employees;
 ```
 
 | sum_mgr | avg_mgr | min_mgr | max_mgr |
-|---------|---------|---------|---------|
-| 5 | 1.6667 | 1 | 3 |
+| ------- | ------- | ------- | ------- |
+| 5       | 1.6667  | 1       | 3       |
 
 NULLs are excluded. The average is computed over 3 non-NULL values (1 + 1 + 3 = 5, 5/3 ≈ 1.6667).
 
@@ -565,13 +568,13 @@ SELECT
 FROM employees;
 ```
 
-| name | email_display |
-|------|---------------|
-| Alice | alice@co.com |
-| Bob | bob@co.com |
+| name    | email_display    |
+| ------- | ---------------- |
+| Alice   | alice@co.com     |
+| Bob     | bob@co.com       |
 | Charlie | No email on file |
-| Diana | diana@co.com |
-| Eve | No email on file |
+| Diana   | diana@co.com     |
+| Eve     | No email on file |
 
 ### COALESCE in Comparisons
 
@@ -611,6 +614,7 @@ SELECT * FROM employees ORDER BY email ASC;
 > **PostgreSQL** allows explicit `NULLS FIRST` / `NULLS LAST`.
 >
 > **SQL Server** does not support `NULLS FIRST`/`NULLS LAST` syntax. Use:
+>
 > ```sql
 > ORDER BY CASE WHEN email IS NULL THEN 1 ELSE 0 END, email
 > ```
@@ -627,12 +631,12 @@ SELECT * FROM employees ORDER BY email ASC;
 SELECT DISTINCT email FROM employees;
 ```
 
-| email |
-|-------|
+| email        |
+| ------------ |
 | alice@co.com |
-| bob@co.com |
+| bob@co.com   |
 | diana@co.com |
-| NULL |
+| NULL         |
 
 Even though Charlie and Eve both have NULL emails, only one NULL appears in the output. This is correct behavior — `DISTINCT` groups all NULLs together.
 
@@ -649,10 +653,10 @@ GROUP BY manager_id;
 ```
 
 | manager_id | num_employees |
-|------------|---------------|
-| NULL | 2 |
-| 1 | 2 |
-| 3 | 1 |
+| ---------- | ------------- |
+| NULL       | 2             |
+| 1          | 2             |
+| 3          | 1             |
 
 Two employees (Alice, Diana) have `manager_id = NULL`. They form one group.
 
@@ -670,13 +674,13 @@ SELECT
 FROM employees;
 ```
 
-| name | email | same_email_count |
-|------|-------|-----------------|
-| Alice | alice@co.com | 1 |
-| Bob | bob@co.com | 1 |
-| Charlie | NULL | 2 |
-| Diana | diana@co.com | 1 |
-| Eve | NULL | 2 |
+| name    | email        | same_email_count |
+| ------- | ------------ | ---------------- |
+| Alice   | alice@co.com | 1                |
+| Bob     | bob@co.com   | 1                |
+| Charlie | NULL         | 2                |
+| Diana   | diana@co.com | 1                |
+| Eve     | NULL         | 2                |
 
 ### NULL in RANK / ROW_NUMBER
 
@@ -690,13 +694,13 @@ SELECT
 FROM employees;
 ```
 
-| name | email | rn |
-|------|-------|-----|
-| Alice | alice@co.com | 1 |
-| Bob | bob@co.com | 2 |
-| Diana | diana@co.com | 3 |
-| Charlie | NULL | 4 |
-| Eve | NULL | 5 |
+| name    | email        | rn  |
+| ------- | ------------ | --- |
+| Alice   | alice@co.com | 1   |
+| Bob     | bob@co.com   | 2   |
+| Diana   | diana@co.com | 3   |
+| Charlie | NULL         | 4   |
+| Eve     | NULL         | 5   |
 
 Without `NULLS LAST`, NULLs would appear first in most databases.
 
@@ -745,13 +749,17 @@ FROM employees;
 ```
 
 > **Interview trap:** What is the difference between:
+>
 > ```sql
 > CASE x WHEN NULL THEN 'yes' ELSE 'no' END
 > ```
+>
 > and
+>
 > ```sql
 > CASE WHEN x IS NULL THEN 'yes' ELSE 'no' END
 > ```
+>
 > The first always returns `'no'` because `x = NULL` is `UNKNOWN`. The second correctly identifies NULLs.
 
 ---
@@ -799,15 +807,15 @@ The `NOT NULL` constraint is the simplest comparison: it checks `IS NOT NULL`.
 
 ## Database-Specific Differences
 
-| Feature | PostgreSQL | MySQL | SQL Server | Oracle |
-|---------|-----------|-------|------------|--------|
-| `IS DISTINCT FROM` | Yes | Yes (`<=>`) | No | No |
-| `IS NOT DISTINCT FROM` | Yes | Yes (`<=>`) | No | No |
-| `NULLS FIRST/LAST` | Yes | No | No | Yes |
-| `NULL = NULL` | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN |
-| Multiple NULLs in UNIQUE | Yes | Yes | Yes | Yes |
-| `NULL` in CHECK passes | Yes | Yes | Yes | Yes |
-| Empty string vs NULL | `''` is not NULL | `''` can be treated as NULL in some contexts | `''` is not NULL | `''` is not NULL |
+| Feature                  | PostgreSQL       | MySQL                                        | SQL Server       | Oracle           |
+| ------------------------ | ---------------- | -------------------------------------------- | ---------------- | ---------------- |
+| `IS DISTINCT FROM`       | Yes              | Yes (`<=>`)                                  | No               | No               |
+| `IS NOT DISTINCT FROM`   | Yes              | Yes (`<=>`)                                  | No               | No               |
+| `NULLS FIRST/LAST`       | Yes              | No                                           | No               | Yes              |
+| `NULL = NULL`            | UNKNOWN          | UNKNOWN                                      | UNKNOWN          | UNKNOWN          |
+| Multiple NULLs in UNIQUE | Yes              | Yes                                          | Yes              | Yes              |
+| `NULL` in CHECK passes   | Yes              | Yes                                          | Yes              | Yes              |
+| Empty string vs NULL     | `''` is not NULL | `''` can be treated as NULL in some contexts | `''` is not NULL | `''` is not NULL |
 
 > **MySQL specific:** When using `LOAD DATA INFILE` or certain string operations, empty strings may be converted to NULL. Be aware of this in ETL pipelines.
 
@@ -949,43 +957,52 @@ SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);
 ### Output Prediction
 
 24. Given:
+
 ```sql
 CREATE TABLE t (a INT, b INT);
 INSERT INTO t VALUES (1, NULL), (NULL, 1), (NULL, NULL), (1, 1);
 SELECT * FROM t WHERE a = b;
 ```
+
 What rows are returned?
 
 25. Given:
+
 ```sql
 SELECT * FROM t WHERE a IS NOT DISTINCT FROM b;
 ```
+
 (using the same table as above)
 What rows are returned?
 
 ### Debugging
 
 26. A developer reports that this query returns no rows:
+
 ```sql
 SELECT * FROM users WHERE last_login = NULL;
 ```
+
 Explain the bug and provide the fix.
 
 27. This query is supposed to find customers who have never placed an order, but it returns nothing:
+
 ```sql
 SELECT * FROM customers
 WHERE id NOT IN (SELECT customer_id FROM orders);
 ```
+
 The `orders.customer_id` column is nullable. Diagnose and fix.
 
 ### Performance
 
 28. Would `WHERE email IS NULL` use an index on `email`? What about `WHERE COALESCE(email, '') = ''`?
 29. You have a table with 10 million rows and 40% NULL values in `status`. Compare the performance characteristics of:
+
 ```sql
 SELECT * FROM t WHERE status = 'active';
 SELECT * FROM t WHERE status <> 'active';
 SELECT * FROM t WHERE status IS NULL;
 ```
-How would you verify which is faster?
-30. A `LEFT JOIN ... ON a.id = b.id WHERE b.id IS NULL` pattern is used to find unmatched rows. Is this sargable? How would you confirm with an execution plan?
+
+How would you verify which is faster? 30. A `LEFT JOIN ... ON a.id = b.id WHERE b.id IS NULL` pattern is used to find unmatched rows. Is this sargable? How would you confirm with an execution plan?

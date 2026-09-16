@@ -21,12 +21,12 @@ Before writing any Top-N query, always answer:
 
 > **What does one row in my source table represent?**
 
-| Table | Grain |
-|---|---|
-| `employees` | One row = one employee |
-| `orders` | One row = one order |
+| Table         | Grain                                   |
+| ------------- | --------------------------------------- |
+| `employees`   | One row = one employee                  |
+| `orders`      | One row = one order                     |
 | `order_items` | One row = one line item within an order |
-| `logins` | One row = one login event |
+| `logins`      | One row = one login event               |
 
 If you join a one-to-many table without thinking about grain, your Top-N logic can silently produce **wrong results**.
 
@@ -89,14 +89,14 @@ WHERE rn <= 2;
 
 ### Expected Output
 
-| employee_name | department | salary | rn |
-|---|---|---|---|
-| Charlie | Engineering | 130000 | 1 |
-| Alice | Engineering | 120000 | 2 |
-| Diana | Marketing | 95000 | 1 |
-| Frank | Marketing | 95000 | 2 |
-| Grace | Sales | 105000 | 1 |
-| Hank | Sales | 105000 | 2 |
+| employee_name | department  | salary | rn  |
+| ------------- | ----------- | ------ | --- |
+| Charlie       | Engineering | 130000 | 1   |
+| Alice         | Engineering | 120000 | 2   |
+| Diana         | Marketing   | 95000  | 1   |
+| Frank         | Marketing   | 95000  | 2   |
+| Grace         | Sales       | 105000 | 1   |
+| Hank          | Sales       | 105000 | 2   |
 
 Notice: Diana and Frank both earn 95000. `ROW_NUMBER` assigns them 1 and 2 **arbitrarily** (here deterministic because `employee_id` breaks the tie). Without the tiebreaker, which one gets `rn = 1` can change between runs.
 
@@ -125,12 +125,12 @@ WHERE department = 'Sales';
 
 ### Output
 
-| employee_name | department | salary | rnk |
-|---|---|---|---|
-| Grace | Sales | 105000 | 1 |
-| Hank | Sales | 105000 | 1 |
-| Ivy | Sales | 92000 | **3** |
-| Jack | Sales | 87000 | 4 |
+| employee_name | department | salary | rnk   |
+| ------------- | ---------- | ------ | ----- |
+| Grace         | Sales      | 105000 | 1     |
+| Hank          | Sales      | 105000 | 1     |
+| Ivy           | Sales      | 92000  | **3** |
+| Jack          | Sales      | 87000  | 4     |
 
 Grace and Hank tie at rank 1. The next rank is **3**, not 2.
 
@@ -166,19 +166,19 @@ WHERE department = 'Sales';
 ### Output
 
 | employee_name | department | salary | dense_rnk |
-|---|---|---|---|
-| Grace | Sales | 105000 | 1 |
-| Hank | Sales | 105000 | 1 |
-| Ivy | Sales | 92000 | **2** |
-| Jack | Sales | 87000 | 3 |
+| ------------- | ---------- | ------ | --------- |
+| Grace         | Sales      | 105000 | 1         |
+| Hank          | Sales      | 105000 | 1         |
+| Ivy           | Sales      | 92000  | **2**     |
+| Jack          | Sales      | 87000  | 3         |
 
 ### Comparison: ROW_NUMBER vs RANK vs DENSE_RANK
 
-| Function | Ties | Skips Ranks | Unique per row |
-|---|---|---|---|
-| `ROW_NUMBER()` | Different numbers | N/A | Yes |
-| `RANK()` | Same rank, skip | Yes | No |
-| `DENSE_RANK()` | Same rank, no skip | No | No |
+| Function       | Ties               | Skips Ranks | Unique per row |
+| -------------- | ------------------ | ----------- | -------------- |
+| `ROW_NUMBER()` | Different numbers  | N/A         | Yes            |
+| `RANK()`       | Same rank, skip    | Yes         | No             |
+| `DENSE_RANK()` | Same rank, no skip | No          | No             |
 
 > **Which one to use for "top N"?**
 > It depends on the business requirement. **Always clarify.**
@@ -307,14 +307,14 @@ UNION ALL
 
 ## Comparison of All Methods
 
-| Method | Readability | Performance | Scales to any N | DB Support |
-|---|---|---|---|---|
-| `ROW_NUMBER()` | Excellent | Good | Yes | All modern |
-| `RANK()` | Good | Good | Yes (clarify ties) | All modern |
-| `DENSE_RANK()` | Good | Good | Yes (clarify ties) | All modern |
-| Correlated Subquery | Poor | Poor (O(n²)) | Yes | All |
-| `LATERAL` / `CROSS APPLY` | Good | Good | Yes | PostgreSQL, MySQL 8+, SQL Server, Oracle |
-| `UNION ALL` trick | Very Poor | Poor | No | All |
+| Method                    | Readability | Performance  | Scales to any N    | DB Support                               |
+| ------------------------- | ----------- | ------------ | ------------------ | ---------------------------------------- |
+| `ROW_NUMBER()`            | Excellent   | Good         | Yes                | All modern                               |
+| `RANK()`                  | Good        | Good         | Yes (clarify ties) | All modern                               |
+| `DENSE_RANK()`            | Good        | Good         | Yes (clarify ties) | All modern                               |
+| Correlated Subquery       | Poor        | Poor (O(n²)) | Yes                | All                                      |
+| `LATERAL` / `CROSS APPLY` | Good        | Good         | Yes                | PostgreSQL, MySQL 8+, SQL Server, Oracle |
+| `UNION ALL` trick         | Very Poor   | Poor         | No                 | All                                      |
 
 ---
 
@@ -470,11 +470,11 @@ WHERE rn = 2;
 
 ### Output
 
-| employee_name | department | salary | rn |
-|---|---|---|---|
-| Alice | Engineering | 110000 | 2 |
-| Frank | Marketing | 95000 | 2 |
-| Ivy | Sales | 92000 | 2 |
+| employee_name | department  | salary | rn  |
+| ------------- | ----------- | ------ | --- |
+| Alice         | Engineering | 110000 | 2   |
+| Frank         | Marketing   | 95000  | 2   |
+| Ivy           | Sales       | 92000  | 2   |
 
 Note: If two employees tie for the highest salary, `DENSE_RANK() = 2` gives the **actual** second-highest salary. `RANK() = 2` would skip it. `ROW_NUMBER() = 2` would give the second row, which might still be the highest salary.
 
@@ -578,12 +578,12 @@ If `department` is NULL, all rows with `NULL` department are placed in **one par
 
 As discussed above, the position of NULLs depends on the database:
 
-| Database | `ORDER BY salary DESC` | NULLs position |
-|---|---|---|
+| Database   | `ORDER BY salary DESC`                             | NULLs position              |
+| ---------- | -------------------------------------------------- | --------------------------- |
 | PostgreSQL | Explicit `NULLS LAST` needed for predictable order | Default: NULLs last in DESC |
-| MySQL | NULLs treated as lowest value in DESC | NULLs last |
-| SQL Server | NULLs treated as lowest value in DESC | NULLs last |
-| Oracle | Explicit `NULLS LAST` needed for predictable order | Default: NULLs last in DESC |
+| MySQL      | NULLs treated as lowest value in DESC              | NULLs last                  |
+| SQL Server | NULLs treated as lowest value in DESC              | NULLs last                  |
+| Oracle     | Explicit `NULLS LAST` needed for predictable order | Default: NULLs last in DESC |
 
 > **Production pitfall:** If your `ORDER BY` column contains NULLs and you don't specify `NULLS LAST`/`NULLS FIRST`, results may be inconsistent across database upgrades or migration.
 
@@ -663,11 +663,11 @@ ORDER BY salary DESC;
 
 Using the wrong ranking function gives different results:
 
-| Scenario | ROW_NUMBER | RANK | DENSE_RANK |
-|---|---|---|---|
-| Salary 130K, 120K, 110K (no ties) | 1, 2, 3 | 1, 2, 3 | 1, 2, 3 |
-| Salary 130K, 130K, 110K (tie at top) | 1, 2, 3 | 1, 1, 3 | 1, 1, 2 |
-| Filter `<= 2` rows | 2 rows | 3 rows | 2 rows |
+| Scenario                             | ROW_NUMBER | RANK    | DENSE_RANK |
+| ------------------------------------ | ---------- | ------- | ---------- |
+| Salary 130K, 120K, 110K (no ties)    | 1, 2, 3    | 1, 2, 3 | 1, 2, 3    |
+| Salary 130K, 130K, 110K (tie at top) | 1, 2, 3    | 1, 1, 3 | 1, 1, 2    |
+| Filter `<= 2` rows                   | 2 rows     | 3 rows  | 2 rows     |
 
 ---
 
@@ -688,6 +688,7 @@ Without a tiebreaker, **the same query can return different results on different
 If one partition contains millions of rows (e.g., one department with 1 million employees), the database must sort all 1 million rows before assigning row numbers.
 
 **Mitigation:**
+
 - Ensure indexes support the `PARTITION BY` and `ORDER BY` columns
 - Consider whether a `LATERAL`/`CROSS APPLY` approach (which can stop after N rows) is more efficient
 - Use `EXPLAIN ANALYZE` to verify
@@ -732,23 +733,23 @@ This index supports:
 
 Run `EXPLAIN ANALYZE` (PostgreSQL), `EXPLAIN` (MySQL), or the equivalent for your database. Look for:
 
-| Good Signs | Bad Signs |
-|---|---|
-| Index Scan / Index Only Scan | Full Table Scan |
-| Limit / Top-N Sort | Filesort / Sort (on full partition) |
-| Nested Loop with LATERAL | Hash Join on full table before ranking |
-| Partition-wise processing | Materializing entire ranked result before filtering |
+| Good Signs                   | Bad Signs                                           |
+| ---------------------------- | --------------------------------------------------- |
+| Index Scan / Index Only Scan | Full Table Scan                                     |
+| Limit / Top-N Sort           | Filesort / Sort (on full partition)                 |
+| Nested Loop with LATERAL     | Hash Join on full table before ranking              |
+| Partition-wise processing    | Materializing entire ranked result before filtering |
 
 > **Do not guess about performance.** Run `EXPLAIN ANALYZE` with realistic data volumes and verify.
 
 ### LATERAL vs Window Function Performance
 
-| Aspect | Window Function | LATERAL / CROSS APPLY |
-|---|---|---|
-| Materializes all ranked rows before filtering | Yes (typically) | No — can stop at N |
-| Works with GROUP BY | Yes (via CTE/subquery) | Requires more steps |
-| Index usage | Depends on partition size | Excellent with per-group index |
-| Readability | Excellent | Good |
+| Aspect                                        | Window Function           | LATERAL / CROSS APPLY          |
+| --------------------------------------------- | ------------------------- | ------------------------------ |
+| Materializes all ranked rows before filtering | Yes (typically)           | No — can stop at N             |
+| Works with GROUP BY                           | Yes (via CTE/subquery)    | Requires more steps            |
+| Index usage                                   | Depends on partition size | Excellent with per-group index |
+| Readability                                   | Excellent                 | Good                           |
 
 For **very large** partitions where you need only a small N, `LATERAL` can outperform window functions because it avoids sorting the entire partition. However, for most practical cases, the window function approach is equally fast and more readable.
 
@@ -783,6 +784,7 @@ For **very large** partitions where you need only a small N, `LATERAL` can outpe
 11. Explain the performance difference between these two queries and how you would verify it:
 
     **Query A:**
+
     ```sql
     SELECT * FROM (
         SELECT *, ROW_NUMBER() OVER (PARTITION BY dept ORDER BY salary DESC) rn
@@ -791,6 +793,7 @@ For **very large** partitions where you need only a small N, `LATERAL` can outpe
     ```
 
     **Query B:**
+
     ```sql
     SELECT e1.*
     FROM employees e1
@@ -831,6 +834,7 @@ For **very large** partitions where you need only a small N, `LATERAL` can outpe
 17. Two engineers write:
 
     **Engineer A:**
+
     ```sql
     SELECT * FROM (
         SELECT *, DENSE_RANK() OVER (PARTITION BY dept ORDER BY salary DESC) rn
@@ -839,6 +843,7 @@ For **very large** partitions where you need only a small N, `LATERAL` can outpe
     ```
 
     **Engineer B:**
+
     ```sql
     SELECT * FROM (
         SELECT *, ROW_NUMBER() OVER (PARTITION BY dept ORDER BY salary DESC) rn

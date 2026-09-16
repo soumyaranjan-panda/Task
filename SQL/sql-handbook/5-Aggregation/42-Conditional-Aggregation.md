@@ -8,7 +8,7 @@
 
 ### The one-paragraph answer
 
-Conditional aggregation is the technique of putting a `CASE` expression *inside* an aggregate function (or attaching a `FILTER (WHERE ...)` clause to it) so that each aggregate only considers the rows that satisfy a condition.The corruption is fixed and the grep confirms no other interleavings in section 42 (matches were in unrelated pre-existing files). Let me do a final structure check.
+Conditional aggregation is the technique of putting a `CASE` expression _inside_ an aggregate function (or attaching a `FILTER (WHERE ...)` clause to it) so that each aggregate only considers the rows that satisfy a condition.The corruption is fixed and the grep confirms no other interleavings in section 42 (matches were in unrelated pre-existing files). Let me do a final structure check.
 Section 42 written to `sql-handbook/5-Aggregation/42-Conditional-Aggregation.md` (852 lines), matching the handbook's style:
 
 - **Fundamentals** — what/why, three moving parts, the mental model (grain preserved)
@@ -25,7 +25,7 @@ Self-join `employees a JOIN employees b` | Row duplication, fragile |
 
 Conditional aggregation answers all of them with **one scan** and no self-joins. That is its reason for being: fewer passes over the same data, fewer moving parts, output already shaped like the report (rows in one column each).
 
-> Common misconception: "Conditional aggregation is just a different spelling of `WHERE`." No. `WHERE` filters **input rows**; a conditional aggregate filters rows **per aggregate**, so some aggregates can see a row while others do not. `WHERE` would remove the row for *every* aggregate at once.
+> Common misconception: "Conditional aggregation is just a different spelling of `WHERE`." No. `WHERE` filters **input rows**; a conditional aggregate filters rows **per aggregate**, so some aggregates can see a row while others do not. `WHERE` would remove the row for _every_ aggregate at once.
 
 ### The mental model and grain (unchanged)
 
@@ -34,7 +34,7 @@ One row in `orders` = one order.
 One row in `order_items` = one line item inside an order (an order can have many items).
 One row in `shipments` = one shipment of an order (an order can have many shipments).
 
-Conditional aggregation does not change the rules of *Section 36 — GROUP BY*: if you group rows, every non-aggregate in the `SELECT` must be a group key, and one output row still represents **one group**. Conditional aggregation only changes *which input rows feed each aggregate*, never the output grain.
+Conditional aggregation does not change the rules of _Section 36 — GROUP BY_: if you group rows, every non-aggregate in the `SELECT` must be a group key, and one output row still represents **one group**. Conditional aggregation only changes _which input rows feed each aggregate_, never the output grain.
 
 ---
 
@@ -91,25 +91,25 @@ The order of clauses matters when combining with window functions: `SUM(x) FILTE
 
 ### Pattern 3 — engine-specific one-liners (functionally the same idea)
 
-| Engine | Count-if | Sum-if |
-|---|---|---|
-| MySQL | `COUNT(IF(cond, 1, NULL))`, `SUM(IF(cond, 1, 0))` | `SUM(IF(cond, sales, 0))` |
-| SQL Server | `COUNT(IIF(cond, 1, NULL))`, `SUM(IIF(cond, 1, 0))` | `SUM(IIF(cond, sales, 0))` |
-| Oracle | `COUNT(DECODE(status, 'shipped', 1))` | `SUM(DECODE(status, 'shipped', sales, 0))` |
-| BigQuery | `COUNTIF(cond)` | `SUMIF(cond, sales)` |
+| Engine     | Count-if                                            | Sum-if                                     |
+| ---------- | --------------------------------------------------- | ------------------------------------------ |
+| MySQL      | `COUNT(IF(cond, 1, NULL))`, `SUM(IF(cond, 1, 0))`   | `SUM(IF(cond, sales, 0))`                  |
+| SQL Server | `COUNT(IIF(cond, 1, NULL))`, `SUM(IIF(cond, 1, 0))` | `SUM(IIF(cond, sales, 0))`                 |
+| Oracle     | `COUNT(DECODE(status, 'shipped', 1))`               | `SUM(DECODE(status, 'shipped', sales, 0))` |
+| BigQuery   | `COUNTIF(cond)`                                     | `SUMIF(cond, sales)`                       |
 
 `DECODE` deserves one warning: a missing match returns `NULL` (great for `COUNT`), and `DECODE` treats `NULL`/default specially — the same "shape the value to `NULL`" trick, but with its own footguns. Prefer `CASE` for portability; these shortcuts are conveniences for teams that never leave their engine.
 
 ### The four canonical "count-if" spellings (memorize these)
 
-| Intent | Spelling | Non-matching rows become | Result when 0 match |
-|---|---|---|---|
-| count matching rows | `COUNT(CASE WHEN cond THEN 1 END)` | `NULL` (skipped) | `0` |
-| count matching rows | `SUM(CASE WHEN cond THEN 1 ELSE 0 END)` | `0` (added, harmless) | `0` |
-| count matching rows | `COUNT(*) FILTER (WHERE cond)` | excluded before counting | `0` |
-| **WRONG** count | `COUNT(CASE WHEN cond THEN 1 ELSE 0 END)` | `0` (counted!) | `rows − 0 = everything` |
+| Intent              | Spelling                                  | Non-matching rows become | Result when 0 match     |
+| ------------------- | ----------------------------------------- | ------------------------ | ----------------------- |
+| count matching rows | `COUNT(CASE WHEN cond THEN 1 END)`        | `NULL` (skipped)         | `0`                     |
+| count matching rows | `SUM(CASE WHEN cond THEN 1 ELSE 0 END)`   | `0` (added, harmless)    | `0`                     |
+| count matching rows | `COUNT(*) FILTER (WHERE cond)`            | excluded before counting | `0`                     |
+| **WRONG** count     | `COUNT(CASE WHEN cond THEN 1 ELSE 0 END)` | `0` (counted!)           | `rows − 0 = everything` |
 
-The last row is the most famous conditional-aggregation bug in existence. `COUNT` does not ignore `0`, so `ELSE 0` counts the rows that *failed* the condition. `COUNT` only lets you off the hook for `NULL`. `SUM(CASE ... ELSE 0 END)` is safe because adding zero is neutral; `COUNT(CASE ... ELSE 0 END)` is broken because counting zero is not.
+The last row is the most famous conditional-aggregation bug in existence. `COUNT` does not ignore `0`, so `ELSE 0` counts the rows that _failed_ the condition. `COUNT` only lets you off the hook for `NULL`. `SUM(CASE ... ELSE 0 END)` is safe because adding zero is neutral; `COUNT(CASE ... ELSE 0 END)` is broken because counting zero is not.
 
 ---
 
@@ -123,7 +123,7 @@ FROM  →  WHERE  →  GROUP BY  →  HAVING  →  SELECT (expressions, incl. CA
 
 - `WHERE` runs **before** grouping and before any aggregate. A row dropped by `WHERE` is gone for all aggregates.
 - The `CASE` inside the aggregate is evaluated **per input row** (for the rows that survived `WHERE` and joined), and its result (`value` or `NULL`) is handed to the aggregate's running state.
-- `FILTER (WHERE cond)` behaves as if only the rows satisfying `cond` are fed to that one aggregate — clausewise, *per aggregate*, exactly like a private `WHERE` for that aggregate.
+- `FILTER (WHERE cond)` behaves as if only the rows satisfying `cond` are fed to that one aggregate — clausewise, _per aggregate_, exactly like a private `WHERE` for that aggregate.
 
 ### Why "CASE produces NULL" is the whole engine of the trick
 
@@ -136,14 +136,14 @@ Input row ──► CASE ──► matches?  yes ──► value ──► COUNT
 ```
 
 - `COUNT(CASE ... THEN 1 END)` → non-matching rows send `NULL` → `COUNT` skips them → only matches are counted.
-- `SUM(CASE ... THEN total END)` → non-matching rows send `NULL` → `SUM` skips them → sum of matches only; if *no* row matches, `SUM` over only-NULL values returns `NULL` (not `0`) — see *Section 38*.
+- `SUM(CASE ... THEN total END)` → non-matching rows send `NULL` → `SUM` skips them → sum of matches only; if _no_ row matches, `SUM` over only-NULL values returns `NULL` (not `0`) — see _Section 38_.
 - `AVG(CASE ... THEN x END)` → `NULL`-rows are not in the **denominator** either, so the average is over matching rows only. This is the difference between "average of a filtered set" and accidentally dividing by all rows.
 
-> Interview trap: "`AVG(CASE ... END)` and `AVG(x) FILTER (WHERE ...)` are the same, right?" Functionally yes, with the same NULL semantics. But the *reason* they work is not identical — `CASE` *relies on NULL-skipping* (which is why the wrong `ELSE 0` breaks `COUNT` but not `SUM`), while `FILTER` never feeds non-matching rows into the aggregate at all. One is a property of the value; the other is a property of the row set.
+> Interview trap: "`AVG(CASE ... END)` and `AVG(x) FILTER (WHERE ...)` are the same, right?" Functionally yes, with the same NULL semantics. But the _reason_ they work is not identical — `CASE` _relies on NULL-skipping_ (which is why the wrong `ELSE 0` breaks `COUNT` but not `SUM`), while `FILTER` never feeds non-matching rows into the aggregate at all. One is a property of the value; the other is a property of the row set.
 
 ### Does `FILTER` change performance vs `CASE`? (The honest answer)
 
-The two spellings are semantically equivalent, and the default assumption — until proven otherwise — is that the optimizer generates the same or comparable work. There are plausible mechanism-level reasons `FILTER` *could* differ from `CASE` in a given engine: with `CASE`, the aggregate's argument expression may still be visited for every input row, while a `FILTER`-style clause can short-circuit a row before evaluating the argument; engines may also treat `FILTER` aggregates as partial-able differently. But none of this is universal, and neither is "always faster".
+The two spellings are semantically equivalent, and the default assumption — until proven otherwise — is that the optimizer generates the same or comparable work. There are plausible mechanism-level reasons `FILTER` _could_ differ from `CASE` in a given engine: with `CASE`, the aggregate's argument expression may still be visited for every input row, while a `FILTER`-style clause can short-circuit a row before evaluating the argument; engines may also treat `FILTER` aggregates as partial-able differently. But none of this is universal, and neither is "always faster".
 
 **What to do:** treat them as equivalent by default, and if a hot query matters, measure it:
 
@@ -155,9 +155,9 @@ EXPLAIN ANALYZE
 SELECT COUNT(*) FILTER (WHERE status = 'shipped') FROM orders;
 ```
 
-Compare plan shape and `actual rows` / `actual time`. If they plan identically, the choice is readability, not speed. See *jOOQ's "FILTER vs CASE" benchmarks* as a reference point, not a law — numbers depend on version, statistics, and data.
+Compare plan shape and `actual rows` / `actual time`. If they plan identically, the choice is readability, not speed. See _jOOQ's "FILTER vs CASE" benchmarks_ as a reference point, not a law — numbers depend on version, statistics, and data.
 
-### One internal detail that *is* engine-flag-worthy: `COUNT(DISTINCT ...)`
+### One internal detail that _is_ engine-flag-worthy: `COUNT(DISTINCT ...)`
 
 In PostgreSQL, an aggregate containing `DISTINCT` (or `ORDER BY`) **does not participate in parallel aggregation** — the parser/planner treats it as not parallel-safe. That applies to both `COUNT(DISTINCT CASE ... END)` and `COUNT(DISTINCT x) FILTER (WHERE ...)`. Confirm with `EXPLAIN`: if you expect a `Gather` + `Partial Aggregate` and you see a plain serial `Finalize Aggregate`, distinct-count is likely the reason. This is engine-specific and version-specific — verify, don't assume.
 
@@ -246,7 +246,7 @@ UNION ALL
 SELECT 'pending',   COUNT(*) FROM orders WHERE status = 'pending';
 ```
 
-That is three scans, three statements bolted together, and the result is one column per *row* — backwards from what the report wants.
+That is three scans, three statements bolted together, and the result is one column per _row_ — backwards from what the report wants.
 
 ```sql
 -- BETTER APPROACH: conditional aggregation, one scan, one row
@@ -259,8 +259,8 @@ FROM orders;
 ```
 
 | total_orders | shipped | cancelled | pending |
-|---|---|---|---|
-| 6 | 4 | 1 | 1 |
+| ------------ | ------- | --------- | ------- |
+| 6            | 4       | 1         | 1       |
 
 Order 1, 3, 4, 6 are `shipped`; order 2 is `cancelled`; order 5 is `pending`.
 
@@ -277,8 +277,8 @@ FROM orders;
 ```
 
 | shipped_revenue | cancelled_revenue | pending_revenue |
-|---|---|---|
-| 890.00 | 99.00 | 300.00 |
+| --------------- | ----------------- | --------------- |
+| 890.00          | 99.00             | 300.00          |
 
 `shipped`: 250 + 480 + 120 + 40 = 890. The three aggregates ran over the **same six rows in the same pass**; each one simply ignored the rows it did not care about.
 
@@ -299,14 +299,14 @@ ORDER BY department_id;
 ```
 
 | department_id | headcount | active_cnt | inactive_cnt | high_pay_total |
-|---|---|---|---|---|
-| 1 | 2 | 2 | 0 | 17000.00 |
-| 2 | 2 | 1 | 1 | NULL |
-| 3 | 2 | 2 | 0 | NULL |
+| ------------- | --------- | ---------- | ------------ | -------------- |
+| 1             | 2         | 2          | 0            | 17000.00       |
+| 2             | 2         | 1          | 1            | NULL           |
+| 3             | 2         | 2          | 0            | NULL           |
 
 Notes:
 
-- `dept 2` shows the *shape* of the trick: Carol active, Dave inactive; nobody earns above 6500, so `high_pay_total` is `NULL`, **not 0** (every row became `NULL`, and `SUM` of nothing is `NULL`).
+- `dept 2` shows the _shape_ of the trick: Carol active, Dave inactive; nobody earns above 6500, so `high_pay_total` is `NULL`, **not 0** (every row became `NULL`, and `SUM` of nothing is `NULL`).
 - `dept 3`: Frank is active but his salary is `NULL`; he counts in `active_cnt` (the condition is on `is_active`, unrelated to salary) but contributes nothing to any salary sum.
 
 ### Example 4 — conditional `AVG` and percentages (watch integer division)
@@ -320,8 +320,8 @@ FROM employees;
 ```
 
 | avg_all | avg_active | avg_inactive |
-|---|---|---|
-| 6916.67 | 7000.00 | 6500.00 |
+| ------- | ---------- | ------------ |
+| 6916.67 | 7000.00    | 6500.00      |
 
 The `AVG` denominators differ by design: `avg_active` divides by **5** (the active employees with a salary; Frank's `NULL` salary is excluded), `avg_all` by 6, `avg_inactive` by 1.
 
@@ -339,10 +339,10 @@ FROM employees;
 ```
 
 | active_pct |
-|---|
-| 85.71 |
+| ---------- |
+| 85.71      |
 
-`100.0 * 6 / 7 = 85.71`. Integer division (`6 / 7 = 0`) is the classic trap here — see *Section 38* — and it does not care that you used a `CASE`.
+`100.0 * 6 / 7 = 85.71`. Integer division (`6 / 7 = 0`) is the classic trap here — see _Section 38_ — and it does not care that you used a `CASE`.
 
 ### Example 5 — conditional `MIN` / `MAX`
 
@@ -357,10 +357,10 @@ ORDER BY department_id;
 ```
 
 | department_id | min_active_salary | max_inactive_salary |
-|---|---|---|
-| 1 | 8000.00 | NULL |
-| 2 | 6000.00 | 6500.00 |
-| 3 | 5000.00 | NULL |
+| ------------- | ----------------- | ------------------- |
+| 1             | 8000.00           | NULL                |
+| 2             | 6000.00           | 6500.00             |
+| 3             | 5000.00           | NULL                |
 
 `dept 1` has no inactive employee, so `max_inactive_salary` is `NULL`. `dept 3`'s `min` ignores Frank's `NULL` salary — proving that the `CASE` filter and the aggregate's own NULL-skipping compose.
 
@@ -377,8 +377,8 @@ FROM orders;
 ```
 
 | customers_with_orders | customers_shipped | customers_cancelled |
-|---|---|---|
-| 3 | 3 | 1 |
+| --------------------- | ----------------- | ------------------- |
+| 3                     | 3                 | 1                   |
 
 Every customer (1, 2, 3) appears on a shipped order, so `customers_shipped` = 3. Only customer 1 has a cancelled order. The `CASE` streams only matching `customer_id` values into the distinct set; both the non-matching rows (via `CASE` → `NULL`) and the NULL itself (never a distinct value) are ignored.
 
@@ -392,7 +392,7 @@ SELECT
 FROM orders;
 ```
 
-Same output — and note the repeated `customer_id` expression. The `CASE` form repeats the *condition*; the `FILTER` form repeats the *function arguments*. That symmetry is why neither is "cleaner" on every screen.
+Same output — and note the repeated `customer_id` expression. The `CASE` form repeats the _condition_; the `FILTER` form repeats the _function arguments_. That symmetry is why neither is "cleaner" on every screen.
 
 ### Example 7 — `FILTER (WHERE ...)` equivalents of Examples 1 and 2
 
@@ -406,10 +406,10 @@ FROM orders;
 ```
 
 | total_orders | shipped | cancelled | shipped_revenue |
-|---|---|---|---|
-| 6 | 4 | 1 | 890.00 |
+| ------------ | ------- | --------- | --------------- |
+| 6            | 4       | 1         | 890.00          |
 
-> Common misconception: "`FILTER` is a MySQL/PostgreSQL-ism." It is standard SQL:2003 *worldwide* — but only *implemented* in some engines. On MySQL or SQL Server this exact query is a syntax error.
+> Common misconception: "`FILTER` is a MySQL/PostgreSQL-ism." It is standard SQL:2003 _worldwide_ — but only _implemented_ in some engines. On MySQL or SQL Server this exact query is a syntax error.
 
 ### Example 8 — "pivot-lite": months as columns
 
@@ -425,12 +425,12 @@ ORDER BY customer_id;
 ```
 
 | customer_id | jan_revenue | feb_revenue |
-|---|---|---|
-| 1 | 349.00 | NULL |
-| 2 | 480.00 | 120.00 |
-| 3 | NULL | 340.00 |
+| ----------- | ----------- | ----------- |
+| 1           | 349.00      | NULL        |
+| 2           | 480.00      | 120.00      |
+| 3           | NULL        | 340.00      |
 
-Customer 1's January total is 250 + 99 across two orders; customer 1 has no February order, so `feb_revenue` is `NULL` (not 0). For a real `PIVOT`/`CROSSTAB` engine comparison, see *Section 99 — Pivot & Unpivot*.
+Customer 1's January total is 250 + 99 across two orders; customer 1 has no February order, so `feb_revenue` is `NULL` (not 0). For a real `PIVOT`/`CROSSTAB` engine comparison, see _Section 99 — Pivot & Unpivot_.
 
 ### Example 9 — on-time delivery ratio per carrier (real-world scenario)
 
@@ -449,9 +449,9 @@ ORDER BY carrier;
 ```
 
 | carrier | shipments | on_time | late | late_pct |
-|---|---|---|---|---|
-| DHL | 3 | 1 | 2 | 66.67 |
-| UPS | 3 | 2 | 1 | 33.33 |
+| ------- | --------- | ------- | ---- | -------- |
+| DHL     | 3         | 1       | 2    | 66.67    |
+| UPS     | 3         | 2       | 1    | 33.33    |
 
 (Shipment 3 and 5 — delivered early — count as on-time because `actual <= promised`.) One scan over six shipments produced a six-cell quality report that would otherwise need a `GROUP BY` per carrier status, a join, or two query passes.
 
@@ -470,31 +470,31 @@ HAVING COUNT(CASE WHEN is_active THEN 1 END) > COUNT(*) / 2
 ORDER BY department_id;
 ```
 
-| department_id | n | active_cnt |
-|---|---|---|
-| 1 | 2 | 2 |
-| 3 | 2 | 2 |
+| department_id | n   | active_cnt |
+| ------------- | --- | ---------- |
+| 1             | 2   | 2          |
+| 3             | 2   | 2          |
 
-`dept 2` loses: 1 active of 2 is *not* greater than 1. Note you cannot move that condition into `WHERE` (it aggregates a group) and you cannot reference the `SELECT` alias `active_cnt` in `HAVING` on every engine (Oracle historically rejects it, PostgreSQL allows aggregates only) — see *Section 37*.
+`dept 2` loses: 1 active of 2 is _not_ greater than 1. Note you cannot move that condition into `WHERE` (it aggregates a group) and you cannot reference the `SELECT` alias `active_cnt` in `HAVING` on every engine (Oracle historically rejects it, PostgreSQL allows aggregates only) — see _Section 37_.
 
 ---
 
 ## NULL behavior
 
-Conditional aggregation is *made of* NULL behavior. Every rule below is a direct consequence of the rules in *Sections 38–39*.
+Conditional aggregation is _made of_ NULL behavior. Every rule below is a direct consequence of the rules in _Sections 38–39_.
 
-| Situation | Result | Why |
-|---|---|---|
-| Matching row, `COUNT(CASE ... THEN 1 END)` | counted | row value is `1` |
-| Non-matching row, same aggregate | skipped | `CASE` (no `ELSE`) returns `NULL`; `COUNT(col)` skips `NULL` |
-| Non-matching row, `COUNT(CASE ... THEN 1 ELSE 0 END)` | **counted** | `0` is a value; `COUNT` counts it — the famous bug |
-| Matching row whose *source value* is `NULL` (`SUM(CASE WHEN cond THEN salary END)`, salary = NULL) | skipped | `SUM` skips `NULL` too — the condition may pass while the value is still NULL |
-| Zero matching rows, `SUM(CASE ... END)` | `NULL` | `SUM` over zero non-NULL inputs is `NULL`, not 0 |
-| Zero matching rows, `SUM(CASE ... ELSE 0 END)` | `0` | every row contributed `0` |
-| Zero matching rows, both `COUNT` spellings | `0` | `COUNT` always returns a number |
-| Condition itself involves NULL (`status = NULL`) | treated as `FALSE`/unknown → no match | three-valued logic: `NULL = NULL` is *unknown*, never true — see *Sections 10–11* |
-| `COUNT(DISTINCT CASE ... THEN customer_id END)` | non-matching rows supply `NULL`; `NULL` is not "distinct", so excluded | distinct + NULL rules compose |
-| Broken `CASE` branch ordering | wrong branches swallow matches | `CASE` picks **the first** true branch, top to bottom |
+| Situation                                                                                          | Result                                                                 | Why                                                                               |
+| -------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Matching row, `COUNT(CASE ... THEN 1 END)`                                                         | counted                                                                | row value is `1`                                                                  |
+| Non-matching row, same aggregate                                                                   | skipped                                                                | `CASE` (no `ELSE`) returns `NULL`; `COUNT(col)` skips `NULL`                      |
+| Non-matching row, `COUNT(CASE ... THEN 1 ELSE 0 END)`                                              | **counted**                                                            | `0` is a value; `COUNT` counts it — the famous bug                                |
+| Matching row whose _source value_ is `NULL` (`SUM(CASE WHEN cond THEN salary END)`, salary = NULL) | skipped                                                                | `SUM` skips `NULL` too — the condition may pass while the value is still NULL     |
+| Zero matching rows, `SUM(CASE ... END)`                                                            | `NULL`                                                                 | `SUM` over zero non-NULL inputs is `NULL`, not 0                                  |
+| Zero matching rows, `SUM(CASE ... ELSE 0 END)`                                                     | `0`                                                                    | every row contributed `0`                                                         |
+| Zero matching rows, both `COUNT` spellings                                                         | `0`                                                                    | `COUNT` always returns a number                                                   |
+| Condition itself involves NULL (`status = NULL`)                                                   | treated as `FALSE`/unknown → no match                                  | three-valued logic: `NULL = NULL` is _unknown_, never true — see _Sections 10–11_ |
+| `COUNT(DISTINCT CASE ... THEN customer_id END)`                                                    | non-matching rows supply `NULL`; `NULL` is not "distinct", so excluded | distinct + NULL rules compose                                                     |
+| Broken `CASE` branch ordering                                                                      | wrong branches swallow matches                                         | `CASE` picks **the first** true branch, top to bottom                             |
 
 > Production pitfall: `SUM(CASE ... END)` returning `NULL` ripples through dashboards. `COALESCE(SUM(CASE ... END), 0)` is the standard fix — applying it after the aggregate, not inside the `CASE`.
 
@@ -513,7 +513,7 @@ SELECT
   ...
 ```
 
-If you need bands, make them mutually exclusive explicitly, or accept that "first match wins" is the semantics you asked for. See *Section 08 — CASE Expressions* for the full precedence rules.
+If you need bands, make them mutually exclusive explicitly, or accept that "first match wins" is the semantics you asked for. See _Section 08 — CASE Expressions_ for the full precedence rules.
 
 ### 2. The condition is only "true-ish" — NULL status values
 
@@ -533,7 +533,7 @@ GROUP BY customer_id;
 -- zero output rows (no groups exist)
 ```
 
-Same rule as *Section 36*: a bare aggregate over zero rows is one conceptual group and still emits a row; `GROUP BY` over zero rows emits nothing.
+Same rule as _Section 36_: a bare aggregate over zero rows is one conceptual group and still emits a row; `GROUP BY` over zero rows emits nothing.
 
 ### 4. `ELSE 0` vs no `ELSE` with `SUM` — both legal, different NULL contract
 
@@ -546,7 +546,7 @@ Pick intentionally: NULL propagates "no data" honestly; 0 fabricates a number. M
 
 ### 5. Type unification across branches
 
-All `THEN` values in one `CASE` must unify to one type. `SUM(CASE WHEN x THEN 1 END)` is fine; `SUM(CASE WHEN x THEN 1 ELSE 'y' END)` is not. Similarly `COUNT(DISTINCT CASE ... THEN customer_id END)` requires `customer_id` on the right side — a classic typo is putting TRUE/1 there, which counts *distinct booleans* instead of customers.
+All `THEN` values in one `CASE` must unify to one type. `SUM(CASE WHEN x THEN 1 END)` is fine; `SUM(CASE WHEN x THEN 1 ELSE 'y' END)` is not. Similarly `COUNT(DISTINCT CASE ... THEN customer_id END)` requires `customer_id` on the right side — a classic typo is putting TRUE/1 there, which counts _distinct booleans_ instead of customers.
 
 ### 6. `CASE` at the wrong level — inside `WHERE`, against aggregates
 
@@ -555,32 +555,32 @@ All `THEN` values in one `CASE` must unify to one type. `SUM(CASE WHEN x THEN 1 
 SELECT CASE WHEN COUNT(*) > 5 THEN 'big' END FROM orders;  -- illegal in most engines
 ```
 
-Conditional aggregation shapes *input* values. Deciding something about an *aggregate result* (`HAVING`, a subquery, a window function) is a different job.
+Conditional aggregation shapes _input_ values. Deciding something about an _aggregate result_ (`HAVING`, a subquery, a window function) is a different job.
 
 ### 7. Denominator choices with `AVG` and percentages
 
-`AVG(CASE ... END)` divides by matching rows only. If the intent was "value when matching, 0 when not" — use `AVG(CASE WHEN cond THEN x ELSE 0 END)`. If the intent was literal NULL rows excluded — `AVG(NULLIF(...))`, see *Section 12*. These are three different numbers; say which one the report wants.
+`AVG(CASE ... END)` divides by matching rows only. If the intent was "value when matching, 0 when not" — use `AVG(CASE WHEN cond THEN x ELSE 0 END)`. If the intent was literal NULL rows excluded — `AVG(NULLIF(...))`, see _Section 12_. These are three different numbers; say which one the report wants.
 
 ### 8. Note the case keywords vs `FILTER`: `COUNT(*)` inside `FILTER`
 
-`COUNT(CASE ... )` is a `COUNT(expression)`; `COUNT(*) FILTER (WHERE ...)` is a counted-rows form. When the condition rides on the *row* rather than a column value, `COUNT(*) FILTER (WHERE cond)` says it plainly.
+`COUNT(CASE ... )` is a `COUNT(expression)`; `COUNT(*) FILTER (WHERE ...)` is a counted-rows form. When the condition rides on the _row_ rather than a column value, `COUNT(*) FILTER (WHERE cond)` says it plainly.
 
 ---
 
 ## Common mistakes
 
-| Mistake | Symptom | Fix |
-|---|---|---|
-| `COUNT(CASE ... THEN 1 ELSE 0 END)` | counting **all** rows | drop `ELSE 0` (or switch to `SUM(CASE ... ELSE 0 END)`) |
-| `SUM(CASE ... END)` treated as "always a number" | NULL where a 0 was expected | `COALESCE(SUM(...), 0)`, or `ELSE 0` |
-| Filtering in `WHERE` when you need totals **and** sub-totals side by side | extra scans / subqueries to recover the grand total | conditional aggregates inside one scan |
-| Repeating the condition dozens of times | typos drift between columns | build one clean `SELECT` per condition; or generate columns in your BI tool |
-| `COUNT(DISTINCT CASE ... THEN flag END)` | counts 1/TRUE, not the real key | `THEN` the value you actually want to distinct-count |
-| Branch order with overlapping conditions | earlier branch silently wins | make branches mutually exclusive or accept first-match |
-| `WHEN status = NULL` | never matches | `WHEN status IS NULL` |
-| Integer division in ratios | percent becomes `0` or `1` | multiply by `100.0` / `1.0` before dividing |
-| Using `FILTER` on MySQL/SQL Server | syntax error | `CASE`, or check engine |
-| JOINing a detail table and conditionally summing a parent column | double counting (fan-out) | aggregate children to the parent grain first (see *Section 21*) |
+| Mistake                                                                   | Symptom                                             | Fix                                                                         |
+| ------------------------------------------------------------------------- | --------------------------------------------------- | --------------------------------------------------------------------------- |
+| `COUNT(CASE ... THEN 1 ELSE 0 END)`                                       | counting **all** rows                               | drop `ELSE 0` (or switch to `SUM(CASE ... ELSE 0 END)`)                     |
+| `SUM(CASE ... END)` treated as "always a number"                          | NULL where a 0 was expected                         | `COALESCE(SUM(...), 0)`, or `ELSE 0`                                        |
+| Filtering in `WHERE` when you need totals **and** sub-totals side by side | extra scans / subqueries to recover the grand total | conditional aggregates inside one scan                                      |
+| Repeating the condition dozens of times                                   | typos drift between columns                         | build one clean `SELECT` per condition; or generate columns in your BI tool |
+| `COUNT(DISTINCT CASE ... THEN flag END)`                                  | counts 1/TRUE, not the real key                     | `THEN` the value you actually want to distinct-count                        |
+| Branch order with overlapping conditions                                  | earlier branch silently wins                        | make branches mutually exclusive or accept first-match                      |
+| `WHEN status = NULL`                                                      | never matches                                       | `WHEN status IS NULL`                                                       |
+| Integer division in ratios                                                | percent becomes `0` or `1`                          | multiply by `100.0` / `1.0` before dividing                                 |
+| Using `FILTER` on MySQL/SQL Server                                        | syntax error                                        | `CASE`, or check engine                                                     |
+| JOINing a detail table and conditionally summing a parent column          | double counting (fan-out)                           | aggregate children to the parent grain first (see _Section 21_)             |
 
 ---
 
@@ -597,7 +597,7 @@ Conditional aggregation shapes *input* values. Deciding something about an *aggr
 > GROUP BY o.customer_id;
 > ```
 >
-> A conditional aggregate is still an aggregate — it cannot repair rows that were duplicated by a join (see *Section 21*). Fix the grain: compute at `orders` level (no `order_items`), or pre-aggregate `order_items` to `order_id` before joining.
+> A conditional aggregate is still an aggregate — it cannot repair rows that were duplicated by a join (see _Section 21_). Fix the grain: compute at `orders` level (no `order_items`), or pre-aggregate `order_items` to `order_id` before joining.
 
 > Production pitfall 2 — **`FILTER` writing that dead-ends on a migration.**
 >
@@ -622,11 +622,11 @@ Two claims you will hear, both oversimplified:
 
 Neither is universally true. The truthful framing:
 
-- **Scan count is the main lever.** A single `SELECT` with conditional aggregates can answer N questions with one scan of the table. N separate `COUNT ... WHERE` queries (or a `UNION ALL`) may scan N times. But the optimizer *can* combine, cache, or parallelize these differently — the number of physical scans is **not** guaranteed by the number of statements you write. Check the plan.
+- **Scan count is the main lever.** A single `SELECT` with conditional aggregates can answer N questions with one scan of the table. N separate `COUNT ... WHERE` queries (or a `UNION ALL`) may scan N times. But the optimizer _can_ combine, cache, or parallelize these differently — the number of physical scans is **not** guaranteed by the number of statements you write. Check the plan.
 - **`FILTER` vs `CASE`** is, in most engines, the same aggregation node with a filter/expression attached. Whether the argument expression is evaluated for non-matching rows, whether the aggregate is partial-able, and whether parallel workers help all vary by engine/version. Measure, don't assume (see the two-`EXPLAIN ANALYZE` comparison above).
-- **`WHERE` still matters.** If you only need *one* metric and it lives behind a selective predicate, `WHERE status = 'shipped'` + plain `COUNT(*)` typically scans far fewer rows than `COUNT(CASE...)` over the whole table — a conditional aggregate cannot push that predicate down the way a `WHERE` can. If you need multiple metrics **and** the filtered sub-total, conditional aggregation in one scan often beats a filtered query plus a full-scan query.
+- **`WHERE` still matters.** If you only need _one_ metric and it lives behind a selective predicate, `WHERE status = 'shipped'` + plain `COUNT(*)` typically scans far fewer rows than `COUNT(CASE...)` over the whole table — a conditional aggregate cannot push that predicate down the way a `WHERE` can. If you need multiple metrics **and** the filtered sub-total, conditional aggregation in one scan often beats a filtered query plus a full-scan query.
 - **`COUNT(DISTINCT ...)` is the expensive cousin.** Exact distinct sets force state (hash or sort) per group and may spill; in PostgreSQL they also disable parallel aggregation for that call. If a conditional distinct count is your hot path, look at the plan and consider approximation engines where correctness allows (server-level approximate distinct functions).
-- **Indexes.** Conditional aggregation over a whole table rarely benefits from an index unless it is *covering* (an index-only scan may avoid heap reads — see *Sections 72–77*). A partial index on `(status)` can also accelerate the standalone `WHERE status='shipped'` count dramatically by scanning only matching rows. Again: verify via `EXPLAIN`, don't assume.
+- **Indexes.** Conditional aggregation over a whole table rarely benefits from an index unless it is _covering_ (an index-only scan may avoid heap reads — see _Sections 72–77_). A partial index on `(status)` can also accelerate the standalone `WHERE status='shipped'` count dramatically by scanning only matching rows. Again: verify via `EXPLAIN`, don't assume.
 
 Verification protocol — always:
 
@@ -646,35 +646,35 @@ Look for: node types (`Seq Scan` vs `Index Only Scan` vs `Gather`), `actual rows
 
 ### Technique selection
 
-| Situation | Best tool | Why |
-|---|---|---|
-| "Count/sum per category, several categories, one pass" | Conditional aggregation (`CASE` or `FILTER`) | one scan, report-shaped output |
-| "One category only, selective predicate" | `WHERE` + plain aggregate | can use index / skip rows |
-| "Grand total **and** one sub-total" | one aggregate + one conditional aggregate | single scan keeps both |
-| "Two sub-totals over the *same* scan" | two conditional aggregates | beats two queries |
-| "Values that want to be columns" | conditional aggregation (pivot-lite) or real `PIVOT`/`CROSSTAB` | *Section 99* for the real thing |
-| "Filter on an aggregate result" | `HAVING` (+ conditional aggregates inside it) | you need group-level filtering |
-| "Need aggregates next to detail rows" | window functions (`SUM(...) FILTER (WHERE ...) OVER (PARTITION BY ...)`) | preserves rows instead of collapsing — *Section 56* |
+| Situation                                              | Best tool                                                                | Why                                                 |
+| ------------------------------------------------------ | ------------------------------------------------------------------------ | --------------------------------------------------- |
+| "Count/sum per category, several categories, one pass" | Conditional aggregation (`CASE` or `FILTER`)                             | one scan, report-shaped output                      |
+| "One category only, selective predicate"               | `WHERE` + plain aggregate                                                | can use index / skip rows                           |
+| "Grand total **and** one sub-total"                    | one aggregate + one conditional aggregate                                | single scan keeps both                              |
+| "Two sub-totals over the _same_ scan"                  | two conditional aggregates                                               | beats two queries                                   |
+| "Values that want to be columns"                       | conditional aggregation (pivot-lite) or real `PIVOT`/`CROSSTAB`          | _Section 99_ for the real thing                     |
+| "Filter on an aggregate result"                        | `HAVING` (+ conditional aggregates inside it)                            | you need group-level filtering                      |
+| "Need aggregates next to detail rows"                  | window functions (`SUM(...) FILTER (WHERE ...) OVER (PARTITION BY ...)`) | preserves rows instead of collapsing — _Section 56_ |
 
 ### `CASE` vs `FILTER` vs engine shortcut
 
-| Aspect | `CASE ... END` (ANSI) | `FILTER (WHERE ...)` (SQL:2003) | `IF`/`IIF`/`DECODE`/`COUNTIF` |
-|---|---|---|---|
-| Portability | everywhere | PostgreSQL, SQLite 3.30+, DuckDB, BigQuery; Oracle 23ai+ (recent); **not** MySQL/SQL Server | engine-bound only |
-| Mechanism | reshape value to `NULL`; rely on NULL-skip | exclude rows before aggregation | reshape value; same idea as `CASE` |
-| Count-if must avoid `ELSE 0` | yes | n/a — non-matching rows never counted | depends on function (`IF(cond,1,NULL)` ok, `IF(cond,1,0)` wrong for COUNT) |
-| Reads as | "turn non-matches into nothing" | "filter this aggregate's input" | "COUNTIF/SUMIF" |
-| Window functions | `CASE` inside the window's aggregation | `FILTER` before `OVER` | depends |
+| Aspect                       | `CASE ... END` (ANSI)                      | `FILTER (WHERE ...)` (SQL:2003)                                                             | `IF`/`IIF`/`DECODE`/`COUNTIF`                                              |
+| ---------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Portability                  | everywhere                                 | PostgreSQL, SQLite 3.30+, DuckDB, BigQuery; Oracle 23ai+ (recent); **not** MySQL/SQL Server | engine-bound only                                                          |
+| Mechanism                    | reshape value to `NULL`; rely on NULL-skip | exclude rows before aggregation                                                             | reshape value; same idea as `CASE`                                         |
+| Count-if must avoid `ELSE 0` | yes                                        | n/a — non-matching rows never counted                                                       | depends on function (`IF(cond,1,NULL)` ok, `IF(cond,1,0)` wrong for COUNT) |
+| Reads as                     | "turn non-matches into nothing"            | "filter this aggregate's input"                                                             | "COUNTIF/SUMIF"                                                            |
+| Window functions             | `CASE` inside the window's aggregation     | `FILTER` before `OVER`                                                                      | depends                                                                    |
 
 ### The six spellings, side by side
 
-| Metric | `CASE` | `FILTER` | Engine shortcut |
-|---|---|---|---|
-| count rows where cond | `COUNT(CASE WHEN cond THEN 1 END)` | `COUNT(*) FILTER (WHERE cond)` | `COUNTIF(cond)` (BigQuery) |
-| count distinct values where cond | `COUNT(DISTINCT CASE WHEN cond THEN col END)` | `COUNT(DISTINCT col) FILTER (WHERE cond)` | `COUNT(DISTINCT IF(cond, col, NULL))` (BigQuery) |
-| sum values where cond | `SUM(CASE WHEN cond THEN x END)` | `SUM(x) FILTER (WHERE cond)` | `SUMIF(cond, x)` (BigQuery), `SUM(IF(cond,x,0))` (MySQL) |
-| average values where cond | `AVG(CASE WHEN cond THEN x END)` | `AVG(x) FILTER (WHERE cond)` | `AVG(IF(cond, x, NULL))` (MySQL) |
-| share of rows | `100.0 * COUNT(CASE WHEN cond THEN 1 END) / COUNT(*)` | `100.0 * COUNT(*) FILTER (WHERE cond) / COUNT(*)` | `100.0 * COUNTIF(cond) / COUNT(*)` (BigQuery) |
+| Metric                           | `CASE`                                                | `FILTER`                                          | Engine shortcut                                          |
+| -------------------------------- | ----------------------------------------------------- | ------------------------------------------------- | -------------------------------------------------------- |
+| count rows where cond            | `COUNT(CASE WHEN cond THEN 1 END)`                    | `COUNT(*) FILTER (WHERE cond)`                    | `COUNTIF(cond)` (BigQuery)                               |
+| count distinct values where cond | `COUNT(DISTINCT CASE WHEN cond THEN col END)`         | `COUNT(DISTINCT col) FILTER (WHERE cond)`         | `COUNT(DISTINCT IF(cond, col, NULL))` (BigQuery)         |
+| sum values where cond            | `SUM(CASE WHEN cond THEN x END)`                      | `SUM(x) FILTER (WHERE cond)`                      | `SUMIF(cond, x)` (BigQuery), `SUM(IF(cond,x,0))` (MySQL) |
+| average values where cond        | `AVG(CASE WHEN cond THEN x END)`                      | `AVG(x) FILTER (WHERE cond)`                      | `AVG(IF(cond, x, NULL))` (MySQL)                         |
+| share of rows                    | `100.0 * COUNT(CASE WHEN cond THEN 1 END) / COUNT(*)` | `100.0 * COUNT(*) FILTER (WHERE cond) / COUNT(*)` | `100.0 * COUNTIF(cond) / COUNT(*)` (BigQuery)            |
 
 ---
 
@@ -756,10 +756,10 @@ flowchart TD
 
 ## Advanced
 
-11. `CASE` picks the first `TRUE` branch top-to-bottom. Design banded revenue buckets (`<100`, `100–499`, `>=500`) with overlapping conditions and show how both *correct* and *buggy* results can emerge from the same rows.
+11. `CASE` picks the first `TRUE` branch top-to-bottom. Design banded revenue buckets (`<100`, `100–499`, `>=500`) with overlapping conditions and show how both _correct_ and _buggy_ results can emerge from the same rows.
 12. In PostgreSQL, why might the same `EXPLAIN` show no `Gather`/`Partial Aggregate` for a query containing `COUNT(DISTINCT ...) FILTER (WHERE ...)`? What would you check to confirm the cause?
-13. Compare the *mechanism* of `CASE`-inside-aggregate vs `FILTER`: one relies on NULL-skipping, the other on row exclusion. Give a concrete example where the distinction matters for correctness (e.g., an aggregate that does *not* skip NULLs).
-14. A designer claims "`FILTER` is always faster than `CASE` because the argument expression is never evaluated for non-matching rows." Defend the *proper* answer: when is it plausible, when is it irrelevant, and how do you verify it on one specific engine?
+13. Compare the _mechanism_ of `CASE`-inside-aggregate vs `FILTER`: one relies on NULL-skipping, the other on row exclusion. Give a concrete example where the distinction matters for correctness (e.g., an aggregate that does _not_ skip NULLs).
+14. A designer claims "`FILTER` is always faster than `CASE` because the argument expression is never evaluated for non-matching rows." Defend the _proper_ answer: when is it plausible, when is it irrelevant, and how do you verify it on one specific engine?
 15. Build a single-query report that needs, per department: headcount, active count, average active salary, and the share of employees above the company-wide average salary (without using a window function). Discuss what the denominator means in each column.
 
 ## Scenario Based
@@ -815,7 +815,7 @@ GROUP BY customer_id
 ORDER BY customer_id;
 ```
 
-26. Predict what each of these returns on the sample `employees`, and explain *why* they differ:
+26. Predict what each of these returns on the sample `employees`, and explain _why_ they differ:
 
 ```sql
 SELECT AVG(salary)                                  AS a,
@@ -835,7 +835,7 @@ FROM employees;
 
 31. Design a rigorous comparison of "one scan of three conditional counts" vs "three separate `COUNT ... WHERE` queries" on your engine. What must you check in the `EXPLAIN` (node types, actual rows, time) before concluding either is faster on a 10M-row table?
 32. Same metric, two spellings on PostgreSQL: `COUNT(CASE WHEN cond THEN 1 END)` vs `COUNT(*) FILTER (WHERE cond)`. Describe the experiment and which plan features (if any) would make `FILTER` plausibly cheaper.
-33. A `COUNT(DISTINCT CASE ... END) FILTER (WHERE ...)` on a dimensional table of 20M rows is slow on PostgreSQL. List the things you would verify (parallel aggregation eligibility, index-only scan possibility, spill/memory, distinct-count approximation alternatives) *before* rewriting it.
+33. A `COUNT(DISTINCT CASE ... END) FILTER (WHERE ...)` on a dimensional table of 20M rows is slow on PostgreSQL. List the things you would verify (parallel aggregation eligibility, index-only scan possibility, spill/memory, distinct-count approximation alternatives) _before_ rewriting it.
 34. Compare `WHERE status='shipped'` + plain `COUNT(*)` vs a conditional count over the whole table. When can the `WHERE` version legitimately be expected to scan fewer rows, and what schema object would you add to make that provable via `EXPLAIN`?
 
-*(Questions are practice — reason them against the sample tables and your own `EXPLAIN` output before peeking at results.)*
+_(Questions are practice — reason them against the sample tables and your own `EXPLAIN` output before peeking at results.)_

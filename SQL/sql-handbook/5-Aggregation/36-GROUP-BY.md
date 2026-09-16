@@ -1,4 +1,4 @@
-```markdown
+````markdown
 # 36 — GROUP BY
 
 > Category: 5-Aggregation — Section: 36-GROUP-BY
@@ -9,7 +9,7 @@
 
 ### What it is
 
-`GROUP BY` is the clause that collapses multiple rows from a table into **groups**, and then allows you to compute one value *per group* using an aggregate function such as `COUNT`, `SUM`, `AVG`, `MIN`, `MAX`.
+`GROUP BY` is the clause that collapses multiple rows from a table into **groups**, and then allows you to compute one value _per group_ using an aggregate function such as `COUNT`, `SUM`, `AVG`, `MIN`, `MAX`.
 
 ### Why it exists
 
@@ -19,7 +19,7 @@ Most real-world questions are not "how many rows total?" but "how many per somet
 
 `GROUP BY` does **not** order anything. It does **not** deduplicate rows (despite a very common misconception). It does not change the underlying table — it produces a new grouped result set.
 
-> Common misconception: "GROUP BY removes duplicates." Wrong. `GROUP BY` collapses rows into groups and applies aggregates. `SELECT DISTINCT` removes duplicates. The results can *look* similar when you group by a column and select it without an aggregate, but the semantics are different: `GROUP BY` groups (and can compute aggregates), `DISTINCT` only dedupes.
+> Common misconception: "GROUP BY removes duplicates." Wrong. `GROUP BY` collapses rows into groups and applies aggregates. `SELECT DISTINCT` removes duplicates. The results can _look_ similar when you group by a column and select it without an aggregate, but the semantics are different: `GROUP BY` groups (and can compute aggregates), `DISTINCT` only dedupes.
 
 ---
 
@@ -41,6 +41,7 @@ SELECT   -- compute expressions & aggregates
 ORDER BY -- sort final rows
 LIMIT/OFFSET
 ```
+````
 
 ---
 
@@ -149,11 +150,11 @@ GROUP BY department_id;
 ```
 
 | department_id | employee_count |
-|---|---|
-| 1 | 2 |
-| 2 | 2 |
-| 3 | 2 |
-| NULL | 1 |
+| ------------- | -------------- |
+| 1             | 2              |
+| 2             | 2              |
+| 3             | 2              |
+| NULL          | 1              |
 
 - `Grace` has `department_id = NULL`, and she still forms her own group.
 - Because the question is "per department," the output grain is **one department per row**.
@@ -174,10 +175,10 @@ GROUP BY d.department_name;
 ```
 
 | department_name | headcount | total_salary | avg_salary | min_salary | max_salary |
-|---|---|---|---|---|---|
-| Engineering | 2 | 17000.00 | 8500.00 | 8000.00 | 9000.00 |
-| Sales | 2 | 12500.00 | 6250.00 | 6000.00 | 6500.00 |
-| HR | 2 | 5000.00 | 5000.00 | 5000.00 | 5000.00 |
+| --------------- | --------- | ------------ | ---------- | ---------- | ---------- |
+| Engineering     | 2         | 17000.00     | 8500.00    | 8000.00    | 9000.00    |
+| Sales           | 2         | 12500.00     | 6250.00    | 6000.00    | 6500.00    |
+| HR              | 2         | 5000.00      | 5000.00    | 5000.00    | 5000.00    |
 
 Note: `Frank`'s `NULL` salary is ignored by `SUM/AVG` but `COUNT(*)` still counts him. `Grace` (no department) is dropped because the join is an `INNER JOIN`.
 
@@ -194,9 +195,10 @@ NULL is not a value — it's "unknown/missing." Grouping shares the general thre
    FROM employees
    GROUP BY department_id;
    ```
+
    includes `| NULL | 1 |` for Grace.
 
-2. Aggregates ignore NULLs *except* `COUNT(*)`:
+2. Aggregates ignore NULLs _except_ `COUNT(*)`:
    - `COUNT(*)` counts all rows in the group **including NULL-containing rows**.
    - `COUNT(col)` counts only rows where `col IS NOT NULL`.
    - `SUM(col)`, `AVG(col)`, `MIN(col)`, `MAX(col)` ignore NULL rows entirely.
@@ -216,18 +218,19 @@ ORDER BY department_id;
 For `department_id = 3`:
 
 | rows_in_group | salaries_present | sum_salary | avg_salary |
-|---|---|---|---|
-| 2 | 1 | 5000.00 | 5000.00 |
+| ------------- | ---------------- | ---------- | ---------- |
+| 2             | 1                | 5000.00    | 5000.00    |
 
 > Interview trap: `AVG(salary)` for HR returns **5000.00**, not 2500.00. Beginners assume average over all rows including NULL. Because NULL is excluded from the average, HR's average is 5000 (one non-null salary), even though the department has 2 employees.
 
-3. `GROUP BY` a column that contains NULLs separates NULL rows into their own bucket. If you want to *exclude* or *label* that bucket, handle it explicitly:
+3. `GROUP BY` a column that contains NULLs separates NULL rows into their own bucket. If you want to _exclude_ or _label_ that bucket, handle it explicitly:
 
    ```sql
    SELECT COALESCE(department_id, -1) AS department_id, COUNT(*)
    FROM employees
    GROUP BY COALESCE(department_id, -1);
    ```
+
    Note: group by the **same expression** you select, otherwise your `SELECT` column no longer matches the grouping key.
 
 4. **`GROUP BY` does NOT collapse NULLs together with real values.** `NULL` is not equal to any value and not equal to another NULL — yet grouping still places them in one group. This is a deliberate, engine-wide behavior (distinct grouping keys), not a violation of three-valued logic.
@@ -247,10 +250,10 @@ HAVING COUNT(*) > 1;
 ```
 
 | department_id | headcount |
-|---|---|
-| 1 | 2 |
-| 2 | 2 |
-| 3 | 2 |
+| ------------- | --------- |
+| 1             | 2         |
+| 2             | 2         |
+| 3             | 2         |
 
 ### WHERE vs HAVING — what runs first and why it matters
 
@@ -263,13 +266,13 @@ WHERE status = 'shipped'   -- removes non-shipped ROWS before grouping
 GROUP BY department_id;
 ```
 
-| | WHERE | HAVING |
-|---|---|---|
-| Applied to | individual rows | groups |
-| Timing | before grouping | after grouping |
-| Can use aggregates | No | Yes |
-| Can use plain columns | Yes | Yes (but must also be in SELECT/GROUP BY in strict engines) |
-| Performance intent | filters early, fewer rows grouped | filters late, after aggregation work |
+|                       | WHERE                             | HAVING                                                      |
+| --------------------- | --------------------------------- | ----------------------------------------------------------- |
+| Applied to            | individual rows                   | groups                                                      |
+| Timing                | before grouping                   | after grouping                                              |
+| Can use aggregates    | No                                | Yes                                                         |
+| Can use plain columns | Yes                               | Yes (but must also be in SELECT/GROUP BY in strict engines) |
+| Performance intent    | filters early, fewer rows grouped | filters late, after aggregation work                        |
 
 > Production pitfall: putting a cheap filter in `HAVING` instead of `WHERE` makes the engine **group all rows first**, then discard whole groups. On large tables this can execute aggregations over rows you never needed. Check the execution plan — a `Filter` before the `HashAggregate`/`GroupAggregate` node vs after is the telltale.
 
@@ -305,11 +308,11 @@ ORDER BY customer_id, month;
 ```
 
 | customer_id | month | revenue |
-|---|---|---|
-| 1 | 1 | 250.00 |
-| 2 | 1 | 480.00 |
-| 2 | 2 | 120.00 |
-| 3 | 2 | 340.00 |
+| ----------- | ----- | ------- |
+| 1           | 1     | 250.00  |
+| 2           | 1     | 480.00  |
+| 2           | 2     | 120.00  |
+| 3           | 2     | 340.00  |
 
 Output grain: **one row per (customer, month)** combination.
 
@@ -331,17 +334,17 @@ JOIN order_items oi ON oi.order_id = o.order_id
 WHERE o.order_id = 1;
 ```
 
-| order_id | total | quantity | unit_price |
-|---|---|---|---|
-| 1 | 250.00 | 2 | 50.00 |
-| 1 | 250.00 | 2 | 50.00 | -- wait, we show order_items rows
+| order_id | total  | quantity | unit_price |
+| -------- | ------ | -------- | ---------- | --------------------------------- |
+| 1        | 250.00 | 2        | 50.00      |
+| 1        | 250.00 | 2        | 50.00      | -- wait, we show order_items rows |
 
 Actually the join on order 1 yields 2 line items:
 
 | order_id | o.total | quantity | unit_price | line_amt |
-|---|---|---|---|---|
-| 1 | 250.00 | 2 | 50.00 | 100.00 |
-| 1 | 250.00 | 3 | 50.00 | 150.00 |
+| -------- | ------- | -------- | ---------- | -------- |
+| 1        | 250.00  | 2        | 50.00      | 100.00   |
+| 1        | 250.00  | 3        | 50.00      | 150.00   |
 
 Now try: `SELECT o.order_id, SUM(o.total) FROM orders o JOIN order_items oi ... GROUP BY o.order_id` — the order total appears **twice** (once per line item).
 
@@ -356,8 +359,8 @@ GROUP BY o.order_id;
 ```
 
 | order_id | order_total_x2 |
-|---|---|
-| 1 | 500.00 |
+| -------- | -------------- |
+| 1        | 500.00         |
 
 Expected: 250.00. Actual: 500.00. Classic **fan-out double-counting**.
 
@@ -397,7 +400,7 @@ WHERE o.order_id = 1;
 
 > Common misconception: "The join is wrong." The join isn't wrong. The problem is **mixing two grains in one aggregation**: `o.total` lives at order grain; `order_items` rows live at line-item grain. Aggregating the two together creates a mismatch.
 
-> Interview trap: Given orders and order_items, "sum the total revenue and the line-item quantity, grouped by customer." Correct approach: aggregate `order_items` to order grain *first*, then join, then aggregate to customer grain. The wrong approach joins first and over-counts `o.total`.
+> Interview trap: Given orders and order_items, "sum the total revenue and the line-item quantity, grouped by customer." Correct approach: aggregate `order_items` to order grain _first_, then join, then aggregate to customer grain. The wrong approach joins first and over-counts `o.total`.
 
 ### Adopt the 5-question grain check from the Reasoning appendix for every grouped join:
 
@@ -419,13 +422,13 @@ SELECT department_id FROM employees GROUP BY department_id;
 
 Both return one row per distinct department_id, but:
 
-| | DISTINCT | GROUP BY |
-|---|---|---|
-| Purpose | deduplicate rows | form groups for aggregation |
-| Aggregates | not allowed | allowed |
-| Same output when | selecting only grouping columns | selecting only grouping columns |
-| Readability | clearer intent for dedup | implies aggregation |
-| Performance | engine-specific; optimizer may produce identical plans | same caveat |
+|                  | DISTINCT                                               | GROUP BY                        |
+| ---------------- | ------------------------------------------------------ | ------------------------------- |
+| Purpose          | deduplicate rows                                       | form groups for aggregation     |
+| Aggregates       | not allowed                                            | allowed                         |
+| Same output when | selecting only grouping columns                        | selecting only grouping columns |
+| Readability      | clearer intent for dedup                               | implies aggregation             |
+| Performance      | engine-specific; optimizer may produce identical plans | same caveat                     |
 
 If you are **not computing aggregates**, prefer `SELECT DISTINCT`. If you are **computing aggregates**, you need `GROUP BY`. Some engines optimize both to the same plan — verify with `EXPLAIN`, don't assume one is always faster.
 
@@ -447,11 +450,11 @@ FROM employees;
 ```
 
 | employee_name | department_id | salary | dept_max_salary |
-|---|---|---|---|
-| Alice | 1 | 9000 | 9000 |
-| Bob | 1 | 8000 | 9000 |
-| Carol | 2 | 6000 | 6500 |
-| Dave | 2 | 6500 | 6500 |
+| ------------- | ------------- | ------ | --------------- |
+| Alice         | 1             | 9000   | 9000            |
+| Bob           | 1             | 8000   | 9000            |
+| Carol         | 2             | 6000   | 6500            |
+| Dave          | 2             | 6500   | 6500            |
 
 Rules of thumb:
 
@@ -483,7 +486,7 @@ Best practice: keep the `SELECT` expression and the `GROUP BY` expression **byte
 
 > MySQL
 >
-> Historically MySQL (default or loose `sql_mode`) allowed `SELECT department_id, employee_name ... GROUP BY department_id`, silently picking an *arbitrary* `employee_name`. This is **non-deterministic** and effectively an engine bug from a standards view. Design is: `ONLY_FULL_GROUP_BY` mode makes MySQL behave like other engines by rejecting these queries. Always work with `ONLY_FULL_GROUP_BY` enabled.
+> Historically MySQL (default or loose `sql_mode`) allowed `SELECT department_id, employee_name ... GROUP BY department_id`, silently picking an _arbitrary_ `employee_name`. This is **non-deterministic** and effectively an engine bug from a standards view. Design is: `ONLY_FULL_GROUP_BY` mode makes MySQL behave like other engines by rejecting these queries. Always work with `ONLY_FULL_GROUP_BY` enabled.
 
 > SQL Server
 >
@@ -560,20 +563,21 @@ GROUP BY department_id;
 ```
 
 Expected plan hints (PostgreSQL example — adapt per engine):
+
 - `Seq Scan` on employees + `Filter` → `HashAggregate` (or `GroupAggregate` with a sort).
 - Row estimates vs actual rows: mismatch = stale statistics → `ANALYZE`.
 
 ### Pitfalls that hurt grouped queries
 
-| Issue | Effect | Mitigation |
-|---|---|---|
-| Non-sargable predicate in `WHERE` (e.g. `WHERE DATE(col) = ...`) | index on `col` unusable → full scan | compare `col >= ... AND col < ...` boundary form |
-| `HAVING` on a cheap filter instead of `WHERE` | groups all rows first | move to `WHERE` |
-| `GROUP BY (huge expression)` or `GROUP BY` a wide `TEXT` concatenation | heavy key hashing/sorting | reduce key width, add derived column |
-| enriching with joins at wrong grain | fan-out → wrong numbers | aggregate before join |
-| `SELECT DISTINCT` + window function combo | often redundant | check if `GROUP BY` suffices |
+| Issue                                                                  | Effect                              | Mitigation                                       |
+| ---------------------------------------------------------------------- | ----------------------------------- | ------------------------------------------------ |
+| Non-sargable predicate in `WHERE` (e.g. `WHERE DATE(col) = ...`)       | index on `col` unusable → full scan | compare `col >= ... AND col < ...` boundary form |
+| `HAVING` on a cheap filter instead of `WHERE`                          | groups all rows first               | move to `WHERE`                                  |
+| `GROUP BY (huge expression)` or `GROUP BY` a wide `TEXT` concatenation | heavy key hashing/sorting           | reduce key width, add derived column             |
+| enriching with joins at wrong grain                                    | fan-out → wrong numbers             | aggregate before join                            |
+| `SELECT DISTINCT` + window function combo                              | often redundant                     | check if `GROUP BY` suffices                     |
 
-> Note: an index does not magically make `GROUP BY` fast. Grouping still needs to materialize groups. What an index can do is *supply order* (so a sort can be skipped for GroupAggregate) or allow a *covering* scan so each aggregate scan avoids table fetches. Whether this pays off depends on the query and data — confirm with the execution plan.
+> Note: an index does not magically make `GROUP BY` fast. Grouping still needs to materialize groups. What an index can do is _supply order_ (so a sort can be skipped for GroupAggregate) or allow a _covering_ scan so each aggregate scan avoids table fetches. Whether this pays off depends on the query and data — confirm with the execution plan.
 
 ---
 
@@ -619,11 +623,11 @@ GROUP BY d.department_name;
 ```
 
 | department_name | headcount |
-|---|---|
-| Engineering | 2 |
-| Sales | 2 |
-| HR | 2 |
-| NULL | 1 |
+| --------------- | --------- |
+| Engineering     | 2         |
+| Sales           | 2         |
+| HR              | 2         |
+| NULL            | 1         |
 
 ---
 
@@ -656,10 +660,10 @@ GROUP BY DATE_TRUNC('month', order_date)
 ORDER BY month;
 ```
 
-| month | orders | revenue |
-|---|---|---|
-| 2025-01 | 2 | 730.00 |
-| 2025-02 | 3 | 460.00 |
+| month   | orders | revenue |
+| ------- | ------ | ------- |
+| 2025-01 | 2      | 730.00  |
+| 2025-02 | 3      | 460.00  |
 
 ### Scenario 3 — "Top 3 employees per department" (window function + filter)
 
@@ -714,11 +718,11 @@ GROUP BY m
 ORDER BY m;
 ```
 
-| month | orders |
-|---|---|
-| 2025-01 | 3 |
-| 2025-02 | 3 |
-| 2025-03 | 0 |
+| month   | orders |
+| ------- | ------ |
+| 2025-01 | 3      |
+| 2025-02 | 3      |
+| 2025-03 | 0      |
 
 ### Grouping on a column with all NULLs
 
@@ -747,17 +751,17 @@ Grouping is case-sensitive per the column's collation. In PostgreSQL with defaul
 
 ## Summary comparison table
 
-| Question | Tool |
-|---|---|
-| "How many per x?" | `GROUP BY` + `COUNT` |
-| "Filter groups (e.g., count > 3)" | `HAVING` |
-| "Skip rows before grouping" | `WHERE` |
-| "Unique list of values" | `SELECT DISTINCT` |
-| "Top-N per group with rows preserved" | window `ROW_NUMBER` / `RANK` |
-| "Summary next to detail rows" | window aggregate |
+| Question                                  | Tool                                |
+| ----------------------------------------- | ----------------------------------- |
+| "How many per x?"                         | `GROUP BY` + `COUNT`                |
+| "Filter groups (e.g., count > 3)"         | `HAVING`                            |
+| "Skip rows before grouping"               | `WHERE`                             |
+| "Unique list of values"                   | `SELECT DISTINCT`                   |
+| "Top-N per group with rows preserved"     | window `ROW_NUMBER` / `RANK`        |
+| "Summary next to detail rows"             | window aggregate                    |
 | "Multiple grouping levels with subtotals" | `GROUPING SETS` / `ROLLUP` / `CUBE` |
-| "Per group per second key" | multi-column `GROUP BY` |
-| "Group by truncated date" | `GROUP BY DATE(col)` / `date_trunc` |
+| "Per group per second key"                | multi-column `GROUP BY`             |
+| "Group by truncated date"                 | `GROUP BY DATE(col)` / `date_trunc` |
 
 ---
 
@@ -842,4 +846,4 @@ GROUP BY o.order_id;
 28. Why might `GROUP BY` on a huge expression string be slow, and what schema-level change helps?
 29. Explain how you would verify whether moving a predicate from `HAVING` to `WHERE` improves a grouped query's performance.
 
-*(Questions 22–29 are practice — answer them yourself before checking against execution plans and the tables' grain
+\*(Questions 22–29 are practice — answer them yourself before checking against execution plans and the tables' grain

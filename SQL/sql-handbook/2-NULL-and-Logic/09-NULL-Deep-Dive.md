@@ -3,11 +3,13 @@ Let me verify the file and fix two small artifacts I noticed while writing.
 Generated `sql-handbook/2-NULL-and-Logic/09-NULL-Deep-Dive.md` (1,673 lines).
 
 Covers:
+
 - **Fundamentals:** what NULL is, storage, "absence" semantics, three-valued logic truth tables (AND/OR/NOT) + the `FALSE AND UNKNOWN` / `TRUE OR UNKNOWN` rules, and the 10 golden rules
 - **Operators/functions:** comparison, `IS [NOT] NULL`, `IS [NOT] DISTINCT FROM` (with per-DB support matrix), `COALESCE`, `NULLIF`, arithmetic/concatenation (incl. Oracle's `''`==NULL and `'a' || NULL`), aggregates (`COUNT(*)`/`COUNT(col)`/`SUM` returning NULL), `GROUP BY`/`DISTINCT`/`UNION` NULL bucketing, `ORDER BY` defaults per engine, `IN`/`NOT IN` zero-rows trap, `EXISTS`/`NOT EXISTS`, JOINs + LEFT→INNER trap, window functions, `CASE`, constraints (`CHECK` lets NULL through), CRUD/`MERGE`
 - **Realistic sample data** with grain stated, expected outputs for every example, BAD vs BETTER patterns, sargability table, `EXPLAIN` verification guidance (no absolute performance claims), DB-specific callouts, labeled misconceptions/traps/pitfalls, Mermaid decision diagram
 - **Interview Questions:** 74 questions across all 8 requested categories (Beginner → Performance), including output-prediction prompts for the sample data, with answers withheld for practice.
-es)
+  es)
+
 20. [NULL in CRUD: INSERT, UPDATE, MERGE](#null-in-crud-insert-update-merge)
 21. [Empty String vs NULL](#empty-string-vs-null)
 22. [Database-Specific Differences: PostgreSQL, MySQL, SQL Server, Oracle](#database-specific-differences-postgresql-mysql-sql-server-oracle)
@@ -33,26 +35,26 @@ It is **not**:
 - an empty array
 
 > **Common misconception**
-> "NULL is just another value, like an empty string or zero." — It is not. `NULL` is proof of *absence*. Almost every SQL engine stores it specially (a null bitmap, a byte in the row header, an indicator in the file format), and every operator must handle it specially because there is nothing to compare.
+> "NULL is just another value, like an empty string or zero." — It is not. `NULL` is proof of _absence_. Almost every SQL engine stores it specially (a null bitmap, a byte in the row header, an indicator in the file format), and every operator must handle it specially because there is nothing to compare.
 
 > **Common misconception**
-> "There is one NULL anywhere in the database." — Every column cell is independently NULL or not. `NULL` is not a shared object like a number; it is a *per-cell flag* meaning "no value here."
+> "There is one NULL anywhere in the database." — Every column cell is independently NULL or not. `NULL` is not a shared object like a number; it is a _per-cell flag_ meaning "no value here."
 
 ### What NULL means semantically
 
 Exactly what "no value" means is your job as the designer. It typically means one of:
 
-| Meaning | Example |
-|---------|---------|
-| Unknown | `salary` is not known yet for a new hire |
-| Missing | No `email` was ever provided |
-| Inapplicable / Not applicable | A person with no manager has `manager_id = NULL` |
-| Not yet set | `shipped_date` is NULL until the order ships |
-| Suppressed | Data intentionally withheld (e.g. a redacted field) |
+| Meaning                       | Example                                             |
+| ----------------------------- | --------------------------------------------------- |
+| Unknown                       | `salary` is not known yet for a new hire            |
+| Missing                       | No `email` was ever provided                        |
+| Inapplicable / Not applicable | A person with no manager has `manager_id = NULL`    |
+| Not yet set                   | `shipped_date` is NULL until the order ships        |
+| Suppressed                    | Data intentionally withheld (e.g. a redacted field) |
 
-This is why you should never treat NULL and `''` as interchangeable: `''` is a *known* empty value; NULL says *we don't know or there is none*.
+This is why you should never treat NULL and `''` as interchangeable: `''` is a _known_ empty value; NULL says _we don't know or there is none_.
 
-> **Grain reminder:** NULL operates at the *cell* level and never changes the number of rows a query sees — except indirectly through `WHERE`, `HAVING`, `ON`, and `JOIN` filters, which discard rows. Always ask: "Which rows did the filter drop because of NULL, and is that what I intended?"
+> **Grain reminder:** NULL operates at the _cell_ level and never changes the number of rows a query sees — except indirectly through `WHERE`, `HAVING`, `ON`, and `JOIN` filters, which discard rows. Always ask: "Which rows did the filter drop because of NULL, and is that what I intended?"
 
 ---
 
@@ -60,13 +62,13 @@ This is why you should never treat NULL and `''` as interchangeable: `''` is a *
 
 SQL does not use the two-valued logic of most programming languages. Every comparison produces one of three results:
 
-| Result | Meaning |
-|--------|---------|
-| `TRUE`   | The comparison holds |
-| `FALSE`  | The comparison does not hold |
-| `UNKNOWN`| The comparison involves NULL, so the truth cannot be determined |
+| Result    | Meaning                                                         |
+| --------- | --------------------------------------------------------------- |
+| `TRUE`    | The comparison holds                                            |
+| `FALSE`   | The comparison does not hold                                    |
+| `UNKNOWN` | The comparison involves NULL, so the truth cannot be determined |
 
-In SQL, `UNKNOWN` is often written as `NULL` when the result is *returned as a value*, but inside the engine the filter logic distinguishes three states: `TRUE`, `FALSE`, `UNKNOWN`.
+In SQL, `UNKNOWN` is often written as `NULL` when the result is _returned as a value_, but inside the engine the filter logic distinguishes three states: `TRUE`, `FALSE`, `UNKNOWN`.
 
 ### Late binding — the golden rule
 
@@ -74,30 +76,30 @@ In SQL, `UNKNOWN` is often written as `NULL` when the result is *returned as a v
 
 ### The AND / OR / NOT truth tables
 
-| A | B | A AND B | A OR B |
-|---|---|---------|--------|
-| TRUE  | TRUE    | TRUE    | TRUE    |
-| TRUE  | FALSE   | FALSE   | TRUE    |
-| TRUE  | UNKNOWN | UNKNOWN | TRUE    |
-| FALSE | TRUE    | FALSE   | TRUE    |
-| FALSE | FALSE   | FALSE   | FALSE   |
-| FALSE | UNKNOWN | FALSE  | UNKNOWN |
-| UNKNOWN | TRUE  | UNKNOWN | TRUE    |
-| UNKNOWN | FALSE | FALSE  | UNKNOWN |
+| A       | B       | A AND B | A OR B  |
+| ------- | ------- | ------- | ------- |
+| TRUE    | TRUE    | TRUE    | TRUE    |
+| TRUE    | FALSE   | FALSE   | TRUE    |
+| TRUE    | UNKNOWN | UNKNOWN | TRUE    |
+| FALSE   | TRUE    | FALSE   | TRUE    |
+| FALSE   | FALSE   | FALSE   | FALSE   |
+| FALSE   | UNKNOWN | FALSE   | UNKNOWN |
+| UNKNOWN | TRUE    | UNKNOWN | TRUE    |
+| UNKNOWN | FALSE   | FALSE   | UNKNOWN |
 | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN |
 
-| A | NOT A |
-|---|-------|
-| TRUE    | FALSE    |
-| FALSE   | TRUE     |
-| UNKNOWN | UNKNOWN  |
+| A       | NOT A   |
+| ------- | ------- |
+| TRUE    | FALSE   |
+| FALSE   | TRUE    |
+| UNKNOWN | UNKNOWN |
 
 **Two rows to memorize** (they are the source of most interview surprises):
 
-| Expression | Result | Why |
-|------------|--------|-----|
+| Expression          | Result  | Why                                                  |
+| ------------------- | ------- | ---------------------------------------------------- |
 | `FALSE AND UNKNOWN` | `FALSE` | A false fact is false no matter what the unknown was |
-| `TRUE OR UNKNOWN`   | `TRUE`  | A true fact is true no matter what the unknown was |
+| `TRUE OR UNKNOWN`   | `TRUE`  | A true fact is true no matter what the unknown was   |
 
 ### Why these two rows exist
 
@@ -132,30 +134,30 @@ flowchart TD
     B -- UNKNOWN --> D
     D --> E["NULL behaves like FALSE in WHERE"]
     subgraph "Only IS NULL / IS NOT NULL / IS DISTINCT FROM ever return TRUE from a NULL operand"
-    F["col = NULL -> UNKNOWN"] 
+    F["col = NULL -> UNKNOWN"]
     G["col IS NULL -> TRUE"]
     end
 ```
 
 > **Interview trap**
-> "A filter with `WHERE col = NULL` returns every row whose column is empty." — No: it matches nothing. `col = NULL` is `UNKNOWN` for *every* row, and `WHERE` keeps only `TRUE`.
+> "A filter with `WHERE col = NULL` returns every row whose column is empty." — No: it matches nothing. `col = NULL` is `UNKNOWN` for _every_ row, and `WHERE` keeps only `TRUE`.
 
 ---
 
 ## The Golden Rules of NULL
 
-| # | Rule | Consequence |
-|---|------|-------------|
-| 1 | `NULL = NULL` is `UNKNOWN`, not `TRUE` | NULL is never "equal to" anything, not even itself |
-| 2 | `NULL <> NULL` is `UNKNOWN`, not `FALSE` | NULL is never "not equal to" anything either |
-| 3 | `WHERE`, `HAVING`, `ON`, and `JOIN` conditions keep a row **only** when the condition is `TRUE` | FALSE *and* UNKNOWN rows disappear |
-| 4 | Aggregates ignore NULLs | `SUM`, `AVG`, `MIN`, `MAX`, `COUNT(col)` skip NULL cells |
-| 5 | `COUNT(*)` counts rows; `COUNT(col)` counts non-NULL cells | The two disagree exactly by the NULL count |
-| 6 | NULL propagates through expressions | `NULL + 1 = NULL`, `UPPER(NULL) = NULL`, `'a' || NULL` is NULL except in Oracle |
-| 7 | NULL groups together | `GROUP BY`, `DISTINCT`, `UNION` place all NULLs in one bucket |
-| 8 | NULL breaks `NOT IN` (and most `<>`) semantics | Use `NOT EXISTS` or `IS NOT DISTINCT FROM` instead |
-| 9 | Only 3 predicates return `TRUE` for a NULL operand: `IS NULL`, `IS NOT NULL`, and `IS [NOT] DISTINCT FROM` | For everything else, NULL means UNKNOWN |
-| 10 | Sort order of NULLs is database-defined and may differ | Always verify per engine, or force it explicitly |
+| #   | Rule                                                                                                       | Consequence                                                   |
+| --- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- | --- | ------------------------------ |
+| 1   | `NULL = NULL` is `UNKNOWN`, not `TRUE`                                                                     | NULL is never "equal to" anything, not even itself            |
+| 2   | `NULL <> NULL` is `UNKNOWN`, not `FALSE`                                                                   | NULL is never "not equal to" anything either                  |
+| 3   | `WHERE`, `HAVING`, `ON`, and `JOIN` conditions keep a row **only** when the condition is `TRUE`            | FALSE _and_ UNKNOWN rows disappear                            |
+| 4   | Aggregates ignore NULLs                                                                                    | `SUM`, `AVG`, `MIN`, `MAX`, `COUNT(col)` skip NULL cells      |
+| 5   | `COUNT(*)` counts rows; `COUNT(col)` counts non-NULL cells                                                 | The two disagree exactly by the NULL count                    |
+| 6   | NULL propagates through expressions                                                                        | `NULL + 1 = NULL`, `UPPER(NULL) = NULL`, `'a'                 |     | NULL` is NULL except in Oracle |
+| 7   | NULL groups together                                                                                       | `GROUP BY`, `DISTINCT`, `UNION` place all NULLs in one bucket |
+| 8   | NULL breaks `NOT IN` (and most `<>`) semantics                                                             | Use `NOT EXISTS` or `IS NOT DISTINCT FROM` instead            |
+| 9   | Only 3 predicates return `TRUE` for a NULL operand: `IS NULL`, `IS NOT NULL`, and `IS [NOT] DISTINCT FROM` | For everything else, NULL means UNKNOWN                       |
+| 10  | Sort order of NULLs is database-defined and may differ                                                     | Always verify per engine, or force it explicitly              |
 
 ---
 
@@ -195,22 +197,22 @@ WHERE salary < 100000;
 
 `employees`:
 
-| id | name    | dept_id | salary | manager_id |
-|----|---------|---------|--------|------------|
-| 1  | Alice   | 1       | 95000  | NULL       |
-| 2  | Bob     | 1       | 72000  | 1          |
-| 3  | Charlie | 2       | 88000  | 1          |
-| 4  | Diana   | 2       | NULL   | 3          |
-| 5  | Eve     | 3       | 110000 | NULL       |
-| 6  | Frank   | NULL    | 55000  | NULL       |
-| 7  | Grace   | NULL    | NULL   | NULL       |
+| id  | name    | dept_id | salary | manager_id |
+| --- | ------- | ------- | ------ | ---------- |
+| 1   | Alice   | 1       | 95000  | NULL       |
+| 2   | Bob     | 1       | 72000  | 1          |
+| 3   | Charlie | 2       | 88000  | 1          |
+| 4   | Diana   | 2       | NULL   | 3          |
+| 5   | Eve     | 3       | 110000 | NULL       |
+| 6   | Frank   | NULL    | 55000  | NULL       |
+| 7   | Grace   | NULL    | NULL   | NULL       |
 
 **Grain:** One row = one employee.
 
 **Expected output:**
 
 | name    | salary |
-|---------|--------|
+| ------- | ------ |
 | Alice   | 95000  |
 | Bob     | 72000  |
 | Charlie | 88000  |
@@ -226,7 +228,7 @@ FROM employees
 WHERE salary BETWEEN 70000 AND 90000;
 ```
 
-Same rule: Diana and Grace are absent, because `NULL BETWEEN ...` is `UNKNOWN`. The `BETWEEN` with a NULL *boundary* also yields UNKNOWN for every row:
+Same rule: Diana and Grace are absent, because `NULL BETWEEN ...` is `UNKNOWN`. The `BETWEEN` with a NULL _boundary_ also yields UNKNOWN for every row:
 
 ```sql
 SELECT name FROM employees WHERE salary BETWEEN 70000 AND NULL;   -- 0 rows
@@ -252,7 +254,7 @@ expr IS NOT NULL
 - `expr IS NULL` → `TRUE` if `expr` evaluates to NULL, else `FALSE`.
 - `expr IS NOT NULL` → `TRUE` if `expr` is not NULL, else `FALSE`.
 
-They are *predicates*, so they can appear wherever a condition can: `WHERE`, `HAVING`, `ON`, `CASE WHEN`, `CHECK`, `JOIN ... ON`.
+They are _predicates_, so they can appear wherever a condition can: `WHERE`, `HAVING`, `ON`, `CASE WHEN`, `CHECK`, `JOIN ... ON`.
 
 ### Why they exist
 
@@ -268,7 +270,7 @@ WHERE salary IS NULL;
 ```
 
 | name  | salary |
-|-------|--------|
+| ----- | ------ |
 | Diana | NULL   |
 | Grace | NULL   |
 
@@ -280,7 +282,7 @@ WHERE salary IS NOT NULL;
 ```
 
 | name    | salary |
-|---------|--------|
+| ------- | ------ |
 | Alice   | 95000  |
 | Bob     | 72000  |
 | Charlie | 88000  |
@@ -295,19 +297,19 @@ WHERE manager_id IS NULL;
 ```
 
 | name  |
-|-------|
+| ----- |
 | Alice |
 | Eve   |
 | Frank |
 | Grace |
 
-### NULL checks are *not* equality
+### NULL checks are _not_ equality
 
-| Expression | TRUE when | FALSE when |
-|------------|-----------|------------|
-| `col = 5`     | `col = 5` | `col <> 5` and `col = NULL` (UNKNOWN → dropped) |
-| `col IS NULL` | `col` is NULL | `col` is any real value |
-| `col = NULL`  | never | `UNKNOWN` for every row → **0 rows** |
+| Expression    | TRUE when     | FALSE when                                      |
+| ------------- | ------------- | ----------------------------------------------- |
+| `col = 5`     | `col = 5`     | `col <> 5` and `col = NULL` (UNKNOWN → dropped) |
+| `col IS NULL` | `col` is NULL | `col` is any real value                         |
+| `col = NULL`  | never         | `UNKNOWN` for every row → **0 rows**            |
 
 > **Interview trap**
 > `SELECT * FROM t WHERE col = NULL;` compiles without error and returns zero rows. Beginners assume an error; there is none — the query is just vacuously FALSE/UNKNOWN for every row. People who "fix" it with `col <> NULL` "fix" nothing.
@@ -318,12 +320,12 @@ WHERE manager_id IS NULL;
 
 ### What it is
 
-A NULL-aware comparison that returns real `TRUE`/`FALSE` (never `UNKNOWN`). It asks: "are these two values *distinguishable*?"
+A NULL-aware comparison that returns real `TRUE`/`FALSE` (never `UNKNOWN`). It asks: "are these two values _distinguishable_?"
 
-| Operator | Meaning | Returns |
-|----------|---------|---------|
-| `a IS DISTINCT FROM b`     | a and b differ, treating NULL as its own value | TRUE if one is NULL and the other is not, or both real and different |
-| `a IS NOT DISTINCT FROM b` | a and b are the same, treating NULL as its own value | TRUE if both NULL, or both real and equal |
+| Operator                   | Meaning                                              | Returns                                                              |
+| -------------------------- | ---------------------------------------------------- | -------------------------------------------------------------------- |
+| `a IS DISTINCT FROM b`     | a and b differ, treating NULL as its own value       | TRUE if one is NULL and the other is not, or both real and different |
+| `a IS NOT DISTINCT FROM b` | a and b are the same, treating NULL as its own value | TRUE if both NULL, or both real and equal                            |
 
 ### Syntax (ANSI SQL:1999)
 
@@ -334,12 +336,12 @@ a IS NOT DISTINCT FROM b
 
 ### Support matrix
 
-| Database | `IS [NOT] DISTINCT FROM` | Null-safe alternative |
-|----------|--------------------------|-----------------------|
-| PostgreSQL | Yes | `IS NOT DISTINCT FROM`, `IS DISTINCT FROM` |
-| MariaDB    | Yes (10.x+) | same |
-| MySQL      | No (as of common 8.0.x) | `<=>` null-safe equality operator |
-| SQL Server | No | hand-rolled boolean expression (below) |
+| Database   | `IS [NOT] DISTINCT FROM`                   | Null-safe alternative                                       |
+| ---------- | ------------------------------------------ | ----------------------------------------------------------- |
+| PostgreSQL | Yes                                        | `IS NOT DISTINCT FROM`, `IS DISTINCT FROM`                  |
+| MariaDB    | Yes (10.x+)                                | same                                                        |
+| MySQL      | No (as of common 8.0.x)                    | `<=>` null-safe equality operator                           |
+| SQL Server | No                                         | hand-rolled boolean expression (below)                      |
 | Oracle     | No (pre-23 historical); check your version | `DECODE`/`NVL2`-style expressions or `NOT (a = b)` wrapping |
 
 > **PostgreSQL**
@@ -378,14 +380,14 @@ With the plain `LEFT JOIN`, the CEO row comes back with `manager = NULL` (which 
 
 ### Edge cases
 
-| Expression | Result | Why |
-|------------|--------|-----|
-| `1 IS DISTINCT FROM 2`        | TRUE   | different values |
-| `1 IS DISTINCT FROM 1`        | FALSE  | equal |
-| `1 IS DISTINCT FROM NULL`     | TRUE   | one NULL, one not |
-| `NULL IS DISTINCT FROM NULL`  | FALSE  | both NULL → not distinguishable |
-| `1 IS NOT DISTINCT FROM NULL` | FALSE  | distinguishable |
-| `NULL IS NOT DISTINCT FROM NULL` | TRUE | both NULL → same |
+| Expression                       | Result | Why                             |
+| -------------------------------- | ------ | ------------------------------- |
+| `1 IS DISTINCT FROM 2`           | TRUE   | different values                |
+| `1 IS DISTINCT FROM 1`           | FALSE  | equal                           |
+| `1 IS DISTINCT FROM NULL`        | TRUE   | one NULL, one not               |
+| `NULL IS DISTINCT FROM NULL`     | FALSE  | both NULL → not distinguishable |
+| `1 IS NOT DISTINCT FROM NULL`    | FALSE  | distinguishable                 |
+| `NULL IS NOT DISTINCT FROM NULL` | TRUE   | both NULL → same                |
 
 ---
 
@@ -416,7 +418,7 @@ END
 
 - Evaluates arguments, returns the first that is not NULL.
 - Stops as soon as a non-NULL is found (engines implement it as the `CASE` above; argument evaluation is effectively left-to-right).
-- The type must be *common-compatible* across arguments; if not, `CAST` explicitly.
+- The type must be _common-compatible_ across arguments; if not, `CAST` explicitly.
 
 ### Examples
 
@@ -427,16 +429,16 @@ SELECT name,
 FROM employees;
 ```
 
-| name    | contact             |
-|---------|---------------------|
-| Alice   | Ali                 |
-| Bob     | bob@corp.com        |
+| name  | contact      |
+| ----- | ------------ |
+| Alice | Ali          |
+| Bob   | bob@corp.com |
 
 ### Use cases
 
 1. **Display fallback:** `COALESCE(nickname, name)` to avoid NULL in a UI.
 2. **Aggregate zeroing:** `COALESCE(SUM(amount), 0)` so a no-match group shows `0`, not NULL.
-3. **Date fallback:** `COALESCE(shipped_date, order_date)` to treat unshipped orders as shipped-today — but *only* if business rules allow it.
+3. **Date fallback:** `COALESCE(shipped_date, order_date)` to treat unshipped orders as shipped-today — but _only_ if business rules allow it.
 4. **Pivot defaults:** `COALESCE(SUM(CASE WHEN region='North' THEN amount END), 0)`.
 
 ### BAD vs BETTER
@@ -449,7 +451,7 @@ SELECT COUNT(*) FROM orders WHERE status IN ('shipped','pending');
 SELECT COUNT(*) FROM orders WHERE COALESCE(status, 'unknown') IN ('shipped','pending');
 ```
 
-But note the *performance* side: `COALESCE(status, 'unknown') IN (...)` wraps the column in a function, which can defeat an index on `status`. The sargable equivalent:
+But note the _performance_ side: `COALESCE(status, 'unknown') IN (...)` wraps the column in a function, which can defeat an index on `status`. The sargable equivalent:
 
 ```sql
 SELECT COUNT(*) FROM orders WHERE status IN ('shipped','pending') OR status IS NULL;
@@ -459,22 +461,22 @@ Which approach is faster depends on indexes, statistics, cardinality, and the op
 
 ### Edge cases
 
-| Expression | Result |
-|------------|--------|
-| `COALESCE(NULL, NULL)`      | NULL |
-| `COALESCE(NULL, 0)`         | 0    |
-| `COALESCE('a', NULL)`       | 'a'  |
-| `COALESCE(0, 5)`            | 0 (0 is a valid, non-NULL value) |
-| `COALESCE('', 'fallback')`  | `''` (empty string is not NULL) |
+| Expression                 | Result                           |
+| -------------------------- | -------------------------------- |
+| `COALESCE(NULL, NULL)`     | NULL                             |
+| `COALESCE(NULL, 0)`        | 0                                |
+| `COALESCE('a', NULL)`      | 'a'                              |
+| `COALESCE(0, 5)`           | 0 (0 is a valid, non-NULL value) |
+| `COALESCE('', 'fallback')` | `''` (empty string is not NULL)  |
 
 > **Common misconception**
-> "COALESCE returns the first *truthy* value." — No. It returns the first **non-NULL** value. `0`, `''`, and `false` are non-NULL and will be returned.
+> "COALESCE returns the first _truthy_ value." — No. It returns the first **non-NULL** value. `0`, `''`, and `false` are non-NULL and will be returned.
 
 > **PostgreSQL / MySQL / SQL Server / Oracle**
-> All four support `COALESCE`. Oracle also has an older synonym `NVL(a, b)` (two arguments only) and `NVL2`. SQL Server has `ISNULL(a, b)` (two arguments only), which is *not* identical in type inference, so `COALESCE` is preferred for portability. MySQL also has `IFNULL(a, b)`.
+> All four support `COALESCE`. Oracle also has an older synonym `NVL(a, b)` (two arguments only) and `NVL2`. SQL Server has `ISNULL(a, b)` (two arguments only), which is _not_ identical in type inference, so `COALESCE` is preferred for portability. MySQL also has `IFNULL(a, b)`.
 
 > **Interview trap**
-> `SELECT COALESCE(NULL, NULL, 1, NULL);` → `1`. Many candidates stumble by thinking COALESCE *multiplies* or *joins*; it only picks the first non-NULL.
+> `SELECT COALESCE(NULL, NULL, 1, NULL);` → `1`. Many candidates stumble by thinking COALESCE _multiplies_ or _joins_; it only picks the first non-NULL.
 
 ---
 
@@ -505,18 +507,18 @@ FROM products;
 ```
 
 | product_id | sku   |
-|-----------|-------|
-| P1        | W-001 |
-| P2        | NULL  |
-| P3        | G-002 |
+| ---------- | ----- |
+| P1         | W-001 |
+| P2         | NULL  |
+| P3         | G-002 |
 
 Correct output:
 
 | product_id | sku   |
-|-----------|-------|
-| P1        | W-001 |
-| P2        | NULL  |
-| P3        | G-002 |
+| ---------- | ----- |
+| P1         | W-001 |
+| P2         | NULL  |
+| P3         | G-002 |
 
 ### The classic safe-division pattern
 
@@ -531,6 +533,7 @@ FROM order_lines;
 ```
 
 `revenue / NULLIF(qty, 0)`:
+
 - `qty = 5` → `revenue / 5` normal division.
 - `qty = 0` → `NULLIF(0, 0)` → NULL → `revenue / NULL` → **NULL**, not an error.
 - `qty = NULL` → `NULLIF(NULL, 0)` → NULL → NULL.
@@ -538,17 +541,17 @@ FROM order_lines;
 The consumer then decides: filter NULLs via `IS NOT NULL`, or `COALESCE(...)`, or leave NULL to report "unknown".
 
 > **Production pitfall**
-> `NULLIF(0, 0)` returning NULL *silently* lives in a report and is easy to mistake for missing data. Decide explicitly what the report should show for zero-quantity lines (NULL vs 0 vs an error), and document it.
+> `NULLIF(0, 0)` returning NULL _silently_ lives in a report and is easy to mistake for missing data. Decide explicitly what the report should show for zero-quantity lines (NULL vs 0 vs an error), and document it.
 
 ### Edge cases
 
-| Expression | Result | Why |
-|------------|--------|-----|
-| `NULLIF(1, 1)`       | NULL   | equal |
-| `NULLIF(1, 2)`       | 1      | not equal |
+| Expression           | Result | Why                                                      |
+| -------------------- | ------ | -------------------------------------------------------- |
+| `NULLIF(1, 1)`       | NULL   | equal                                                    |
+| `NULLIF(1, 2)`       | 1      | not equal                                                |
 | `NULLIF(NULL, 1)`    | NULL   | `NULL = 1` is UNKNOWN → returns first arg, which is NULL |
-| `NULLIF(1, NULL)`    | 1      | `1 = NULL` is UNKNOWN → returns first arg |
-| `NULLIF(NULL, NULL)` | NULL   | returns first arg (NULL) |
+| `NULLIF(1, NULL)`    | 1      | `1 = NULL` is UNKNOWN → returns first arg                |
+| `NULLIF(NULL, NULL)` | NULL   | returns first arg (NULL)                                 |
 
 > **Interview trap**
 > `NULLIF(NULL, NULL)`. Intuitively "equal, so NULL" — true here only because the returned value is `a` itself. But `NULLIF(1, NULL)` is **1**, not NULL: SQL's `=` never treats NULLs as equal.
@@ -576,12 +579,12 @@ All engines return NULL for these.
 
 ### String concatenation differs between engines
 
-| Engine | `'a' \|\| NULL` / `'a' + NULL` | `CONCAT('a', NULL)` |
-|--------|-------------------------------|---------------------|
-| PostgreSQL | NULL (operator `\|\|`) | NULL |
-| MySQL | NULL (`CONCAT`) | NULL (`CONCAT` returns NULL if any arg is NULL; `CONCAT_WS` skips NULLs) |
-| SQL Server | NULL (`+`) — `CONCAT('a', NULL)` returns `'a'`, though | n/a |
-| Oracle | `'a'` (!!)            | n/a (`\|\|`) |
+| Engine     | `'a' \|\| NULL` / `'a' + NULL`                         | `CONCAT('a', NULL)`                                                      |
+| ---------- | ------------------------------------------------------ | ------------------------------------------------------------------------ |
+| PostgreSQL | NULL (operator `\|\|`)                                 | NULL                                                                     |
+| MySQL      | NULL (`CONCAT`)                                        | NULL (`CONCAT` returns NULL if any arg is NULL; `CONCAT_WS` skips NULLs) |
+| SQL Server | NULL (`+`) — `CONCAT('a', NULL)` returns `'a'`, though | n/a                                                                      |
+| Oracle     | `'a'` (!!)                                             | n/a (`\|\|`)                                                             |
 
 > **Oracle**
 > Oracle treats NULL and the empty string as the same value in many contexts: `'a' || NULL` yields `'a'`, whereas the same expression yields NULL in PostgreSQL. This is famous and a common porting bug when moving Oracle queries to PostgreSQL/MySQL.
@@ -622,19 +625,19 @@ FROM staff;
 
 ### Comparison table
 
-| Function | NULL handling | All-NULL / empty-set result |
-|----------|---------------|-----------------------------|
-| `COUNT(*)` | counts every row regardless | `0` |
-| `COUNT(col)` | counts only non-NULL cells | `0` |
-| `COUNT(DISTINCT col)` | counts distinct non-NULL values | `0` |
-| `SUM(col)` | sums non-NULL values | `NULL` |
-| `AVG(col)` | average over non-NULL values only (`= SUM / COUNT(col)`, not `SUM / COUNT(*)`) | `NULL` |
-| `MIN(col)` / `MAX(col)` | ignore NULLs | `NULL` |
-| `STDDEV` / `VARIANCE` / percentiles | ignore NULLs | `NULL` |
+| Function                            | NULL handling                                                                  | All-NULL / empty-set result |
+| ----------------------------------- | ------------------------------------------------------------------------------ | --------------------------- |
+| `COUNT(*)`                          | counts every row regardless                                                    | `0`                         |
+| `COUNT(col)`                        | counts only non-NULL cells                                                     | `0`                         |
+| `COUNT(DISTINCT col)`               | counts distinct non-NULL values                                                | `0`                         |
+| `SUM(col)`                          | sums non-NULL values                                                           | `NULL`                      |
+| `AVG(col)`                          | average over non-NULL values only (`= SUM / COUNT(col)`, not `SUM / COUNT(*)`) | `NULL`                      |
+| `MIN(col)` / `MAX(col)`             | ignore NULLs                                                                   | `NULL`                      |
+| `STDDEV` / `VARIANCE` / percentiles | ignore NULLs                                                                   | `NULL`                      |
 
 ### Why NULLs are ignored (the reasoning)
 
-`SUM`-ing NULLs is impossible: you cannot add an unknown quantity. `AVG` over a group must not treat NULL as 0 — that would drag the mean down with fake zeroes. So aggregates are defined over the *known* values only, and `AVG(col) = SUM(col) / COUNT(col)`.
+`SUM`-ing NULLs is impossible: you cannot add an unknown quantity. `AVG` over a group must not treat NULL as 0 — that would drag the mean down with fake zeroes. So aggregates are defined over the _known_ values only, and `AVG(col) = SUM(col) / COUNT(col)`.
 
 ### Examples
 
@@ -650,13 +653,13 @@ SELECT
 FROM employees;
 ```
 
-**Grain reminder:** the whole table = one group. These numbers are over *employees*, and `COUNT(salary)` answers "how many employees have a salary on file."
+**Grain reminder:** the whole table = one group. These numbers are over _employees_, and `COUNT(salary)` answers "how many employees have a salary on file."
 
 **Expected output:**
 
 | rows_thrown_through_where | salaries_recorded | distinct_depts_recorded | payroll | avg_salary | min_salary | max_salary |
-|---------------------------|-------------------|-------------------------|---------|------------|------------|------------|
-| 7 | 5 | 3 | 420000 | 84000 | 55000 | 110000 |
+| ------------------------- | ----------------- | ----------------------- | ------- | ---------- | ---------- | ---------- |
+| 7                         | 5                 | 3                       | 420000  | 84000      | 55000      | 110000     |
 
 Check: 7 rows, 5 with non-NULL salary (Diana, Grace have NULL), payroll = 95000+72000+88000+110000+55000 = 420000, avg = 84000 (over 5, not 7), distinct depts recorded = {1,2,3} → 3 (Frank's and Grace's NULL dept_id counted as NULL, excluded from distinct).
 
@@ -714,11 +717,11 @@ GROUP BY dept_id;
 ```
 
 | dept_id | headcount |
-|---------|-----------|
+| ------- | --------- | ---------------- |
 | 1       | 2         |
 | 2       | 3         |
 | 3       | 1         |
-| NULL    | 2         |   -- Frank + Grace
+| NULL    | 2         | -- Frank + Grace |
 
 > Note: `GROUP BY` on a column whose group key is NULL does **not** use `=`; it uses grouping equality, where all NULLs are equal to each other. That is why NULLs merge into one bucket here even though `NULL = NULL` is UNKNOWN in regular comparisons.
 
@@ -746,6 +749,7 @@ GROUP BY dept_id;
 ```sql
 SELECT DISTINCT dept_id FROM employees;
 ```
+
 → `1, 2, 3, NULL` — exactly one row for all NULL-dept employees.
 
 ### UNION and UNION ALL
@@ -759,22 +763,22 @@ SELECT id FROM departments;
 ```
 
 > **Interview trap**
-> "UNION loses NULLs" — no. `UNION` dedupes them into one row; `UNION ALL` keeps every row. Only `DISTINCT`, `UNION`, `GROUP BY`, and set operators collapse NULLs to a single occurrence *of the NULL marker* in output.
+> "UNION loses NULLs" — no. `UNION` dedupes them into one row; `UNION ALL` keeps every row. Only `DISTINCT`, `UNION`, `GROUP BY`, and set operators collapse NULLs to a single occurrence _of the NULL marker_ in output.
 
 ---
 
 ## ORDER BY with NULL — Database-Specific Sort Order
 
-The ANSI standard says NULLs sorting is *undefined by default*. It then introduced `NULLS FIRST` / `NULLS LAST` as the portable explicit syntax.
+The ANSI standard says NULLs sorting is _undefined by default_. It then introduced `NULLS FIRST` / `NULLS LAST` as the portable explicit syntax.
 
 ### Default behavior per engine
 
-| Engine | `ORDER BY col ASC` | `ORDER BY col DESC` | `NULLS FIRST/LAST` clause? |
-|--------|--------------------|--------------------|----------------------------|
-| PostgreSQL | NULLs last | NULLs first | Yes |
-| Oracle | NULLs last | NULLs first | Yes |
-| SQL Server | NULLs first | NULLs last | No (emulate) |
-| MySQL | NULLs first | NULLs last | No (MariaDB 10.x adds the clause; MySQL 8.0 core still lacks it) |
+| Engine     | `ORDER BY col ASC` | `ORDER BY col DESC` | `NULLS FIRST/LAST` clause?                                       |
+| ---------- | ------------------ | ------------------- | ---------------------------------------------------------------- |
+| PostgreSQL | NULLs last         | NULLs first         | Yes                                                              |
+| Oracle     | NULLs last         | NULLs first         | Yes                                                              |
+| SQL Server | NULLs first        | NULLs last          | No (emulate)                                                     |
+| MySQL      | NULLs first        | NULLs last          | No (MariaDB 10.x adds the clause; MySQL 8.0 core still lacks it) |
 
 > **Production pitfall**
 > Same query, two engines, two different default orders. A "top 10 cheapest products" report can silently demote your NULL-price rows to the back on PostgreSQL while MySQL puts them at the front. Always write the sort explicitly when NULL handling matters:
@@ -785,6 +789,7 @@ SELECT name, price
 FROM products
 ORDER BY (price IS NULL), price;
 ```
+
 - `(price IS NULL)` is `TRUE=1 / FALSE=0`, so FALSE (non-NULL) sorts first, then real prices ascending; NULL real-price rows sort last.
 
 ```sql
@@ -797,7 +802,7 @@ ORDER BY (price IS NOT NULL), price;
 ### Where the default matters most: pagination
 
 - `NULLS LAST` vs `NULLS FIRST` flips which page contains your NULL rows.
-- When the sort column is NULL for several rows, their *relative order* is unspecified → pagination can skip/duplicate rows across pages.
+- When the sort column is NULL for several rows, their _relative order_ is unspecified → pagination can skip/duplicate rows across pages.
 
 ---
 
@@ -816,6 +821,7 @@ WHERE salary > 80000 OR dept_id IS NULL OR manager_id IS NULL;
 ```
 
 Let's trace Grace (`salary = NULL, dept_id = NULL, manager_id = NULL`):
+
 - `(NULL > 80000)` → UNKNOWN
 - `dept_id IS NULL` → TRUE
 - `OR TRUE` → TRUE → **Grace is included.**
@@ -826,6 +832,7 @@ Now a naive rewrite without the IS NULL terms:
 SELECT name FROM employees
 WHERE salary > 80000 OR dept_id = NULL;   -- BAD
 ```
+
 - `(NULL > 80000)` → UNKNOWN
 - `(NULL = NULL)` → UNKNOWN
 - → UNKNOWN → **Grace is dropped**, and so is every NULL-salary employee.
@@ -843,10 +850,10 @@ GROUP BY dept_id
 HAVING COUNT(*) >= 2;
 ```
 
-| dept_id | n |
-|---------|---|
-| 1 | 2 |
-| 2 | 3 |
+| dept_id | n   |
+| ------- | --- |
+| 1       | 2   |
+| 2       | 3   |
 
 The NULL dept group has `COUNT(*) = 2`, so it would also qualify: `HAVING COUNT(*) >= 2 OR dept_id IS NULL`. Designers often intentionally do `HAVING dept_id IS NOT NULL` to exclude the unassigned bucket from a management report — a NULL-driven decision, not an accident.
 
@@ -868,14 +875,16 @@ Let's use:
 SELECT name FROM employees
 WHERE dept_id IN (1, 2);
 ```
+
 = `dept_id = 1 OR dept_id = 2`.
 
 - Frank/`NULL` → `UNKNOWN OR UNKNOWN` → UNKNOWN → dropped. Good.
-- NULL *inside the list*:
+- NULL _inside the list_:
 
 ```sql
 SELECT name FROM employees WHERE dept_id IN (1, NULL);
 ```
+
 = `dept_id = 1 OR dept_id = NULL`.
 
 - Employees with `dept_id = 1` → TRUE → returned.
@@ -889,6 +898,7 @@ So: **a NULL inside the IN-list never matches a NULL row.** `IN (NULL)` matches 
 ```sql
 SELECT name FROM employees WHERE dept_id NOT IN (1, 2);
 ```
+
 = `dept_id <> 1 AND dept_id <> 2`.
 
 - Diana/2 → FALSE AND ... = FALSE → dropped (correct).
@@ -911,26 +921,27 @@ SELECT name
 FROM employees
 WHERE dept_id NOT IN (SELECT dept_id FROM employees WHERE manager_id IS NULL);
 ```
+
 The subquery yields `{NULL, 1, 1, 1}` — manager_id IS NULL for Alice, Eve, Frank, Grace whose dept_ids are 1,3,NULL,NULL. So the set is `{1, 3, NULL}`.
 
 `dept_id NOT IN (1, 3, NULL)` = `dept_id <> 1 AND dept_id <> 3 AND dept_id <> NULL`.
 
 - Alice (dept 1) → FALSE → dropped (correct, she is in the set).
-- Bob (dept 1) → FALSE → dropped (correct: Bob *is* in a listed dept).
+- Bob (dept 1) → FALSE → dropped (correct: Bob _is_ in a listed dept).
 - Diana (dept 2) → TRUE AND TRUE AND UNKNOWN = UNKNOWN → **dropped — wrong!** Diana belongs to no listed department, so the query should return her.
 - The NULL rows → UNKNOWN → dropped regardless.
 
-Because `NOT (TRUE) = FALSE` and `NOT (UNKNOWN) = UNKNOWN`, a NULL somewhere in the subquery result makes `NOT IN` return *zero rows* even when there are perfectly valid matches.
+Because `NOT (TRUE) = FALSE` and `NOT (UNKNOWN) = UNKNOWN`, a NULL somewhere in the subquery result makes `NOT IN` return _zero rows_ even when there are perfectly valid matches.
 
 ### The rule of thumb
 
-| Pattern | NULL-safe? |
-|---------|-----------|
-| `x IN (list-without-NULL)` | yes |
-| `x IN (subquery)` | safe *unless* the subquery can return NULL **or** `x` is NULL (x NULL → UNKNOWN → dropped) |
-| `x NOT IN (list)` | problematic if any element is NULL |
-| `x NOT IN (subquery)` | **assume broken if the inner set can contain NULL or x can be NULL** |
-| `NOT EXISTS` | always NULL-safe |
+| Pattern                    | NULL-safe?                                                                                 |
+| -------------------------- | ------------------------------------------------------------------------------------------ |
+| `x IN (list-without-NULL)` | yes                                                                                        |
+| `x IN (subquery)`          | safe _unless_ the subquery can return NULL **or** `x` is NULL (x NULL → UNKNOWN → dropped) |
+| `x NOT IN (list)`          | problematic if any element is NULL                                                         |
+| `x NOT IN (subquery)`      | **assume broken if the inner set can contain NULL or x can be NULL**                       |
+| `NOT EXISTS`               | always NULL-safe                                                                           |
 
 ### The fix: NOT EXISTS
 
@@ -960,7 +971,7 @@ Semantics: for each candidate row `e`, the correlated subquery asks "is there at
 
 ### What they are
 
-`EXISTS (subquery)` returns `TRUE` if the subquery produces **at least one row**; `NOT EXISTS` returns `TRUE` if it produces **zero rows**. The *values* in the returned rows — including NULLs — are irrelevant; only row cardinality matters.
+`EXISTS (subquery)` returns `TRUE` if the subquery produces **at least one row**; `NOT EXISTS` returns `TRUE` if it produces **zero rows**. The _values_ in the returned rows — including NULLs — are irrelevant; only row cardinality matters.
 
 ### Why they are NULL-safe
 
@@ -969,24 +980,25 @@ Because `EXISTS` never compares the outer row to NULL via `=`. The standard tric
 ```sql
 SELECT 1 FROM departments WHERE id = e.dept_id
 ```
-One engine will still *evaluate* the join predicate per candidate but a NULL `e.dept_id` simply yields no matching rows → `NOT EXISTS` = TRUE (correct: an employee with no department cannot be in a department list).
+
+One engine will still _evaluate_ the join predicate per candidate but a NULL `e.dept_id` simply yields no matching rows → `NOT EXISTS` = TRUE (correct: an employee with no department cannot be in a department list).
 
 ### EXISTS vs NOT EXISTS vs IN vs NOT IN — decision table
 
-| Task | Preferred | Why |
-|------|-----------|-----|
-| Does at least one related row exist? | `EXISTS` | NULL-safe, stops early on first match |
-| Is this row linked to any listed value? | `IN` / `= ANY` | convenient and NULL-safe enough when inner set has no NULLs (still use EXISTS in doubt) |
-| Is this row NOT linked to anything in the list? | `NOT EXISTS` | NULL-safe where `NOT IN` is not |
-| Is this row NOT in a small literal list (no NULLs)? | `NOT IN` | readable; literals rarely have NULLs |
+| Task                                                | Preferred      | Why                                                                                     |
+| --------------------------------------------------- | -------------- | --------------------------------------------------------------------------------------- |
+| Does at least one related row exist?                | `EXISTS`       | NULL-safe, stops early on first match                                                   |
+| Is this row linked to any listed value?             | `IN` / `= ANY` | convenient and NULL-safe enough when inner set has no NULLs (still use EXISTS in doubt) |
+| Is this row NOT linked to anything in the list?     | `NOT EXISTS`   | NULL-safe where `NOT IN` is not                                                         |
+| Is this row NOT in a small literal list (no NULLs)? | `NOT IN`       | readable; literals rarely have NULLs                                                    |
 
 **But performance is not a law:**
 
-> Not a guarantee: `EXISTS` is not *always* faster than `IN`, and `NOT EXISTS` is not *always* faster than `NOT IN`. The optimizer can flatten `IN` subqueries into joins, `EXISTS` into semi-joins, `NOT EXISTS` into anti-joins, and may still pick sequential scans. Always run the equivalent `EXPLAIN`/execution plan and compare actual row estimates. The only unconditional claim is **correctness**: `NOT EXISTS` is NULL-safe; `NOT IN` is not.
+> Not a guarantee: `EXISTS` is not _always_ faster than `IN`, and `NOT EXISTS` is not _always_ faster than `NOT IN`. The optimizer can flatten `IN` subqueries into joins, `EXISTS` into semi-joins, `NOT EXISTS` into anti-joins, and may still pick sequential scans. Always run the equivalent `EXPLAIN`/execution plan and compare actual row estimates. The only unconditional claim is **correctness**: `NOT EXISTS` is NULL-safe; `NOT IN` is not.
 
 ### Anti-join caveat with NULLs on the inner side
 
-Even `NOT EXISTS` can surprise you if your *business rule* really means "not present *and* we have a value":
+Even `NOT EXISTS` can surprise you if your _business rule_ really means "not present _and_ we have a value":
 
 ```sql
 -- List customers with no shipped order rows
@@ -997,7 +1009,8 @@ WHERE NOT EXISTS (
    WHERE o.customer_id = c.id AND o.status = 'shipped'
 );
 ```
-If a customer has only `status = NULL` orders, the subquery returns zero rows → the customer is returned, even though they do have orders whose status is unknown. That is *correct* for "no confirmed shipped order" but *wrong* for "customer has no orders at all." The NULL is not a bug here; it is your rule. Be explicit about which you want.
+
+If a customer has only `status = NULL` orders, the subquery returns zero rows → the customer is returned, even though they do have orders whose status is unknown. That is _correct_ for "no confirmed shipped order" but _wrong_ for "customer has no orders at all." The NULL is not a bug here; it is your rule. Be explicit about which you want.
 
 ---
 
@@ -1016,16 +1029,16 @@ LEFT JOIN departments d ON e.dept_id = d.id;
 **Expected output:**
 
 | name    | dept        |
-|---------|-------------|
+| ------- | ----------- | ----------------------- |
 | Alice   | Engineering |
 | Bob     | Engineering |
 | Charlie | Marketing   |
 | Diana   | Marketing   |
 | Eve     | Executive   |
-| Frank   | NULL        |   -- no matching dept row
+| Frank   | NULL        | -- no matching dept row |
 | Grace   | NULL        |
 
-Note: an INNER JOIN would *drop* Frank and Grace entirely (their `ON` conditions are UNKNOWN). That is why `employees LEFT JOIN departments` loses NULL-dept employees only if you switch to INNER JOIN.
+Note: an INNER JOIN would _drop_ Frank and Grace entirely (their `ON` conditions are UNKNOWN). That is why `employees LEFT JOIN departments` loses NULL-dept employees only if you switch to INNER JOIN.
 
 ### The trap: conditions on the right side in WHERE
 
@@ -1042,7 +1055,7 @@ FROM employees e
 LEFT JOIN departments d ON e.dept_id = d.id AND d.budget >= 400000;
 ```
 
-**Result of the BAD version:** Alice, Charlie, Eve survive (their depts match AND budget >= 400000). Bob/Diana drop (their depts *match*, but Marketing 300000 < 400000). Frank/Grace drop entirely — because `d.budget` is NULL for their unmatched rows → `WHERE NULL >= 400000` = UNKNOWN → dropped. Result: 3 rows.
+**Result of the BAD version:** Alice, Charlie, Eve survive (their depts match AND budget >= 400000). Bob/Diana drop (their depts _match_, but Marketing 300000 < 400000). Frank/Grace drop entirely — because `d.budget` is NULL for their unmatched rows → `WHERE NULL >= 400000` = UNKNOWN → dropped. Result: 3 rows.
 
 **Result of the BETTER version:** all 7 employees, with unmatched/NULL dept rows showing NULL for `d.name` and `d.budget`.
 
@@ -1051,7 +1064,7 @@ The rule: anything that filters the **preserved side** (the right side of a LEFT
 > **Interview trap**
 > A LEFT JOIN that "returns fewer rows than the left table" is a red flag that a right-side column was filtered in `WHERE` (or that the left table had rows filtered by a WHERE on the left table itself). Both are common.
 
-### COUNT(*) fan-out with NULL right-side values
+### COUNT(\*) fan-out with NULL right-side values
 
 ```sql
 -- Count customers per region
@@ -1059,7 +1072,8 @@ SELECT c.region, COUNT(*) AS customers
 FROM customers c
 GROUP BY c.region;
 ```
-If `region` can be NULL, the NULL region groups into one row. If you want "unknown/blank" as its own label, use `COALESCE(region, 'unknown')` — but remember this changes the *grouping key*, not the grain of the individual rows.
+
+If `region` can be NULL, the NULL region groups into one row. If you want "unknown/blank" as its own label, use `COALESCE(region, 'unknown')` — but remember this changes the _grouping key_, not the grain of the individual rows.
 
 ---
 
@@ -1083,7 +1097,7 @@ SELECT name, salary,
 FROM employees;
 ```
 
-For employees with NULL salary (Diana, Grace): in PostgreSQL `ORDER BY salary DESC` puts NULLs first, so Diana and Grace tie at rank 1... In SQL Server NULLs are last descending... no wait SQL Server: `DESC` puts NULLs *last*. So the same query produces different ranks per engine. This is a classic "output prediction" trap — the NULL ordering default changes the answer across engines.
+For employees with NULL salary (Diana, Grace): in PostgreSQL `ORDER BY salary DESC` puts NULLs first, so Diana and Grace tie at rank 1... In SQL Server NULLs are last descending... no wait SQL Server: `DESC` puts NULLs _last_. So the same query produces different ranks per engine. This is a classic "output prediction" trap — the NULL ordering default changes the answer across engines.
 
 ```sql
 -- portable "NULLs last regardless of direction, and no NULL ties unless you want them":
@@ -1091,6 +1105,7 @@ SELECT name, salary,
        ROW_NUMBER() OVER (ORDER BY salary DESC NULLS LAST) AS rn
 FROM employees;
 ```
+
 `NULLS LAST` is supported by PostgreSQL and Oracle; the portable alternative is `ORDER BY (salary IS NULL), salary DESC`.
 
 ### NULL ordering and unstable pagination
@@ -1158,7 +1173,7 @@ A `PRIMARY KEY` column can never be NULL — every engine enforces it. `id` in t
 
 ### UNIQUE (many NULLs allowed — by default)
 
-`UNIQUE` constraints/indexes allow **multiple NULLs** by default in PostgreSQL, MySQL, SQL Server, and Oracle. Only the *non-NULL* values must be distinct.
+`UNIQUE` constraints/indexes allow **multiple NULLs** by default in PostgreSQL, MySQL, SQL Server, and Oracle. Only the _non-NULL_ values must be distinct.
 
 ```sql
 CREATE UNIQUE INDEX idx_emp_email ON employees(email);
@@ -1205,7 +1220,7 @@ CONSTRAINT chk_salary CHECK (salary IS NULL OR salary > 0)
 - B-tree indexes store rows whose indexed key is NULL (PostgreSQL, MySQL/InnoDB, SQL Server, Oracle all do for the common cases).
 - `col = NULL` can never hit an index — it matches nothing.
 - `col IS NULL` is sargable and can use an index range scan in all four engines (verify with EXPLAIN).
-- Partial indexes (PostgreSQL) / filtered indexes (SQL Server) can index *only* the NULL rows:
+- Partial indexes (PostgreSQL) / filtered indexes (SQL Server) can index _only_ the NULL rows:
 
 ```sql
 -- PostgreSQL: fast lookup of employees with no recorded salary
@@ -1267,12 +1282,12 @@ Constraint violations from NULL surface at the DML statement (immediate) or at c
 
 `''` is a real, known value; NULL means absent. They are different and are handled differently by every engine — except Oracle.
 
-| Engine | `''` distinct from NULL? | Consequences |
-|--------|--------------------------|--------------|
-| PostgreSQL | Yes | `'' IS NULL` → FALSE; `LENGTH('')` = 0 |
-| MySQL | Yes | `''` stored distinctly; `'' IS NULL` → FALSE |
-| SQL Server | Yes | `LEN('')` = 0; `'' IS NULL` → FALSE |
-| Oracle | **No** | Oracle treats `''` as NULL for VARCHAR2; `'' IS NULL` → TRUE; `LENGTH('')` → NULL |
+| Engine     | `''` distinct from NULL? | Consequences                                                                      |
+| ---------- | ------------------------ | --------------------------------------------------------------------------------- |
+| PostgreSQL | Yes                      | `'' IS NULL` → FALSE; `LENGTH('')` = 0                                            |
+| MySQL      | Yes                      | `''` stored distinctly; `'' IS NULL` → FALSE                                      |
+| SQL Server | Yes                      | `LEN('')` = 0; `'' IS NULL` → FALSE                                               |
+| Oracle     | **No**                   | Oracle treats `''` as NULL for VARCHAR2; `'' IS NULL` → TRUE; `LENGTH('')` → NULL |
 
 > **Oracle**
 > Oracle's famous quirk: `''` is `NULL`. When you store `''`, it becomes NULL; `WHERE col <> ''` misses NULL columns; and `UNIQUE` lets multiple empty-string rows coexist. Porting Oracle data to PostgreSQL requires translating NULL ↔ '' carefully.
@@ -1288,29 +1303,29 @@ SELECT
 FROM employees;
 ```
 
-Oracle would report `is_empty = 0` for everything, because there *is* no empty string. Watch for this when writing portable reports.
+Oracle would report `is_empty = 0` for everything, because there _is_ no empty string. Watch for this when writing portable reports.
 
 ---
 
 ## Database-Specific Differences: PostgreSQL, MySQL, SQL Server, Oracle
 
-| Feature | PostgreSQL | MySQL | SQL Server | Oracle |
-|---------|-----------|-------|------------|--------|
-| `NULL = NULL` | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN |
-| `IS [NOT] DISTINCT FROM` | Yes | No (`<=>`) | No | No (pre-23) |
-| `COALESCE` | Yes | Yes | Yes | Yes (+ `NVL`) |
-| `NULLIF` | Yes | Yes | Yes | Yes |
-| `''` handled as NULL | No | No | No | **Yes** |
-| `'a' \|\| NULL` | NULL | NULL | NULL | **'a'** |
-| `CONCAT('a', NULL)` | NULL | NULL | **'a'** | n/a |
-| Default NULL sort, ASC | NULLS LAST | NULLS FIRST | NULLS FIRST | NULLS LAST |
-| Default NULL sort, DESC | NULLS FIRST | NULLS LAST | NULLS LAST | NULLS FIRST |
-| `NULLS FIRST/LAST` clause | Yes | No (MariaDB: yes) | No | Yes |
-| Multiple NULLs in UNIQUE | Yes (15<sup>+</sup>: `NULLS NOT DISTINCT` opt) | Yes | Yes | Yes |
-| `CHECK` rejects `NULL` | No | No | No | No |
-| `COUNT(col)` ignores NULL | Yes | Yes | Yes | Yes |
-| NULL-safe eq operator name | `IS NOT DISTINCT FROM` | `<=>` | (hand-rolled) | (hand-rolled) |
-| `NULLIF(x, x)` | NULL | NULL | NULL | NULL |
+| Feature                    | PostgreSQL                                     | MySQL             | SQL Server    | Oracle        |
+| -------------------------- | ---------------------------------------------- | ----------------- | ------------- | ------------- |
+| `NULL = NULL`              | UNKNOWN                                        | UNKNOWN           | UNKNOWN       | UNKNOWN       |
+| `IS [NOT] DISTINCT FROM`   | Yes                                            | No (`<=>`)        | No            | No (pre-23)   |
+| `COALESCE`                 | Yes                                            | Yes               | Yes           | Yes (+ `NVL`) |
+| `NULLIF`                   | Yes                                            | Yes               | Yes           | Yes           |
+| `''` handled as NULL       | No                                             | No                | No            | **Yes**       |
+| `'a' \|\| NULL`            | NULL                                           | NULL              | NULL          | **'a'**       |
+| `CONCAT('a', NULL)`        | NULL                                           | NULL              | **'a'**       | n/a           |
+| Default NULL sort, ASC     | NULLS LAST                                     | NULLS FIRST       | NULLS FIRST   | NULLS LAST    |
+| Default NULL sort, DESC    | NULLS FIRST                                    | NULLS LAST        | NULLS LAST    | NULLS FIRST   |
+| `NULLS FIRST/LAST` clause  | Yes                                            | No (MariaDB: yes) | No            | Yes           |
+| Multiple NULLs in UNIQUE   | Yes (15<sup>+</sup>: `NULLS NOT DISTINCT` opt) | Yes               | Yes           | Yes           |
+| `CHECK` rejects `NULL`     | No                                             | No                | No            | No            |
+| `COUNT(col)` ignores NULL  | Yes                                            | Yes               | Yes           | Yes           |
+| NULL-safe eq operator name | `IS NOT DISTINCT FROM`                         | `<=>`             | (hand-rolled) | (hand-rolled) |
+| `NULLIF(x, x)`             | NULL                                           | NULL              | NULL          | NULL          |
 
 > **Verification note:** engine releases move. The MySQL/MariaDB `NULLS FIRST/LAST` and Oracle `IS DISTINCT FROM` availability differ by version; confirm against your server’s docs and run a trivial probe against your target version before relying on them.
 
@@ -1328,32 +1343,32 @@ Two unconditional truths:
 Everything else must be confirmed with the execution plan:
 
 - `EXISTS` vs `IN` vs `NOT IN` vs `NOT EXISTS` vs `JOIN`: the optimizer picks differently based on statistics, cardinality, NULL-bearing columns, join types (semi/anti/hash/merge/nested-loop) — there is **no** always-faster winner.
-- `IS NULL` on its own is an indexable predicate (range scan) in PostgreSQL, InnoDB, SQL Server, and Oracle B-trees — but only help if the query needs to *filter* on it; a `NULLS LAST` sort still needs a matching index order, etc. Verify with `EXPLAIN`.
+- `IS NULL` on its own is an indexable predicate (range scan) in PostgreSQL, InnoDB, SQL Server, and Oracle B-trees — but only help if the query needs to _filter_ on it; a `NULLS LAST` sort still needs a matching index order, etc. Verify with `EXPLAIN`.
 
 ### EXPLAIN/EXPLAIN ANALYZE equivalents
 
-| Engine | Equivalent |
-|--------|-----------|
-| PostgreSQL | `EXPLAIN` / `EXPLAIN (ANALYZE, BUFFERS)` |
-| MySQL | `EXPLAIN` / `EXPLAIN ANALYZE` (8.0.18+) |
+| Engine     | Equivalent                                                             |
+| ---------- | ---------------------------------------------------------------------- |
+| PostgreSQL | `EXPLAIN` / `EXPLAIN (ANALYZE, BUFFERS)`                               |
+| MySQL      | `EXPLAIN` / `EXPLAIN ANALYZE` (8.0.18+)                                |
 | SQL Server | `SET STATISTICS IO, TIME ON;` + actual execution plan (`SHOWPLAN_ALL`) |
-| Oracle | `EXPLAIN PLAN` / DBMS_XPLAN, or SQL Monitor |
+| Oracle     | `EXPLAIN PLAN` / DBMS_XPLAN, or SQL Monitor                            |
 
 Compare plans for the before/after of every "optimization" below.
 
 ### The sargability table
 
-| Predicate | Sargable? | Typical effect |
-|-----------|-----------|---------------|
-| `col IS NULL` | Yes | may use an index scan/seek for NULL rows |
-| `col = value` | Yes | index seek |
-| `col = NULL` | (matches nothing — vacuous) | no index benefit; matches 0 rows |
-| `col <> value` | Partial | often needs a scan or scan+filter |
-| `COALESCE(col, x) = v` | No | full scan/filter typically |
-| `ISNULL(col, 0) = 0` (SQL Server) | No | full scan/filter typically |
-| `col = v OR col IS NULL` | Depends | can use OR-expansion / bitmap OR (InnoDB) or two index branches |
-| `UPPER(col) = 'X'` | No | unless expression index |
-| `col IN (NULL, 1)` | effectively `col = 1 OR (NULL...)` | same as `col IN (1)` matches + loses NULL rows |
+| Predicate                         | Sargable?                          | Typical effect                                                  |
+| --------------------------------- | ---------------------------------- | --------------------------------------------------------------- |
+| `col IS NULL`                     | Yes                                | may use an index scan/seek for NULL rows                        |
+| `col = value`                     | Yes                                | index seek                                                      |
+| `col = NULL`                      | (matches nothing — vacuous)        | no index benefit; matches 0 rows                                |
+| `col <> value`                    | Partial                            | often needs a scan or scan+filter                               |
+| `COALESCE(col, x) = v`            | No                                 | full scan/filter typically                                      |
+| `ISNULL(col, 0) = 0` (SQL Server) | No                                 | full scan/filter typically                                      |
+| `col = v OR col IS NULL`          | Depends                            | can use OR-expansion / bitmap OR (InnoDB) or two index branches |
+| `UPPER(col) = 'X'`                | No                                 | unless expression index                                         |
+| `col IN (NULL, 1)`                | effectively `col = 1 OR (NULL...)` | same as `col IN (1)` matches + loses NULL rows                  |
 
 Add an index where useful:
 
@@ -1374,7 +1389,8 @@ WHERE shipped_date IS NULL AND order_date < CURRENT_DATE;
 > SELECT ... FROM employees e
 > WHERE NOT EXISTS (SELECT 1 FROM departments d WHERE ...);
 > ```
-> and compare against the `NOT IN` variant on *your* data, indexes, and statistics.
+>
+> and compare against the `NOT IN` variant on _your_ data, indexes, and statistics.
 
 ---
 
@@ -1474,7 +1490,7 @@ FROM employees e
 LEFT JOIN departments d ON e.dept_id = d.id AND d.budget > 1;
 ```
 
-> In practice, write the intent-laden version even if it costs an extra predicate: `WHERE e.dept_id IS NOT NULL AND (d.budget > 1 OR d.budget IS NULL)` when you truly must keep unmatched employees *and* filter budgets. Document the rule.
+> In practice, write the intent-laden version even if it costs an extra predicate: `WHERE e.dept_id IS NOT NULL AND (d.budget > 1 OR d.budget IS NULL)` when you truly must keep unmatched employees _and_ filter budgets. Document the rule.
 
 ### 7. Window ranking with NULLs
 
@@ -1526,7 +1542,7 @@ ROW_NUMBER() OVER (ORDER BY (salary IS NULL), salary DESC)
 1. Default to `col IS NULL` / `IS NOT NULL` when the question is about presence.
 2. Use `NOT EXISTS` for anti-joins; reserve `NOT IN` for literal lists known to contain no NULLs.
 3. Aggregate with intent: `COUNT(*)` when counting entities, `COUNT(col)` when counting known values, `COALESCE(SUM(...), 0)` at report boundaries.
-4. Decide *what NULL means* in every domain and document it (unknown vs not-applicable vs suppressed). Consider separate flags (`is_redacted`) when NULL would be ambiguous.
+4. Decide _what NULL means_ in every domain and document it (unknown vs not-applicable vs suppressed). Consider separate flags (`is_redacted`) when NULL would be ambiguous.
 5. Keep `WHERE`/`HAVING` pronounced: emit NULL rows deliberately labeled, never accidentally.
 6. In JOINs, put right-side conditions in `ON`, left-table filters in `WHERE`, and verify row counts stay stable.
 7. Use `NULLS FIRST/LAST` (where supported) or the `(col IS NULL)` ordering trick when NULL position matters — never leave it to the engine default.
@@ -1627,31 +1643,34 @@ Predict the output (rows and values) for each query against:
 ### Debugging
 
 61. This query should return employees with no manager but returns nothing. Fix it:
+
 ```sql
 SELECT * FROM employees WHERE manager_id = NULL;
 ```
+
 62. This query is meant to find customers who never purchased but returns zero rows:
+
 ```sql
 SELECT * FROM customers
 WHERE id NOT IN (SELECT customer_id FROM orders WHERE customer_id IS NOT NULL AND status = 'completed');
 ```
-Where can NULL still break it?
-63. A `LEFT JOIN` query returns fewer rows than the left table:
+
+Where can NULL still break it? 63. A `LEFT JOIN` query returns fewer rows than the left table:
+
 ```sql
 SELECT e.name, d.budget
 FROM employees e
 LEFT JOIN departments d ON e.dept_id = d.id
 WHERE d.budget > 100000;  -- BAD
 ```
-Fix it and explain what happened to Frank and Grace.
-64. `COUNT(salary)` returns 5 but the business expects 7 rows "because employees exist." Diagnose.
-65. `SELECT COALESCE(amount, 0) FROM orders;` still shows 0 in a report that should say "N/A" — explain what COALESCE did and what the user probably wanted.
-66. The following returns a division error:
+
+Fix it and explain what happened to Frank and Grace. 64. `COUNT(salary)` returns 5 but the business expects 7 rows "because employees exist." Diagnose. 65. `SELECT COALESCE(amount, 0) FROM orders;` still shows 0 in a report that should say "N/A" — explain what COALESCE did and what the user probably wanted. 66. The following returns a division error:
+
 ```sql
 SELECT revenue / qty FROM sales;
 ```
-Rewrite without crashing and explain the resulting NULL.
-67. `UPDATE employees SET dept_id = NULL WHERE dept_id <> 1;` — did rows with NULL dept_id get touched? Confirm the correct update that catches them.
+
+Rewrite without crashing and explain the resulting NULL. 67. `UPDATE employees SET dept_id = NULL WHERE dept_id <> 1;` — did rows with NULL dept_id get touched? Confirm the correct update that catches them.
 
 ### Performance
 

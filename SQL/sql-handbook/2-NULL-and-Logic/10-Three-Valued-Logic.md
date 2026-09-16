@@ -26,10 +26,10 @@ If SQL treated UNKNOWN as FALSE, queries like "find employees whose commission i
 
 ## The Three Truth Values
 
-| Value | Meaning |
-|-------|---------|
-| **TRUE** | The comparison is definitely true |
-| **FALSE** | The comparison is definitely false |
+| Value       | Meaning                                                             |
+| ----------- | ------------------------------------------------------------------- |
+| **TRUE**    | The comparison is definitely true                                   |
+| **FALSE**   | The comparison is definitely false                                  |
 | **UNKNOWN** | The comparison involves a missing value; truth cannot be determined |
 
 > Common misconception: Many developers think `NULL = NULL` returns FALSE. It actually returns **UNKNOWN**, not FALSE. FALSE would mean "I know these are different." UNKNOWN means "I cannot determine."
@@ -60,14 +60,14 @@ INSERT INTO employees VALUES
 
 **Grain:** One row per employee.
 
-| emp_id | emp_name | department | salary | commission | hire_date  | manager_id |
-|--------|----------|------------|--------|------------|------------|------------|
-| 1 | Alice | Engineering | 95000.00 | 0.15 | 2020-03-15 | NULL |
-| 2 | Bob | Engineering | 82000.00 | NULL | 2021-07-22 | 1 |
-| 3 | Charlie | Marketing | 67000.00 | 0.10 | 2019-11-30 | 1 |
-| 4 | Diana | Marketing | 71000.00 | NULL | 2022-01-10 | 1 |
-| 5 | Eve | NULL | 88000.00 | NULL | NULL | 1 |
-| 6 | Frank | Engineering | 91000.00 | 0.12 | 2018-06-01 | NULL |
+| emp_id | emp_name | department  | salary   | commission | hire_date  | manager_id |
+| ------ | -------- | ----------- | -------- | ---------- | ---------- | ---------- |
+| 1      | Alice    | Engineering | 95000.00 | 0.15       | 2020-03-15 | NULL       |
+| 2      | Bob      | Engineering | 82000.00 | NULL       | 2021-07-22 | 1          |
+| 3      | Charlie  | Marketing   | 67000.00 | 0.10       | 2019-11-30 | 1          |
+| 4      | Diana    | Marketing   | 71000.00 | NULL       | 2022-01-10 | 1          |
+| 5      | Eve      | NULL        | 88000.00 | NULL       | NULL       | 1          |
+| 6      | Frank    | Engineering | 91000.00 | 0.12       | 2018-06-01 | NULL       |
 
 ---
 
@@ -140,15 +140,15 @@ WHERE EXISTS (
 );
 ```
 
-| Operator | NULL = NULL | NULL <> NULL | NULL > 5 | Purpose |
-|----------|-------------|--------------|----------|---------|
-| `=` | UNKNOWN | — | — | Standard comparison |
-| `<>` | — | UNKNOWN | — | Standard comparison |
-| `IS NULL` | TRUE | — | — | Tests for NULL |
-| `IS NOT NULL` | FALSE | — | — | Tests for non-NULL |
-| `IS DISTINCT FROM` | FALSE | FALSE | TRUE | NULL-safe inequality |
-| `IS NOT DISTINCT FROM` | TRUE | TRUE | FALSE | NULL-safe equality |
-| `<=>` (MySQL) | TRUE | FALSE | FALSE | MySQL NULL-safe equality |
+| Operator               | NULL = NULL | NULL <> NULL | NULL > 5 | Purpose                  |
+| ---------------------- | ----------- | ------------ | -------- | ------------------------ |
+| `=`                    | UNKNOWN     | —            | —        | Standard comparison      |
+| `<>`                   | —           | UNKNOWN      | —        | Standard comparison      |
+| `IS NULL`              | TRUE        | —            | —        | Tests for NULL           |
+| `IS NOT NULL`          | FALSE       | —            | —        | Tests for non-NULL       |
+| `IS DISTINCT FROM`     | FALSE       | FALSE        | TRUE     | NULL-safe inequality     |
+| `IS NOT DISTINCT FROM` | TRUE        | TRUE         | FALSE    | NULL-safe equality       |
+| `<=>` (MySQL)          | TRUE        | FALSE        | FALSE    | MySQL NULL-safe equality |
 
 ---
 
@@ -156,10 +156,10 @@ WHERE EXISTS (
 
 ### AND truth table
 
-| AND | TRUE | FALSE | UNKNOWN |
-|-----|------|-------|---------|
-| **TRUE** | TRUE | FALSE | UNKNOWN |
-| **FALSE** | FALSE | FALSE | FALSE |
+| AND         | TRUE    | FALSE | UNKNOWN |
+| ----------- | ------- | ----- | ------- |
+| **TRUE**    | TRUE    | FALSE | UNKNOWN |
+| **FALSE**   | FALSE   | FALSE | FALSE   |
 | **UNKNOWN** | UNKNOWN | FALSE | UNKNOWN |
 
 ```sql
@@ -174,11 +174,11 @@ SELECT FALSE AND NULL;         -- FALSE (short-circuit: false stays false)
 
 ### OR truth table
 
-| OR | TRUE | FALSE | UNKNOWN |
-|----|------|-------|---------|
-| **TRUE** | TRUE | TRUE | TRUE |
-| **FALSE** | FALSE | FALSE | UNKNOWN |
-| **UNKNOWN** | TRUE | UNKNOWN | UNKNOWN |
+| OR          | TRUE  | FALSE   | UNKNOWN |
+| ----------- | ----- | ------- | ------- |
+| **TRUE**    | TRUE  | TRUE    | TRUE    |
+| **FALSE**   | FALSE | FALSE   | UNKNOWN |
+| **UNKNOWN** | TRUE  | UNKNOWN | UNKNOWN |
 
 ```sql
 -- TRUE OR UNKNOWN → TRUE
@@ -192,10 +192,10 @@ SELECT FALSE OR NULL;          -- NULL
 
 ### NOT truth table
 
-| NOT | Result |
-|-----|--------|
-| TRUE | FALSE |
-| FALSE | TRUE |
+| NOT     | Result  |
+| ------- | ------- |
+| TRUE    | FALSE   |
+| FALSE   | TRUE    |
 | UNKNOWN | UNKNOWN |
 
 ```sql
@@ -236,10 +236,10 @@ WHERE department <> 'Engineering';
 
 **Result:**
 
-| emp_id | emp_name | department | salary | commission | hire_date | manager_id |
-|--------|----------|------------|--------|------------|-----------|------------|
-| 3 | Charlie | Marketing | 67000.00 | 0.10 | 2019-11-30 | 1 |
-| 4 | Diana | Marketing | 71000.00 | NULL | 2022-01-10 | 1 |
+| emp_id | emp_name | department | salary   | commission | hire_date  | manager_id |
+| ------ | -------- | ---------- | -------- | ---------- | ---------- | ---------- |
+| 3      | Charlie  | Marketing  | 67000.00 | 0.10       | 2019-11-30 | 1          |
+| 4      | Diana    | Marketing  | 71000.00 | NULL       | 2022-01-10 | 1          |
 
 **Eve is missing.** Her department is NULL. The condition `NULL <> 'Engineering'` returns UNKNOWN. `WHERE` filters out UNKNOWN rows (it only keeps TRUE rows). So Eve silently disappears.
 
@@ -253,11 +253,11 @@ WHERE department <> 'Engineering'
    OR department IS NULL;
 ```
 
-| emp_id | emp_name | department | salary | commission | hire_date | manager_id |
-|--------|----------|------------|--------|------------|-----------|------------|
-| 3 | Charlie | Marketing | 67000.00 | 0.10 | 2019-11-30 | 1 |
-| 4 | Diana | Marketing | 71000.00 | NULL | 2022-01-10 | 1 |
-| 5 | Eve | NULL | 88000.00 | NULL | NULL | 1 |
+| emp_id | emp_name | department | salary   | commission | hire_date  | manager_id |
+| ------ | -------- | ---------- | -------- | ---------- | ---------- | ---------- |
+| 3      | Charlie  | Marketing  | 67000.00 | 0.10       | 2019-11-30 | 1          |
+| 4      | Diana    | Marketing  | 71000.00 | NULL       | 2022-01-10 | 1          |
+| 5      | Eve      | NULL       | 88000.00 | NULL       | NULL       | 1          |
 
 ### Using IS DISTINCT FROM for a cleaner solution
 
@@ -396,9 +396,9 @@ WHERE NOT EXISTS (
 
 **Result:**
 
-| emp_id | emp_name | department | salary | commission | hire_date | manager_id |
-|--------|----------|------------|--------|------------|-----------|------------|
-| 5 | Eve | NULL | 88000.00 | NULL | NULL | 1 |
+| emp_id | emp_name | department | salary   | commission | hire_date | manager_id |
+| ------ | -------- | ---------- | -------- | ---------- | --------- | ---------- |
+| 5      | Eve      | NULL       | 88000.00 | NULL       | NULL      | 1          |
 
 Eve is correctly returned because `NOT EXISTS` uses `=` which returns UNKNOWN when comparing NULL to NULL, and `EXISTS` treats UNKNOWN as "not found" — so the correlated subquery finds no matching row, and Eve passes.
 
@@ -430,12 +430,12 @@ WHERE NOT EXISTS (SELECT 1 FROM valid_departments d WHERE d.dept_name = e.depart
 -- Eve included (subquery finds no match → NOT EXISTS → TRUE)
 ```
 
-| Operator | NULL in subquery | NULL in main table column | Safe? |
-|----------|------------------|---------------------------|-------|
-| `IN` | No problem for matches | NULL column → UNKNOWN → excluded | Partially safe |
-| `NOT IN` | **Causes empty result** | NULL column → UNKNOWN → excluded | **Dangerous** |
-| `EXISTS` | No problem | NULL column → UNKNOWN → subquery finds no match | Safe |
-| `NOT EXISTS` | No problem | NULL column → subquery finds no match → NOT EXISTS TRUE | **Safe** |
+| Operator     | NULL in subquery        | NULL in main table column                               | Safe?          |
+| ------------ | ----------------------- | ------------------------------------------------------- | -------------- |
+| `IN`         | No problem for matches  | NULL column → UNKNOWN → excluded                        | Partially safe |
+| `NOT IN`     | **Causes empty result** | NULL column → UNKNOWN → excluded                        | **Dangerous**  |
+| `EXISTS`     | No problem              | NULL column → UNKNOWN → subquery finds no match         | Safe           |
+| `NOT EXISTS` | No problem              | NULL column → subquery finds no match → NOT EXISTS TRUE | **Safe**       |
 
 ---
 
@@ -454,13 +454,13 @@ LEFT JOIN employees m ON e.manager_id = m.emp_id;
 ```
 
 | employee | manager |
-|----------|---------|
-| Alice | NULL |
-| Bob | Alice |
-| Charlie | Alice |
-| Diana | Alice |
-| Eve | Alice |
-| Frank | NULL |
+| -------- | ------- |
+| Alice    | NULL    |
+| Bob      | Alice   |
+| Charlie  | Alice   |
+| Diana    | Alice   |
+| Eve      | Alice   |
+| Frank    | NULL    |
 
 The LEFT JOIN preserves Alice and Frank even though their `manager_id` is NULL. The join condition `NULL = m.emp_id` returns UNKNOWN, so no match is found. Since it is a LEFT JOIN, the row is preserved with NULL in the manager columns.
 
@@ -519,11 +519,11 @@ FROM employees
 GROUP BY department;
 ```
 
-| department | emp_count |
-|------------|-----------|
-| Engineering | 3 |
-| Marketing | 2 |
-| NULL | 1 |
+| department  | emp_count |
+| ----------- | --------- |
+| Engineering | 3         |
+| Marketing   | 2         |
+| NULL        | 1         |
 
 All NULL department values are grouped together into a single group.
 
@@ -553,12 +553,12 @@ ORDER BY commission ASC NULLS FIRST;   -- PostgreSQL, Oracle
 -- Oracle: NULLs sort LAST in ASC, FIRST in DESC
 ```
 
-| Database | NULLs in ASC | NULLs in DESC | Customizable? |
-|----------|--------------|---------------|---------------|
-| PostgreSQL | LAST | FIRST | Yes (`NULLS FIRST/LAST`) |
-| Oracle | LAST | FIRST | Yes (`NULLS FIRST/LAST`) |
-| SQL Server | FIRST | FIRST | No native syntax (use CASE or ISNULL) |
-| MySQL | FIRST | LAST | No native syntax (use CASE or IFNULL) |
+| Database   | NULLs in ASC | NULLs in DESC | Customizable?                         |
+| ---------- | ------------ | ------------- | ------------------------------------- |
+| PostgreSQL | LAST         | FIRST         | Yes (`NULLS FIRST/LAST`)              |
+| Oracle     | LAST         | FIRST         | Yes (`NULLS FIRST/LAST`)              |
+| SQL Server | FIRST        | FIRST         | No native syntax (use CASE or ISNULL) |
+| MySQL      | FIRST        | LAST          | No native syntax (use CASE or IFNULL) |
 
 ---
 
@@ -578,13 +578,13 @@ FROM employees;
 ```
 
 | emp_name | commission_safe |
-|----------|-----------------|
-| Alice | 0.15 |
-| Bob | 0.00 |
-| Charlie | 0.10 |
-| Diana | 0.00 |
-| Eve | 0.00 |
-| Frank | 0.12 |
+| -------- | --------------- |
+| Alice    | 0.15            |
+| Bob      | 0.00            |
+| Charlie  | 0.10            |
+| Diana    | 0.00            |
+| Eve      | 0.00            |
+| Frank    | 0.12            |
 
 ### NULLIF
 
@@ -615,12 +615,12 @@ FROM employees;
 
 ### NVL / IFNULL / ISNULL (database-specific)
 
-| Database | Function | Syntax |
-|----------|----------|--------|
-| Oracle | `NVL(commission, 0)` | Returns second arg if first is NULL |
-| MySQL | `IFNULL(commission, 0)` | Returns second arg if first is NULL |
-| SQL Server | `ISNULL(commission, 0)` | Returns second arg if first is NULL |
-| PostgreSQL | `COALESCE(commission, 0)` | Standard, works everywhere |
+| Database   | Function                  | Syntax                              |
+| ---------- | ------------------------- | ----------------------------------- |
+| Oracle     | `NVL(commission, 0)`      | Returns second arg if first is NULL |
+| MySQL      | `IFNULL(commission, 0)`   | Returns second arg if first is NULL |
+| SQL Server | `ISNULL(commission, 0)`   | Returns second arg if first is NULL |
+| PostgreSQL | `COALESCE(commission, 0)` | Standard, works everywhere          |
 
 > Prefer `COALESCE` for portability. It is ANSI SQL standard and supported by all databases.
 
@@ -855,6 +855,7 @@ NULL handling differs across databases. When replicating data:
 1. **NULL checks in WHERE clauses** can prevent index usage in some databases. A filtered index (`WHERE column IS NULL`) can help.
 
 2. **COALESCE in WHERE clauses** can make predicates non-sargable:
+
    ```sql
    -- BAD: function on column prevents index use
    WHERE COALESCE(department, 'Unknown') = 'Engineering'
@@ -896,32 +897,32 @@ NULL handling differs across databases. When replicating data:
 
 ## Comparison Summary Table
 
-| Expression | Result | Explanation |
-|------------|--------|-------------|
-| `NULL = NULL` | UNKNOWN | Cannot determine equality of unknowns |
-| `NULL <> NULL` | UNKNOWN | Cannot determine inequality of unknowns |
-| `NULL < 5` | UNKNOWN | Cannot determine ordering with unknown |
-| `NULL > 5` | UNKNOWN | Cannot determine ordering with unknown |
-| `NULL = 5` | UNKNOWN | Cannot determine equality |
-| `NULL <> 5` | UNKNOWN | Cannot determine inequality |
-| `NULL AND TRUE` | UNKNOWN | TRUE AND UNKNOWN = UNKNOWN |
-| `NULL AND FALSE` | FALSE | FALSE AND anything = FALSE (short-circuit) |
-| `NULL OR TRUE` | TRUE | TRUE OR anything = TRUE (short-circuit) |
-| `NULL OR FALSE` | UNKNOWN | FALSE OR UNKNOWN = UNKNOWN |
-| `NOT NULL` | UNKNOWN | NOT UNKNOWN = UNKNOWN |
-| `NULL IN (1,2,3)` | UNKNOWN | Cannot determine membership |
-| `NULL NOT IN (1,2,3)` | UNKNOWN | Cannot determine non-membership |
-| `NULL IN (1,2,NULL)` | UNKNOWN | One branch UNKNOWN, others FALSE → UNKNOWN |
-| `NULL NOT IN (1,2,NULL)` | UNKNOWN | All branches UNKNOWN or FALSE → UNKNOWN |
-| `NULL IS NULL` | TRUE | IS NULL tests for NULL directly |
-| `NULL IS NOT NULL` | FALSE | IS NOT NULL tests for non-NULL |
-| `COALESCE(NULL, 5)` | 5 | Returns first non-NULL |
-| `NULLIF(5, 5)` | NULL | Arguments equal → NULL |
-| `NULLIF(5, 3)` | 5 | Arguments differ → first argument |
-| `COUNT(NULL)` | 0 | COUNT excludes NULLs |
-| `COUNT(*)` | N | Counts all rows |
-| `SUM(NULL)` | NULL | All-NULL input → NULL |
-| `AVG(NULL)` | NULL | All-NULL input → NULL |
+| Expression               | Result  | Explanation                                |
+| ------------------------ | ------- | ------------------------------------------ |
+| `NULL = NULL`            | UNKNOWN | Cannot determine equality of unknowns      |
+| `NULL <> NULL`           | UNKNOWN | Cannot determine inequality of unknowns    |
+| `NULL < 5`               | UNKNOWN | Cannot determine ordering with unknown     |
+| `NULL > 5`               | UNKNOWN | Cannot determine ordering with unknown     |
+| `NULL = 5`               | UNKNOWN | Cannot determine equality                  |
+| `NULL <> 5`              | UNKNOWN | Cannot determine inequality                |
+| `NULL AND TRUE`          | UNKNOWN | TRUE AND UNKNOWN = UNKNOWN                 |
+| `NULL AND FALSE`         | FALSE   | FALSE AND anything = FALSE (short-circuit) |
+| `NULL OR TRUE`           | TRUE    | TRUE OR anything = TRUE (short-circuit)    |
+| `NULL OR FALSE`          | UNKNOWN | FALSE OR UNKNOWN = UNKNOWN                 |
+| `NOT NULL`               | UNKNOWN | NOT UNKNOWN = UNKNOWN                      |
+| `NULL IN (1,2,3)`        | UNKNOWN | Cannot determine membership                |
+| `NULL NOT IN (1,2,3)`    | UNKNOWN | Cannot determine non-membership            |
+| `NULL IN (1,2,NULL)`     | UNKNOWN | One branch UNKNOWN, others FALSE → UNKNOWN |
+| `NULL NOT IN (1,2,NULL)` | UNKNOWN | All branches UNKNOWN or FALSE → UNKNOWN    |
+| `NULL IS NULL`           | TRUE    | IS NULL tests for NULL directly            |
+| `NULL IS NOT NULL`       | FALSE   | IS NOT NULL tests for non-NULL             |
+| `COALESCE(NULL, 5)`      | 5       | Returns first non-NULL                     |
+| `NULLIF(5, 5)`           | NULL    | Arguments equal → NULL                     |
+| `NULLIF(5, 3)`           | 5       | Arguments differ → first argument          |
+| `COUNT(NULL)`            | 0       | COUNT excludes NULLs                       |
+| `COUNT(*)`               | N       | Counts all rows                            |
+| `SUM(NULL)`              | NULL    | All-NULL input → NULL                      |
+| `AVG(NULL)`              | NULL    | All-NULL input → NULL                      |
 
 ---
 
@@ -998,19 +999,26 @@ NULL handling differs across databases. When replicating data:
 ## Tricky
 
 23. What does this return?
+
 ```sql
 SELECT CASE WHEN NULL = NULL THEN 'Equal' ELSE 'Not Equal' END;
 ```
+
 24. What does this return?
+
 ```sql
 SELECT * FROM (VALUES (1),(2),(3),(NULL)) AS t(val)
 WHERE val NOT IN (SELECT * FROM (VALUES (1),(NULL)) AS s(val));
 ```
+
 25. What does this return?
+
 ```sql
 SELECT NULL = NULL AND NULL = NULL;
 ```
+
 26. What does this return?
+
 ```sql
 SELECT NOT (NULL IN (NULL));
 ```
@@ -1018,14 +1026,17 @@ SELECT NOT (NULL IN (NULL));
 ## Output Prediction
 
 27. Given:
+
 ```sql
 CREATE TABLE t (a INT, b INT);
 INSERT INTO t VALUES (1, NULL), (NULL, 2), (3, 3), (NULL, NULL);
 SELECT a + b FROM t;
 ```
+
 What rows are returned?
 
 28. Given:
+
 ```sql
 SELECT
     CASE
@@ -1035,21 +1046,26 @@ SELECT
     END AS result
 FROM t;
 ```
+
 Using the same table `t` above, what rows are returned?
 
 ## Debugging
 
 29. This query returns fewer rows than expected:
+
 ```sql
 SELECT * FROM employees WHERE department <> 'Sales' AND commission > 0.10;
 ```
+
 The user expects all non-Sales employees with commission above 0.10. What might be wrong?
 
 30. This INSERT fails:
+
 ```sql
 ALTER TABLE employees ADD CONSTRAINT chk_dept CHECK (department <> '');
 INSERT INTO employees VALUES (7, 'Grace', NULL, 70000, NULL, NULL, 1);
 ```
+
 Why? How do you fix it?
 
 ## Performance

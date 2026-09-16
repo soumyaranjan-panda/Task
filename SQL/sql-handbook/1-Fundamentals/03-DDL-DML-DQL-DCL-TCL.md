@@ -6,13 +6,13 @@ SQL commands are grouped into five sub-languages based on what they do. Knowing 
 
 ## Overview
 
-| Category | Full Name | Purpose | Examples |
-|----------|-----------|---------|----------|
-| **DDL** | Data Definition Language | Define / alter database structure | `CREATE`, `ALTER`, `DROP`, `TRUNCATE`, `RENAME` |
-| **DML** | Data Manipulation Language | Insert, change, delete rows | `INSERT`, `UPDATE`, `DELETE`, `MERGE` |
-| **DQL** | Data Query Language | Read data | `SELECT` |
-| **DCL** | Data Control Language | Grant / revoke permissions | `GRANT`, `REVOKE` |
-| **TCL** | Transaction Control Language | Manage transactions | `BEGIN`, `COMMIT`, `ROLLBACK`, `SAVEPOINT` |
+| Category | Full Name                    | Purpose                           | Examples                                        |
+| -------- | ---------------------------- | --------------------------------- | ----------------------------------------------- |
+| **DDL**  | Data Definition Language     | Define / alter database structure | `CREATE`, `ALTER`, `DROP`, `TRUNCATE`, `RENAME` |
+| **DML**  | Data Manipulation Language   | Insert, change, delete rows       | `INSERT`, `UPDATE`, `DELETE`, `MERGE`           |
+| **DQL**  | Data Query Language          | Read data                         | `SELECT`                                        |
+| **DCL**  | Data Control Language        | Grant / revoke permissions        | `GRANT`, `REVOKE`                               |
+| **TCL**  | Transaction Control Language | Manage transactions               | `BEGIN`, `COMMIT`, `ROLLBACK`, `SAVEPOINT`      |
 
 > Common misconception: Some textbooks classify `SELECT` as DML. Others give it its own category (DQL). Both conventions are in wide use. The key point is that `SELECT` is read-only — it does not modify data.
 
@@ -26,23 +26,23 @@ Every example in this section uses these tables.
 
 ### departments
 
-| dept_id | dept_name      | budget   |
-|---------|----------------|----------|
-| 1       | Engineering    | 500000   |
-| 2       | Marketing      | 200000   |
-| 3       | Human Resources| 150000   |
+| dept_id | dept_name       | budget |
+| ------- | --------------- | ------ |
+| 1       | Engineering     | 500000 |
+| 2       | Marketing       | 200000 |
+| 3       | Human Resources | 150000 |
 
 **Grain:** One row = one department.
 
 ### employees
 
-| emp_id | first_name | last_name | dept_id | salary | hire_date  | email      |
-|--------|------------|-----------|---------|--------|------------|------------|
-| 101    | Alice      | Chen      | 1       | 95000  | 2020-03-15 | alice@co   |
-| 102    | Bob        | Martinez  | 1       | 88000  | 2021-06-01 | bob@co     |
-| 103    | Carol      | Johnson   | 2       | 72000  | 2019-01-20 | carol@co   |
-| 104    | Dave       | Williams  | NULL    | 65000  | 2022-09-10 | dave@co    |
-| 105    | Eve        | Brown     | 2       | 81000  | 2020-11-05 | eve@co     |
+| emp_id | first_name | last_name | dept_id | salary | hire_date  | email    |
+| ------ | ---------- | --------- | ------- | ------ | ---------- | -------- |
+| 101    | Alice      | Chen      | 1       | 95000  | 2020-03-15 | alice@co |
+| 102    | Bob        | Martinez  | 1       | 88000  | 2021-06-01 | bob@co   |
+| 103    | Carol      | Johnson   | 2       | 72000  | 2019-01-20 | carol@co |
+| 104    | Dave       | Williams  | NULL    | 65000  | 2022-09-10 | dave@co  |
+| 105    | Eve        | Brown     | 2       | 81000  | 2020-11-05 | eve@co   |
 
 **Grain:** One row = one employee.
 
@@ -72,14 +72,14 @@ CREATE TABLE employees (
 
 Key elements:
 
-| Clause | Purpose |
-|--------|---------|
+| Clause        | Purpose                                                                        |
+| ------------- | ------------------------------------------------------------------------------ |
 | `PRIMARY KEY` | Uniquely identifies each row; implicitly `NOT NULL` and creates a unique index |
-| `NOT NULL` | Column cannot hold NULL |
-| `REFERENCES` | Foreign key constraint |
-| `CHECK` | Row-level validation |
-| `UNIQUE` | All values in the column must be distinct |
-| `DEFAULT` | Value used when none is specified |
+| `NOT NULL`    | Column cannot hold NULL                                                        |
+| `REFERENCES`  | Foreign key constraint                                                         |
+| `CHECK`       | Row-level validation                                                           |
+| `UNIQUE`      | All values in the column must be distinct                                      |
+| `DEFAULT`     | Value used when none is specified                                              |
 
 #### Index
 
@@ -157,32 +157,36 @@ TRUNCATE TABLE employees;
 
 #### TRUNCATE vs DELETE
 
-| Aspect | TRUNCATE | DELETE |
-|--------|----------|--------|
-| Speed | Fast — deallocates pages | Slower — row-by-row |
-| WHERE clause | Not allowed | Allowed |
-| Rollback | Depends on database (see below) | Yes, within a transaction |
-| Triggers | Does not fire (PostgreSQL, MySQL) | Fires |
-| Identity/sequence reset | Yes | No |
-| Logging | Minimal (page deallocation) | Full row-level logging |
-| Locking | Table-level lock (typically) | Row-level locks |
-| Space reclamation | Immediate | Deferred (VACUUM in PostgreSQL) |
+| Aspect                  | TRUNCATE                          | DELETE                          |
+| ----------------------- | --------------------------------- | ------------------------------- |
+| Speed                   | Fast — deallocates pages          | Slower — row-by-row             |
+| WHERE clause            | Not allowed                       | Allowed                         |
+| Rollback                | Depends on database (see below)   | Yes, within a transaction       |
+| Triggers                | Does not fire (PostgreSQL, MySQL) | Fires                           |
+| Identity/sequence reset | Yes                               | No                              |
+| Logging                 | Minimal (page deallocation)       | Full row-level logging          |
+| Locking                 | Table-level lock (typically)      | Row-level locks                 |
+| Space reclamation       | Immediate                         | Deferred (VACUUM in PostgreSQL) |
 
 Database-specific behavior for TRUNCATE:
 
 > PostgreSQL
+>
 > - DDL command, but **can be rolled back** inside a transaction block.
 > - Does not fire `BEFORE DELETE` / `AFTER DELETE` triggers.
 
 > MySQL (InnoDB)
+>
 > - DDL, auto-committed. Cannot be rolled back.
 > - Does not fire triggers.
 
 > SQL Server
+>
 > - Can be rolled back inside an explicit transaction.
 > - Does not fire triggers unless `FIRE_TRIGGERS` option is specified.
 
 > Oracle
+>
 > - DDL, auto-committed. Cannot be rolled back.
 > - Does not fire triggers.
 
@@ -219,13 +223,13 @@ When you run `CREATE INDEX`:
 
 ### DDL Common Mistakes
 
-| Mistake | Why It's Bad | Better Approach |
-|---------|--------------|-----------------|
-| No primary key | Can't uniquely identify rows; poor performance | Always define a PK |
-| Using `VARCHAR(255)` everywhere | Wastes memory, hurts index performance | Use appropriate sizes |
-| No foreign keys | Orphan rows, data corruption | Define FK constraints |
-| `DROP TABLE` without `IF EXISTS` | Script fails if table doesn't exist | Use `IF EXISTS` |
-| No indexes on FK columns | Slow joins, lock contention | Index foreign key columns |
+| Mistake                          | Why It's Bad                                   | Better Approach           |
+| -------------------------------- | ---------------------------------------------- | ------------------------- |
+| No primary key                   | Can't uniquely identify rows; poor performance | Always define a PK        |
+| Using `VARCHAR(255)` everywhere  | Wastes memory, hurts index performance         | Use appropriate sizes     |
+| No foreign keys                  | Orphan rows, data corruption                   | Define FK constraints     |
+| `DROP TABLE` without `IF EXISTS` | Script fails if table doesn't exist            | Use `IF EXISTS`           |
+| No indexes on FK columns         | Slow joins, lock contention                    | Index foreign key columns |
 
 > Production pitfall: In MySQL InnoDB, foreign key columns **must** be indexed. If you don't create an index, MySQL creates one implicitly. In PostgreSQL and SQL Server, foreign key columns are NOT automatically indexed — you must create indexes explicitly.
 
@@ -286,12 +290,12 @@ WHEN NOT MATCHED THEN INSERT VALUES (source.emp_id, source.first_name, source.la
 
 #### INSERT Common Mistakes
 
-| Mistake | Problem | Fix |
-|---------|---------|-----|
-| Column count mismatch | Error or wrong data | List columns explicitly |
-| Implicit type coercion | Silent data truncation or failure | Match types explicitly |
-| NULL into NOT NULL column | Error | Provide value or use `DEFAULT` |
-| Missing column list | Assumes all columns in order | Always list columns explicitly |
+| Mistake                   | Problem                           | Fix                            |
+| ------------------------- | --------------------------------- | ------------------------------ |
+| Column count mismatch     | Error or wrong data               | List columns explicitly        |
+| Implicit type coercion    | Silent data truncation or failure | Match types explicitly         |
+| NULL into NOT NULL column | Error                             | Provide value or use `DEFAULT` |
+| Missing column list       | Assumes all columns in order      | Always list columns explicitly |
 
 > Interview trap: "What happens if you `INSERT` with the wrong number of values?" Answer depends on whether columns are specified. With columns, it errors. Without columns, MySQL may attempt type coercion for trailing values and error on length mismatch.
 
@@ -398,23 +402,30 @@ OUTPUT deleted.*;
 
 #### DELETE Common Mistakes
 
-| Mistake | Problem | Fix |
-|---------|---------|-----|
-| No WHERE clause | Deletes all rows | Always verify with SELECT first |
-| Cascading deletes destroy data | FK cascade removes related rows | Understand your ON DELETE action |
-| Deleting in a loop without limit | Long-running lock, replication lag | Use batches |
+| Mistake                          | Problem                            | Fix                              |
+| -------------------------------- | ---------------------------------- | -------------------------------- |
+| No WHERE clause                  | Deletes all rows                   | Always verify with SELECT first  |
+| Cascading deletes destroy data   | FK cascade removes related rows    | Understand your ON DELETE action |
+| Deleting in a loop without limit | Long-running lock, replication lag | Use batches                      |
 
 > Production pitfall: Deleting millions of rows in a single transaction can fill up WAL (PostgreSQL), redo logs (Oracle/MySQL), or transaction logs (SQL Server). Batch deletes:
 >
 > ```sql
 > -- PostgreSQL / MySQL
 > DELETE FROM employees
-WHERE emp_id IN (
+> WHERE emp_id IN (
+> ```
+
     SELECT emp_id FROM employees
     WHERE hire_date < '2015-01-01'
     LIMIT 10000
+
 );
+
 > -- Repeat until 0 rows affected
+>
+> ```
+>
 > ```
 
 ### 2.4 MERGE
@@ -516,13 +527,13 @@ The order SQL **logically** processes a query differs from the written order:
 
 ### DQL vs DML: Why the Distinction Matters
 
-| Aspect | DQL (SELECT) | DML (INSERT/UPDATE/DELETE) |
-|--------|--------------|---------------------------|
-| Side effects | None (read-only) | Modifies data |
-| Transaction | Doesn't start one (unless in explicit TXN) | Part of current transaction |
-| Locking | Shared locks (typically) | Exclusive locks |
-| Replication | Not replicated | Replicated to replicas |
-| Permissions | Separate permission set | Separate permission set |
+| Aspect       | DQL (SELECT)                               | DML (INSERT/UPDATE/DELETE)  |
+| ------------ | ------------------------------------------ | --------------------------- |
+| Side effects | None (read-only)                           | Modifies data               |
+| Transaction  | Doesn't start one (unless in explicit TXN) | Part of current transaction |
+| Locking      | Shared locks (typically)                   | Exclusive locks             |
+| Replication  | Not replicated                             | Replicated to replicas      |
+| Permissions  | Separate permission set                    | Separate permission set     |
 
 ---
 
@@ -578,13 +589,13 @@ GRANT read_only TO analyst1, analyst2;
 
 ### DCL Best Practices
 
-| Practice | Why |
-|----------|-----|
-| Use roles, not individual grants | Easier to manage at scale |
-| Principle of least privilege | Grant only what's needed |
-| Revoke PUBLIC access | Prevents anonymous access |
-| Use `GRANT OPTION` sparingly | Prevents privilege escalation |
-| Audit grants regularly | Detect over-privileged accounts |
+| Practice                         | Why                             |
+| -------------------------------- | ------------------------------- |
+| Use roles, not individual grants | Easier to manage at scale       |
+| Principle of least privilege     | Grant only what's needed        |
+| Revoke PUBLIC access             | Prevents anonymous access       |
+| Use `GRANT OPTION` sparingly     | Prevents privilege escalation   |
+| Audit grants regularly           | Detect over-privileged accounts |
 
 > Production pitfall: In MySQL, a user can grant privileges they don't possess if they have the `GRANT OPTION`. Always audit `mysql.user` and `mysql.db` tables.
 
@@ -596,12 +607,12 @@ TCL manages **units of work** — ensuring that a group of statements either all
 
 ### 5.1 ACID Properties
 
-| Property | Meaning |
-|----------|---------|
-| **Atomicity** | All statements in a transaction succeed, or none do |
+| Property        | Meaning                                                        |
+| --------------- | -------------------------------------------------------------- |
+| **Atomicity**   | All statements in a transaction succeed, or none do            |
 | **Consistency** | Transaction moves the database from one valid state to another |
-| **Isolation** | Concurrent transactions don't interfere with each other |
-| **Durability** | Once committed, data survives crashes |
+| **Isolation**   | Concurrent transactions don't interfere with each other        |
+| **Durability**  | Once committed, data survives crashes                          |
 
 ### 5.2 Basic Transaction
 
@@ -640,21 +651,21 @@ COMMIT;  -- Jack is inserted, Kate is not
 
 ### 5.4 Auto-Commit Behavior
 
-| Database | Default Behavior |
-|----------|-----------------|
-| PostgreSQL | Each statement is auto-committed unless inside `BEGIN ... COMMIT` |
-| MySQL (InnoDB) | Auto-commit is ON by default. Each statement is its own transaction |
-| SQL Server | Auto-commit is ON by default. Use `BEGIN TRAN` for explicit transactions |
-| Oracle | Each statement is its own transaction. `COMMIT` / `ROLLBACK` are explicit |
+| Database       | Default Behavior                                                          |
+| -------------- | ------------------------------------------------------------------------- |
+| PostgreSQL     | Each statement is auto-committed unless inside `BEGIN ... COMMIT`         |
+| MySQL (InnoDB) | Auto-commit is ON by default. Each statement is its own transaction       |
+| SQL Server     | Auto-commit is ON by default. Use `BEGIN TRAN` for explicit transactions  |
+| Oracle         | Each statement is its own transaction. `COMMIT` / `ROLLBACK` are explicit |
 
 ### 5.5 Isolation Levels
 
-| Level | Dirty Read | Non-Repeatable Read | Phantom Read |
-|-------|------------|---------------------|--------------|
-| READ UNCOMMITTED | Possible | Possible | Possible |
-| READ COMMITTED | Prevented | Possible | Possible |
-| REPEATABLE READ | Prevented | Prevented | Possible* |
-| SERIALIZABLE | Prevented | Prevented | Prevented |
+| Level            | Dirty Read | Non-Repeatable Read | Phantom Read |
+| ---------------- | ---------- | ------------------- | ------------ |
+| READ UNCOMMITTED | Possible   | Possible            | Possible     |
+| READ COMMITTED   | Prevented  | Possible            | Possible     |
+| REPEATABLE READ  | Prevented  | Prevented           | Possible\*   |
+| SERIALIZABLE     | Prevented  | Prevented           | Prevented    |
 
 \* SQL Server's `REPEATABLE READ` prevents phantoms. PostgreSQL's `REPEATABLE READ` uses MVCC snapshots, which also prevents phantoms.
 
@@ -670,12 +681,12 @@ SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
 ### 5.6 Transaction Pitfalls
 
-| Pitfall | Problem | Fix |
-|---------|---------|-----|
-| Long-running transactions | Hold locks, block others, fill WAL | Keep transactions short |
-| Uncommitted reads (autocommit off, no commit) | Locks held until session ends | Always commit or rollback |
-| Nested transactions (misunderstanding) | Some databases don't truly nest | Use savepoints |
-| `ROLLBACK` after DDL | DDL auto-commits in most databases; can't rollback | Be aware of DDL behavior |
+| Pitfall                                       | Problem                                            | Fix                       |
+| --------------------------------------------- | -------------------------------------------------- | ------------------------- |
+| Long-running transactions                     | Hold locks, block others, fill WAL                 | Keep transactions short   |
+| Uncommitted reads (autocommit off, no commit) | Locks held until session ends                      | Always commit or rollback |
+| Nested transactions (misunderstanding)        | Some databases don't truly nest                    | Use savepoints            |
+| `ROLLBACK` after DDL                          | DDL auto-commits in most databases; can't rollback | Be aware of DDL behavior  |
 
 > PostgreSQL: DDL is transactional. You can `ROLLBACK` a `CREATE TABLE` or `ALTER TABLE` inside a transaction block. This is unique among major databases.
 
@@ -727,14 +738,14 @@ COMMIT;
 
 ## DDL vs DML Locking Behavior
 
-| Operation | Lock Type | Duration | Blocks Reads? | Blocks Writes? |
-|-----------|-----------|----------|---------------|----------------|
-| `INSERT` (row) | Row exclusive | Transaction | No (RC+) | Yes (same row) |
-| `UPDATE` (row) | Row exclusive | Transaction | No (RC+) | Yes (same row) |
-| `DELETE` (row) | Row exclusive | Transaction | No (RC+) | Yes (same row) |
-| `ALTER TABLE` | Table lock (varies) | Statement | Usually yes | Usually yes |
-| `CREATE INDEX` | Table lock or INPLACE | Statement | Varies | Varies |
-| `TRUNCATE` | Table lock | Statement | Yes | Yes |
+| Operation      | Lock Type             | Duration    | Blocks Reads? | Blocks Writes? |
+| -------------- | --------------------- | ----------- | ------------- | -------------- |
+| `INSERT` (row) | Row exclusive         | Transaction | No (RC+)      | Yes (same row) |
+| `UPDATE` (row) | Row exclusive         | Transaction | No (RC+)      | Yes (same row) |
+| `DELETE` (row) | Row exclusive         | Transaction | No (RC+)      | Yes (same row) |
+| `ALTER TABLE`  | Table lock (varies)   | Statement   | Usually yes   | Usually yes    |
+| `CREATE INDEX` | Table lock or INPLACE | Statement   | Varies        | Varies         |
+| `TRUNCATE`     | Table lock            | Statement   | Yes           | Yes            |
 
 > Performance implication: Always verify locking behavior with your database's monitoring tools: `pg_locks` (PostgreSQL), `SHOW ENGINE INNODB STATUS` (MySQL), `sys.dm_tran_locks` (SQL Server).
 
@@ -742,33 +753,33 @@ COMMIT;
 
 ## Performance Implications Summary
 
-| Statement | Performance Consideration |
-|-----------|--------------------------|
-| `CREATE TABLE` | Generally fast (metadata only) |
-| `CREATE INDEX` | Can be slow on large tables; use `CONCURRENTLY` (PG) or online DDL (MySQL) |
-| `ALTER TABLE ADD COLUMN` | Fast in PostgreSQL 11+ for most cases; slow on large MySQL tables |
-| `ALTER TABLE DROP COLUMN` | Fast in PostgreSQL 11+; may rebuild in MySQL |
-| `INSERT` (single) | Fast; batch for bulk loads |
-| `INSERT ... SELECT` | Can be slow; consider disabling indexes during bulk load |
-| `UPDATE` without WHERE | Updates all rows; verify with execution plan |
-| `DELETE` without WHERE | Deletes all rows; consider `TRUNCATE` instead |
-| `SELECT` | Always use `EXPLAIN ANALYZE` for unfamiliar queries |
-| `MERGE` | Complex; verify execution plan for large datasets |
+| Statement                 | Performance Consideration                                                  |
+| ------------------------- | -------------------------------------------------------------------------- |
+| `CREATE TABLE`            | Generally fast (metadata only)                                             |
+| `CREATE INDEX`            | Can be slow on large tables; use `CONCURRENTLY` (PG) or online DDL (MySQL) |
+| `ALTER TABLE ADD COLUMN`  | Fast in PostgreSQL 11+ for most cases; slow on large MySQL tables          |
+| `ALTER TABLE DROP COLUMN` | Fast in PostgreSQL 11+; may rebuild in MySQL                               |
+| `INSERT` (single)         | Fast; batch for bulk loads                                                 |
+| `INSERT ... SELECT`       | Can be slow; consider disabling indexes during bulk load                   |
+| `UPDATE` without WHERE    | Updates all rows; verify with execution plan                               |
+| `DELETE` without WHERE    | Deletes all rows; consider `TRUNCATE` instead                              |
+| `SELECT`                  | Always use `EXPLAIN ANALYZE` for unfamiliar queries                        |
+| `MERGE`                   | Complex; verify execution plan for large datasets                          |
 
 ---
 
 ## Database-Specific Differences
 
-| Feature | PostgreSQL | MySQL | SQL Server | Oracle |
-|---------|------------|-------|------------|--------|
-| `TRUNCATE` rollback | Yes (in txn) | No (auto-commit) | Yes (in txn) | No (auto-commit) |
-| `DELETE` triggers on `TRUNCATE` | No | No | With `FIRE_TRIGGERS` | No |
-| DDL in transactions | Yes | No | Partial | No |
-| `MERGE` | Yes (v15+) | No | Yes | Yes |
-| `RETURNING` clause | Yes | No | `OUTPUT` clause | `RETURNING INTO` |
-| `UPSERT` | `ON CONFLICT` | `ON DUPLICATE KEY` | `MERGE` | `MERGE` |
-| Auto-increment | `GENERATED ALWAYS AS IDENTITY` or `SERIAL` | `AUTO_INCREMENT` | `IDENTITY(1,1)` | `GENERATED AS IDENTITY` or sequences |
-| `LIMIT` syntax | `LIMIT n` | `LIMIT n` | `TOP n` | `FETCH FIRST n ROWS ONLY` |
+| Feature                         | PostgreSQL                                 | MySQL              | SQL Server           | Oracle                               |
+| ------------------------------- | ------------------------------------------ | ------------------ | -------------------- | ------------------------------------ |
+| `TRUNCATE` rollback             | Yes (in txn)                               | No (auto-commit)   | Yes (in txn)         | No (auto-commit)                     |
+| `DELETE` triggers on `TRUNCATE` | No                                         | No                 | With `FIRE_TRIGGERS` | No                                   |
+| DDL in transactions             | Yes                                        | No                 | Partial              | No                                   |
+| `MERGE`                         | Yes (v15+)                                 | No                 | Yes                  | Yes                                  |
+| `RETURNING` clause              | Yes                                        | No                 | `OUTPUT` clause      | `RETURNING INTO`                     |
+| `UPSERT`                        | `ON CONFLICT`                              | `ON DUPLICATE KEY` | `MERGE`              | `MERGE`                              |
+| Auto-increment                  | `GENERATED ALWAYS AS IDENTITY` or `SERIAL` | `AUTO_INCREMENT`   | `IDENTITY(1,1)`      | `GENERATED AS IDENTITY` or sequences |
+| `LIMIT` syntax                  | `LIMIT n`                                  | `LIMIT n`          | `TOP n`              | `FETCH FIRST n ROWS ONLY`            |
 
 ---
 

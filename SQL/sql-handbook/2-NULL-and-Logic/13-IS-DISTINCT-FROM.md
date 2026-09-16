@@ -25,10 +25,10 @@ expression IS DISTINCT FROM expression
 expression IS NOT DISTINCT FROM expression
 ```
 
-| Operator | Returns TRUE when... |
-|---|---|
-| `IS DISTINCT FROM` | Values are different, or one is NULL and the other is not |
-| `IS NOT DISTINCT FROM` | Values are the same, including both being NULL |
+| Operator               | Returns TRUE when...                                      |
+| ---------------------- | --------------------------------------------------------- |
+| `IS DISTINCT FROM`     | Values are different, or one is NULL and the other is not |
+| `IS NOT DISTINCT FROM` | Values are the same, including both being NULL            |
 
 ## Internal Working
 
@@ -74,11 +74,11 @@ FROM employees
 WHERE department IS DISTINCT FROM 'Sales';
 ```
 
-| name | department |
-|---|---|
-| Alice | Engineering |
-| Charlie | NULL |
-| Eve | Engineering |
+| name    | department  |
+| ------- | ----------- |
+| Alice   | Engineering |
+| Charlie | NULL        |
+| Eve     | Engineering |
 
 **Why this matters:** `CHARLIE` has `NULL` department. Using `department <> 'Sales'` would **exclude** Charlie because `NULL <> 'Sales'` returns `UNKNOWN`. `IS DISTINCT FROM` correctly includes Charlie because `NULL` is "different from" `'Sales'`.
 
@@ -91,9 +91,9 @@ WHERE email IS NOT DISTINCT FROM NULL;
 ```
 
 | name | email |
-|---|---|
-| Bob | NULL |
-| Eve | NULL |
+| ---- | ----- |
+| Bob  | NULL  |
+| Eve  | NULL  |
 
 **Equivalent to:**
 
@@ -113,11 +113,11 @@ FROM employees
 WHERE department IS DISTINCT FROM 'Engineering';
 ```
 
-| name | department | email |
-|---|---|---|
-| Bob | Sales | NULL |
-| Charlie | NULL | charlie@company.com |
-| Diana | Sales | diana@company.com |
+| name    | department | email               |
+| ------- | ---------- | ------------------- |
+| Bob     | Sales      | NULL                |
+| Charlie | NULL       | charlie@company.com |
+| Diana   | Sales      | diana@company.com   |
 
 Now consider comparing **two columns**:
 
@@ -150,16 +150,16 @@ JOIN employee_assignments a ON e.id = a.employee_id
 WHERE e.department IS DISTINCT FROM a.assigned_dept;
 ```
 
-| name | department | assigned_dept |
-|---|---|---|
-| Diana | Sales | Marketing |
-| Charlie | NULL | NULL — wait, Charlie is NOT in result |
+| name    | department | assigned_dept                         |
+| ------- | ---------- | ------------------------------------- |
+| Diana   | Sales      | Marketing                             |
+| Charlie | NULL       | NULL — wait, Charlie is NOT in result |
 
 **Expected result:**
 
-| name | department | assigned_dept |
-|---|---|---|
-| Diana | Sales | Marketing |
+| name  | department | assigned_dept |
+| ----- | ---------- | ------------- |
+| Diana | Sales      | Marketing     |
 
 Charlie is excluded because `NULL IS DISTINCT FROM NULL` returns `FALSE` — they are "not different" (both NULL).
 
@@ -175,8 +175,8 @@ SELECT
     NULL IS NOT DISTINCT FROM NULL AS ndf; -- TRUE
 ```
 
-| eq | neq | df | ndf |
-|---|---|---|---|
+| eq      | neq     | df    | ndf  |
+| ------- | ------- | ----- | ---- |
 | UNKNOWN | UNKNOWN | FALSE | TRUE |
 
 ### BAD APPROACH
@@ -207,12 +207,12 @@ WHERE e.department IS DISTINCT FROM a.assigned_dept;
 
 ### Comparison Table
 
-| Approach | NULL = NULL | NULL <> value | readable | portable |
-|---|---|---|---|---|
-| `<>` | UNKNOWN | UNKNOWN | ★★★ | ★★★ |
-| `IS DISTINCT FROM` | FALSE | TRUE | ★★★ | ★★☆ |
-| `COALESCE(a, '') <> COALESCE(b, '')` | FALSE | TRUE | ★★☆ | ★★★ |
-| `(a <> b OR (a IS NULL AND b IS NOT NULL) OR (a IS NOT NULL AND b IS NULL))` | FALSE | TRUE | ★☆☆ | ★★★ |
+| Approach                                                                     | NULL = NULL | NULL <> value | readable | portable |
+| ---------------------------------------------------------------------------- | ----------- | ------------- | -------- | -------- |
+| `<>`                                                                         | UNKNOWN     | UNKNOWN       | ★★★      | ★★★      |
+| `IS DISTINCT FROM`                                                           | FALSE       | TRUE          | ★★★      | ★★☆      |
+| `COALESCE(a, '') <> COALESCE(b, '')`                                         | FALSE       | TRUE          | ★★☆      | ★★★      |
+| `(a <> b OR (a IS NULL AND b IS NOT NULL) OR (a IS NOT NULL AND b IS NULL))` | FALSE       | TRUE          | ★☆☆      | ★★★      |
 
 ### COALESCE Approach
 
@@ -246,10 +246,10 @@ WHERE department IS DISTINCT FROM 'Sales';
 
 `IS DISTINCT FROM` has **consistent, predictable NULL behavior**:
 
-| Expression | When a is NULL | When b is NULL | When both NULL |
-|---|---|---|---|
-| `a IS DISTINCT FROM b` | TRUE (if b is not NULL) | TRUE (if a is not NULL) | FALSE |
-| `a IS NOT DISTINCT FROM b` | FALSE (if b is not NULL) | FALSE (if a is not NULL) | TRUE |
+| Expression                 | When a is NULL           | When b is NULL           | When both NULL |
+| -------------------------- | ------------------------ | ------------------------ | -------------- |
+| `a IS DISTINCT FROM b`     | TRUE (if b is not NULL)  | TRUE (if a is not NULL)  | FALSE          |
+| `a IS NOT DISTINCT FROM b` | FALSE (if b is not NULL) | FALSE (if a is not NULL) | TRUE           |
 
 Key rules:
 
@@ -281,10 +281,10 @@ INSERT INTO configs VALUES
 SELECT * FROM configs WHERE value IS DISTINCT FROM '';
 ```
 
-| id | value |
-|---|---|
-| 1 | NULL |
-| 3 | active |
+| id  | value  |
+| --- | ------ |
+| 1   | NULL   |
+| 3   | active |
 
 Row with `id=2` is excluded because `'' IS DISTINCT FROM ''` → `FALSE`. Row with `id=1` is included because `NULL IS DISTINCT FROM ''` → `TRUE`.
 
@@ -330,8 +330,8 @@ WHERE temperature IS DISTINCT FROM 98.6;
 ```
 
 | count |
-|---|
-| 3 |
+| ----- |
+| 3     |
 
 Rows 2, 3, and 4 are all "distinct from" 98.6. NULL is distinct from 98.6.
 
@@ -404,13 +404,13 @@ WHERE department IS DISTINCT FROM ALL (SELECT dept FROM departments WHERE dept I
 
 ### Mistake 4: Assuming IS DISTINCT FROM is Standard Everywhere
 
-| Database | IS DISTINCT FROM support |
-|---|---|
-| PostgreSQL | ✅ Full support |
-| MySQL 8.0+ | ✅ Full support |
+| Database   | IS DISTINCT FROM support                                 |
+| ---------- | -------------------------------------------------------- |
+| PostgreSQL | ✅ Full support                                          |
+| MySQL 8.0+ | ✅ Full support                                          |
 | SQL Server | ❌ Not supported (use `EXCEPT` or `COALESCE` workaround) |
-| Oracle | ✅ Full support (12c+) |
-| SQLite | ✅ Full support |
+| Oracle     | ✅ Full support (12c+)                                   |
+| SQLite     | ✅ Full support                                          |
 
 > SQL Server: Use a `CASE` expression or `EXCEPT` as a workaround.
 
@@ -523,6 +523,7 @@ Answer: `NULL <> anything` returns `UNKNOWN`, which is treated as `FALSE` in a `
 **Trap 3:** "Can you rewrite `IS DISTINCT FROM` without using it?"
 
 Answer: Yes:
+
 ```sql
 -- a IS DISTINCT FROM b
 (a <> b) OR (a IS NULL AND b IS NOT NULL) OR (a IS NOT NULL AND b IS NULL)

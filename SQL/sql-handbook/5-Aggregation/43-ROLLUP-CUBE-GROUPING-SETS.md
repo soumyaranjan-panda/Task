@@ -19,7 +19,7 @@ Why it exists: without these clauses, producing a subtotal report means running 
 
 ### The three clauses are one family
 
-`GROUPING SETS` is the *primitive*. `ROLLUP` and `CUBE` are just convenient shorthand that expands into a list of grouping sets:
+`GROUPING SETS` is the _primitive_. `ROLLUP` and `CUBE` are just convenient shorthand that expands into a list of grouping sets:
 
 ```mermaid
 flowchart TD
@@ -38,14 +38,14 @@ flowchart TD
 
 ### The empty grouping set `()`
 
-`()` is the grouping set over **no columns** — it collapses the entire filtered input into one grand-total row (pathologically: the empty set produces exactly one row even for zero input rows on engines that treat an aggregating query as producing one group, see *Edge cases*).
+`()` is the grouping set over **no columns** — it collapses the entire filtered input into one grand-total row (pathologically: the empty set produces exactly one row even for zero input rows on engines that treat an aggregating query as producing one group, see _Edge cases_).
 
 ### Grain rule
 
 > One row in `orders` represents one order.
 > One row in `employees` represents one employee.
 
-For the *output* of a `ROLLUP`/`CUBE`/`GROUPING SETS` query, the grain is:
+For the _output_ of a `ROLLUP`/`CUBE`/`GROUPING SETS` query, the grain is:
 
 > One output row = the aggregate of one grouping level (one grouping set and one group-key value within it). Subtotal and total rows technically belong to different grouping sets, so they are **different grains** living in the same result set — always tag them with `GROUPING()` before a report (or downstream ETL) touches them.
 
@@ -63,7 +63,7 @@ CREATE TABLE orders (
 );
 ```
 
-> One row in `orders` represents one order. No NULL region exists in this table — the NULLs you will see in outputs belong to the *grouping machinery*, which is exactly the point to remember.
+> One row in `orders` represents one order. No NULL region exists in this table — the NULLs you will see in outputs belong to the _grouping machinery_, which is exactly the point to remember.
 
 ```sql
 INSERT INTO orders VALUES
@@ -151,7 +151,7 @@ GROUP BY ROLLUP (region, product_category);
 
 ### `GROUPING()` — the disambiguation function
 
-`GROUPING(col)` returns `1` when `col` has been *rolled up* (i.e., the row is a subtotal/total that does not include `col`), and `0` when `col` is a genuine grouping key of the row's grouping set. It is the only reliable way to distinguish a subtotal `NULL` from a stored `NULL`.
+`GROUPING(col)` returns `1` when `col` has been _rolled up_ (i.e., the row is a subtotal/total that does not include `col`), and `0` when `col` is a genuine grouping key of the row's grouping set. It is the only reliable way to distinguish a subtotal `NULL` from a stored `NULL`.
 
 ```sql
 SELECT department_id, job_title,
@@ -187,12 +187,12 @@ FROM employees
 GROUP BY CUBE (department_id, job_title);
 ```
 
-| Calling convention | `GROUPING(department_id, job_title)` | Meaning |
-|---|---|---|
-| department + job in group | `0 0` → `0` | detail row |
-| job rolled up (subtotal over job) | `0 1` → `1` | department subtotal |
-| department rolled up (subtotal over department) | `1 0` → `2` | job subtotal (CUBE only) |
-| both rolled up | `1 1` → `3` | grand total |
+| Calling convention                              | `GROUPING(department_id, job_title)` | Meaning                  |
+| ----------------------------------------------- | ------------------------------------ | ------------------------ |
+| department + job in group                       | `0 0` → `0`                          | detail row               |
+| job rolled up (subtotal over job)               | `0 1` → `1`                          | department subtotal      |
+| department rolled up (subtotal over department) | `1 0` → `2`                          | job subtotal (CUBE only) |
+| both rolled up                                  | `1 1` → `3`                          | grand total              |
 
 > Note: `ROLLUP(department_id, job_title)` can **never** produce `g = 2` (job subtotals are not in a rollup). The `job` level only appears under `CUBE` or an explicit `(job_title)` grouping set.
 
@@ -201,7 +201,7 @@ GROUP BY CUBE (department_id, job_title);
 ## Fundamentals of behaviour (learn these, they govern every example)
 
 1. **`WHERE` runs before grouping.** Subtotals and the grand total are computed **only over the rows that survive `WHERE`**. If you filter rows out, every level changes — not just detail.
-2. **`HAVING` runs after grouping, over all levels.** Your `HAVING` condition applies to detail rows *and* subtotal rows *and* the grand total. This is what makes `HAVING GROUPING(col) = 1` work as a level filter.
+2. **`HAVING` runs after grouping, over all levels.** Your `HAVING` condition applies to detail rows _and_ subtotal rows _and_ the grand total. This is what makes `HAVING GROUPING(col) = 1` work as a level filter.
 3. **`ORDER BY` is never implied.** No level is guaranteed to precede another. Use `ORDER BY` (ideally on `GROUPING()` + keys) if the presentation order matters.
 4. **Aggregates over the subtotal rows are real aggregates.** `SUM()`, `AVG()`, `COUNT()` on a subtotal row are computed over that level's rows — never confuse a subtotal row's value with "an extra row of data".
 5. **`GROUPING()` never respects `WHERE`.** You cannot filter out subtotal rows with `WHERE`; you must use `HAVING GROUPING(...) = 1` because subtotals don't exist until after `WHERE`.
@@ -222,29 +222,29 @@ GROUP BY ROLLUP (region, product_category);
 
 Result (order shown is conventional; `GROUP BY` does **not** guarantee it):
 
-| region | product_category | total |
-|---|---|---|
-| East | Hardware | 120.00 |
-| East | Electronics | 240.00 |
-| East | Software | 300.00 |
-| East | NULL | 660.00 |
-| West | Hardware | 80.00 |
-| West | Electronics | 150.00 |
-| West | Software | 240.00 |
-| West | NULL | 470.00 |
-| Central | Hardware | 60.00 |
-| Central | Software | 200.00 |
-| Central | NULL | 260.00 |
-| South | Hardware | 90.00 |
-| South | Electronics | 180.00 |
-| South | NULL | 270.00 |
-| NULL | NULL | 1660.00 |
+| region  | product_category | total   |
+| ------- | ---------------- | ------- |
+| East    | Hardware         | 120.00  |
+| East    | Electronics      | 240.00  |
+| East    | Software         | 300.00  |
+| East    | NULL             | 660.00  |
+| West    | Hardware         | 80.00   |
+| West    | Electronics      | 150.00  |
+| West    | Software         | 240.00  |
+| West    | NULL             | 470.00  |
+| Central | Hardware         | 60.00   |
+| Central | Software         | 200.00  |
+| Central | NULL             | 260.00  |
+| South   | Hardware         | 90.00   |
+| South   | Electronics      | 180.00  |
+| South   | NULL             | 270.00  |
+| NULL    | NULL             | 1660.00 |
 
 Rows `(East, NULL) = 660` etc. are the **region subtotals**; the final row `(NULL, NULL) = 1660.00` is the **grand total**. `ROLLUP(region, category)` expands to groups `(region, category)`, `(region)`, and `()` — note there is **no** `product_category`-only subtotal.
 
 ### Example 2 — ordering the presentation portably
 
-Subtotal `NULL`s sort differently across engines (see *NULL behavior*). To put detail first, then subtotals, then the total, order on the `GROUPING()` flags first. Single-argument `GROUPING()` calls are portable to every engine:
+Subtotal `NULL`s sort differently across engines (see _NULL behavior_). To put detail first, then subtotals, then the total, order on the `GROUPING()` flags first. Single-argument `GROUPING()` calls are portable to every engine:
 
 ```sql
 SELECT region, product_category, SUM(amount) AS total
@@ -286,28 +286,28 @@ FROM orders
 GROUP BY CUBE (region, product_category);
 ```
 
-| region | product_category | total |
-|---|---|---|
-| East | Hardware | 120.00 |
-| East | Electronics | 240.00 |
-| East | Software | 300.00 |
-| West | Hardware | 80.00 |
-| West | Electronics | 150.00 |
-| West | Software | 240.00 |
-| Central | Hardware | 60.00 |
-| Central | Software | 200.00 |
-| South | Hardware | 90.00 |
-| South | Electronics | 180.00 |
-| East | NULL | 660.00 |
-| West | NULL | 470.00 |
-| Central | NULL | 260.00 |
-| South | NULL | 270.00 |
-| NULL | Hardware | 350.00 |
-| NULL | Electronics | 570.00 |
-| NULL | Software | 740.00 |
-| NULL | NULL | 1660.00 |
+| region  | product_category | total   |
+| ------- | ---------------- | ------- |
+| East    | Hardware         | 120.00  |
+| East    | Electronics      | 240.00  |
+| East    | Software         | 300.00  |
+| West    | Hardware         | 80.00   |
+| West    | Electronics      | 150.00  |
+| West    | Software         | 240.00  |
+| Central | Hardware         | 60.00   |
+| Central | Software         | 200.00  |
+| South   | Hardware         | 90.00   |
+| South   | Electronics      | 180.00  |
+| East    | NULL             | 660.00  |
+| West    | NULL             | 470.00  |
+| Central | NULL             | 260.00  |
+| South   | NULL             | 270.00  |
+| NULL    | Hardware         | 350.00  |
+| NULL    | Electronics      | 570.00  |
+| NULL    | Software         | 740.00  |
+| NULL    | NULL             | 1660.00 |
 
-`CUBE` adds the `product_category` subtotals (350 / 570 / 740) that `ROLLUP` never produced. Cost: row explosion — `CUBE (a, b, c)` yields **8 levels**, `CUBE` on *n* columns yields `2^n` levels.
+`CUBE` adds the `product_category` subtotals (350 / 570 / 740) that `ROLLUP` never produced. Cost: row explosion — `CUBE (a, b, c)` yields **8 levels**, `CUBE` on _n_ columns yields `2^n` levels.
 
 ### Example 5 — `GROUPING SETS` with a custom menu
 
@@ -319,7 +319,7 @@ FROM orders
 GROUP BY GROUPING SETS ((region, product_category), (region), ());
 ```
 
-Exact same 15 rows as Example 1 — `ROLLUP(region, product_category)` and this `GROUPING SETS` list are equivalent. The difference is that `GROUPING SETS` lets you *drop* levels:
+Exact same 15 rows as Example 1 — `ROLLUP(region, product_category)` and this `GROUPING SETS` list are equivalent. The difference is that `GROUPING SETS` lets you _drop_ levels:
 
 ```sql
 -- Detail + grand total ONLY (no region subtotals):
@@ -354,7 +354,7 @@ GROUP BY ROLLUP (region, product_category)
 HAVING GROUPING(product_category) = 1;
 ```
 
-Only rows where `product_category` was rolled up remain: the 4 region subtotals and the grand total (note that the grand total has *both* flags set). To get **only** region subtotals:
+Only rows where `product_category` was rolled up remain: the 4 region subtotals and the grand total (note that the grand total has _both_ flags set). To get **only** region subtotals:
 
 ```sql
 HAVING GROUPING(region) = 0 AND GROUPING(product_category) = 1;
@@ -402,23 +402,23 @@ FROM employees
 GROUP BY GROUPING SETS ((department_id, job_title), (department_id), ());
 ```
 
-| department_id | job_title | headcount | payroll | g_dept | g_job |
-|---|---|---|---|---|---|
-| 10 | Engineer | 2 | 132000 | 0 | 0 |
-| 10 | Analyst | 2 | 103000 | 0 | 0 |
-| 20 | Engineer | 1 | 60000 | 0 | 0 |
-| 20 | Manager | 1 | 72000 | 0 | 0 |
-| **NULL** | **Director** | **1** | **90000** | **0** | **0** |
-| **NULL** | **Analyst** | **1** | **52000** | **0** | **0** |
-| 10 | NULL | 4 | 235000 | 0 | 1 |
-| 20 | NULL | 2 | 132000 | 0 | 1 |
-| **NULL** | **NULL** | **2** | **142000** | **0** | **1** |
-| NULL | NULL | 8 | 509000 | 1 | 1 |
+| department_id | job_title    | headcount | payroll    | g_dept | g_job |
+| ------------- | ------------ | --------- | ---------- | ------ | ----- |
+| 10            | Engineer     | 2         | 132000     | 0      | 0     |
+| 10            | Analyst      | 2         | 103000     | 0      | 0     |
+| 20            | Engineer     | 1         | 60000      | 0      | 0     |
+| 20            | Manager      | 1         | 72000      | 0      | 0     |
+| **NULL**      | **Director** | **1**     | **90000**  | **0**  | **0** |
+| **NULL**      | **Analyst**  | **1**     | **52000**  | **0**  | **0** |
+| 10            | NULL         | 4         | 235000     | 0      | 1     |
+| 20            | NULL         | 2         | 132000     | 0      | 1     |
+| **NULL**      | **NULL**     | **2**     | **142000** | **0**  | **1** |
+| NULL          | NULL         | 8         | 509000     | 1      | 1     |
 
 Three rows here print as `(NULL, ...)` but mean completely different things:
 
 1. `(NULL, Director)` — a **stored** NULL: Grace really has no department. `g_dept = 0` proves it is a genuine key.
-2. `(NULL, NULL) = 142000` — the subtotal for the *department-NULL group* (Grace + Hank). `g_job = 1` marks `job_title` rolled up.
+2. `(NULL, NULL) = 142000` — the subtotal for the _department-NULL group_ (Grace + Hank). `g_job = 1` marks `job_title` rolled up.
 3. `(NULL, NULL) = 509000` — the grand total. `g_job = 1` **and** `g_dept = 1`.
 
 `NULL` value alone cannot tell these apart; **only `GROUPING()` can**. A naive report that renders `NULL` as "missing" will merge Grace's row, the 142000 subtotal, and the 509000 total into one confusing blob.
@@ -444,7 +444,7 @@ This is the "BAD APPROACH":
 
 - the `orders` table is scanned three times (verify with the execution plan — engines may cache a scan, but you must **not assume** it);
 - every `WHERE` filter has to be copied into all three branches, and any future level change must be added three times;
-- the rows carry a `level` string *you* invent — nothing prevents copy-paste drift;
+- the rows carry a `level` string _you_ invent — nothing prevents copy-paste drift;
 - `ORDER BY` over `UNION ALL` needs yet another wrapping `SELECT`.
 
 The `ROLLUP` version (Example 1) is a single statement, one place to edit, and the engine is free to visit the data fewer times — but verify with `EXPLAIN` rather than assuming.
@@ -493,22 +493,22 @@ MySQL specifics to remember:
 
 ## NULL behavior
 
-- **Subtotal/total `NULL` is a placeholder, not missing data.** It means "all values of this column". This is the *opposite* of `NULL` in the base table.
+- **Subtotal/total `NULL` is a placeholder, not missing data.** It means "all values of this column". This is the _opposite_ of `NULL` in the base table.
 - **Stored `NULL`s in grouping columns are real keys** and form their own group (Example 9). They are visually identical to subtotal `NULL`s — always separate them with `GROUPING()`.
-- **`COUNT(*)` still counts rows.** On a subtotal row, `COUNT(*)` counts the rows in *that* level. Aggregates (`SUM`, `AVG`, `MIN`, `MAX`, `COUNT(col)`) keep their usual NULL-skipping rules (see section 39); the placeholder `NULL`s do not affect them because a subtotal's input set is just the base rows with the key omitted.
+- **`COUNT(*)` still counts rows.** On a subtotal row, `COUNT(*)` counts the rows in _that_ level. Aggregates (`SUM`, `AVG`, `MIN`, `MAX`, `COUNT(col)`) keep their usual NULL-skipping rules (see section 39); the placeholder `NULL`s do not affect them because a subtotal's input set is just the base rows with the key omitted.
 - **`WHERE` never sees subtotal rows** — filters run before grouping.
 - **`ORDER BY` placement of subtotal `NULL`s differs by engine:**
 
-| Engine | Default position of NULLs (ASC) | Subtotal rows tend to |
-|---|---|---|
-| PostgreSQL | last (NULLS LAST for ASC) | bottom |
-| Oracle | last (default, NULLS FIRST/LAST overridable) | bottom |
-| MySQL | **first** (NULL is lowest) | top |
-| SQL Server | **first** (NULL is lowest) | top |
+| Engine     | Default position of NULLs (ASC)              | Subtotal rows tend to |
+| ---------- | -------------------------------------------- | --------------------- |
+| PostgreSQL | last (NULLS LAST for ASC)                    | bottom                |
+| Oracle     | last (default, NULLS FIRST/LAST overridable) | bottom                |
+| MySQL      | **first** (NULL is lowest)                   | top                   |
+| SQL Server | **first** (NULL is lowest)                   | top                   |
 
 That is why ordering on `GROUPING()` first (Example 2) is recommended for portable presentation.
 
-- **`COALESCE(region, 'ALL')` is dangerous.** It rewrites a stored `NULL` region and a subtotal row into the same label *and* it runs before you can test `GROUPING()`. Correct pattern:
+- **`COALESCE(region, 'ALL')` is dangerous.** It rewrites a stored `NULL` region and a subtotal row into the same label _and_ it runs before you can test `GROUPING()`. Correct pattern:
 
 ```sql
 CASE
@@ -531,7 +531,7 @@ END AS region_label
 7. **Levels you didn't ask for do not exist:** `ROLLUP(a,b)` has no `b`-subtotal; `GROUPING(a,b) = 2` never appears.
 8. **Aggregate arguments are NOT expanded by rollup.** `ROLLUP` only changes the grouping keys; `SUM(amount)`, `AVG(salary)` etc. compute normally at each level.
 9. **Combine clauses:** `GROUPING SETS (ROLLUP (a, b), CUBE (c))` is legal in PostgreSQL, SQL Server, and Oracle — mix and match as needed.
-10. **`WHERE` reduces every level.** Adding `WHERE region = 'East'` changes detail rows *and* the region total *and* the grand total — tables that "cache" rollups must be wary of pre-aggregation invalidation.
+10. **`WHERE` reduces every level.** Adding `WHERE region = 'East'` changes detail rows _and_ the region total _and_ the grand total — tables that "cache" rollups must be wary of pre-aggregation invalidation.
 
 ---
 
@@ -540,21 +540,21 @@ END AS region_label
 1. **Assuming `ROLLUP(a,b)` contains a `b` subtotal.** It does not — see the trap above.
 2. **Presenting subtotal rows without `GROUPING()`.** Every report/ETL consuming grouped output must tag levels, or a stored `NULL` region will be merged with totals.
 3. **Using `COALESCE(col, 'ALL')` in the `SELECT`** to "prettify" subtotal NULLs and then losing the ability to distinguish them; it also makes the output unusable for further `GROUPING()` logic.
-4. **Filtering with `WHERE ... IS NULL`** thinking it removes subtotals. It removes *stored* NULLs (or doesn't run at all for the placeholder rows). Use `HAVING GROUPING(...)`.
+4. **Filtering with `WHERE ... IS NULL`** thinking it removes subtotals. It removes _stored_ NULLs (or doesn't run at all for the placeholder rows). Use `HAVING GROUPING(...)`.
 5. **Counting subtotal rows as if they were data rows.** Example 9: the 142000 subtotal looks like two extra employees.
 6. **Writing `UNION ALL` chains** for multi-level reports instead of a single `ROLLUP`/`CUBE`/`GROUPING SETS` (Example 10).
 7. **Ordering without `ORDER BY`.** No level ordering is guaranteed; MySQL 8.0 removed even the implicit grouping sort.
 8. **MySQL users writing `CUBE` or `GROUPING SETS`** — those are syntax errors on MySQL; roll up manually with `UNION ALL` or switch engines.
-9. **`HAVING` with plain column conditions** (e.g. `HAVING region = 'East'`) — legally allowed, but it filters whole groups *including subtotal/total rows* of the matching combination, which usually is not what you intended.
+9. **`HAVING` with plain column conditions** (e.g. `HAVING region = 'East'`) — legally allowed, but it filters whole groups _including subtotal/total rows_ of the matching combination, which usually is not what you intended.
 10. **Forgetting the grand total** exists and can be double-joined into aggregates.
 
 ---
 
 ## Production pitfalls
 
-> Production pitfall — row explosion: `CUBE` on *n* columns generates `2^n` grouping levels. With 12 columns that is 4096 levels, and every level contributes output rows proportional to its distinct-key count. Estimate output cardinality *before* running: upper bound ≈ product over columns of `(1 + distinct values of col)`.
+> Production pitfall — row explosion: `CUBE` on _n_ columns generates `2^n` grouping levels. With 12 columns that is 4096 levels, and every level contributes output rows proportional to its distinct-key count. Estimate output cardinality _before_ running: upper bound ≈ product over columns of `(1 + distinct values of col)`.
 
-> Production pitfall — pipeline double counting: if a `ROLLUP` result is loaded into a fact table *without* the `level` tag, downstream `SUM()` will add detail + subtotal + total at once. Always persist a `level` column computed from `GROUPING()`.
+> Production pitfall — pipeline double counting: if a `ROLLUP` result is loaded into a fact table _without_ the `level` tag, downstream `SUM()` will add detail + subtotal + total at once. Always persist a `level` column computed from `GROUPING()`.
 
 > Production pitfall — MySQL super-aggregate rows are appended at the very end of processing; a paginated or `LIMIT`-ed read can silently drop every subtotal + the grand total.
 
@@ -566,14 +566,14 @@ END AS region_label
 
 ## Performance implications
 
-Honest framing: as with most optimizations, **verify, don't assume.** Performance depends on the optimizer, indexes, statistics, cardinality, data distribution, and query shape. Use `EXPLAIN` / `EXPLAIN ANALYZE` (or the engine's plan equivalent) and compare numbers on *your* data.
+Honest framing: as with most optimizations, **verify, don't assume.** Performance depends on the optimizer, indexes, statistics, cardinality, data distribution, and query shape. Use `EXPLAIN` / `EXPLAIN ANALYZE` (or the engine's plan equivalent) and compare numbers on _your_ data.
 
 What is reasonable to state:
 
-- **One statement vs many:** `GROUPING SETS`/`ROLLUP`/`CUBE` express several aggregation levels in a single plan. Engines differ in *how* they execute them — PostgreSQL (9.5+) emits a `GroupAggregate`/`HashAggregate` node annotated with `Grouping Sets:` and can read the input once; SQL Server's docs describe the semantics as producing the union of the individual group results (which an optimizer may fold into fewer passes or not). Therefore:
+- **One statement vs many:** `GROUPING SETS`/`ROLLUP`/`CUBE` express several aggregation levels in a single plan. Engines differ in _how_ they execute them — PostgreSQL (9.5+) emits a `GroupAggregate`/`HashAggregate` node annotated with `Grouping Sets:` and can read the input once; SQL Server's docs describe the semantics as producing the union of the individual group results (which an optimizer may fold into fewer passes or not). Therefore:
   - The naive `UNION ALL` of `GROUP BY`s may scan the table once per branch **or** be optimized into fewer passes — check the plan before claiming either is always faster ("EXISTS vs IN" style absolute claims apply here too).
-  - A single `GROUPING SETS` statement is *at worst* as maintainable, and typically useful for the optimizer to schedule shared scans and shared orders.
-- **Indexing rarely saves you an aggregate.** Aggregating generally reads all matching rows; an ordered index can sometimes enable quick ordered aggregation (PostgreSQL index scans feeding `GroupAggregate`, MySQL increase of loose-index-scan for grouped access) — but only if the order and prefix of the grouping keys align with the index *and* you verify it in the plan.
+  - A single `GROUPING SETS` statement is _at worst_ as maintainable, and typically useful for the optimizer to schedule shared scans and shared orders.
+- **Indexing rarely saves you an aggregate.** Aggregating generally reads all matching rows; an ordered index can sometimes enable quick ordered aggregation (PostgreSQL index scans feeding `GroupAggregate`, MySQL increase of loose-index-scan for grouped access) — but only if the order and prefix of the grouping keys align with the index _and_ you verify it in the plan.
 - **Sort vs hash:** some engines choose a sort-based aggregate for `ROLLUP`/`CUBE` levels; sorting cost grows with cardinality. Others hash. Watch for `work_mem`/hash-spill in the plan for wide `CUBE` runs.
 - **Output cardinality can dominate cost.** `CUBE` of high-cardinality columns can emit far more rows than the input; the optimizer can't always anticipate the consumer, so bound the requested levels.
 - **`GROUPING()` calls are cheap flag computations** — they are evaluated per output row, not per input row, so they add negligible cost.
@@ -590,39 +590,39 @@ What to check in the plan:
 
 ## Comparison
 
-| | `GROUP BY ROLLUP (a, b)` | `GROUP BY CUBE (a, b)` | `GROUP BY GROUPING SETS ((a,b),(a),())` | N × `GROUP BY` + `UNION ALL` |
-|---|---|---|---|---|
-| Levels produced | `(a,b)`, `(a)`, `()` | `(a,b)`, `(a)`, `(b)`, `()` | exactly what you list | exactly what you write |
-| `(b)` subtotal | no | yes | only if listed | only if written |
-| Column-order sensitive | yes | no (power set) | no (you list sets) | n/a |
-| Number of grouping levels (n cols) | n + 1 | 2ⁿ | number of listed sets | number of `SELECT`s |
-| Distinguish levels | `GROUPING()` | `GROUPING()` | `GROUPING()` | your own `level` column |
-| Maintainability | high | high | high | low (filters duplicated per branch) |
-| Engine support (see table below) | all 4 | not MySQL | not MySQL | all 4 |
+|                                    | `GROUP BY ROLLUP (a, b)` | `GROUP BY CUBE (a, b)`      | `GROUP BY GROUPING SETS ((a,b),(a),())` | N × `GROUP BY` + `UNION ALL`        |
+| ---------------------------------- | ------------------------ | --------------------------- | --------------------------------------- | ----------------------------------- |
+| Levels produced                    | `(a,b)`, `(a)`, `()`     | `(a,b)`, `(a)`, `(b)`, `()` | exactly what you list                   | exactly what you write              |
+| `(b)` subtotal                     | no                       | yes                         | only if listed                          | only if written                     |
+| Column-order sensitive             | yes                      | no (power set)              | no (you list sets)                      | n/a                                 |
+| Number of grouping levels (n cols) | n + 1                    | 2ⁿ                          | number of listed sets                   | number of `SELECT`s                 |
+| Distinguish levels                 | `GROUPING()`             | `GROUPING()`                | `GROUPING()`                            | your own `level` column             |
+| Maintainability                    | high                     | high                        | high                                    | low (filters duplicated per branch) |
+| Engine support (see table below)   | all 4                    | not MySQL                   | not MySQL                               | all 4                               |
 
 ### Level-set expansion reference
 
-| Expression | Equivalent grouping sets |
-|---|---|
-| `ROLLUP (a, b)` | `(a, b)`, `(a)`, `()` |
-| `ROLLUP (a)` | `(a)`, `()` |
-| `CUBE (a, b)` | `(a, b)`, `(a)`, `(b)`, `()` |
-| `CUBE (a)` | `(a)`, `()` |
-| `GROUPING SETS ((a), (b))` | exactly `(a)`, `(b)` |
+| Expression                                | Equivalent grouping sets          |
+| ----------------------------------------- | --------------------------------- |
+| `ROLLUP (a, b)`                           | `(a, b)`, `(a)`, `()`             |
+| `ROLLUP (a)`                              | `(a)`, `()`                       |
+| `CUBE (a, b)`                             | `(a, b)`, `(a)`, `(b)`, `()`      |
+| `CUBE (a)`                                | `(a)`, `()`                       |
+| `GROUPING SETS ((a), (b))`                | exactly `(a)`, `(b)`              |
 | `GROUPING SETS (ROLLUP (a, b), CUBE (b))` | `(a,b)`, `(a)`, `()`, `(b)`, `()` |
 
 ### Engine support matrix
 
-| Feature | PostgreSQL | MySQL | SQL Server | Oracle |
-|---|---|---|---|---|
-| `ROLLUP` | ✓ (9.5+) | ✓ (`WITH ROLLUP` / `ROLLUP(...)`) | ✓ (`GROUP BY ROLLUP(...)` and legacy `WITH ROLLUP`) | ✓ |
-| `CUBE` | ✓ (9.5+) | ✗ | ✓ (`GROUP BY CUBE(...)` and legacy `WITH CUBE`) | ✓ |
-| `GROUPING SETS` | ✓ (9.5+) | ✗ | ✓ | ✓ |
-| empty set `()` | ✓ | ✓ (implicit in rollup) | ✓ | ✓ |
-| `GROUPING(col)` | ✓ (single and multi-arg) | ✓ (single arg, 8.0+) | ✓ (single arg) | ✓ (single arg) |
-| `GROUPING_ID(...)` bitmask | — use `GROUPING(a, b)` | ✗ | ✓ | ✓ |
-| combined/nested clauses | ✓ | ✗ | ✓ | ✓ (incl. `GROUP_ID()` dedup) |
-| Grand-total row by default | only if `()` in sets | ✓ (`WITH ROLLUP` appends it) | only if `()` in sets / rollup | only if `()` in sets / rollup |
+| Feature                    | PostgreSQL               | MySQL                             | SQL Server                                          | Oracle                        |
+| -------------------------- | ------------------------ | --------------------------------- | --------------------------------------------------- | ----------------------------- |
+| `ROLLUP`                   | ✓ (9.5+)                 | ✓ (`WITH ROLLUP` / `ROLLUP(...)`) | ✓ (`GROUP BY ROLLUP(...)` and legacy `WITH ROLLUP`) | ✓                             |
+| `CUBE`                     | ✓ (9.5+)                 | ✗                                 | ✓ (`GROUP BY CUBE(...)` and legacy `WITH CUBE`)     | ✓                             |
+| `GROUPING SETS`            | ✓ (9.5+)                 | ✗                                 | ✓                                                   | ✓                             |
+| empty set `()`             | ✓                        | ✓ (implicit in rollup)            | ✓                                                   | ✓                             |
+| `GROUPING(col)`            | ✓ (single and multi-arg) | ✓ (single arg, 8.0+)              | ✓ (single arg)                                      | ✓ (single arg)                |
+| `GROUPING_ID(...)` bitmask | — use `GROUPING(a, b)`   | ✗                                 | ✓                                                   | ✓                             |
+| combined/nested clauses    | ✓                        | ✗                                 | ✓                                                   | ✓ (incl. `GROUP_ID()` dedup)  |
+| Grand-total row by default | only if `()` in sets     | ✓ (`WITH ROLLUP` appends it)      | only if `()` in sets / rollup                       | only if `()` in sets / rollup |
 
 ---
 
@@ -657,7 +657,7 @@ What to check in the plan:
 
 # Interview Questions
 
-*Practice on the sample `orders` and `employees` tables above. Reason them out — answers are deliberately withheld.*
+_Practice on the sample `orders` and `employees` tables above. Reason them out — answers are deliberately withheld._
 
 ## Beginner
 
@@ -669,19 +669,19 @@ What to check in the plan:
 
 ## Intermediate
 
-6. Rewrite this as a single `GROUPING SETS` query that returns *only* region subtotals and the grand total: two `SELECT ... GROUP BY` queries unioned together.
+6. Rewrite this as a single `GROUPING SETS` query that returns _only_ region subtotals and the grand total: two `SELECT ... GROUP BY` queries unioned together.
 7. Using `employees`, write a query that flags each row of `GROUP BY ROLLUP (department_id, job_title)` as `detail`, `department subtotal`, or `grand total` using only `GROUPING()`.
 8. Explain why `GROUPING(department_id, job_title)` can never return 2 in a `ROLLUP` query but can in a `CUBE` query. Which row (if any) has value 2 in a `CUBE` on `employees`?
-9. A stored `NULL` in `department_id` and a subtotal `NULL` look identical. Give one query from `employees` where the output contains a row that is *visually* `(NULL, NULL)` and explain which one is a subtotal and which is the total — and how `GROUPING()` tells them apart.
+9. A stored `NULL` in `department_id` and a subtotal `NULL` look identical. Give one query from `employees` where the output contains a row that is _visually_ `(NULL, NULL)` and explain which one is a subtotal and which is the total — and how `GROUPING()` tells them apart.
 10. On MySQL, how would you obtain `CUBE`-style output? What two restrictions were lifted in MySQL 8.0.12 with respect to `ROLLUP`?
 
 ## Advanced
 
-11. Write a query returning, per region and category, the amount plus the percentage of the *grand total* for each cell, using a window function over a `ROLLUP` result.
+11. Write a query returning, per region and category, the amount plus the percentage of the _grand total_ for each cell, using a window function over a `ROLLUP` result.
 12. Construct a `GROUPING SETS` clause that deliberately creates duplicate rows (overlapping sets), and explain why the result follows `UNION ALL` semantics. How would Oracle's `GROUP_ID()` help deduplicate?
 13. Explain the bitmask convention: in `GROUPING_ID(department_id, job_title)`, which argument is the least-significant bit, and derive the 4 possible values for a `CUBE`.
 14. You have `orders` with an extra column `channel`. Ask for detail, region subtotal, channel subtotal, and grand total in a single statement — write the query. Which of these levels would a `CUBE` give that a `ROLLUP` cannot?
-15. Discuss `WHERE` vs `HAVING` with `ROLLUP`: which clause can reduce the grand total, and which can filter out subtotal rows? Write a query that keeps only `East` data *and* drops the grand-total row.
+15. Discuss `WHERE` vs `HAVING` with `ROLLUP`: which clause can reduce the grand total, and which can filter out subtotal rows? Write a query that keeps only `East` data _and_ drops the grand-total row.
 
 ## Scenario Based
 
@@ -691,7 +691,7 @@ What to check in the plan:
 
 ## Tricky
 
-19. `SELECT region, product_category, SUM(amount) ... GROUP BY GROUPING SETS ((region), (product_category));` — how many rows does it produce, and which columns are NULL on a region subtotal row? Could a row ever have *both* columns not NULL?
+19. `SELECT region, product_category, SUM(amount) ... GROUP BY GROUPING SETS ((region), (product_category));` — how many rows does it produce, and which columns are NULL on a region subtotal row? Could a row ever have _both_ columns not NULL?
 20. In `ROLLUP (region, product_category)`, the row `(East, NULL, 660)` — is `product_category` "really" NULL for that row? What would `GROUPING(product_category)` return and why does it matter if `East` also had an order with a stored NULL category?
 21. `HAVING GROUPING(region) = 1` — which rows survive for a `ROLLUP` query, and why can't this be done with `WHERE`?
 22. You roll up over `EXTRACT(YEAR FROM order_date)`. Why does `GROUPING(EXTRACT(YEAR FROM order_date))` work while `GROUPING(y)` on an alias does not? What must you pass instead?
@@ -743,11 +743,11 @@ GROUP BY GROUPING SETS ((region), ());
 27. A teammate produced a sales report with `ROLLUP (region, product_category)` but the dashboard keeps showing "5790.00" for total sales although the true total is 1660. Describe the most likely cause and the exact fix.
 28. The same query on `employees` shows two rows that both print as `(NULL, NULL)` but with payroll 142000 and 509000. A reviewer deletes "duplicate" rows. What will break, and how would you add a column to make the rows unambiguous?
 29. A MySQL query using `GROUP BY CUBE (region, product_category)` fails with a syntax error. Explain why and give a correct (if clunkier) version that returns the same rows.
-30. A report orders by `product_category` on SQL Server and the grand total appears *first*; hours later the identical query on PostgreSQL shows it *last*. Is the query wrong? Show the ordering that is portable and why.
+30. A report orders by `product_category` on SQL Server and the grand total appears _first_; hours later the identical query on PostgreSQL shows it _last_. Is the query wrong? Show the ordering that is portable and why.
 
 ## Performance
 
 31. Compare "one `ROLLUP` query" vs "three `GROUP BY` + `UNION ALL`" for the sample tables on your engine. Describe exactly what you would inspect in the execution plan before claiming either is faster.
-32. A `CUBE` over 12 columns on a 10M-row table is slow. List the plan/output-cardinality checks you would run *before* rewriting, and the cheaper alternative (narrower column set / `GROUPING SETS` subset / pre-aggregated base).
+32. A `CUBE` over 12 columns on a 10M-row table is slow. List the plan/output-cardinality checks you would run _before_ rewriting, and the cheaper alternative (narrower column set / `GROUPING SETS` subset / pre-aggregated base).
 33. Explain the role of sort vs hash in the engine plan for a wide `ROLLUP` on a high-cardinality grouping column, and where memory spill would show up in the plan on PostgreSQL.
-34. Would an index on `(region, product_category, amount)` help *this* aggregation? Under what conditions could it (ordered-group scans / index-only access), and how would you confirm with `EXPLAIN` instead of assuming?
+34. Would an index on `(region, product_category, amount)` help _this_ aggregation? Under what conditions could it (ordered-group scans / index-only access), and how would you confirm with `EXPLAIN` instead of assuming?

@@ -27,7 +27,7 @@ Most of the time when a developer "joins" two tables, they do **not** actually w
 
 If you answer that question with an ordinary `JOIN`, you get the row-multiplication (fan-out) problem: a customer with three orders appears three times. You then "fix" it with `DISTINCT`, which forces the database to do extra sorting or hashing.
 
-The semi-join exists so you can ask existence questions **without multiplying rows** and **without projecting unwanted columns**. It is also the natural building block for its twin, the **anti-join** (return rows that match *nothing*), which Section 25 covers.
+The semi-join exists so you can ask existence questions **without multiplying rows** and **without projecting unwanted columns**. It is also the natural building block for its twin, the **anti-join** (return rows that match _nothing_), which Section 25 covers.
 
 ## The Grain of Each Table
 
@@ -54,11 +54,11 @@ CREATE TABLE payments (
 );
 ```
 
-| Table | Grain |
-|---|---|
-| `customers` | one row = one customer |
-| `orders` | one row = one order (a customer can have many orders) |
-| `payments` | one row = one payment (an order can have many payments) |
+| Table       | Grain                                                   |
+| ----------- | ------------------------------------------------------- |
+| `customers` | one row = one customer                                  |
+| `orders`    | one row = one order (a customer can have many orders)   |
+| `payments`  | one row = one payment (an order can have many payments) |
 
 Sample data:
 
@@ -79,11 +79,11 @@ INSERT INTO payments VALUES
 
 ## The Three Ways to Write a Semi-Join
 
-| Form | Query shape | Notes |
-|---|---|---|
-| `EXISTS` correlated subquery | `WHERE EXISTS (SELECT 1 FROM s WHERE s.k = r.k)` | Most explicit; naturally correlated; robust with NULL |
-| `IN` subquery | `WHERE r.k IN (SELECT s.k FROM s)` | Concise; uncorrelated by default |
-| `JOIN` + `DISTINCT` | `SELECT DISTINCT r.* FROM r JOIN s ON ...` | Syntactically correct but the worst implementation; see pitfalls |
+| Form                         | Query shape                                      | Notes                                                            |
+| ---------------------------- | ------------------------------------------------ | ---------------------------------------------------------------- |
+| `EXISTS` correlated subquery | `WHERE EXISTS (SELECT 1 FROM s WHERE s.k = r.k)` | Most explicit; naturally correlated; robust with NULL            |
+| `IN` subquery                | `WHERE r.k IN (SELECT s.k FROM s)`               | Concise; uncorrelated by default                                 |
+| `JOIN` + `DISTINCT`          | `SELECT DISTINCT r.* FROM r JOIN s ON ...`       | Syntactically correct but the worst implementation; see pitfalls |
 
 ### 1) Using `EXISTS`
 
@@ -101,10 +101,10 @@ WHERE EXISTS (
 
 **Expected output:**
 
-| customer_id | name |
-|---|---|
-| 1 | Alice |
-| 3 | Carol |
+| customer_id | name  |
+| ----------- | ----- |
+| 1           | Alice |
+| 3           | Carol |
 
 Alice is returned **once**, even though she has two orders. Bob and Dan never ordered, so they are excluded.
 
@@ -118,10 +118,10 @@ WHERE c.customer_id IN (SELECT o.customer_id FROM orders AS o);
 
 Same result:
 
-| customer_id | name |
-|---|---|
-| 1 | Alice |
-| 3 | Carol |
+| customer_id | name  |
+| ----------- | ----- |
+| 1           | Alice |
+| 3           | Carol |
 
 ### 3) The `JOIN` + `DISTINCT` lookalike (avoid it)
 
@@ -137,12 +137,12 @@ Also gives the same result — but for the wrong reasons and with unnecessary wo
 
 When you write `EXISTS` or `IN`, the optimizer usually rewrites the query into a dedicated **semi-join operator**. You never type `SEMI JOIN`, but you will see it in execution plans:
 
-| Database | What EXPLAIN shows |
-|---|---|
-| PostgreSQL | `Hash Semi Join`, `Nested Loop Semi Join`, `Merge Semi Join` |
-| SQL Server | a `Left Semi Join` operator in the plan |
-| Oracle | semi-join shown in the join/access path of the plan |
-| MySQL | `EXPLAIN FORMAT=TREE` shows a `SEMIJOIN`; older plans show the `semijoin` strategy hints (`FirstMatch`, `Loosescan`, `DuplicateWeedout`, `Materialize`) |
+| Database   | What EXPLAIN shows                                                                                                                                      |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| PostgreSQL | `Hash Semi Join`, `Nested Loop Semi Join`, `Merge Semi Join`                                                                                            |
+| SQL Server | a `Left Semi Join` operator in the plan                                                                                                                 |
+| Oracle     | semi-join shown in the join/access path of the plan                                                                                                     |
+| MySQL      | `EXPLAIN FORMAT=TREE` shows a `SEMIJOIN`; older plans show the `semijoin` strategy hints (`FirstMatch`, `Loosescan`, `DuplicateWeedout`, `Materialize`) |
 
 There are three classic algorithms, chosen by the optimizer based on sizes, indexes, and statistics:
 
@@ -184,7 +184,7 @@ A semi-join is exactly the "existence without fan-out" answer.
 
 `IN (subquery)` behaves differently beneath the surface. `x IN (1, 2, NULL)` is actually `x = 1 OR x = 2 OR x = NULL`, which always evaluates to `NULL` (not `FALSE`) for any `x` not equal to 1 or 2. In a `WHERE`, `NULL` behaves like `FALSE`, so the row is dropped.
 
-Within a **positive semi-join**, that just produces the correct result: a value that genuinely matches nothing is excluded whether the subquery list contains a NULL or not. So `IN` is *usually* fine for semi-joins.
+Within a **positive semi-join**, that just produces the correct result: a value that genuinely matches nothing is excluded whether the subquery list contains a NULL or not. So `IN` is _usually_ fine for semi-joins.
 
 > **Common misconception:** "IN is broken when the subquery returns NULL."
 > For the **positive** form (`r.k IN (SELECT ...)`), `IN` still returns exactly the rows with a real match, so it is a faithful semi-join. The famous NULL disaster happens with the **negated** form: `NOT IN` returns **zero rows** whenever the subquery produces a single NULL. That is the anti-join trap (Section 25), not a semi-join problem.
@@ -196,18 +196,18 @@ Because of the `NULL` behavior above:
 - `EXISTS` and `IN` agree with each other for the positive semi-join (in the uncorrelated case).
 - `NOT EXISTS` and `NOT IN` **diverge**: `NOT IN` collapses to "no rows" when the subquery contains any NULL, while `NOT EXISTS` behaves correctly.
 
-That single difference is why many coding standards say: *use `NOT EXISTS` for anti-joins, not `NOT IN`.*
+That single difference is why many coding standards say: _use `NOT EXISTS` for anti-joins, not `NOT IN`._
 
 ## Edge Cases
 
-| Scenario | `EXISTS` | `IN` |
-|---|---|---|
-| Right table is empty | returns nothing | returns nothing |
-| Row matches many right rows | emitted once | emitted once |
-| Row matches zero right rows | excluded | excluded |
-| Join key is `NULL` on the left | excluded (no equality) | excluded (`NULL IN ...` is NULL) |
-| Subquery result contains `NULL` | irrelevant (no comparison unless written) | still correct for positive `IN` |
-| Uncorrelated, never-false subquery | **bug**: every left row passes | not applicable (no outer ref) |
+| Scenario                           | `EXISTS`                                  | `IN`                             |
+| ---------------------------------- | ----------------------------------------- | -------------------------------- |
+| Right table is empty               | returns nothing                           | returns nothing                  |
+| Row matches many right rows        | emitted once                              | emitted once                     |
+| Row matches zero right rows        | excluded                                  | excluded                         |
+| Join key is `NULL` on the left     | excluded (no equality)                    | excluded (`NULL IN ...` is NULL) |
+| Subquery result contains `NULL`    | irrelevant (no comparison unless written) | still correct for positive `IN`  |
+| Uncorrelated, never-false subquery | **bug**: every left row passes            | not applicable (no outer ref)    |
 
 ### The "always-true `EXISTS`" bug
 
@@ -267,10 +267,10 @@ JOIN payments AS p ON p.order_id = o.order_id;
 ```
 
 | order_id |
-|---|
-| 101 |
-| 101 |
-| 103 |
+| -------- |
+| 101      |
+| 101      |
+| 103      |
 
 **BAD APPROACH** — "fix" with `DISTINCT`:
 
@@ -293,9 +293,9 @@ WHERE EXISTS (
 ```
 
 | order_id |
-|---|
-| 101 |
-| 103 |
+| -------- |
+| 101      |
+| 103      |
 
 The better version expresses the intent directly, avoids the fan-out entirely, and gives the optimizer the same semi-join rewriting freedom.
 
@@ -303,7 +303,7 @@ The better version expresses the intent directly, avoids the fan-out entirely, a
 
 ### Scenario 1 — Recently active customers (time window)
 
-*Dashboards question: which customers ordered in the last 30 days?*
+_Dashboards question: which customers ordered in the last 30 days?_
 
 ```sql
 SELECT c.customer_id, c.name
@@ -355,9 +355,9 @@ WHERE NOT EXISTS (
 ```
 
 | customer_id | name |
-|---|---|
-| 2 | Bob |
-| 4 | Dan |
+| ----------- | ---- |
+| 2           | Bob  |
+| 4           | Dan  |
 
 This is the **anti-join** (semi-join's complement). Full treatment in Section 25 — the short version: prefer `NOT EXISTS` over `NOT IN` here because of the NULL trap.
 
@@ -365,30 +365,30 @@ This is the **anti-join** (semi-join's complement). Full treatment in Section 25
 
 ### `EXISTS` vs `IN` vs `JOIN + DISTINCT`
 
-| Criterion | `EXISTS` | `IN` | `JOIN` + `DISTINCT` |
-|---|---|---|---|
-| Output = left schema only | Yes | Yes | Yes (after dedupe) |
-| Fan-out / duplicates | None | None | Present, then removed |
-| Naturally correlated | Yes | Usually uncorrelated (but can be) | N/A |
-| Arbitrary subquery conditions (ranges, OR, inequalities) | Yes | Only equality to subquery columns | Yes, but with fan-out |
-| Multiple-column comparison | Yes (any predicate) | `(a,b) IN (SELECT ...)` — supported in PostgreSQL/MySQL/SQL Server, **not** in Oracle | Yes (ON clause) |
-| NULL-safe for the negated form | Yes (`NOT EXISTS`) | No (`NOT IN` → empty result with NULLs) | N/A |
-| Optimizer usually rewrites to | Semi-join | Semi-join | Not a semi-join; dedupe is a real stage |
-| Symmetry (rows appear once) | Yes | Yes | Only via DISTINCT |
+| Criterion                                                | `EXISTS`            | `IN`                                                                                  | `JOIN` + `DISTINCT`                     |
+| -------------------------------------------------------- | ------------------- | ------------------------------------------------------------------------------------- | --------------------------------------- |
+| Output = left schema only                                | Yes                 | Yes                                                                                   | Yes (after dedupe)                      |
+| Fan-out / duplicates                                     | None                | None                                                                                  | Present, then removed                   |
+| Naturally correlated                                     | Yes                 | Usually uncorrelated (but can be)                                                     | N/A                                     |
+| Arbitrary subquery conditions (ranges, OR, inequalities) | Yes                 | Only equality to subquery columns                                                     | Yes, but with fan-out                   |
+| Multiple-column comparison                               | Yes (any predicate) | `(a,b) IN (SELECT ...)` — supported in PostgreSQL/MySQL/SQL Server, **not** in Oracle | Yes (ON clause)                         |
+| NULL-safe for the negated form                           | Yes (`NOT EXISTS`)  | No (`NOT IN` → empty result with NULLs)                                               | N/A                                     |
+| Optimizer usually rewrites to                            | Semi-join           | Semi-join                                                                             | Not a semi-join; dedupe is a real stage |
+| Symmetry (rows appear once)                              | Yes                 | Yes                                                                                   | Only via DISTINCT                       |
 
 ### Semi-join vs the alternatives
 
-| Operation | Returns | Row duplication? | Right columns? |
-|---|---|---|---|
-| INNER JOIN | rows only where both sides match | Yes, one per (left,right) match | Yes |
-| LEFT JOIN | all left rows | Yes | Yes (NULLs when no match) |
-| SEMI-JOIN (`EXISTS`/`IN`) | left rows with ≥1 match | Never | Never |
-| ANTI-JOIN (`NOT EXISTS`/`NOT IN`) | left rows with 0 matches | Never | Never |
+| Operation                         | Returns                          | Row duplication?                | Right columns?            |
+| --------------------------------- | -------------------------------- | ------------------------------- | ------------------------- |
+| INNER JOIN                        | rows only where both sides match | Yes, one per (left,right) match | Yes                       |
+| LEFT JOIN                         | all left rows                    | Yes                             | Yes (NULLs when no match) |
+| SEMI-JOIN (`EXISTS`/`IN`)         | left rows with ≥1 match          | Never                           | Never                     |
+| ANTI-JOIN (`NOT EXISTS`/`NOT IN`) | left rows with 0 matches         | Never                           | Never                     |
 
 ## Performance Implications
 
 - **Don't claim a universal winner.** Whether `EXISTS` or `IN` is faster depends on optimizer version, indexes, statistics, data distribution, cardinality, and query shape. Both are routinely flattened into the same semi-join operator. There is no law that "EXISTS beats IN" — verify per query.
-- **Semi-joins beat `JOIN` + `DISTINCT` structurally.** The join+distinct pipeline must produce and sort/hash *every* matched pair; the nested-loop semi-join stops after the **first** match per left row. This advantage grows when each left row matches many right rows.
+- **Semi-joins beat `JOIN` + `DISTINCT` structurally.** The join+distinct pipeline must produce and sort/hash _every_ matched pair; the nested-loop semi-join stops after the **first** match per left row. This advantage grows when each left row matches many right rows.
 - **Index the right-side join column.** For a nested-loop semi-join, an index on the subquery/right table's join column (e.g., `orders(customer_id)`) lets the database seek and stop immediately. For a hash semi-join, the optimizer builds a hash on the smaller input — check the plan to confirm which side it chose.
 - **Statistics matter for the choice.** A semi-join's estimated cardinality depends on the number of distinct values / frequencies of the join column. Poor or stale statistics → wrong algorithm choice. `ANALYZE` / update stats and re-check.
 - **MySQL specifics.** Since 5.6, MySQL has optimizer strategies specifically for semi-joins (`FirstMatch`, `Loosescan`, `DuplicateWeedout`, `Materialize`). On MySQL, `EXISTS` and `IN` can produce noticeably different plans depending on version — again, read `EXPLAIN`.
@@ -425,7 +425,7 @@ This is the **anti-join** (semi-join's complement). Full treatment in Section 25
 2. Which two SQL keywords let you write a semi-join without a `SEMI JOIN` keyword existing in SQL?
 3. Given a `customers` and an `orders` table, write a query to find customers who have placed at least one order.
 4. How many times can a left-hand row appear in the result of a semi-join — and why?
-5. What is the grain difference between returning *customers* and returning *customer-order pairs*?
+5. What is the grain difference between returning _customers_ and returning _customer-order pairs_?
 
 ## Intermediate
 

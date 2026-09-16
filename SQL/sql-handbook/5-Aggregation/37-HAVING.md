@@ -13,7 +13,7 @@ The mental model:
 5. `SELECT` → express the result
 6. `ORDER BY` / `LIMIT` → sort and trim the output
 
-> Section cross-reference: logical order of execution is explained in depth in *Section 36 — GROUP BY*.
+> Section cross-reference: logical order of execution is explained in depth in _Section 36 — GROUP BY_.
 
 `HAVING` exists because `WHERE` cannot reference aggregate functions. `WHERE` is evaluated on raw rows; at that point no group exists yet, so `WHERE COUNT(*) > 5` is not even defined — there is no `COUNT(*)` per row.
 
@@ -145,9 +145,9 @@ HAVING COUNT(*) >= 3;
 **Expected result:**
 
 | department_id | employees |
-|--------------|-----------|
-| 1            | 3         |
-| 2            | 4         |
+| ------------- | --------- |
+| 1             | 3         |
+| 2             | 4         |
 
 `Engineering` (3) and `Sales` (4) survive; `HR` (2) is filtered out because its group count is below 3. `Marketing` has no employees and produces **no group at all** — see the edge cases below.
 
@@ -163,9 +163,9 @@ HAVING SUM(salary) > 15000;
 **Expected result:**
 
 | department_id | total_salary |
-|--------------|-------------|
-| 1            | 26500.00    |
-| 2            | 21700.00    |
+| ------------- | ------------ |
+| 1             | 26500.00     |
+| 2             | 21700.00     |
 
 ## Example 3 — HAVING on non-aggregate group columns
 
@@ -197,14 +197,14 @@ GROUP BY department_id;
 
 ## HAVING vs WHERE — the authoritative comparison
 
-| Concern | `WHERE` | `HAVING` |
-|---|---|---|
-| When evaluated | Before grouping | After grouping |
-| Can reference aggregates | No | Yes |
-| Grain it filters | Rows | Groups |
-| Applies to columns not in `GROUP BY` | Yes | Only if the column is itself a group column, or the DB allows aliases |
-| Row pruning before aggregation | Yes | No |
-| Typical clause position | After `FROM`/`JOIN` | After `GROUP BY` |
+| Concern                              | `WHERE`             | `HAVING`                                                              |
+| ------------------------------------ | ------------------- | --------------------------------------------------------------------- |
+| When evaluated                       | Before grouping     | After grouping                                                        |
+| Can reference aggregates             | No                  | Yes                                                                   |
+| Grain it filters                     | Rows                | Groups                                                                |
+| Applies to columns not in `GROUP BY` | Yes                 | Only if the column is itself a group column, or the DB allows aliases |
+| Row pruning before aggregation       | Yes                 | No                                                                    |
+| Typical clause position              | After `FROM`/`JOIN` | After `GROUP BY`                                                      |
 
 ## Example 4 — WHERE + HAVING combined
 
@@ -220,10 +220,10 @@ Explanation: `WHERE` restricts to US employees (rows: Aisha, Chloe, Diego-gone, 
 
 **Expected result:**
 
-| department_id | emp_count |
-|--------------|-----------|
-| 1            | 2         |
-| 2            | 1 → wait — count is 1, filtered? |
+| department_id | emp_count                        |
+| ------------- | -------------------------------- |
+| 1             | 2                                |
+| 2             | 1 → wait — count is 1, filtered? |
 
 Let's recalculate carefully. US employees: Aisha (dept 1), Chloe (dept 1), Fatima (dept 2). Diego is `MX`, Elif `TR`, Goran `HR`, Hana `CZ`, Ivan `RU`, Bruno `DE`.
 
@@ -232,8 +232,8 @@ Groups: dept 1 → {Aisha, Chloe} → count 2 → passes. dept 2 → {Fatima} �
 **Expected result:**
 
 | department_id | emp_count |
-|--------------|-----------|
-| 1            | 2         |
+| ------------- | --------- |
+| 1             | 2         |
 
 This is the classic trap: candidates write `WHERE country = 'US' AND COUNT(*) >= 2` and get an error, or write both safely but as two clauses with different semantics.
 
@@ -256,7 +256,7 @@ HAVING COUNT(*) > 2;
 **Expected result:**
 
 | region | shipped_orders |
-|--------|----------------|
+| ------ | -------------- |
 | North  | 4              |
 
 `South` has 1 shipped, `West` has 0 shipped — both filtered.
@@ -363,7 +363,7 @@ HAVING COALESCE(SUM(salary), 0) >= 0
 ORDER BY department_id;
 ```
 
-> NULL section cross-reference: the three-valued logic rules behind this live in *Section 03 — NULL* and *Section 05 — THREE-VALUED LOGIC*.
+> NULL section cross-reference: the three-valued logic rules behind this live in _Section 03 — NULL_ and _Section 05 — THREE-VALUED LOGIC_.
 
 ## Common mistakes
 
@@ -434,7 +434,7 @@ HAVING COUNT(*) > 5;
 
 > Production pitfall: aggregation after a one-to-many join silently changes the grain. Always state the grain of the source table and the grain of the group before writing `HAVING`.
 
-> Section cross-reference: fan-out and double-counting are covered fully in *Section 28 — JOIN DUPLICATION* and *Section 29 — ONE-TO-MANY JOINS*.
+> Section cross-reference: fan-out and double-counting are covered fully in _Section 28 — JOIN DUPLICATION_ and _Section 29 — ONE-TO-MANY JOINS_.
 
 ### Filtering on aggregate before joining
 
@@ -471,13 +471,13 @@ These are tendencies, not laws. Always confirm with an execution plan:
 
 ## Comparison table — WHERE vs HAVING vs window function
 
-| Task | Tool |
-|---|---|
-| Filter rows on a raw column | `WHERE` |
-| Filter groups on an aggregate | `HAVING` |
-| Keep all rows but attach an aggregate result to each | Window function |
-| Rank groups / top–N groups | `HAVING` + `ORDER BY ... LIMIT` (or aggregate over windowed row_number) |
-| Per-group running totals while keeping rows | Window functions |
+| Task                                                 | Tool                                                                    |
+| ---------------------------------------------------- | ----------------------------------------------------------------------- |
+| Filter rows on a raw column                          | `WHERE`                                                                 |
+| Filter groups on an aggregate                        | `HAVING`                                                                |
+| Keep all rows but attach an aggregate result to each | Window function                                                         |
+| Rank groups / top–N groups                           | `HAVING` + `ORDER BY ... LIMIT` (or aggregate over windowed row_number) |
+| Per-group running totals while keeping rows          | Window functions                                                        |
 
 ## Example 7 — double grouping (nested aggregates)
 
@@ -495,14 +495,15 @@ HAVING MAX(salary) > (SELECT AVG(salary) * 1.2 FROM employees);
 Global `AVG(salary)` = (9000+10000+7500+6000+5000+5500+5200+4800+4700+4000)/9? Count: 10 rows (we inserted 110). Sum = 9000+10000+7500+6000+5000+5500+5200+4800+4700+4000 = 61,700. `AVG` = 6170. Threshold: 6170 × 1.2 = 7404.
 
 Groups:
+
 - dept 1: MAX = 10000 → 10000 > 7404 → keep
 - dept 2: MAX = 6000 → drop
 - dept 3: MAX = 4800 → drop
 - NULL group: MAX = 4000 → drop
 
 | department_id | max_salary |
-|--------------|-----------|
-| 1            | 10000.00  |
+| ------------- | ---------- |
+| 1             | 10000.00   |
 
 ## Example 8 — HAVING with HAVING-level arithmetic
 
@@ -519,9 +520,9 @@ ORDER BY avg_salary DESC;
 **Expected result:**
 
 | department_id | emp_count | avg_salary |
-|--------------|-----------|-----------|
-| 1            | 3         | 8833.33    |
-| 2            | 4         | 5425.00    |
+| ------------- | --------- | ---------- |
+| 1             | 3         | 8833.33    |
+| 2             | 4         | 5425.00    |
 
 `HR` (avg 4750) fails the average condition; the `NULL` group (1 row avg 4000) fails both.
 
@@ -540,23 +541,23 @@ LIMIT 2;
 
 **Expected result:**
 
-| region | n |
-|--------|---|
-| North  | 5 |
-| South  | 1 |
+| region | n   |
+| ------ | --- |
+| North  | 5   |
+| South  | 1   |
 
 (Orders shipped: North has orders 1,2,4,7,8 → wait, order 8 is pending. Let me recount. Shipped: o1 North, o2 North, o4 North, o5 South, o7 North. That is North=4, South=1. Order 6 cancelled West, order 3 pending South, order 8 pending North.)
 
 Corrected result:
 
-| region | n |
-|--------|---|
-| North  | 4 |
-| South  | 1 |
+| region | n   |
+| ------ | --- |
+| North  | 4   |
+| South  | 1   |
 
-If you need a hard group filter *and* ordering/length, combine `HAVING` with `ORDER BY`/`LIMIT`. If you need "top N per something else", that becomes a window function job.
+If you need a hard group filter _and_ ordering/length, combine `HAVING` with `ORDER BY`/`LIMIT`. If you need "top N per something else", that becomes a window function job.
 
-> Section cross-reference: *Section 18 — WINDOW FUNCTIONS* and *Section 43 — PAGINATION* / keyset pagination discuss when `LIMIT/OFFSET` is unsafe.
+> Section cross-reference: _Section 18 — WINDOW FUNCTIONS_ and _Section 43 — PAGINATION_ / keyset pagination discuss when `LIMIT/OFFSET` is unsafe.
 
 ## Example 10 — input from a filtered aggregate (JOIN + GROUP BY + HAVING)
 
@@ -575,9 +576,9 @@ HAVING COUNT(*) >= 2;
 **Expected result:**
 
 | customer_id | shipped_orders |
-|------------|----------------|
-| 100        | 2              |
-| 104        | 2              |
+| ----------- | -------------- |
+| 100         | 2              |
+| 104         | 2              |
 
 Customer 101 has 1 shipped (the other is pending) → filtered.
 
@@ -612,9 +613,9 @@ HAVING COUNT(DISTINCT country) >= 2;
 **Expected result:**
 
 | department_id | countries |
-|--------------|-----------|
-| 1            | 2         |
-| 2            | 4         |
+| ------------- | --------- |
+| 1             | 2         |
+| 2             | 4         |
 
 `HR` has 2 (CZ, RU) also. So 1, 2, 3.
 

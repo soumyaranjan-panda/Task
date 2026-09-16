@@ -8,13 +8,13 @@
 
 A **scalar subquery** is a subquery that returns exactly **one row with exactly one column** — a single value. It is used anywhere in SQL where a single value is expected: a `SELECT` list item, a `WHERE` comparison operand, a `HAVING` condition, an `ORDER BY` expression, a `CASE` branch, an `UPDATE ... SET` expression, or an `INSERT ... VALUES` expression.
 
-The word *scalar* does not describe the SQL you write; it describes the **result contract**. You can write any valid `SELECT` inside the parentheses — what matters is what it returns.
+The word _scalar_ does not describe the SQL you write; it describes the **result contract**. You can write any valid `SELECT` inside the parentheses — what matters is what it returns.
 
 ```sql
 (SELECT MAX(salary) FROM employees)
 ```
 
-No keywords mark a subquery as "scalar". A subquery *becomes* scalar by context: it is placed where SQL demands a single value.
+No keywords mark a subquery as "scalar". A subquery _becomes_ scalar by context: it is placed where SQL demands a single value.
 
 ```mermaid
 flowchart TD
@@ -25,7 +25,7 @@ flowchart TD
     SC --> CORR[Correlated<br/>references outer query columns]
 ```
 
-Related concept that is *not* a scalar subquery: a **row subquery** (a tuple comparison such as `(a, b) = (SELECT x, y FROM t)`), which returns one row with multiple columns. PostgreSQL and MySQL allow it in row-constructor contexts; see the **Row Subqueries** section.
+Related concept that is _not_ a scalar subquery: a **row subquery** (a tuple comparison such as `(a, b) = (SELECT x, y FROM t)`), which returns one row with multiple columns. PostgreSQL and MySQL allow it in row-constructor contexts; see the **Row Subqueries** section.
 
 ---
 
@@ -33,17 +33,17 @@ Related concept that is *not* a scalar subquery: a **row subquery** (a tuple com
 
 A scalar subquery is bound by three rules:
 
-| Rule | Constraint | What happens if violated |
-|------|-----------|--------------------------|
-| Column rule | Must select **exactly one column** | Compile-time error in most contexts |
-| Zero-row rule | May return **zero rows** | Produces the value `NULL` (not an error) |
-| Multi-row rule | Must not return **more than one row** | **Runtime error** — the statement fails |
+| Rule           | Constraint                            | What happens if violated                 |
+| -------------- | ------------------------------------- | ---------------------------------------- |
+| Column rule    | Must select **exactly one column**    | Compile-time error in most contexts      |
+| Zero-row rule  | May return **zero rows**              | Produces the value `NULL` (not an error) |
+| Multi-row rule | Must not return **more than one row** | **Runtime error** — the statement fails  |
 
 > Interview trap
 
-> The multi-row violation is a **runtime** error, not a syntax error. The statement compiles and starts executing fine. The database only rejects it *if and when* more than one row is actually produced. This is why the bug can live in production for months and explode the day data grows.
+> The multi-row violation is a **runtime** error, not a syntax error. The statement compiles and starts executing fine. The database only rejects it _if and when_ more than one row is actually produced. This is why the bug can live in production for months and explode the day data grows.
 
-One more subtlety: an **aggregate without `GROUP BY`** (e.g. `(SELECT MAX(salary) FROM employees)`) is *always* safe. An aggregate over zero rows still returns one row (`NULL`, or `0` for `COUNT`). So aggregates give you the zero-row rule and the multi-row rule for free.
+One more subtlety: an **aggregate without `GROUP BY`** (e.g. `(SELECT MAX(salary) FROM employees)`) is _always_ safe. An aggregate over zero rows still returns one row (`NULL`, or `0` for `COUNT`). So aggregates give you the zero-row rule and the multi-row rule for free.
 
 ---
 
@@ -78,16 +78,16 @@ WHERE salary > (SELECT AVG(salary) FROM employees)
 
 ### Valid positions
 
-| Position | Example | Notes |
-|----------|---------|-------|
-| `SELECT` list | `SELECT emp_name, (SELECT MAX(salary) FROM employees)` | Evaluated per output row for correlated subqueries |
-| `WHERE` | `WHERE salary = (SELECT MAX(salary) FROM employees)` | Comparison uses three-valued logic |
-| `HAVING` | `HAVING AVG(salary) > (SELECT AVG(salary) FROM employees)` | Like `WHERE`, but over groups |
-| `ORDER BY` | `ORDER BY (SELECT dept_name FROM departments d WHERE d.dept_id = e.dept_id)` | Sorting key need not appear in `SELECT` |
-| `CASE` | `CASE WHEN salary > (SELECT AVG(salary) FROM employees) THEN ...` | Any expression branch |
-| `UPDATE ... SET` | `SET salary = salary * 1.03 WHERE salary < (SELECT AVG(salary) ...)` | Evaluated per affected row if correlated |
-| `INSERT ... VALUES` | `VALUES ('x', (SELECT MAX(emp_id) FROM employees))` | Insert current database value |
-| Arithmetic / concatenation | `(SELECT total) * 1.1`, `'Dept: ' || (SELECT dept_name ...)` | Subquery is just an expression operand |
+| Position                   | Example                                                                      | Notes                                              |
+| -------------------------- | ---------------------------------------------------------------------------- | -------------------------------------------------- | ----------------------- | -------------------------------------- |
+| `SELECT` list              | `SELECT emp_name, (SELECT MAX(salary) FROM employees)`                       | Evaluated per output row for correlated subqueries |
+| `WHERE`                    | `WHERE salary = (SELECT MAX(salary) FROM employees)`                         | Comparison uses three-valued logic                 |
+| `HAVING`                   | `HAVING AVG(salary) > (SELECT AVG(salary) FROM employees)`                   | Like `WHERE`, but over groups                      |
+| `ORDER BY`                 | `ORDER BY (SELECT dept_name FROM departments d WHERE d.dept_id = e.dept_id)` | Sorting key need not appear in `SELECT`            |
+| `CASE`                     | `CASE WHEN salary > (SELECT AVG(salary) FROM employees) THEN ...`            | Any expression branch                              |
+| `UPDATE ... SET`           | `SET salary = salary * 1.03 WHERE salary < (SELECT AVG(salary) ...)`         | Evaluated per affected row if correlated           |
+| `INSERT ... VALUES`        | `VALUES ('x', (SELECT MAX(emp_id) FROM employees))`                          | Insert current database value                      |
+| Arithmetic / concatenation | `(SELECT total) * 1.1`, `'Dept: '                                            |                                                    | (SELECT dept_name ...)` | Subquery is just an expression operand |
 
 ---
 
@@ -97,33 +97,33 @@ All examples use the following tables unless stated otherwise. Grains are stated
 
 > `departments` — one row per department.
 
-| dept_id | dept_name    |
-|--------:|--------------|
-| 1       | Engineering  |
-| 2       | Sales        |
-| 3       | Marketing    |
-| 4       | Research     |
+| dept_id | dept_name   |
+| ------: | ----------- |
+|       1 | Engineering |
+|       2 | Sales       |
+|       3 | Marketing   |
+|       4 | Research    |
 
 > `employees` — one row per employee. `dept_id` is a foreign key to `departments`; it is nullable (an employee can be unassigned). `salary` is nullable (data-entry gap).
 
 | emp_id | emp_name | dept_id | salary |
-|-------:|----------|--------:|-------:|
-| 1      | Alice    | 1       | 120000 |
-| 2      | Bob      | 1       | 95000  |
-| 3      | Carol    | 2       | 80000  |
-| 4      | Dave     | 2       | 60000  |
-| 5      | Eve      | 3       | 85000  |
-| 6      | Frank    | 4       | NULL   |
-| 7      | Grace    | NULL    | 70000  |
+| -----: | -------- | ------: | -----: |
+|      1 | Alice    |       1 | 120000 |
+|      2 | Bob      |       1 |  95000 |
+|      3 | Carol    |       2 |  80000 |
+|      4 | Dave     |       2 |  60000 |
+|      5 | Eve      |       3 |  85000 |
+|      6 | Frank    |       4 |   NULL |
+|      7 | Grace    |    NULL |  70000 |
 
 > `orders` — one row per order. `total` is the monetary value of the order.
 
 | order_id | customer_id | total |
-|---------:|------------:|------:|
-| 501      | 1           | 320   |
-| 502      | 2           | 150   |
-| 503      | 1           | 90    |
-| 504      | 3           | 240   |
+| -------: | ----------: | ----: |
+|      501 |           1 |   320 |
+|      502 |           2 |   150 |
+|      503 |           1 |    90 |
+|      504 |           3 |   240 |
 
 Company average salary (NULLs are ignored by `AVG`):
 
@@ -148,14 +148,14 @@ FROM employees;
 **Expected output:**
 
 | emp_name | salary | company_max |
-|----------|-------:|------------:|
-| Alice    | 120000 | 120000      |
-| Bob      | 95000  | 120000      |
-| Carol    | 80000  | 120000      |
-| Dave     | 60000  | 120000      |
-| Eve      | 85000  | 120000      |
-| Frank    | NULL   | 120000      |
-| Grace    | 70000  | 120000      |
+| -------- | -----: | ----------: |
+| Alice    | 120000 |      120000 |
+| Bob      |  95000 |      120000 |
+| Carol    |  80000 |      120000 |
+| Dave     |  60000 |      120000 |
+| Eve      |  85000 |      120000 |
+| Frank    |   NULL |      120000 |
+| Grace    |  70000 |      120000 |
 
 The subquery does not reference any column of the outer query — it is **non-correlated**. The optimizer generally evaluates it **once** and reuses the value for every row.
 
@@ -174,11 +174,11 @@ WHERE salary > (SELECT AVG(salary) FROM employees);
 **Expected output:**
 
 | emp_name | salary |
-|----------|-------:|
+| -------- | -----: |
 | Alice    | 120000 |
-| Bob      | 95000  |
+| Bob      |  95000 |
 
-Eve's `85000` is *not more than* `85000`, so she is excluded. The outer predicate (`salary >`) is applied against a value-that-was-once-computed; because the inner value is materialized first, the outer column can still use an index — the predicate is sargable.
+Eve's `85000` is _not more than_ `85000`, so she is excluded. The outer predicate (`salary >`) is applied against a value-that-was-once-computed; because the inner value is materialized first, the outer column can still use an index — the predicate is sargable.
 
 ---
 
@@ -201,14 +201,14 @@ The inner query references `e.dept_id` from the **outer** query → **correlated
 **Expected output:**
 
 | emp_name | salary | dept_max |
-|----------|-------:|---------:|
-| Alice    | 120000 | 120000   |
-| Bob      | 95000  | 120000   |
-| Carol    | 80000  | 80000    |
-| Dave     | 60000  | 80000    |
-| Eve      | 85000  | 85000    |
-| Frank    | NULL   | NULL     |
-| Grace    | 70000  | NULL     |
+| -------- | -----: | -------: |
+| Alice    | 120000 |   120000 |
+| Bob      |  95000 |   120000 |
+| Carol    |  80000 |    80000 |
+| Dave     |  60000 |    80000 |
+| Eve      |  85000 |    85000 |
+| Frank    |   NULL |     NULL |
+| Grace    |  70000 |     NULL |
 
 Two NULL rows to explain:
 
@@ -219,7 +219,7 @@ Two NULL rows to explain:
 
 ## Example 4 — Correlated scalar subquery in `WHERE`
 
-**Task:** employees who earn more than the average salary of *their own* department.
+**Task:** employees who earn more than the average salary of _their own_ department.
 
 ```sql
 SELECT e.emp_name, e.salary
@@ -234,9 +234,9 @@ WHERE e.salary > (
 **Expected output:**
 
 | emp_name | salary |
-|----------|-------:|
+| -------- | -----: |
 | Alice    | 120000 |
-| Carol    | 80000  |
+| Carol    |  80000 |
 
 Footwork: dept 1 average is 107500 (Alice only); dept 2 average is 70000 (Carol only); dept 3 average is 85000, and Eve's `85000 > 85000` is false; dept 4 yields `NULL` for both sides; Grace's correlated subquery returns `NULL`. All the excluded comparisons evaluate to `UNKNOWN`, which `WHERE` treats as false.
 
@@ -256,8 +256,8 @@ HAVING AVG(salary) > (SELECT AVG(salary) FROM employees);
 **Expected output:**
 
 | dept_id | dept_avg |
-|--------:|---------:|
-| 1       | 107500   |
+| ------: | -------: |
+|       1 |   107500 |
 
 Why others are skipped: dept 2 → 70000 < 85000; dept 3 → 85000 is not `>` 85000; dept 4 → average resolves to `NULL`, and alike `NULL > 85000` is `UNKNOWN`; Grace's `NULL`-keyed group also fails. Note the distinction between `WHERE` (rows) and `HAVING` (groups) — this is covered deeply in the GROUP BY/HAVING section.
 
@@ -280,14 +280,14 @@ ORDER BY (
 **Expected output (typical default NULL ordering):**
 
 | emp_name | dept_id |
-|----------|--------:|
-| Alice    | 1       |
-| Bob      | 1       |
-| Eve      | 3       |
-| Frank    | 4       |
-| Carol    | 2       |
-| Dave     | 2       |
-| Grace    | NULL    |
+| -------- | ------: |
+| Alice    |       1 |
+| Bob      |       1 |
+| Eve      |       3 |
+| Frank    |       4 |
+| Carol    |       2 |
+| Dave     |       2 |
+| Grace    |    NULL |
 
 Grace's `dept_name` is `NULL`. Where NULLs sort depends on the engine (PostgreSQL/Oracle: last by default on ASC; SQL Server/MySQL: first). Frank's `Research` < `Sales`, hence ordering above.
 
@@ -341,12 +341,12 @@ SELECT (SELECT salary FROM employees) AS x;
 
 `employees` has 7 rows → **error**. Typical messages per engine:
 
-| Engine      | Error text |
-|-------------|-----------|
-| PostgreSQL  | `ERROR: more than one row returned by a subquery used as an expression` |
-| MySQL       | `ERROR 1242 (21000): Subquery returns more than 1 row` |
-| SQL Server  | `Subquery returned more than 1 value. This is not permitted when the subquery follows =, !=, <, <=, >, >= or when the subquery is used as an expression.` |
-| Oracle      | `ORA-01427: single-row subquery returns more than one row` |
+| Engine     | Error text                                                                                                                                                |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| PostgreSQL | `ERROR: more than one row returned by a subquery used as an expression`                                                                                   |
+| MySQL      | `ERROR 1242 (21000): Subquery returns more than 1 row`                                                                                                    |
+| SQL Server | `Subquery returned more than 1 value. This is not permitted when the subquery follows =, !=, <, <=, >, >= or when the subquery is used as an expression.` |
+| Oracle     | `ORA-01427: single-row subquery returns more than one row`                                                                                                |
 
 Common multi-row triggers:
 
@@ -410,7 +410,7 @@ The inner query references nothing from the outer query. Optimizers typically ev
 
 ### Correlated scalar subqueries
 
-The inner query depends on outer-row column(s). The naive model is *one execution per outer row* (a nested-loop shape). Optimizers mitigate this:
+The inner query depends on outer-row column(s). The naive model is _one execution per outer row_ (a nested-loop shape). Optimizers mitigate this:
 
 > Oracle
 
@@ -455,7 +455,7 @@ LEFT JOIN departments d ON d.dept_id = e.dept_id;
 
 The `LEFT JOIN` also preserves Grace (unassigned) with `dept_name = NULL`, matching the scalar subquery's zero-row → `NULL` behavior.
 
-**Why BETTER:** it gives the optimizer full freedom over join order, index selection, and access methods, and it is far easier to reason about. The correlated scalar *may* still perform acceptably when a good index exists — the claim must be verified, not assumed:
+**Why BETTER:** it gives the optimizer full freedom over join order, index selection, and access methods, and it is far easier to reason about. The correlated scalar _may_ still perform acceptably when a good index exists — the claim must be verified, not assumed:
 
 ```sql
 -- Verify: does the plan show a per-row lookup (seek) or a repeated scan?
@@ -524,21 +524,21 @@ Diagnosis checklist:
 3. Does a rewrite (join/lateral/CTE) change the plan shape and the cost? Measure a realistic workload, not a toy.
 4. Mind statistics staleness — a plan chosen for a 7-row table may catastrophically misbehave on 7 million rows.
 
-**The right mental model:** a scalar subquery is *not inherently slow or fast*. It is slow when it forces per-row work without an index, and fast when the optimizer collapses it to a constant or a seek. The optimizer, indexes, statistics, and execution plan decide — not the syntax.
+**The right mental model:** a scalar subquery is _not inherently slow or fast_. It is slow when it forces per-row work without an index, and fast when the optimizer collapses it to a constant or a seek. The optimizer, indexes, statistics, and execution plan decide — not the syntax.
 
 ---
 
 ## Common Mistakes
 
-| Mistake | Why it is wrong | Fix |
-|---------|-----------------|-----|
-| Selecting more than one column | Violates the contract; compile error | Use exactly one column (or a row subquery where supported) |
-| Forgetting the multi-row rule | `GROUP BY` inside the subquery → runtime error as soon as >1 group exists | Aggregate without `GROUP BY`, or `LIMIT 1` with ordering |
-| Comparing against a potentially NULL subquery result in `WHERE` | Three-valued logic silently filters everything | Use `COALESCE` inside or add `IS NOT NULL` guards |
-| Correlated subquery with no supporting index | Per-row scans become quadratic | Add an index on the inner join column, or restructure to a join |
-| Replacing `EXISTS`/`NOT EXISTS` with scalar comparisons | Changes semantics, especially with NULLs | Use `EXISTS` for existence semantics (see that section) |
-| Assuming zero-row means empty | Zero rows → `NULL`, which misbehaves in arithmetic | `COALESCE((SELECT ...), 0)` |
-| `DISTINCT` to "fix" the multi-row error | Still errors with 2+ distinct values | Use `MAX`/`MIN`/`LIMIT 1` |
+| Mistake                                                         | Why it is wrong                                                           | Fix                                                             |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Selecting more than one column                                  | Violates the contract; compile error                                      | Use exactly one column (or a row subquery where supported)      |
+| Forgetting the multi-row rule                                   | `GROUP BY` inside the subquery → runtime error as soon as >1 group exists | Aggregate without `GROUP BY`, or `LIMIT 1` with ordering        |
+| Comparing against a potentially NULL subquery result in `WHERE` | Three-valued logic silently filters everything                            | Use `COALESCE` inside or add `IS NOT NULL` guards               |
+| Correlated subquery with no supporting index                    | Per-row scans become quadratic                                            | Add an index on the inner join column, or restructure to a join |
+| Replacing `EXISTS`/`NOT EXISTS` with scalar comparisons         | Changes semantics, especially with NULLs                                  | Use `EXISTS` for existence semantics (see that section)         |
+| Assuming zero-row means empty                                   | Zero rows → `NULL`, which misbehaves in arithmetic                        | `COALESCE((SELECT ...), 0)`                                     |
+| `DISTINCT` to "fix" the multi-row error                         | Still errors with 2+ distinct values                                      | Use `MAX`/`MIN`/`LIMIT 1`                                       |
 
 ---
 
@@ -546,7 +546,7 @@ Diagnosis checklist:
 
 > Production pitfall
 
-> **The multi-row explosion.** A subquery that is single-row today (unique `emp_id`, one active rate per deal) can return two rows after a data backfill, a duplicate insert, or a uniqueness constraint drop. Every statement using it then fails at runtime. Defense: make the single-row property a *database-enforced guarantee* (primary/unique key) or make the subquery structurally single-row (`MAX`, `LIMIT 1`). Test with `EXPLAIN`/data-volume simulations.
+> **The multi-row explosion.** A subquery that is single-row today (unique `emp_id`, one active rate per deal) can return two rows after a data backfill, a duplicate insert, or a uniqueness constraint drop. Every statement using it then fails at runtime. Defense: make the single-row property a _database-enforced guarantee_ (primary/unique key) or make the subquery structurally single-row (`MAX`, `LIMIT 1`). Test with `EXPLAIN`/data-volume simulations.
 
 > Production pitfall
 
@@ -573,7 +573,7 @@ Diagnosis checklist:
 7. **Row subquery lookalikes** (`(SELECT x, y FROM t)`) compile only in tuple-comparison contexts (PostgreSQL/MySQL), not in ordinary expressions.
 8. **Nested scalar subqueries** — a scalar subquery may contain another scalar subquery; each obeys its own contract independently.
 9. **Volatility**: subqueries reading volatile tables/views can yield different values between rows if the optimizer re-evaluates — visible in `WHERE` comparisons across a statement.
-10. **`LIMIT` robustness** depends on ordering. `LIMIT 1` without `ORDER BY` is not predictably single-row-by-value; it is *arbitrarily* one row.
+10. **`LIMIT` robustness** depends on ordering. `LIMIT 1` without `ORDER BY` is not predictably single-row-by-value; it is _arbitrarily_ one row.
 
 ---
 
@@ -594,12 +594,12 @@ Diagnosis checklist:
 
 ## Database Differences
 
-| Engine | Notes |
-|--------|-------|
-| PostgreSQL | Zero rows → `NULL`; supports row-subquery tuple comparisons; `LATERAL` as correlated alternative; message `more than one row returned by a subquery used as an expression`. |
-| MySQL | Error 1242; modern optimizer materializes/rewrites many scalar subqueries into joins; nullable-outer-key correlated matching follows `NULL = NULL → UNKNOWN`; `LIMIT` also works in subqueries. |
-| SQL Server | Error text demands scalar/single-row; plan shows `Constant Scan` for init values; `OUTER APPLY` is the correlated workhorse. |
-| Oracle | `ORA-01427`; scalar subquery caching (`CACHE`) often makes correlated versions cheap; row subqueries appear in `IN`-pair contexts. |
+| Engine     | Notes                                                                                                                                                                                           |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| PostgreSQL | Zero rows → `NULL`; supports row-subquery tuple comparisons; `LATERAL` as correlated alternative; message `more than one row returned by a subquery used as an expression`.                     |
+| MySQL      | Error 1242; modern optimizer materializes/rewrites many scalar subqueries into joins; nullable-outer-key correlated matching follows `NULL = NULL → UNKNOWN`; `LIMIT` also works in subqueries. |
+| SQL Server | Error text demands scalar/single-row; plan shows `Constant Scan` for init values; `OUTER APPLY` is the correlated workhorse.                                                                    |
+| Oracle     | `ORA-01427`; scalar subquery caching (`CACHE`) often makes correlated versions cheap; row subqueries appear in `IN`-pair contexts.                                                              |
 
 Return to the main **Subqueries** index for: Non-correlated vs Correlated Subqueries, Row Subqueries, Subqueries in `FROM`, `EXISTS`, `IN`, Comparison Operators (`ANY`/`ALL`/`SOME`), and CTEs.
 
@@ -654,8 +654,8 @@ Return to the main **Subqueries** index for: Non-correlated vs Correlated Subque
 
 ### Performance
 
-23. "Scalar subqueries are always slower than joins." True or false? Give a case where a non-correlated scalar aggregate is the *better* design, and a case where a correlated scalar is dangerous.
+23. "Scalar subqueries are always slower than joins." True or false? Give a case where a non-correlated scalar aggregate is the _better_ design, and a case where a correlated scalar is dangerous.
 24. What do indexes, statistics, cardinality, and plan-shape have to do with whether a correlated scalar subquery is cheap? Run `EXPLAIN ANALYZE` on Examples 3 and 4 with and without an index on `employees(dept_id)` and compare node costs.
-25. When each outer row triggers a *different* correlated lookup, why might Oracle's scalar caching still help? When does caching *not* help?
+25. When each outer row triggers a _different_ correlated lookup, why might Oracle's scalar caching still help? When does caching _not_ help?
 
 Return to the **Subqueries** index when ready.

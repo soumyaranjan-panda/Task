@@ -6,27 +6,27 @@
 
 ## 1. Fundamentals
 
-A **moving average** (also called *rolling average*, *running average*, *sliding window average*) is the average of the last *k* (or time-based) values of a series as the window "slides" forward one value at a time.
+A **moving average** (also called _rolling average_, _running average_, _sliding window average_) is the average of the last _k_ (or time-based) values of a series as the window "slides" forward one value at a time.
 
-- Each output row answers: *"What is the average of the most recent N values up to this point?"*
+- Each output row answers: _"What is the average of the most recent N values up to this point?"_
 - It smooths short-term noise so that **trends**, **seasonality**, and **level shifts** become visible.
 - It is the standard building block in financial analysis (SMA — Simple Moving Average), demand forecasting, anomaly detection, and QA/metrics monitoring.
 
 **Why it exists**
-A raw time series is noisy. `GROUP BY date` would give you one average *per bucket* (no overlap, no granularity change). A moving average instead gives you **one averaged value per original row**, so you can plot a smooth line *on top of* the raw data without losing granularity.
+A raw time series is noisy. `GROUP BY date` would give you one average _per bucket_ (no overlap, no granularity change). A moving average instead gives you **one averaged value per original row**, so you can plot a smooth line _on top of_ the raw data without losing granularity.
 
 ---
 
 ## 2. The moving average families
 
-| Family | Frame | Weight | Typical use |
-|---|---|---|---|
-| **Running / cumulative average** | `UNBOUNDED PRECEDING` to current row | equal | "Average revenue since the start of the year" |
-| **Simple Moving Average (SMA)** | last *n* rows (`ROWS n PRECEDING..CURRENT ROW`) or last *n* time units | equal | Smoothing, technical analysis |
-| **Centered moving average** | `n PRECEDING` to `n FOLLOWING` (window centered on the row) | equal| Removing seasonality, backtesting |
-| **Weighted moving average** | last *n* rows | increasing weights | Trending, anomaly scoring |
-| **Exponential Moving Average (EMA)** | all history, recursively | exponentially decaying | Finance, forecasting (needs recursion) |
-| **Moving average over time (RANGE)** | rows whose order value is within a time interval | equal | Sparse / irregular time series |
+| Family                               | Frame                                                                  | Weight                 | Typical use                                   |
+| ------------------------------------ | ---------------------------------------------------------------------- | ---------------------- | --------------------------------------------- |
+| **Running / cumulative average**     | `UNBOUNDED PRECEDING` to current row                                   | equal                  | "Average revenue since the start of the year" |
+| **Simple Moving Average (SMA)**      | last _n_ rows (`ROWS n PRECEDING..CURRENT ROW`) or last _n_ time units | equal                  | Smoothing, technical analysis                 |
+| **Centered moving average**          | `n PRECEDING` to `n FOLLOWING` (window centered on the row)            | equal                  | Removing seasonality, backtesting             |
+| **Weighted moving average**          | last _n_ rows                                                          | increasing weights     | Trending, anomaly scoring                     |
+| **Exponential Moving Average (EMA)** | all history, recursively                                               | exponentially decaying | Finance, forecasting (needs recursion)        |
+| **Moving average over time (RANGE)** | rows whose order value is within a time interval                       | equal                  | Sparse / irregular time series                |
 
 Most exam and production questions concern **SMA**, the **running average**, and the **RANGE** (time-based) variant.
 
@@ -86,7 +86,7 @@ Roughly what the engine does:
 
 1. **Sorts** the input by `PARTITION BY` then `ORDER BY` over the whole result set (or uses an index that already provides that order).
 2. **Groups rows into partitions.** The frame can never cross a partition boundary.
-3. For **each row**, the engine evaluates the frame; for `ROWS` frames this is cheap pointer arithmetic (an accumulated sum lets it reuse prior work); for `RANGE`/`GROUPS` it resolves *logical* frames via the ordered value.
+3. For **each row**, the engine evaluates the frame; for `ROWS` frames this is cheap pointer arithmetic (an accumulated sum lets it reuse prior work); for `RANGE`/`GROUPS` it resolves _logical_ frames via the ordered value.
 4. Evaluates the aggregate over just the rows in the frame.
 
 Because a well-written moving-average query **scans the series once**, its growth is roughly O(n·log n) for the sort plus O(n) for the aggregate — versus O(n·k) for a self-join implementation.
@@ -151,18 +151,18 @@ WHERE  region = 'North'
 ORDER  BY sale_date;
 ```
 
-| sale_date | revenue | ma_3 |
-|---|---|---|
-| 2026-01-01 | 100 | 100.00 |
-| 2026-01-02 | 120 | 110.00 |
-| 2026-01-03 | 140 | 120.00 |
-| 2026-01-04 | 130 | 130.00 |
-| 2026-01-05 | 150 | 140.00 |
-| 2026-01-06 | 160 | 146.67 |
-| 2026-01-07 | 150 | 153.33 |
-| 2026-01-08 | 170 | 160.00 |
-| 2026-01-09 | 160 | 160.00 |
-| 2026-01-10 | 180 | 170.00 |
+| sale_date  | revenue | ma_3   |
+| ---------- | ------- | ------ |
+| 2026-01-01 | 100     | 100.00 |
+| 2026-01-02 | 120     | 110.00 |
+| 2026-01-03 | 140     | 120.00 |
+| 2026-01-04 | 130     | 130.00 |
+| 2026-01-05 | 150     | 140.00 |
+| 2026-01-06 | 160     | 146.67 |
+| 2026-01-07 | 150     | 153.33 |
+| 2026-01-08 | 170     | 160.00 |
+| 2026-01-09 | 160     | 160.00 |
+| 2026-01-10 | 180     | 170.00 |
 
 Notice the first two rows average **only over the rows that exist** — no padding. If you need a strict "always divide by 3" average, see "Fixed divisor" below.
 
@@ -188,7 +188,7 @@ For `('North', '2026-01-04')` you get `(100+120+140+130)/4 = 122.50`. The frame 
 
 ---
 
-## 8. Example — RANGE: moving average over the last 7 *calendar days*
+## 8. Example — RANGE: moving average over the last 7 _calendar days_
 
 `ROWS` counts **physical rows**. If some days are missing, "last 7 rows" may span 30 calendar days. `RANGE` counts **time**:
 
@@ -210,12 +210,12 @@ WHERE  region = 'East'
 ORDER  BY sale_date;
 ```
 
-| sale_date | revenue | ma_7d |
-|---|---|---|
-| 2026-02-01 | 200 | 200.00 |
-| 2026-02-03 | 210 | 205.00 |
-| 2026-02-10 | 220 | 220.00 |
-| 2026-02-11 | 230 | 225.00 |
+| sale_date  | revenue | ma_7d  |
+| ---------- | ------- | ------ |
+| 2026-02-01 | 200     | 200.00 |
+| 2026-02-03 | 210     | 205.00 |
+| 2026-02-10 | 220     | 220.00 |
+| 2026-02-11 | 230     | 225.00 |
 
 - `2026-02-03`: frame covers `2026-01-28 … 2026-02-03` → rows `02-01, 02-03` → 205.
 - `2026-02-10`: frame covers `2026-02-04…02-10` → only `02-10` → 220.
@@ -234,18 +234,18 @@ WHERE  region = 'North'
 ORDER  BY sale_date;
 ```
 
-`('2026-01-05')` → `(140+150+160)/3 ≈ 150.00`. This is the frame used in backtesting and seasonal-smoothing because it uses *past and future* context (it is not usable causally — see "When NOT to use").
+`('2026-01-05')` → `(140+150+160)/3 ≈ 150.00`. This is the frame used in backtesting and seasonal-smoothing because it uses _past and future_ context (it is not usable causally — see "When NOT to use").
 
 ---
 
 ## 10. ROWS vs RANGE vs GROUPS
 
-| | ROWS | RANGE | GROUPS |
-|---|---|---|---|
-| Frame defined by | physical row count | order-by value + peers | peer groups |
-| Tomb | ignores tied ORDER BY values | **includes all peer rows** with equal order value | includes whole peer groups |
-| Best for | evenly spaced, unique keys | dates/timestamps, sparse data | ties / grouped aggregation |
-| Caveat | ordering of tied rows is nondeterministic | "n PRECEDING" for numbers/dates uses value arithmetic | requires ≥3 window functions support (PG 11+, others vary) |
+|                  | ROWS                                      | RANGE                                                 | GROUPS                                                     |
+| ---------------- | ----------------------------------------- | ----------------------------------------------------- | ---------------------------------------------------------- |
+| Frame defined by | physical row count                        | order-by value + peers                                | peer groups                                                |
+| Tomb             | ignores tied ORDER BY values              | **includes all peer rows** with equal order value     | includes whole peer groups                                 |
+| Best for         | evenly spaced, unique keys                | dates/timestamps, sparse data                         | ties / grouped aggregation                                 |
+| Caveat           | ordering of tied rows is nondeterministic | "n PRECEDING" for numbers/dates uses value arithmetic | requires ≥3 window functions support (PG 11+, others vary) |
 
 > **Interview trap:** with duplicate `ORDER BY` values, `ROWS BETWEEN 1 PRECEDING …` picks arbitrary physical neighbors among the ties, so the result set is nondeterministic. Add a tiebreaker column (e.g. `ORDER BY sale_date, created_at`) or use `RANGE`.
 >
@@ -306,18 +306,18 @@ WHERE n = 3
 ORDER BY sale_date;
 ```
 
-| sale_date | revenue | ma_3 |
-|---|---|---|
-| 2026-01-03 | 140 | 120.00 |
-| 2026-01-04 | 130 | 130.00 |
-| 2026-01-05 | 150 | 140.00 |
-| ... | ... | ... |
+| sale_date  | revenue | ma_3   |
+| ---------- | ------- | ------ |
+| 2026-01-03 | 140     | 120.00 |
+| 2026-01-04 | 130     | 130.00 |
+| 2026-01-05 | 150     | 140.00 |
+| ...        | ...     | ...    |
 
 ---
 
 ## 12. NULL behavior
 
-`AVG` (and every aggregate) **ignores NULLs** in its window unless the window is *all NULL* — then it returns NULL.
+`AVG` (and every aggregate) **ignores NULLs** in its window unless the window is _all NULL_ — then it returns NULL.
 
 ```sql
 -- Grain: one row per region per day (revenue may be NULL when unreported)
@@ -335,16 +335,17 @@ WHERE  region = 'West'
 ORDER  BY sale_date;
 ```
 
-| sale_date | revenue | ma_3 | explanation |
-|---|---|---|---|
-| 01-01 | NULL | NULL | frame is all-NULL |
-| 01-02 | 100 | 100.00 | NULL ignored |
-| 01-03 | NULL | 100.00 | NULL ignored |
-| 01-04 | NULL | 100.00 | NULL ignored |
-| 01-05 | 200 | 150.00 | `(100+200)/2`, NULLs ignored |
+| sale_date | revenue | ma_3   | explanation                  |
+| --------- | ------- | ------ | ---------------------------- |
+| 01-01     | NULL    | NULL   | frame is all-NULL            |
+| 01-02     | 100     | 100.00 | NULL ignored                 |
+| 01-03     | NULL    | 100.00 | NULL ignored                 |
+| 01-04     | NULL    | 100.00 | NULL ignored                 |
+| 01-05     | 200     | 150.00 | `(100+200)/2`, NULLs ignored |
 
 Implications:
-- "Average of last 7 days" with a `NULL` day silently becomes "average of the *non-null* days in the last 7" — a **silent data-quality bug** if you intended an implicit 0.
+
+- "Average of last 7 days" with a `NULL` day silently becomes "average of the _non-null_ days in the last 7" — a **silent data-quality bug** if you intended an implicit 0.
 - To count NULL as 0 use `COALESCE(revenue, 0)` inside the aggregate.
 - Oracle supports `AVG(...) IGNORE NULLS / RESPECT NULLS OVER (...)`; SQL Server 2022 added (partial) `IGNORE NULLS` but not for all aggregates; PostgreSQL and MySQL have no such clause — use `COALESCE` there.
 
@@ -352,7 +353,7 @@ Implications:
 
 ## 13. Moving average WITH alignment / lagged windows
 
-Sometimes you want the average of the *previous* 3 days, excluding the current day:
+Sometimes you want the average of the _previous_ 3 days, excluding the current day:
 
 ```sql
 SELECT sale_date, revenue,
@@ -363,10 +364,10 @@ WHERE  region = 'North'
 ORDER  BY sale_date;
 ```
 
-| sale_date | revenue | ma_prev3 |
-|---|---|---|
-| 2026-01-04 | 130 | 110.00 | `(100+120+140)/3` |
-| 2026-01-05 | 150 | 130.00 | `(120+140+130)/3` |
+| sale_date  | revenue | ma_prev3 |
+| ---------- | ------- | -------- | ----------------- |
+| 2026-01-04 | 130     | 110.00   | `(100+120+140)/3` |
+| 2026-01-05 | 150     | 130.00   | `(120+140+130)/3` |
 
 This is the "1-lag centered" pattern used for **anomaly detection** (compare current value against the trailing window that excludes it).
 
@@ -401,24 +402,25 @@ SELECT * FROM ema;
 
 ## 15. Edge cases
 
-| Situation | Behavior / fix |
-|---|---|
-| Frame shorter than *n* at partition start | averages over fewer rows; use fixed divisor or `COUNT(*)` filter if a strict *n* is required |
-| Duplicate `ORDER BY` values | `ROWS` is nondeterministic among ties; `RANGE` includes all peers; `ORDER BY date, id` for determinism |
-| Missing days (sparse series) | `ROWS` spans too much *time*; use `RANGE ... INTERVAL` for calendar correctness |
-| `NULL` values in series | ignored by aggregate; all-NULL frame → NULL; `COALESCE` if you want implicit 0 |
-| First/last rows of the whole result | frame is truncated at partition boundary (and start/end of partition) |
-| `WHERE` referencing the window alias | not allowed in the same `SELECT` — wrap in a derived table/CTE, because filtering happens *after* window evaluation at a different step |
-| Integer division | `AVG` is normally fine; `SUM(...)/n` with integer columns **truncates** on many engines |
-| Very large *n* relative to partition | frame ≈ running average; memory grows, but still one pass |
-| Multiple rows per `(partition, order)` key | this is a fan-out: the same average repeats for every row with that key (see Interviews / fan-out section) |
-| Empty table / empty ordering | returns zero rows; `AVG` over all-NULL or empty window → NULL |
+| Situation                                  | Behavior / fix                                                                                                                          |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Frame shorter than _n_ at partition start  | averages over fewer rows; use fixed divisor or `COUNT(*)` filter if a strict _n_ is required                                            |
+| Duplicate `ORDER BY` values                | `ROWS` is nondeterministic among ties; `RANGE` includes all peers; `ORDER BY date, id` for determinism                                  |
+| Missing days (sparse series)               | `ROWS` spans too much _time_; use `RANGE ... INTERVAL` for calendar correctness                                                         |
+| `NULL` values in series                    | ignored by aggregate; all-NULL frame → NULL; `COALESCE` if you want implicit 0                                                          |
+| First/last rows of the whole result        | frame is truncated at partition boundary (and start/end of partition)                                                                   |
+| `WHERE` referencing the window alias       | not allowed in the same `SELECT` — wrap in a derived table/CTE, because filtering happens _after_ window evaluation at a different step |
+| Integer division                           | `AVG` is normally fine; `SUM(...)/n` with integer columns **truncates** on many engines                                                 |
+| Very large _n_ relative to partition       | frame ≈ running average; memory grows, but still one pass                                                                               |
+| Multiple rows per `(partition, order)` key | this is a fan-out: the same average repeats for every row with that key (see Interviews / fan-out section)                              |
+| Empty table / empty ordering               | returns zero rows; `AVG` over all-NULL or empty window → NULL                                                                           |
 
 ---
 
 ## 16. BAD vs BETTER
 
 ### BAD — self-join does a moving average
+
 ```sql
 -- O(n·k), hard to read, hard to extend to time-windows
 SELECT a.sale_date, a.revenue,
@@ -433,6 +435,7 @@ ORDER  BY a.sale_date;
 ```
 
 ### BETTER — window function
+
 ```sql
 SELECT sale_date, revenue,
        ROUND(AVG(revenue) OVER (ORDER BY sale_date
@@ -442,9 +445,10 @@ WHERE  region = 'North'
 ORDER  BY sale_date;
 ```
 
-**Why better:** single scan + sort, no self-join fan-out, frame semantics handled by the engine, and easily extended with `PARTITION BY` / `RANGE`. The self-join version also *silently mis-behaves* if the PK were not `(region, sale_date)`, and needs an extra index.
+**Why better:** single scan + sort, no self-join fan-out, frame semantics handled by the engine, and easily extended with `PARTITION BY` / `RANGE`. The self-join version also _silently mis-behaves_ if the PK were not `(region, sale_date)`, and needs an extra index.
 
 ### BAD — trying to filter the moving average in `WHERE`
+
 ```sql
 SELECT sale_date, revenue, AVG(revenue) OVER (...) AS ma_3
 FROM   daily_sales
@@ -452,6 +456,7 @@ WHERE  ma_3 > 150;   -- ERROR: window function in WHERE
 ```
 
 ### BETTER — filter in an outer query
+
 ```sql
 SELECT *
 FROM (
@@ -475,11 +480,11 @@ Things that actually matter here:
 1. **Ordering cost.** The plan may contain a `Sort` over `(region, sale_date)` — that is the dominant cost. An index on `(region, sale_date)` (or just `(sale_date)` when unpivot-uously partitioned) can turn `Sort` into an index-order scan.
 2. **Where you filter.** `WHERE` before the window shrinks the dataset before the sort; filtering the moving-average result after is unavoidable and not "cheaper" — test both.
 3. **Frame size.** A fixed small frame keeps the frame cheap; `UNBOUNDED PRECEDING` keeps a running aggregate; a huge `ROWS` frame is still one pass but uses more memory.
-4. **Self-join alternative.** Classic self-join SMA is O(n·k) and is nearly always worse above a few thousand rows; the plan will show nested-loop join count. The window version wins, but confirm with plans for *your* data distribution.
+4. **Self-join alternative.** Classic self-join SMA is O(n·k) and is nearly always worse above a few thousand rows; the plan will show nested-loop join count. The window version wins, but confirm with plans for _your_ data distribution.
 5. **`RANGE` with `INTERVAL`** often cannot use an index for the frame membership check in the same way a named-aggregate frame can; on very large series a `LAG`-based or `date_bin`-based rewrite may beat it — test, don't assume.
 6. **Big partitions** can spill window state to disk; a partial pushdown via the index ordering is usually the practical fix.
 
-> > **Production pitfall:** a moving-average query on *all* partitions at once (no `WHERE`) sorts the whole table. If you only need one region/ticker, filter first — a `Seq Scan` of the full table followed by a huge `Sort` is a classic.
+> > **Production pitfall:** a moving-average query on _all_ partitions at once (no `WHERE`) sorts the whole table. If you only need one region/ticker, filter first — a `Seq Scan` of the full table followed by a huge `Sort` is a classic.
 
 ---
 
@@ -488,7 +493,7 @@ Things that actually matter here:
 - **Counting missing days as days.** `ROWS BETWEEN 6 PRECEDING` on a series with weekends/missing days silently means "last 7 reporting rows", which can span two weeks of calendar time. Use `RANGE ... INTERVAL` when "last 7 calendar days" is the requirement.
 - **Silent NULLs.** `AVG` over a window containing NULLs yields an average of fewer points (or NULL). Audit with `COUNT(*) OVER (...)` before trusting the number.
 - **Nondeterministic ties.** Duplicate ordering keys + `ROWS` = unpredictable windows. Add an explicit tie-breaker.
-- **Double counting via JOINs.** If you join `daily_sales` to another table *before* windowing (e.g. attaching `customers` fan-out), rows are duplicated and the moving average is silently inflated. Window over the **base aggregate** first, then join:
+- **Double counting via JOINs.** If you join `daily_sales` to another table _before_ windowing (e.g. attaching `customers` fan-out), rows are duplicated and the moving average is silently inflated. Window over the **base aggregate** first, then join:
   ```sql
   WITH base AS (
       SELECT region, sale_date, SUM(revenue) AS revenue
@@ -511,7 +516,7 @@ Things that actually matter here:
 5. Decide and document the warm-up behavior: dynamic divisor (default) vs fixed divisor vs drop partial frames.
 6. Handle NULLs deliberately: `COALESCE` (treat as 0) or leave ignored (ever-halved) — and say which.
 7. Use `ROUND(..., 2)` at the display layer; keep full precision for downstream math.
-8. Filter partitions *before* windowing; verify with the execution plan.
+8. Filter partitions _before_ windowing; verify with the execution plan.
 9. Check `COUNT(*) OVER (...)` alongside the average during QA to catch short/NULL frames.
 
 ---
@@ -520,36 +525,38 @@ Things that actually matter here:
 
 ### Window function vs self-join
 
-| | Window function | Self-join |
-|---|---|---|
-| Readability | 1 line, declarative | join + group, error-prone |
-| Correctness with heavy fan-out | window over base grain | easily double counts |
-| Complexity | O(n log n) typical | O(n·k) |
-| Time-based frames | `RANGE ... INTERVAL` | manual filtering (easy to get wrong) |
-| Portability | 8.0+ / PG / SQL Server / Oracle | everywhere |
-| Edge-case handling | handled by engine | must be hand-coded |
-| When indicted | the default choice | legacy engines without window support |
+|                                | Window function                 | Self-join                             |
+| ------------------------------ | ------------------------------- | ------------------------------------- |
+| Readability                    | 1 line, declarative             | join + group, error-prone             |
+| Correctness with heavy fan-out | window over base grain          | easily double counts                  |
+| Complexity                     | O(n log n) typical              | O(n·k)                                |
+| Time-based frames              | `RANGE ... INTERVAL`            | manual filtering (easy to get wrong)  |
+| Portability                    | 8.0+ / PG / SQL Server / Oracle | everywhere                            |
+| Edge-case handling             | handled by engine               | must be hand-coded                    |
+| When indicted                  | the default choice              | legacy engines without window support |
 
 ### SMA vs RANGE vs running average quick reference
 
-| Formula | Frame | When |
-|---|---|---|
-| `ROWS BETWEEN 5 PRECEDING AND CURRENT ROW` | last 6 recorded values | regularly spaced series |
-| `RANGE BETWEEN INTERVAL '6' DAY PRECEDING AND CURRENT ROW` | last 7 calendar days | realistic calendar semantics |
-| `ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW` | all history to date | cumulative level |
-| `ROWS BETWEEN 2 PRECEDING AND 2 FOLLOWING` | centered | smoothing for backtesting |
+| Formula                                                    | Frame                  | When                         |
+| ---------------------------------------------------------- | ---------------------- | ---------------------------- |
+| `ROWS BETWEEN 5 PRECEDING AND CURRENT ROW`                 | last 6 recorded values | regularly spaced series      |
+| `RANGE BETWEEN INTERVAL '6' DAY PRECEDING AND CURRENT ROW` | last 7 calendar days   | realistic calendar semantics |
+| `ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`         | all history to date    | cumulative level             |
+| `ROWS BETWEEN 2 PRECEDING AND 2 FOLLOWING`                 | centered               | smoothing for backtesting    |
 
 ---
 
 ## 21. When to use / When NOT to use
 
 **Use when:**
+
 - tracking trends over noisy daily values
 - anomaly detection (current vs trailing baseline)
 - financial indicators (SMA/EMA), forecast pre-processing
 - QA metrics that must smooth flakiness (error rates, latency)
 
 **Do NOT use when:**
+
 - you need a **causal** prediction — a centered MA leaks the future; use trailing only
 - you need equal-weight recent data and heavy machines for forecasting — consider EMA or exponential smoothing (Section 14)
 - rows are sampled at irregular physical intervals — prefer `RANGE`
@@ -618,4 +625,4 @@ Things that actually matter here:
 
 ---
 
-*Questions above are left unanswered as practice. Cross-reference [Section 47 — Window Functions], [Section on NULLs & Three-Valued Logic], [Section on Recursive CTEs], and [Section on Query Optimization / EXPLAIN] while working through them.*
+_Questions above are left unanswered as practice. Cross-reference [Section 47 — Window Functions], [Section on NULLs & Three-Valued Logic], [Section on Recursive CTEs], and [Section on Query Optimization / EXPLAIN] while working through them._

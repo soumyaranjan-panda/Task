@@ -9,8 +9,8 @@
 
 `LAG()` and `LEAD()` are **offset window functions**. They let a row "look backwards" or "look forwards" inside an ordered window and read the value of a column from that neighboring row — **without joining the table to itself**.
 
-- `LAG(column [, offset] [, default])` reads the value of `column` from the **row that comes *before*** the current row.
-- `LEAD(column [, offset] [, default])` reads the value of `column` from the **row that comes *after*** the current row.
+- `LAG(column [, offset] [, default])` reads the value of `column` from the **row that comes _before_** the current row.
+- `LEAD(column [, offset] [, default])` reads the value of `column` from the **row that comes _after_** the current row.
 
 The easiest way to remember which is which:
 
@@ -57,15 +57,15 @@ LEAD( expression [, offset [, default]] ) OVER (
 
 ### Parameters
 
-| Parameter | Meaning | Default |
-|---|---|---|
-| `expression` | Value to read from the previous/next row. Can be any expression (a column, an arithmetic expression, a `CASE`, even a scalar subquery). | — |
-| `offset` | How many rows **before** (LAG) / **after** (LEAD) the current row to look. Must be a non-negative integer. | `1` |
-| `default` | Value returned when the offset row **falls outside the window partition** (there is no such row). | `NULL` |
+| Parameter    | Meaning                                                                                                                                 | Default |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `expression` | Value to read from the previous/next row. Can be any expression (a column, an arithmetic expression, a `CASE`, even a scalar subquery). | —       |
+| `offset`     | How many rows **before** (LAG) / **after** (LEAD) the current row to look. Must be a non-negative integer.                              | `1`     |
+| `default`    | Value returned when the offset row **falls outside the window partition** (there is no such row).                                       | `NULL`  |
 
 Three properties worth stating up front:
 
-1. **`ORDER BY` is mandatory** in the window for both functions (all major engines raise a syntax error without it). The `ORDER BY` inside `OVER` defines the logical order used to compute the offset — it is *not* optional, and it is *not* the same thing as the query's outer `ORDER BY`.
+1. **`ORDER BY` is mandatory** in the window for both functions (all major engines raise a syntax error without it). The `ORDER BY` inside `OVER` defines the logical order used to compute the offset — it is _not_ optional, and it is _not_ the same thing as the query's outer `ORDER BY`.
 2. `PARTITION BY` is optional. Without it, the whole result set is one partition.
 3. `LAG`/`LEAD` **ignore the window frame** (`ROWS`/`RANGE`). They always walk positions from the start of the partition. Oracle rejects the frame clause for them; PostgreSQL and MySQL permit it but ignore it. Simply don't write one.
 
@@ -166,14 +166,14 @@ order by product_id, month;
 
 **Result:**
 
-| product_id | month | revenue | prev_revenue |
-|---:|---|---:|---:|
-| 1 | 2024-01-01 | 1200.00 | NULL |
-| 1 | 2024-02-01 | 1500.00 | 1200.00 |
-| 1 | 2024-03-01 | 1100.00 | 1500.00 |
-| 2 | 2024-01-01 |  800.00 | NULL |
-| 2 | 2024-02-01 |  750.00 | 800.00 |
-| 2 | 2024-03-01 |  900.00 | 750.00 |
+| product_id | month      | revenue | prev_revenue |
+| ---------: | ---------- | ------: | -----------: |
+|          1 | 2024-01-01 | 1200.00 |         NULL |
+|          1 | 2024-02-01 | 1500.00 |      1200.00 |
+|          1 | 2024-03-01 | 1100.00 |      1500.00 |
+|          2 | 2024-01-01 |  800.00 |         NULL |
+|          2 | 2024-02-01 |  750.00 |       800.00 |
+|          2 | 2024-03-01 |  900.00 |       750.00 |
 
 Two things literally printed in the result:
 
@@ -194,11 +194,11 @@ order by month;
 
 **Result:**
 
-| month | revenue | next_revenue |
-|---|---:|---:|
-| 2024-01-01 | 1200.00 | 1500.00 |
-| 2024-02-01 | 1500.00 | 1100.00 |
-| 2024-03-01 | 1100.00 | NULL |
+| month      | revenue | next_revenue |
+| ---------- | ------: | -----------: |
+| 2024-01-01 | 1200.00 |      1500.00 |
+| 2024-02-01 | 1500.00 |      1100.00 |
+| 2024-03-01 | 1100.00 |         NULL |
 
 The **last row of the partition** gets `NULL`.
 
@@ -224,13 +224,13 @@ where close_price > prev_close
 **Result:**
 
 | ticker | trade_date | close_price |
-|---|---|---:|
-| AAPL | 2024-04-04 | 180.00 |
-| MSFT | 2024-04-02 | 425.50 |
+| ------ | ---------- | ----------: |
+| AAPL   | 2024-04-04 |      180.00 |
+| MSFT   | 2024-04-02 |      425.50 |
 
 Notes:
 
-- The window functions are computed *inside* the subquery, then filtered in the outer `WHERE`. You **cannot** write the `prev_close > ...` conditions in the outer query's `WHERE` against the window result directly — window functions are not allowed in `WHERE`/`HAVING` (see *Common mistakes*).
+- The window functions are computed _inside_ the subquery, then filtered in the outer `WHERE`. You **cannot** write the `prev_close > ...` conditions in the outer query's `WHERE` against the window result directly — window functions are not allowed in `WHERE`/`HAVING` (see _Common mistakes_).
 - Rows with `NULL` in `prev_close`/`next_close` (first/last row) fail the comparison automatically, because `x > NULL` is `NULL`, which is filtered out. That is exactly what we want for peaks.
 
 ---
@@ -251,11 +251,11 @@ flowchart LR
 
 Three consequences you should internalize:
 
-1. **The offset is measured against the window's `ORDER BY`, not the physical order of the table.** There is no such thing as "the previous row in the table" for LAG — only "the previous row *in the sorted window*."
+1. **The offset is measured against the window's `ORDER BY`, not the physical order of the table.** There is no such thing as "the previous row in the table" for LAG — only "the previous row _in the sorted window_."
 2. **Frame clauses do not apply.** A `ROWS BETWEEN 1 PRECEDING AND CURRENT ROW` frame has no effect on LAG/LEAD; they look at absolute positions inside the partition.
 3. **They are non-lossy.** Every input row produces exactly one output row. This is the fundamental reason they cannot create the duplicate rows / double counting that self-joined solutions can.
 
-The dominant cost is the **sort of each partition** (see *Performance implications*).
+The dominant cost is the **sort of each partition** (see _Performance implications_).
 
 ---
 
@@ -267,13 +267,13 @@ NULL behavior is the number-one source of confusion with LAG/LEAD, so it gets it
 
 There are **two different** reasons a LAG result can be `NULL`:
 
-| Situation | What LAG returns | Does the `default` argument replace it? |
-|---|---|---|
-| No such row exists (first row of partition, or offset beyond partition) | `default`, or `NULL` if omitted | **Yes** — this is exactly what `default` is for |
-| A row exists, but the **column value itself is NULL** | `NULL` | **No** — the row exists, so `default` never comes into play |
+| Situation                                                               | What LAG returns                | Does the `default` argument replace it?                     |
+| ----------------------------------------------------------------------- | ------------------------------- | ----------------------------------------------------------- |
+| No such row exists (first row of partition, or offset beyond partition) | `default`, or `NULL` if omitted | **Yes** — this is exactly what `default` is for             |
+| A row exists, but the **column value itself is NULL**                   | `NULL`                          | **No** — the row exists, so `default` never comes into play |
 
 > Common misconception
-> People write `LAG(salary, 1, 0)` hoping to replace *missing salaries* with 0. It does **not** do that. It only replaces the *first row's* (or out-of-bounds) value. A `NULL` salary on an actual previous row is still `NULL`.
+> People write `LAG(salary, 1, 0)` hoping to replace _missing salaries_ with 0. It does **not** do that. It only replaces the _first row's_ (or out-of-bounds) value. A `NULL` salary on an actual previous row is still `NULL`.
 
 ### Rule 2 — default behavior is RESPECT NULLS
 
@@ -282,7 +282,7 @@ By default, `LAG`/`LEAD` treat `NULL` values in the column as ordinary values:
 - The offset still **counts the row** that contains the `NULL`.
 - The result is `NULL` (the value of that row), it does not skip over the `NULL` row looking for a real value.
 
-So "give me the previous *non-null* value" is a different task than "give me the previous row's value" — and LAG by default does **not** do the former.
+So "give me the previous _non-null_ value" is a different task than "give me the previous row's value" — and LAG by default does **not** do the former.
 
 ### Rule 3 — IGNORE NULLS changes the meaning of offset
 
@@ -297,10 +297,12 @@ from price_feed;
 ```
 
 Supported in:
+
 - **PostgreSQL** (10+)
 - **Oracle** (has supported it for a long time)
 
 Not supported in:
+
 - **MySQL** (8.x) — no `IGNORE NULLS`
 - **SQL Server** (through at least 2022) — no `IGNORE NULLS`
 
@@ -361,8 +363,8 @@ order by product_id, month;
 
 Highlights:
 
-- The `LAG(...)` expression is repeated because standard SQL cannot alias a window function and reuse it in the same `SELECT` list. To compute the value once, wrap in a CTE (see the *better approach* below).
-- `100.0 *` forces decimal math — avoids the **integer-division** trap (see *Common mistakes*).
+- The `LAG(...)` expression is repeated because standard SQL cannot alias a window function and reuse it in the same `SELECT` list. To compute the value once, wrap in a CTE (see the _better approach_ below).
+- `100.0 *` forces decimal math — avoids the **integer-division** trap (see _Common mistakes_).
 - `NULLIF(prev, 0)` avoids division by zero; when `prev` is `NULL` (first row) the whole expression evaporates to `NULL`. Many shops prefer `COALESCE` at the end.
 - `round(..., 2)` exists in PostgreSQL/MySQL/SQL Server/Oracle.
 
@@ -421,7 +423,7 @@ from stock_prices
 order by ticker, trade_date;
 ```
 
-The last trading day for each ticker has `NULL` `next_close` and `NULL` `next_day_pct` — tomorrow's number does not exist yet. This is the *canonical* LEAD use case.
+The last trading day for each ticker has `NULL` `next_close` and `NULL` `next_day_pct` — tomorrow's number does not exist yet. This is the _canonical_ LEAD use case.
 
 ### C. Year-over-year with offset > 1
 
@@ -438,7 +440,7 @@ order by month;
 ```
 
 > Production pitfall
-> Offset arithmetic like `lag(..., 12)` **assumes exactly 12 rows exist between the two snapshots**. If a month is missing (data gap, closed branch, partial load), row #12 back is *not* the same calendar month a year ago. Check your data is gap-free first, or prefer a calendar-table join. `lag(revenue, 12)` counts **rows**, never **calendar distance**.
+> Offset arithmetic like `lag(..., 12)` **assumes exactly 12 rows exist between the two snapshots**. If a month is missing (data gap, closed branch, partial load), row #12 back is _not_ the same calendar month a year ago. Check your data is gap-free first, or prefer a calendar-table join. `lag(revenue, 12)` counts **rows**, never **calendar distance**.
 
 ### D. "Did anything change since the previous record?" (current vs previous)
 
@@ -455,7 +457,7 @@ from employee_history
 order by emp_id, change_date;
 ```
 
-`lag(title, 1, title)`: for the employee's *first* record there is no previous row, so the `default` kicks in and returns the employee's **own** title — neatly expressing "nothing changed before this". Row 1 of employee 1 shows `prev_title = 'Junior Analyst'`.
+`lag(title, 1, title)`: for the employee's _first_ record there is no previous row, so the `default` kicks in and returns the employee's **own** title — neatly expressing "nothing changed before this". Row 1 of employee 1 shows `prev_title = 'Junior Analyst'`.
 
 ### E. Consecutive-day streaks (gaps-and-islands, LAG the previous date)
 
@@ -519,7 +521,7 @@ This is the pattern used to answer "for every change, how much did the salary mo
 
 ### G. Combined with GROUP BY — compare group totals
 
-Window functions execute *after* grouping, so this is legal and extremely common:
+Window functions execute _after_ grouping, so this is legal and extremely common:
 
 ```sql
 with yearly as (
@@ -542,38 +544,38 @@ order by yr;
 
 ## Edge cases
 
-| Edge case | Behavior |
-|---|---|
-| Partition with a single row | Both `LAG` and `LEAD` return the `default`/`NULL`. |
-| `offset = 0` | Returns the **current row's** value (`LAG(x,0)` = `LEAD(x,0)` = `x`). Valid in PostgreSQL/MySQL/Oracle. |
-| `offset` larger than the partition | Returns `default`/`NULL`. |
-| Negative `offset` | Syntax/semantic error — offset is non-negative. |
-| Missing/wrong `ORDER BY` | Syntax error in PostgreSQL, MySQL, SQL Server, Oracle. |
-| NULL in the *value* column | Returned as `NULL` (RESPECT NULLS default); the row is counted in the offset. |
-| NULLs in the *sort* key | Ordering of NULLs (engine-dependent) decides which row is "previous". |
-| Ties in the sort key | The engine picks *some* previous row among equals — **not deterministic**. |
-| Gap-free requirement for `offset > 1` | Offsets count **rows**, not time. Missing months break anniversary comparisons. |
-| Empty input rowset | Returns zero rows (no "single NULL row"). |
-| `PARTITION BY` several columns | `partition by product_id, region` — fine; order keys apply within the combined group. |
+| Edge case                             | Behavior                                                                                                |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Partition with a single row           | Both `LAG` and `LEAD` return the `default`/`NULL`.                                                      |
+| `offset = 0`                          | Returns the **current row's** value (`LAG(x,0)` = `LEAD(x,0)` = `x`). Valid in PostgreSQL/MySQL/Oracle. |
+| `offset` larger than the partition    | Returns `default`/`NULL`.                                                                               |
+| Negative `offset`                     | Syntax/semantic error — offset is non-negative.                                                         |
+| Missing/wrong `ORDER BY`              | Syntax error in PostgreSQL, MySQL, SQL Server, Oracle.                                                  |
+| NULL in the _value_ column            | Returned as `NULL` (RESPECT NULLS default); the row is counted in the offset.                           |
+| NULLs in the _sort_ key               | Ordering of NULLs (engine-dependent) decides which row is "previous".                                   |
+| Ties in the sort key                  | The engine picks _some_ previous row among equals — **not deterministic**.                              |
+| Gap-free requirement for `offset > 1` | Offsets count **rows**, not time. Missing months break anniversary comparisons.                         |
+| Empty input rowset                    | Returns zero rows (no "single NULL row").                                                               |
+| `PARTITION BY` several columns        | `partition by product_id, region` — fine; order keys apply within the combined group.                   |
 
 ---
 
 ## Differences across databases
 
-| Feature | PostgreSQL | MySQL 8 | SQL Server | Oracle |
-|---|---|---|---|---|
-| `LAG`/`LEAD` basic form | ✅ | ✅ | ✅ (2012+) | ✅ |
-| `IGNORE NULLS` option | ✅ (10+) | ❌ | ❌ | ✅ |
-| Named `WINDOW` clause | ✅ | ✅ | ❌ | ✅ |
-| Frame clause on LAG/LEAD | ignored | ignored | — | **not allowed** |
-| NULL sort position in `ASC` | last | first | first | last |
-| Date arithmetic syntax | `+ interval '1 day'` | `+ interval 1 day` | `dateadd(day,1,x)` | `x + 1` |
+| Feature                     | PostgreSQL           | MySQL 8            | SQL Server         | Oracle          |
+| --------------------------- | -------------------- | ------------------ | ------------------ | --------------- |
+| `LAG`/`LEAD` basic form     | ✅                   | ✅                 | ✅ (2012+)         | ✅              |
+| `IGNORE NULLS` option       | ✅ (10+)             | ❌                 | ❌                 | ✅              |
+| Named `WINDOW` clause       | ✅                   | ✅                 | ❌                 | ✅              |
+| Frame clause on LAG/LEAD    | ignored              | ignored            | —                  | **not allowed** |
+| NULL sort position in `ASC` | last                 | first              | first              | last            |
+| Date arithmetic syntax      | `+ interval '1 day'` | `+ interval 1 day` | `dateadd(day,1,x)` | `x + 1`         |
 
 ---
 
 ## Performance implications
 
-> No universal claim is being made here — "LAG/LEAD is always faster than a self-join" is *not* a law. What follows is what to **verify with an execution plan**.
+> No universal claim is being made here — "LAG/LEAD is always faster than a self-join" is _not_ a law. What follows is what to **verify with an execution plan**.
 
 ### Where the cost is
 
@@ -600,23 +602,23 @@ Look for: an explicit `Sort` node? A `windowAgg` / `WindowAggregate` / `Stream A
 
 ### LAG/LEAD vs self-join — the honest comparison
 
-| Dimension | LAG/LEAD | Self-join (`ROW_NUMBER` + join on key) |
-|---|---|---|
-| Row count | Never duplicated | Must prove the join key is unique, else fan-out / double counting |
-| Reads | One logical pass over the sorted window | Joins usually imply re-reading/folifting the right side |
-| Sort work | One sort (reused by multiple LAG/LEAD in the same window) | A sort plus a join; duplicate-key joins can balloon |
-| NULL keys | Not a problem — order defines positions | Join keys with NULL never match → silently missing "previous" rows |
-| Plan to inspect | Sort + windowAgg | Sort + join node; check for nested loops on large inputs |
+| Dimension       | LAG/LEAD                                                  | Self-join (`ROW_NUMBER` + join on key)                             |
+| --------------- | --------------------------------------------------------- | ------------------------------------------------------------------ |
+| Row count       | Never duplicated                                          | Must prove the join key is unique, else fan-out / double counting  |
+| Reads           | One logical pass over the sorted window                   | Joins usually imply re-reading/folifting the right side            |
+| Sort work       | One sort (reused by multiple LAG/LEAD in the same window) | A sort plus a join; duplicate-key joins can balloon                |
+| NULL keys       | Not a problem — order defines positions                   | Join keys with NULL never match → silently missing "previous" rows |
+| Plan to inspect | Sort + windowAgg                                          | Sort + join node; check for nested loops on large inputs           |
 
-Verdict: prefer LAG/LEAD for readability and correctness. Whether it is *faster* for a *specific* query depends on the optimizer, statistics, cardinalities, and indexes — **verify with EXPLAIN**, don't assume.
+Verdict: prefer LAG/LEAD for readability and correctness. Whether it is _faster_ for a _specific_ query depends on the optimizer, statistics, cardinalities, and indexes — **verify with EXPLAIN**, don't assume.
 
 ---
 
 ## Common mistakes
 
-1. **Forgetting `PARTITION BY`.** You compare product 2's January to product 1's December. This returns `NULL` only by luck and is wrong almost always. Label it out loud before you write: "previous row *within the same product*."
+1. **Forgetting `PARTITION BY`.** You compare product 2's January to product 1's December. This returns `NULL` only by luck and is wrong almost always. Label it out loud before you write: "previous row _within the same product_."
 
-2. **Forgetting the window `ORDER BY`.** It's mandatory; without it you get a syntax error in every major engine. But there's a sneakier variant — people write *an outer* `ORDER BY` and *assume* LAG uses it. It doesn't; the window needs its own.
+2. **Forgetting the window `ORDER BY`.** It's mandatory; without it you get a syntax error in every major engine. But there's a sneakier variant — people write _an outer_ `ORDER BY` and _assume_ LAG uses it. It doesn't; the window needs its own.
 
 3. **Non-deterministic `ORDER BY` keys.** Sorting ties (e.g., `ORDER BY revenue` when two months have equal revenue) mean "who is the previous row?" is arbitrary. Add a tie-breaker.
 
@@ -628,7 +630,7 @@ Verdict: prefer LAG/LEAD for readability and correctness. Whether it is *faster*
 
 7. **Thinking `default` fills NULL data.** Covered above — it only fires when the offset row is out of bounds.
 
-8. **Assuming LAG == "previous *distinct* value".** LAG walks rows, not distinct values. If you sort a statistic per day but want month-over-month from *calendar* months in a table with gaps, LAG off-by-one silently gives the wrong comparison.
+8. **Assuming LAG == "previous _distinct_ value".** LAG walks rows, not distinct values. If you sort a statistic per day but want month-over-month from _calendar_ months in a table with gaps, LAG off-by-one silently gives the wrong comparison.
 
 9. **Ignoring NULLs in the value.** Default `RESPECT NULLS` means a NULL mid-stream breaks your "previous value" chain — you need `IGNORE NULLS` (where supported) or the SUM-over-group trick.
 
@@ -637,7 +639,7 @@ Verdict: prefer LAG/LEAD for readability and correctness. Whether it is *faster*
 ## Production pitfalls
 
 > Production pitfall
-> **Missing `PARTITION BY` in a mixed-entity table is a silent-corruption bug.** Your ETL reports *will* show "day-over-day change" computed across different stores/products/customers and nobody will notice until a data-quality audit. Guard with linting or code review rules.
+> **Missing `PARTITION BY` in a mixed-entity table is a silent-corruption bug.** Your ETL reports _will_ show "day-over-day change" computed across different stores/products/customers and nobody will notice until a data-quality audit. Guard with linting or code review rules.
 
 > Production pitfall
 > **Piping LAG output into further arithmetic without handling the first row.** Every partition's first LAG is `NULL`; `x - NULL` is `NULL`, and a downstream `SUM`/metric that swallows NULLs (or uses `AVG`) will skew totals. Decide explicitly: `COALESCE(..., 0)`, or `LAG(x, 1, x)` to treat "no previous" as "unchanged".
@@ -659,19 +661,19 @@ Verdict: prefer LAG/LEAD for readability and correctness. Whether it is *faster*
 > "What does `LAG(salary, 1, 0)` return for the first row of each partition?" — **0**, not NULL. But everyone who says "it also makes all NULL salaries 0" is wrong. Both facts get tested.
 
 > Interview trap
-> "Which row does LAG read, when the query has an outer `ORDER BY`?" A common wrong instinct: LAG follows the *final displayed* order. It follows the *window* ORDER BY. The final ORDER BY only sorts display.
+> "Which row does LAG read, when the query has an outer `ORDER BY`?" A common wrong instinct: LAG follows the _final displayed_ order. It follows the _window_ ORDER BY. The final ORDER BY only sorts display.
 
 > Interview trap
 > Tie-breakers. "Given ordering by `revenue` only, is `LAG(revenue)` deterministic?" — No. The outcome depends on which tied row the engine emits last.
 
 > Interview trap
-> "Can I use LAG to find the second-highest salary per department?" — Sort `DESC` and take `LEAD(salary, 1)` of the **top** row, or more cleanly use `DENSE_RANK()`/`ROW_NUMBER()`. LAG/LEAD give *neighbor* rows, not *ranks*; ties make neighbor-based "second highest" ambiguous.
+> "Can I use LAG to find the second-highest salary per department?" — Sort `DESC` and take `LEAD(salary, 1)` of the **top** row, or more cleanly use `DENSE_RANK()`/`ROW_NUMBER()`. LAG/LEAD give _neighbor_ rows, not _ranks_; ties make neighbor-based "second highest" ambiguous.
 
 > Interview trap
 > NULL sort order. "The sort key contains NULLs; which row becomes prev/next?" Engine-dependent (see table above). If the answer surprises you, fix with `NULLS FIRST/LAST`.
 
 > Interview trap
-> People answer "LAG is for 'previous row'" and forget the partition boundary: the first row *of each partition* is NULL, not just the very first row of the result.
+> People answer "LAG is for 'previous row'" and forget the partition boundary: the first row _of each partition_ is NULL, not just the very first row of the result.
 
 ---
 
@@ -685,8 +687,8 @@ Verdict: prefer LAG/LEAD for readability and correctness. Whether it is *faster*
 6. **Watch integer division** — multiply by `100.0`.
 7. **For time-series, first make the series gap-free** (calendar table + left join) before relying on `offset = 1` or `offset = 12` semantics.
 8. **Verify with the execution plan.** Look for the `Sort` node and whether an index serves the ordering. Only then talk about "fast on this workload."
-9. **Remember the alias problem**: you cannot reference a window alias within the same `SELECT` list — this is *why* the CTE pattern exists.
-10. When you only need to know *existence* of a previous/next row (not its value), consider `EXISTS`/`LATERAL` instead of LAG — different tools, chosen by what the output row must carry.
+9. **Remember the alias problem**: you cannot reference a window alias within the same `SELECT` list — this is _why_ the CTE pattern exists.
+10. When you only need to know _existence_ of a previous/next row (not its value), consider `EXISTS`/`LATERAL` instead of LAG — different tools, chosen by what the output row must carry.
 
 ---
 
@@ -694,36 +696,36 @@ Verdict: prefer LAG/LEAD for readability and correctness. Whether it is *faster*
 
 ### LAG vs LEAD
 
-| | `LAG` | `LEAD` |
-|---|---|---|
-| Direction | previous rows (behind) | next rows (ahead) |
-| First row of partition | `NULL`/`default` | (depends on data) |
-| Last row of partition | — | `NULL`/`default` |
-| Typical question | "how did this compare to last?" | "what comes next?" |
-| Offset meaning | row at position `i - offset` | row at position `i + offset` |
-| Memory trick | a horse "lags behind" | a leader "goes ahead" |
+|                        | `LAG`                           | `LEAD`                       |
+| ---------------------- | ------------------------------- | ---------------------------- |
+| Direction              | previous rows (behind)          | next rows (ahead)            |
+| First row of partition | `NULL`/`default`                | (depends on data)            |
+| Last row of partition  | —                               | `NULL`/`default`             |
+| Typical question       | "how did this compare to last?" | "what comes next?"           |
+| Offset meaning         | row at position `i - offset`    | row at position `i + offset` |
+| Memory trick           | a horse "lags behind"           | a leader "goes ahead"        |
 
 ### LAG/LEAD vs self-join with ROW_NUMBER
 
-| | LAG / LEAD | ROW_NUMBER + self-join |
-|---|---|---|
-| Row duplication risk | none | high if join key not unique |
-| Code size | 1 function | CTE + join + ON condition |
-| Reads the table twice | no (sorted once) | commonly yes |
-| Surrogate order needed | only tie-breaker | yes, must build a rank key |
+|                        | LAG / LEAD       | ROW_NUMBER + self-join      |
+| ---------------------- | ---------------- | --------------------------- |
+| Row duplication risk   | none             | high if join key not unique |
+| Code size              | 1 function       | CTE + join + ON condition   |
+| Reads the table twice  | no (sorted once) | commonly yes                |
+| Surrogate order needed | only tie-breaker | yes, must build a rank key  |
 
 Use the self-join when you need the previous row **only under a complex condition that can't be expressed by a plain window** (rare), and then guard uniqueness carefully.
 
 ### LAG/LEAD vs correlated subquery
 
-| | LAG / LEAD | correlated subquery |
-|---|---|---|
-| Reads | one sorted pass | potentially re-evaluated per row |
+|                  | LAG / LEAD                | correlated subquery                           |
+| ---------------- | ------------------------- | --------------------------------------------- |
+| Reads            | one sorted pass           | potentially re-evaluated per row              |
 | NULL-safe keying | no key needed (positions) | `NULL` keys silently fail (`=` never matches) |
-| Readability | high | error-prone + verbose |
-| Plan | windowAgg / sort node | dependent subquery (often Nested Loop) |
+| Readability      | high                      | error-prone + verbose                         |
+| Plan             | windowAgg / sort node     | dependent subquery (often Nested Loop)        |
 
-The subquery wins only for "previous row *matching a predicate*" (e.g., previous non-null, previous record before this date) where the fastest plan is genuinely an index lookup, not a sort. Decide case by case; check the plan.
+The subquery wins only for "previous row _matching a predicate_" (e.g., previous non-null, previous record before this date) where the fastest plan is genuinely an index lookup, not a sort. Decide case by case; check the plan.
 
 ---
 
@@ -750,17 +752,17 @@ The subquery wins only for "previous row *matching a predicate*" (e.g., previous
 
 ### Intermediate
 
-6. Explain exactly when the third argument (the `default`) is used — and give one example where it does *not* do what people expect.
+6. Explain exactly when the third argument (the `default`) is used — and give one example where it does _not_ do what people expect.
 7. Write a query that returns each stock day with the **% change vs the previous day**, ordered by ticker and date.
 8. How do you get **both** the previous and the next row's values in one query?
-9. Compare `LAG` + CTE vs self-joining the table on `(product_id, month-1)` for the month-over-month problem. Under what conditions does each return the *wrong* number of rows?
+9. Compare `LAG` + CTE vs self-joining the table on `(product_id, month-1)` for the month-over-month problem. Under what conditions does each return the _wrong_ number of rows?
 10. Why can't you write `WHERE lag(revenue) > 100`? How do you filter on a LAG result?
 
 ### Advanced
 
 11. In PostgreSQL, `LAG(close) IGNORE NULLS over (order by d)` vs `lag(close)` — how does `IGNORE NULLS` change what counts as "offset"? Which major databases lack the feature, and what is the SQL Server workaround (describe the technique, not just the code)?
 12. Show how you'd find **local maxima** in a stock price series with LAG and LEAD — and what changes when the last row of the partition participates.
-13. Compare LAG/LEAD performance to a `ROW_NUMBER` + self-join. When might the self-join actually be chosen by the optimizer, and how would you *prove* one path is cheaper (name the exact tool/command per database)?
+13. Compare LAG/LEAD performance to a `ROW_NUMBER` + self-join. When might the self-join actually be chosen by the optimizer, and how would you _prove_ one path is cheaper (name the exact tool/command per database)?
 14. A "gaps and islands" query: use LAG on a sorted date column to mark the starts of consecutive-day islands. Which rows fail the `prev_date` comparison and why?
 15. What does `LAG(x, 0, 'n/a')` return? Is the default argument used here?
 
@@ -769,7 +771,7 @@ The subquery wins only for "previous row *matching a predicate*" (e.g., previous
 16. "For each employee version, show the raise relative to the employee's previous version, and the title change (from/to)." Write the query. What do you do for the employee's first version — keep NULL or coalesce to 0, and why does the choice matter downstream?
 17. "Revenue by month, with a column 'revenue 12 months ago'." What assumption must you state, and verify, before trusting `LAG(revenue, 12)`?
 18. Stock dashboard: "red days after green days." Given open/high/low/close, write a query to tag each day and rank streaks.
-19. Payment log with occasional `NULL` amounts. "Every row should show the last *non-null* amount." Which function/technique is the correct answer in PostgreSQL vs SQL Server?
+19. Payment log with occasional `NULL` amounts. "Every row should show the last _non-null_ amount." Which function/technique is the correct answer in PostgreSQL vs SQL Server?
 
 ### Tricky
 
@@ -832,12 +834,12 @@ where lag(revenue) over (partition by product_id order by month) > 1000;
 
 ### Performance
 
-31. Where does the hot cost of a LAG query typically live? What node appears in an `EXPLAIN` when the engine sorts for the window, and what does it mean for the plan *not* to contain that node?
-32. Design an index that lets `partition by product_id order by month` run with **no explicit sort** in PostgreSQL/MySQL. Which index *does not* help?
+31. Where does the hot cost of a LAG query typically live? What node appears in an `EXPLAIN` when the engine sorts for the window, and what does it mean for the plan _not_ to contain that node?
+32. Design an index that lets `partition by product_id order by month` run with **no explicit sort** in PostgreSQL/MySQL. Which index _does not_ help?
 33. "LAG is always faster than a self-join." True or false? Give the argument you'd use in a code review, and name the two things you'd check in the execution plan before accepting either version.
 34. In SQL Server, a huge LAG query "spills to tempdb" — what is happening, and what are the two practical knobs you'd pull?
 35. When is `offset = 12` cheaper or more dangerous than a self-join keyed on `date` for a year-over-year comparison? (Hint: think rows vs calendar and NULL-key behavior.)
 
 ---
 
-*Answers to the practice questions above are intentionally omitted — work through them, then verify against the examples and tables in this section. If you want an answers appendix for this section, request `48-LAG-LEAD-Answers`.*
+_Answers to the practice questions above are intentionally omitted — work through them, then verify against the examples and tables in this section. If you want an answers appendix for this section, request `48-LAG-LEAD-Answers`._

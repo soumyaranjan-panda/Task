@@ -2,7 +2,7 @@
 
 ## Overview
 
-Constraints are **rules enforced on table columns** to maintain data integrity. They guarantee that data follows the business rules *at the database level*, regardless of which application or user inserts or updates data.
+Constraints are **rules enforced on table columns** to maintain data integrity. They guarantee that data follows the business rules _at the database level_, regardless of which application or user inserts or updates data.
 
 > **Grain reminder:** Every table definition starts with "one row represents X." Constraints exist to protect that grain.
 
@@ -25,11 +25,11 @@ flowchart TD
 
 ### Constraint Categories
 
-| Category | Constraint Types | Purpose |
-|---|---|---|
-| **Column-level** | NOT NULL, DEFAULT, CHECK, UNIQUE, PRIMARY KEY | Rules on a single column |
-| **Table-level** | CHECK, UNIQUE, PRIMARY KEY, FOREIGN KEY | Rules spanning multiple columns |
-| **Database-level** | Schema rules, custom domains | Rules across tables |
+| Category           | Constraint Types                              | Purpose                         |
+| ------------------ | --------------------------------------------- | ------------------------------- |
+| **Column-level**   | NOT NULL, DEFAULT, CHECK, UNIQUE, PRIMARY KEY | Rules on a single column        |
+| **Table-level**    | CHECK, UNIQUE, PRIMARY KEY, FOREIGN KEY       | Rules spanning multiple columns |
+| **Database-level** | Schema rules, custom domains                  | Rules across tables             |
 
 ---
 
@@ -38,6 +38,7 @@ flowchart TD
 Every example in this section uses the following tables.
 
 > **Grain:**
+>
 > - `departments`: one row = one department
 > - `employees`: one row = one employee; each employee belongs to exactly one department
 > - `customers`: one row = one customer
@@ -137,12 +138,12 @@ Most databases implement primary keys using a **B-tree index** (or clustered ind
 2. Every `INSERT` / `UPDATE` checks uniqueness against this index.
 3. The engine rejects any row that would duplicate an existing key or contain NULL.
 
-| Database | Default Index Type | Clustered? |
-|---|---|---|
-| PostgreSQL | B-tree (non-clustered) | No (but uses the key for heap lookup) |
-| MySQL InnoDB | B-tree (clustered) | Yes — row data stored in PK leaf pages |
-| SQL Server | B-tree (clustered by default) | Yes — PK becomes clustered index |
-| Oracle | B-tree (via UNIQUE constraint) | No (heap-organized tables) |
+| Database     | Default Index Type             | Clustered?                             |
+| ------------ | ------------------------------ | -------------------------------------- |
+| PostgreSQL   | B-tree (non-clustered)         | No (but uses the key for heap lookup)  |
+| MySQL InnoDB | B-tree (clustered)             | Yes — row data stored in PK leaf pages |
+| SQL Server   | B-tree (clustered by default)  | Yes — PK becomes clustered index       |
+| Oracle       | B-tree (via UNIQUE constraint) | No (heap-organized tables)             |
 
 ### Composite Primary Key
 
@@ -170,15 +171,15 @@ INSERT INTO order_items VALUES (1, 1, 103, 3);
 
 ### When to Use a Surrogate vs. Natural Key
 
-| Aspect | Surrogate Key (auto-increment) | Natural Key (business meaning) |
-|---|---|---|
-| **Example** | `SERIAL`, `IDENTITY`, `AUTO_INCREMENT` | `email`, `ISBN`, `SSN` |
-| **Stability** | Never changes | May change (email, name) |
-| **Size** | Usually 4-8 bytes | Can be large strings |
-| **Uniqueness guarantee** | Guaranteed by sequence | Must be validated |
-| **Readability** | Low (opaque integers) | High (meaningful values) |
-| **Composite FK cost** | Fewer bytes | Can bloat indexes |
-| **Interview preference** | Most common recommendation | Acceptable if truly immutable |
+| Aspect                   | Surrogate Key (auto-increment)         | Natural Key (business meaning) |
+| ------------------------ | -------------------------------------- | ------------------------------ |
+| **Example**              | `SERIAL`, `IDENTITY`, `AUTO_INCREMENT` | `email`, `ISBN`, `SSN`         |
+| **Stability**            | Never changes                          | May change (email, name)       |
+| **Size**                 | Usually 4-8 bytes                      | Can be large strings           |
+| **Uniqueness guarantee** | Guaranteed by sequence                 | Must be validated              |
+| **Readability**          | Low (opaque integers)                  | High (meaningful values)       |
+| **Composite FK cost**    | Fewer bytes                            | Can bloat indexes              |
+| **Interview preference** | Most common recommendation             | Acceptable if truly immutable  |
 
 > **Production pitfall:** Using a natural key like `email` as a primary key works until a user changes their email. If the key is referenced by dozens of foreign keys, a cascade update becomes expensive and risky. Surrogate keys avoid this.
 
@@ -268,14 +269,14 @@ CREATE TABLE orders (
 
 When the referenced row is deleted or updated, the database must decide what to do with the referencing rows.
 
-| Action | Behavior | Use Case |
-|---|---|---|
-| `RESTRICT` (default in PostgreSQL) | Reject the DELETE/UPDATE | Most common; safe default |
-| `NO ACTION` | Same as RESTRICT but checked at end of transaction (PostgreSQL) | Deferred checks |
-| `CASCADE` | Delete/update referencing rows too | Dependent data that has no meaning without the parent |
-| `SET NULL` | Set FK column to NULL | Optional relationships |
-| `SET DEFAULT` | Set FK column to its default value | Rare |
-| `RESTRICT` (default in MySQL, SQL Server) | Reject the DELETE/UPDATE | — |
+| Action                                    | Behavior                                                        | Use Case                                              |
+| ----------------------------------------- | --------------------------------------------------------------- | ----------------------------------------------------- |
+| `RESTRICT` (default in PostgreSQL)        | Reject the DELETE/UPDATE                                        | Most common; safe default                             |
+| `NO ACTION`                               | Same as RESTRICT but checked at end of transaction (PostgreSQL) | Deferred checks                                       |
+| `CASCADE`                                 | Delete/update referencing rows too                              | Dependent data that has no meaning without the parent |
+| `SET NULL`                                | Set FK column to NULL                                           | Optional relationships                                |
+| `SET DEFAULT`                             | Set FK column to its default value                              | Rare                                                  |
+| `RESTRICT` (default in MySQL, SQL Server) | Reject the DELETE/UPDATE                                        | —                                                     |
 
 ```sql
 CREATE TABLE order_items (
@@ -391,11 +392,11 @@ VALUES (1, NULL, 'Smith');
 
 ### Common Patterns
 
-| Pattern | Use Case |
-|---|---|
-| `NOT NULL DEFAULT value` | Provides a safe fallback; allows `INSERT` without specifying the column |
-| `NOT NULL` without `DEFAULT` | Forces the application to always provide a value |
-| `NOT NULL` on PK columns | Redundant (PK already implies NOT NULL) |
+| Pattern                      | Use Case                                                                |
+| ---------------------------- | ----------------------------------------------------------------------- |
+| `NOT NULL DEFAULT value`     | Provides a safe fallback; allows `INSERT` without specifying the column |
+| `NOT NULL` without `DEFAULT` | Forces the application to always provide a value                        |
+| `NOT NULL` on PK columns     | Redundant (PK already implies NOT NULL)                                 |
 
 ```sql
 -- GOOD: NOT NULL + DEFAULT ensures column is always populated
@@ -429,24 +430,24 @@ UNIQUE (col1, col2)
 
 ### UNIQUE vs. PRIMARY KEY
 
-| Feature | UNIQUE | PRIMARY KEY |
-|---|---|---|
-| NULLs allowed | **Yes** (one NULL in most databases, multiple NULLs in PostgreSQL/Oracle) | **No** |
-| Number per table | **Multiple** | **One** |
-| Creates index | **Yes** (unique index) | **Yes** (unique index) |
-| Can be FK target | Only if all columns are NOT NULL | **Yes** |
-| Semantic meaning | "This value must be distinct" | "This is the identifier" |
+| Feature          | UNIQUE                                                                    | PRIMARY KEY              |
+| ---------------- | ------------------------------------------------------------------------- | ------------------------ |
+| NULLs allowed    | **Yes** (one NULL in most databases, multiple NULLs in PostgreSQL/Oracle) | **No**                   |
+| Number per table | **Multiple**                                                              | **One**                  |
+| Creates index    | **Yes** (unique index)                                                    | **Yes** (unique index)   |
+| Can be FK target | Only if all columns are NOT NULL                                          | **Yes**                  |
+| Semantic meaning | "This value must be distinct"                                             | "This is the identifier" |
 
 ### NULL Behavior — The Critical Difference
 
 > **This is one of the most important edge cases in SQL.**
 
-| Database | Multiple NULLs in UNIQUE column? |
-|---|---|
+| Database   | Multiple NULLs in UNIQUE column?               |
+| ---------- | ---------------------------------------------- |
 | PostgreSQL | **Yes** — multiple NULLs allowed (NULL ≠ NULL) |
-| MySQL | **Yes** — treats multiple NULLs as distinct |
-| SQL Server | **No** — only one NULL allowed |
-| Oracle | **Yes** — multiple NULLs allowed |
+| MySQL      | **Yes** — treats multiple NULLs as distinct    |
+| SQL Server | **No** — only one NULL allowed                 |
+| Oracle     | **Yes** — multiple NULLs allowed               |
 
 ```sql
 -- PostgreSQL: ALLOWED (both NULLs are kept)
@@ -471,6 +472,7 @@ ADD CONSTRAINT uq_emp_name UNIQUE (first_name, last_name);
 ```
 
 This allows:
+
 - Two rows with `(John, Smith)` — **NO**
 - Two rows with `(John, Doe)` and `(Jane, Smith)` — **YES**
 - Two rows with `(John, NULL)` — **YES** (NULL ≠ NULL)
@@ -559,12 +561,12 @@ ADD CONSTRAINT chk_dates CHECK (start_date < end_date);
 
 ### Database Support
 
-| Database | CHECK support |
-|---|---|
-| PostgreSQL | Full support since v9.0+ |
-| MySQL | Full support since v8.0.16 (older versions parse but ignore CHECK) |
-| SQL Server | Full support since 2008 |
-| Oracle | Full support |
+| Database   | CHECK support                                                      |
+| ---------- | ------------------------------------------------------------------ |
+| PostgreSQL | Full support since v9.0+                                           |
+| MySQL      | Full support since v8.0.16 (older versions parse but ignore CHECK) |
+| SQL Server | Full support since 2008                                            |
+| Oracle     | Full support                                                       |
 
 > **Production pitfall (MySQL < 8.0.16):** CHECK constraints were **parsed but not enforced**. Queries would run without error even if they violated the CHECK. If you are on a legacy MySQL version, you must use triggers or application logic instead.
 
@@ -624,13 +626,13 @@ VALUES (1, DEFAULT, DEFAULT);
 
 Defaults can be expressions, not just constants:
 
-| Expression | Database | Purpose |
-|---|---|---|
-| `CURRENT_DATE` | All | Today's date |
-| `CURRENT_TIMESTAMP` | All | Current timestamp |
-| `gen_random_uuid()` | PostgreSQL | Random UUID |
-| `UUID()` | MySQL | Random UUID |
-| `NEWID()` | SQL Server | Random UUID |
+| Expression                               | Database                        | Purpose                   |
+| ---------------------------------------- | ------------------------------- | ------------------------- |
+| `CURRENT_DATE`                           | All                             | Today's date              |
+| `CURRENT_TIMESTAMP`                      | All                             | Current timestamp         |
+| `gen_random_uuid()`                      | PostgreSQL                      | Random UUID               |
+| `UUID()`                                 | MySQL                           | Random UUID               |
+| `NEWID()`                                | SQL Server                      | Random UUID               |
 | `AUTO_INCREMENT` / `SERIAL` / `IDENTITY` | MySQL / PostgreSQL / SQL Server | Auto-incrementing integer |
 
 ```sql
@@ -707,13 +709,13 @@ CREATE TABLE orders (
 
 Follow a consistent pattern:
 
-| Constraint Type | Naming Pattern |
-|---|---|
-| Primary Key | `pk_<table>` |
-| Foreign Key | `fk_<table>_<referenced_table>` or `fk_<table>_<column>` |
-| Unique | `uq_<table>_<column(s)>` |
-| Check | `chk_<table>_<description>` |
-| Not Null | `nn_<table>_<column>` (not always named) |
+| Constraint Type | Naming Pattern                                           |
+| --------------- | -------------------------------------------------------- |
+| Primary Key     | `pk_<table>`                                             |
+| Foreign Key     | `fk_<table>_<referenced_table>` or `fk_<table>_<column>` |
+| Unique          | `uq_<table>_<column(s)>`                                 |
+| Check           | `chk_<table>_<description>`                              |
+| Not Null        | `nn_<table>_<column>` (not always named)                 |
 
 > **Production pitfall:** Unnamed constraints produce cryptic error messages. When a constraint is violated in production, a named constraint like `chk_orders_positive_amount` tells you exactly what failed. The auto-generated name `orders_amount_check` is less clear but still readable; avoid letting the database choose random names.
 
@@ -765,14 +767,14 @@ SET FOREIGN_KEY_CHECKS = 0;
 
 ## 9. Constraint Interaction with NULL
 
-| Constraint | NULL Behavior |
-|---|---|
-| `PRIMARY KEY` | NULL is **always rejected** |
-| `NOT NULL` | NULL is **always rejected** |
-| `UNIQUE` | NULL is treated as distinct (multiple NULLs allowed in PG/MySQL/Oracle; one in SQL Server) |
-| `CHECK` | NULL causes the expression to evaluate to UNKNOWN → **passes** |
-| `FOREIGN KEY` | NULL is **not checked** against the parent table (allowed) |
-| `DEFAULT` | If column is omitted from INSERT, the default is used (NULL is not inserted) |
+| Constraint    | NULL Behavior                                                                              |
+| ------------- | ------------------------------------------------------------------------------------------ |
+| `PRIMARY KEY` | NULL is **always rejected**                                                                |
+| `NOT NULL`    | NULL is **always rejected**                                                                |
+| `UNIQUE`      | NULL is treated as distinct (multiple NULLs allowed in PG/MySQL/Oracle; one in SQL Server) |
+| `CHECK`       | NULL causes the expression to evaluate to UNKNOWN → **passes**                             |
+| `FOREIGN KEY` | NULL is **not checked** against the parent table (allowed)                                 |
+| `DEFAULT`     | If column is omitted from INSERT, the default is used (NULL is not inserted)               |
 
 ### The "NULL passes CHECK" Gotcha
 
@@ -873,18 +875,18 @@ COMMIT;                                    -- FK checked here — passes!
 
 ## Comparison Table: All Constraints at a Glance
 
-| Feature | PRIMARY KEY | FOREIGN KEY | UNIQUE | NOT NULL | CHECK | DEFAULT |
-|---|---|---|---|---|---|---|
-| Prevents duplicates | Yes | No | Yes | No | No | No |
-| Prevents NULL | Yes | No | No* | Yes | No | No |
-| References another table | No | Yes | No | No | No | No |
-| Allows complex logic | No | No | No | No | Yes | Yes |
-| Creates index | Yes | No (usually) | Yes | No | No | No |
-| Number per table | 1 | Many | Many | Many | Many | Many |
-| NULL allowed | No | Yes (if column is nullable) | Yes** | No | Passes on NULL | N/A |
+| Feature                  | PRIMARY KEY | FOREIGN KEY                 | UNIQUE  | NOT NULL | CHECK          | DEFAULT |
+| ------------------------ | ----------- | --------------------------- | ------- | -------- | -------------- | ------- |
+| Prevents duplicates      | Yes         | No                          | Yes     | No       | No             | No      |
+| Prevents NULL            | Yes         | No                          | No\*    | Yes      | No             | No      |
+| References another table | No          | Yes                         | No      | No       | No             | No      |
+| Allows complex logic     | No          | No                          | No      | No       | Yes            | Yes     |
+| Creates index            | Yes         | No (usually)                | Yes     | No       | No             | No      |
+| Number per table         | 1           | Many                        | Many    | Many     | Many           | Many    |
+| NULL allowed             | No          | Yes (if column is nullable) | Yes\*\* | No       | Passes on NULL | N/A     |
 
-*\*Unless combined with NOT NULL.*
-*\*\*Multiple NULLs allowed in PostgreSQL/MySQL/Oracle; only one in SQL Server.*
+_\*Unless combined with NOT NULL._
+_\*\*Multiple NULLs allowed in PostgreSQL/MySQL/Oracle; only one in SQL Server._
 
 ---
 
@@ -892,17 +894,17 @@ COMMIT;                                    -- FK checked here — passes!
 
 Before finalizing a table definition, walk through this:
 
-| Question | If Yes... |
-|---|---|
-| What identifies this row uniquely? | → Add a `PRIMARY KEY` |
-| Which columns must always have a value? | → Add `NOT NULL` |
-| Which columns must be distinct? | → Add `UNIQUE` |
-| Does this column reference another table? | → Add a `FOREIGN KEY` |
-| Are there range/format rules? | → Add a `CHECK` constraint |
-| Is there a sensible default value? | → Add a `DEFAULT` |
-| Do FK columns have indexes? | → Add explicit indexes (esp. PostgreSQL, SQL Server) |
-| Are constraint names meaningful? | → Name them explicitly |
-| Can NULL be a valid state? | → Document it; don't leave it ambiguous |
+| Question                                  | If Yes...                                            |
+| ----------------------------------------- | ---------------------------------------------------- |
+| What identifies this row uniquely?        | → Add a `PRIMARY KEY`                                |
+| Which columns must always have a value?   | → Add `NOT NULL`                                     |
+| Which columns must be distinct?           | → Add `UNIQUE`                                       |
+| Does this column reference another table? | → Add a `FOREIGN KEY`                                |
+| Are there range/format rules?             | → Add a `CHECK` constraint                           |
+| Is there a sensible default value?        | → Add a `DEFAULT`                                    |
+| Do FK columns have indexes?               | → Add explicit indexes (esp. PostgreSQL, SQL Server) |
+| Are constraint names meaningful?          | → Name them explicitly                               |
+| Can NULL be a valid state?                | → Document it; don't leave it ambiguous              |
 
 ---
 
@@ -957,12 +959,12 @@ CREATE INDEX idx_order_items_prod_id ON order_items(prod_id);
 
 ### Grain Analysis
 
-| Table | Grain | Key |
-|---|---|---|
-| `customers` | One row per customer | `cust_id` |
-| `products` | One row per product | `prod_id` |
-| `orders` | One row per order | `order_id` |
-| `order_items` | One row per line item within an order | `item_id` |
+| Table         | Grain                                 | Key        |
+| ------------- | ------------------------------------- | ---------- |
+| `customers`   | One row per customer                  | `cust_id`  |
+| `products`    | One row per product                   | `prod_id`  |
+| `orders`      | One row per order                     | `order_id` |
+| `order_items` | One row per line item within an order | `item_id`  |
 
 ### Why These Constraints?
 
@@ -975,16 +977,16 @@ CREATE INDEX idx_order_items_prod_id ON order_items(prod_id);
 
 ## Production Pitfalls Summary
 
-| Pitfall | Description | Prevention |
-|---|---|---|
-| Missing FK indexes | Parent DELETEs/UPDATEs cause full child table scans | Always index FK columns |
-| CHECK allowing NULLs | CHECK passes on NULL — not a substitute for NOT NULL | Combine CHECK with NOT NULL |
-| CASCADE chains | Deleting one row triggers deep delete chains | Audit cascade paths before deploying |
-| Disabled constraints | Bulk loading with constraints off, forgotten to re-enable | Automate re-enable in load scripts |
-| MySQL < 8.0.16 CHECK | CHECK parsed but not enforced | Use triggers or upgrade |
-| Auto-generated constraint names | Hard to identify in error messages and migrations | Name all constraints explicitly |
-| UUID as clustered PK | Random UUIDs cause page splits in InnoDB/MSSQL | Use sequential UUIDs or ULID |
-| Circular FK references | Two NOT NULL FKs referencing each other | Make one nullable or use deferred constraints |
+| Pitfall                         | Description                                               | Prevention                                    |
+| ------------------------------- | --------------------------------------------------------- | --------------------------------------------- |
+| Missing FK indexes              | Parent DELETEs/UPDATEs cause full child table scans       | Always index FK columns                       |
+| CHECK allowing NULLs            | CHECK passes on NULL — not a substitute for NOT NULL      | Combine CHECK with NOT NULL                   |
+| CASCADE chains                  | Deleting one row triggers deep delete chains              | Audit cascade paths before deploying          |
+| Disabled constraints            | Bulk loading with constraints off, forgotten to re-enable | Automate re-enable in load scripts            |
+| MySQL < 8.0.16 CHECK            | CHECK parsed but not enforced                             | Use triggers or upgrade                       |
+| Auto-generated constraint names | Hard to identify in error messages and migrations         | Name all constraints explicitly               |
+| UUID as clustered PK            | Random UUIDs cause page splits in InnoDB/MSSQL            | Use sequential UUIDs or ULID                  |
+| Circular FK references          | Two NOT NULL FKs referencing each other                   | Make one nullable or use deferred constraints |
 
 ---
 

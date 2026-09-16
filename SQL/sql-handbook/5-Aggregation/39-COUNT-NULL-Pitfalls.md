@@ -35,11 +35,11 @@ Data almost always has **missing values**. SQL represents missing information wi
 
 ### The Three Forms
 
-| Form | Counts | Skips NULLs |
-|---|---|---|
-| `COUNT(*)` | All rows, including NULLs | No |
-| `COUNT(column)` | Non-NULL values in that column | Yes |
-| `COUNT(DISTINCT column)` | Unique non-NULL values in that column | Yes |
+| Form                     | Counts                                | Skips NULLs |
+| ------------------------ | ------------------------------------- | ----------- |
+| `COUNT(*)`               | All rows, including NULLs             | No          |
+| `COUNT(column)`          | Non-NULL values in that column        | Yes         |
+| `COUNT(DISTINCT column)` | Unique non-NULL values in that column | Yes         |
 
 > Common misconception: `COUNT(*)` counts "all rows including NULLs" — many beginners think it counts only non-NULL rows. It counts **every row** regardless of content. `NULL` in a column does not make the row disappear from `COUNT(*)`.
 
@@ -47,7 +47,7 @@ Data almost always has **missing values**. SQL represents missing information wi
 
 ## Internal Working
 
-### How does COUNT(*) work internally?
+### How does COUNT(\*) work internally?
 
 Most optimizers treat `COUNT(*)` specially:
 
@@ -116,16 +116,16 @@ SELECT SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) AS active_count FROM u
 
 One row per employee.
 
-| id | name | department | salary | manager_id | hire_date |
-|----|------|-----------|--------|------------|-----------|
-| 1 | Alice | Engineering | 120000 | NULL | 2019-03-15 |
-| 2 | Bob | Engineering | 95000 | 1 | 2020-07-01 |
-| 3 | Charlie | Marketing | 80000 | NULL | 2018-11-20 |
-| 4 | Diana | Marketing | 75000 | 3 | 2021-01-10 |
-| 5 | Eve | Sales | 70000 | NULL | 2022-06-05 |
-| 6 | Frank | Sales | 65000 | 5 | 2023-02-14 |
-| 7 | Grace | Engineering | 110000 | 1 | 2020-09-30 |
-| 8 | Heidi | NULL | 60000 | NULL | 2023-08-01 |
+| id  | name    | department  | salary | manager_id | hire_date  |
+| --- | ------- | ----------- | ------ | ---------- | ---------- |
+| 1   | Alice   | Engineering | 120000 | NULL       | 2019-03-15 |
+| 2   | Bob     | Engineering | 95000  | 1          | 2020-07-01 |
+| 3   | Charlie | Marketing   | 80000  | NULL       | 2018-11-20 |
+| 4   | Diana   | Marketing   | 75000  | 3          | 2021-01-10 |
+| 5   | Eve     | Sales       | 70000  | NULL       | 2022-06-05 |
+| 6   | Frank   | Sales       | 65000  | 5          | 2023-02-14 |
+| 7   | Grace   | Engineering | 110000 | 1          | 2020-09-30 |
+| 8   | Heidi   | NULL        | 60000  | NULL       | 2023-08-01 |
 
 Note: Rows 1, 3, 5, 7, 8 have `NULL` in `manager_id`. Row 8 has `NULL` in `department`.
 
@@ -134,13 +134,13 @@ Note: Rows 1, 3, 5, 7, 8 have `NULL` in `manager_id`. Row 8 has `NULL` in `depar
 One row per order.
 
 | order_id | customer_id | product_id | amount | discount | order_date |
-|----------|-------------|------------|--------|----------|------------|
-| 101 | 1 | 10 | 250.00 | 25.00 | 2024-01-05 |
-| 102 | 1 | 20 | NULL | NULL | 2024-01-10 |
-| 103 | 2 | 10 | 300.00 | NULL | 2024-01-15 |
-| 104 | 3 | 30 | NULL | NULL | 2024-02-01 |
-| 105 | 2 | 20 | 150.00 | 10.00 | 2024-02-10 |
-| 106 | 4 | NULL | 400.00 | NULL | 2024-02-15 |
+| -------- | ----------- | ---------- | ------ | -------- | ---------- |
+| 101      | 1           | 10         | 250.00 | 25.00    | 2024-01-05 |
+| 102      | 1           | 20         | NULL   | NULL     | 2024-01-10 |
+| 103      | 2           | 10         | 300.00 | NULL     | 2024-01-15 |
+| 104      | 3           | 30         | NULL   | NULL     | 2024-02-01 |
+| 105      | 2           | 20         | 150.00 | 10.00    | 2024-02-10 |
+| 106      | 4           | NULL       | 400.00 | NULL     | 2024-02-15 |
 
 Note: Rows 102, 104 have `NULL` in `amount`. Rows 102, 103, 104, 106 have `NULL` in `discount`. Row 106 has `NULL` in `product_id`.
 
@@ -148,7 +148,7 @@ Note: Rows 102, 104 have `NULL` in `amount`. Rows 102, 103, 104, 106 have `NULL`
 
 ## Core Examples
 
-### Example 1: COUNT(*) vs COUNT(column)
+### Example 1: COUNT(\*) vs COUNT(column)
 
 ```sql
 SELECT
@@ -162,8 +162,8 @@ FROM employees;
 **Expected result:**
 
 | total_rows | dept_not_null | manager_not_null | salary_not_null |
-|------------|---------------|------------------|-----------------|
-| 8 | 7 | 3 | 8 |
+| ---------- | ------------- | ---------------- | --------------- |
+| 8          | 7             | 3                | 8               |
 
 **Why?**
 
@@ -188,8 +188,8 @@ FROM employees;
 **Expected result:**
 
 | unique_depts | unique_managers |
-|--------------|-----------------|
-| 4 | 3 |
+| ------------ | --------------- |
+| 4            | 3               |
 
 **Why?**
 
@@ -211,8 +211,8 @@ FROM orders;
 **Expected result:**
 
 | total_orders | orders_with_amount | orders_with_discount |
-|--------------|-------------------|---------------------|
-| 6 | 4 | 2 |
+| ------------ | ------------------ | -------------------- |
+| 6            | 4                  | 2                    |
 
 **Why?**
 
@@ -236,12 +236,12 @@ GROUP BY department;
 
 **Expected result:**
 
-| department | total_employees | employees_with_manager | avg_salary |
-|------------|-----------------|----------------------|------------|
-| Engineering | 3 | 2 | 108333 |
-| Marketing | 2 | 1 | 77500 |
-| Sales | 2 | 1 | 67500 |
-| NULL | 1 | 0 | 60000 |
+| department  | total_employees | employees_with_manager | avg_salary |
+| ----------- | --------------- | ---------------------- | ---------- |
+| Engineering | 3               | 2                      | 108333     |
+| Marketing   | 2               | 1                      | 77500      |
+| Sales       | 2               | 1                      | 67500      |
+| NULL        | 1               | 0                      | 60000      |
 
 > Important: `GROUP BY` groups `NULL` values together. `NULL` department forms its own group. See [NULL behavior in GROUP BY](#null-behavior-deep-dive) below.
 
@@ -260,11 +260,11 @@ HAVING COUNT(*) > 1;
 
 **Expected result:**
 
-| department | total_employees |
-|------------|-----------------|
-| Engineering | 3 |
-| Marketing | 2 |
-| Sales | 2 |
+| department  | total_employees |
+| ----------- | --------------- |
+| Engineering | 3               |
+| Marketing   | 2               |
+| Sales       | 2               |
 
 NULL department is excluded because it has only 1 employee.
 
@@ -314,8 +314,8 @@ FROM employees;
 **Result:**
 
 | total | null_managers | non_null_managers |
-|-------|---------------|-------------------|
-| 8 | 5 | 3 |
+| ----- | ------------- | ----------------- |
+| 8     | 5             | 3                 |
 
 **Oracle workaround:**
 
@@ -342,17 +342,17 @@ ORDER BY manager_id;
 **Expected result:**
 
 | manager_id | report_count |
-|------------|--------------|
-| NULL | 5 |
-| 1 | 2 |
-| 3 | 1 |
-| 5 | 1 |
+| ---------- | ------------ |
+| NULL       | 5            |
+| 1          | 2            |
+| 3          | 1            |
+| 5          | 1            |
 
 > Important: `GROUP BY` creates a separate group for `NULL`. NULLs are grouped together, not ignored. This is standard ANSI SQL behavior.
 
 ---
 
-### COUNT(*) vs COUNT(column) in expressions
+### COUNT(\*) vs COUNT(column) in expressions
 
 ```sql
 -- This is a dangerous pattern
@@ -373,14 +373,14 @@ FROM employees;
 
 For completeness — `COUNT` is not the only aggregate affected by NULL:
 
-| Function | NULL behavior |
-|----------|---------------|
-| `COUNT(*)` | Counts all rows |
-| `COUNT(col)` | Skips NULLs |
-| `SUM(col)` | Ignores NULLs; if ALL values are NULL, returns NULL (not 0) |
-| `AVG(col)` | Ignores NULLs; divides by count of non-NULL values |
-| `MIN(col)` / `MAX(col)` | Ignores NULLs |
-| `GROUP_CONCAT(col)` | Ignores NULLs (MySQL) / `STRING_AGG` ignores NULLs (PostgreSQL, SQL Server) |
+| Function                | NULL behavior                                                               |
+| ----------------------- | --------------------------------------------------------------------------- |
+| `COUNT(*)`              | Counts all rows                                                             |
+| `COUNT(col)`            | Skips NULLs                                                                 |
+| `SUM(col)`              | Ignores NULLs; if ALL values are NULL, returns NULL (not 0)                 |
+| `AVG(col)`              | Ignores NULLs; divides by count of non-NULL values                          |
+| `MIN(col)` / `MAX(col)` | Ignores NULLs                                                               |
+| `GROUP_CONCAT(col)`     | Ignores NULLs (MySQL) / `STRING_AGG` ignores NULLs (PostgreSQL, SQL Server) |
 
 > Production pitfall: `AVG(salary)` does not include NULL salaries in the denominator. If you want to count NULL salaries as 0, use `AVG(COALESCE(salary, 0))`. Verify the business intent before using `AVG`.
 
@@ -442,8 +442,8 @@ FROM employees;
 **Expected result:**
 
 | pct_with_manager |
-|------------------|
-| 37.5 |
+| ---------------- |
+| 37.5             |
 
 **Why?** The `CASE` expression makes the intent explicit: "count rows where manager_id is not NULL, divided by total rows." This is self-documenting.
 
@@ -499,9 +499,9 @@ HAVING COUNT(*) >= 3;
 
 **Expected result:**
 
-| department | employee_count | avg_salary |
-|------------|----------------|------------|
-| Engineering | 3 | 108333 |
+| department  | employee_count | avg_salary |
+| ----------- | -------------- | ---------- |
+| Engineering | 3              | 108333     |
 
 **Why?** `WHERE` filters rows before grouping. `HAVING` filters groups after aggregation. Since we need the count (an aggregate result) to decide which groups to keep, we must use `HAVING`.
 
@@ -523,18 +523,18 @@ HAVING SUM(CASE WHEN manager_id IS NULL THEN 1 ELSE 0 END) >
 **Expected result:**
 
 | department | no_manager | has_manager |
-|------------|------------|-------------|
-| Sales | 1 | 1 |
-| Marketing | 1 | 1 |
-| NULL | 1 | 0 |
+| ---------- | ---------- | ----------- |
+| Sales      | 1          | 1           |
+| Marketing  | 1          | 1           |
+| NULL       | 1          | 0           |
 
 Wait — Sales and Marketing are tied at 1-1, so they would not satisfy the `HAVING`. Only the NULL department (Heidi) has 1 no_manager and 0 has_manager.
 
 **Corrected result:**
 
 | department | no_manager | has_manager |
-|------------|------------|-------------|
-| NULL | 1 | 0 |
+| ---------- | ---------- | ----------- |
+| NULL       | 1          | 0           |
 
 ---
 
@@ -566,8 +566,8 @@ FROM employees;
 **Expected result:**
 
 | total | dept_count | distinct_depts |
-|-------|------------|----------------|
-| 0 | 0 | 0 |
+| ----- | ---------- | -------------- |
+| 0     | 0          | 0              |
 
 **Why?** `COUNT(*)` returns 0 for an empty table (not NULL). `COUNT(column)` also returns 0. `COUNT(DISTINCT column)` also returns 0. This is correct ANSI SQL behavior.
 
@@ -589,8 +589,8 @@ FROM employees;
 If every `department` is NULL:
 
 | total | dept_count | distinct_depts |
-|-------|------------|----------------|
-| 8 | 0 | 0 |
+| ----- | ---------- | -------------- |
+| 8     | 0          | 0              |
 
 `COUNT(column)` returns 0, not NULL, because it counts non-NULL values and there are none.
 
@@ -618,7 +618,7 @@ SELECT COUNT(*) FROM (
 ) sub;
 ```
 
-**Result:** 3 (COUNT(*) counts all rows)
+**Result:** 3 (COUNT(\*) counts all rows)
 
 ```sql
 SELECT COUNT(val) FROM (
@@ -649,7 +649,7 @@ FROM employees;
 
 ---
 
-### Edge Case 6: COUNT(*) with a WHERE that never matches
+### Edge Case 6: COUNT(\*) with a WHERE that never matches
 
 ```sql
 SELECT COUNT(*) FROM employees WHERE 1 = 0;
@@ -663,7 +663,7 @@ This is not a NULL issue, but beginners sometimes confuse it.
 
 ## Common Mistakes
 
-### Mistake 1: Using COUNT(*) when COUNT(column) is needed
+### Mistake 1: Using COUNT(\*) when COUNT(column) is needed
 
 ```sql
 -- WRONG: counts all rows, not just those with a discount
@@ -687,7 +687,7 @@ SELECT COUNT(*) FROM employees WHERE manager_id IS NULL;
 
 ---
 
-### Mistake 3: COUNT(*) after LEFT JOIN
+### Mistake 3: COUNT(\*) after LEFT JOIN
 
 ```sql
 -- WRONG: counts joined rows, not actual orders
@@ -749,7 +749,7 @@ SELECT COUNT(DISTINCT order_id) FROM orders WHERE customer_id = 1;
 
 ## Production Pitfalls
 
-### Pitfall 1: COUNT(*) on large tables without an index
+### Pitfall 1: COUNT(\*) on large tables without an index
 
 On a table with billions of rows, `SELECT COUNT(*) FROM large_table` can take minutes. The engine must traverse the entire index (or table).
 
@@ -812,19 +812,19 @@ SELECT AVG(salary) FROM employees WHERE department = 'Nonexistent';
 
 ## Performance Implications
 
-### COUNT(*) vs COUNT(column) speed
+### COUNT(\*) vs COUNT(column) speed
 
-| Aspect | COUNT(*) | COUNT(column) | COUNT(DISTINCT column) |
-|--------|----------|---------------|----------------------|
-| Needs to read column data | No | Yes | Yes |
-| Can use covering index fully | Yes (smallest index) | Only if column is indexed | Only if column is indexed |
-| NULL handling overhead | None | Must check each row | Must check + deduplicate |
-| Memory usage | Minimal | Minimal | Proportional to distinct count |
-| Typical speed (large table) | Fastest | Slightly slower | Slowest |
+| Aspect                       | COUNT(\*)            | COUNT(column)             | COUNT(DISTINCT column)         |
+| ---------------------------- | -------------------- | ------------------------- | ------------------------------ |
+| Needs to read column data    | No                   | Yes                       | Yes                            |
+| Can use covering index fully | Yes (smallest index) | Only if column is indexed | Only if column is indexed      |
+| NULL handling overhead       | None                 | Must check each row       | Must check + deduplicate       |
+| Memory usage                 | Minimal              | Minimal                   | Proportional to distinct count |
+| Typical speed (large table)  | Fastest              | Slightly slower           | Slowest                        |
 
 > Performance claims above are general tendencies, not guarantees. Actual performance depends on the optimizer, indexes, statistics, cardinality, data distribution, query shape, database engine, and execution plan. Always verify with `EXPLAIN ANALYZE`.
 
-### When COUNT(*) can use an index
+### When COUNT(\*) can use an index
 
 If the table has an index, `COUNT(*)` can traverse the index instead of the table. A smaller index is faster:
 
@@ -862,7 +862,7 @@ EXPLAIN ANALYZE SELECT COUNT(DISTINCT customer_id) FROM orders;
 
 ---
 
-### Trap 2: "Why does COUNT(*) not count NULLs as zeros?"
+### Trap 2: "Why does COUNT(\*) not count NULLs as zeros?"
 
 **Answer:** `COUNT(*)` counts **rows**, not values. It does not examine any column. A row exists regardless of whether its columns contain NULL. `COUNT(column)` counts non-NULL **values** in that column. These are different operations.
 
@@ -896,7 +896,7 @@ GROUP BY department;
 
 ---
 
-### Trap 5: "Can COUNT(*) return NULL?"
+### Trap 5: "Can COUNT(\*) return NULL?"
 
 **Answer:** No. `COUNT(*)` always returns a non-negative integer, even for empty tables (returns 0). `COUNT(column)` also returns 0 for empty tables or all-NULL columns, never NULL.
 
@@ -913,6 +913,7 @@ SELECT COUNT(DISTINCT col1, col2) FROM table_name;
 ```
 
 > PostgreSQL: Multi-column `DISTINCT` in `COUNT` is not supported. Use a subquery:
+>
 > ```sql
 > SELECT COUNT(*) FROM (SELECT DISTINCT col1, col2 FROM table_name) sub;
 > ```
@@ -927,32 +928,32 @@ SELECT COUNT(DISTINCT col1, col2) FROM table_name;
 
 ### COUNT Variants Side by Side
 
-| Expression | Counts | NULLs included? | Empty table result |
-|-----------|--------|----------------|-------------------|
-| `COUNT(*)` | All rows | N/A (counts rows) | 0 |
-| `COUNT(col)` | Non-NULL values in col | No | 0 |
-| `COUNT(DISTINCT col)` | Unique non-NULL values | No | 0 |
-| `COUNT(CASE WHEN x THEN 1 END)` | Rows where x is true | No (NULL from ELSE) | 0 |
-| `COUNT(CASE WHEN x THEN 1 ELSE 0 END)` | All rows (0 is not NULL) | N/A | 0 |
+| Expression                             | Counts                   | NULLs included?     | Empty table result |
+| -------------------------------------- | ------------------------ | ------------------- | ------------------ |
+| `COUNT(*)`                             | All rows                 | N/A (counts rows)   | 0                  |
+| `COUNT(col)`                           | Non-NULL values in col   | No                  | 0                  |
+| `COUNT(DISTINCT col)`                  | Unique non-NULL values   | No                  | 0                  |
+| `COUNT(CASE WHEN x THEN 1 END)`        | Rows where x is true     | No (NULL from ELSE) | 0                  |
+| `COUNT(CASE WHEN x THEN 1 ELSE 0 END)` | All rows (0 is not NULL) | N/A                 | 0                  |
 
 ### COUNT vs SUM for Conditional Counting
 
-| Expression | Meaning |
-|-----------|---------|
-| `COUNT(CASE WHEN condition THEN 1 END)` | Counts rows where condition is TRUE |
-| `SUM(CASE WHEN condition THEN 1 ELSE 0 END)` | Same result, but 0 is explicit |
-| `COUNT(*) FILTER (WHERE condition)` | PostgreSQL shorthand, same result |
+| Expression                                   | Meaning                             |
+| -------------------------------------------- | ----------------------------------- |
+| `COUNT(CASE WHEN condition THEN 1 END)`      | Counts rows where condition is TRUE |
+| `SUM(CASE WHEN condition THEN 1 ELSE 0 END)` | Same result, but 0 is explicit      |
+| `COUNT(*) FILTER (WHERE condition)`          | PostgreSQL shorthand, same result   |
 
 ### NULL Comparison Operators
 
-| Expression | NULL = NULL result | NULL compared to value |
-|-----------|-------------------|----------------------|
-| `=` | UNKNOWN | UNKNOWN |
-| `<>` | UNKNOWN | UNKNOWN |
-| `IS NULL` | TRUE for NULL | N/A (only checks NULL) |
-| `IS NOT NULL` | FALSE for NULL | N/A (only checks not NULL) |
-| `IS DISTINCT FROM` | FALSE (NULLs are equal) | TRUE if values differ |
-| `IS NOT DISTINCT FROM` | TRUE (NULLs are equal) | TRUE if values are same |
+| Expression             | NULL = NULL result      | NULL compared to value     |
+| ---------------------- | ----------------------- | -------------------------- |
+| `=`                    | UNKNOWN                 | UNKNOWN                    |
+| `<>`                   | UNKNOWN                 | UNKNOWN                    |
+| `IS NULL`              | TRUE for NULL           | N/A (only checks NULL)     |
+| `IS NOT NULL`          | FALSE for NULL          | N/A (only checks not NULL) |
+| `IS DISTINCT FROM`     | FALSE (NULLs are equal) | TRUE if values differ      |
+| `IS NOT DISTINCT FROM` | TRUE (NULLs are equal)  | TRUE if values are same    |
 
 ---
 
@@ -971,6 +972,7 @@ SELECT COUNT(DISTINCT col1, col2) FROM table_name;
 6. **Prefer `COUNT(column)` over `COUNT(*) - COUNT(column)` for counting NULLs** when readability matters. The subtraction trick is clever but less obvious.
 
 7. **For conditional counting, consider PostgreSQL's `FILTER` clause:**
+
    ```sql
    SELECT COUNT(*) FILTER (WHERE salary > 80000) AS high_earners
    FROM employees;
@@ -1009,6 +1011,7 @@ SELECT COUNT(DISTINCT col1, col2) FROM table_name;
 9. Write a query to count distinct departments from the `employees` table. What happens if some departments are NULL?
 
 10. What is the difference between these two queries?
+
     ```sql
     -- Query A
     SELECT COUNT(DISTINCT department) FROM employees;
@@ -1044,21 +1047,25 @@ SELECT COUNT(DISTINCT col1, col2) FROM table_name;
 ## Tricky
 
 21. What is the result of this query? Explain step by step.
+
     ```sql
     SELECT COUNT(*) FROM (SELECT NULL UNION ALL SELECT NULL UNION ALL SELECT 1) t;
     ```
 
 22. What is the result of this query?
+
     ```sql
     SELECT COUNT(col) FROM (SELECT NULL AS col UNION ALL SELECT NULL UNION ALL SELECT 1) t;
     ```
 
 23. What is the result of this query?
+
     ```sql
     SELECT COUNT(DISTINCT col) FROM (SELECT NULL AS col UNION ALL SELECT NULL UNION ALL SELECT 1) t;
     ```
 
 24. What is the result of this query? Why?
+
     ```sql
     SELECT
         COUNT(CASE WHEN salary > 100000 THEN 1 END) AS high,
@@ -1075,6 +1082,7 @@ SELECT COUNT(DISTINCT col1, col2) FROM table_name;
 ## Output Prediction
 
 26. Given the `employees` table above, what is the output of:
+
     ```sql
     SELECT
         department,
@@ -1085,6 +1093,7 @@ SELECT COUNT(DISTINCT col1, col2) FROM table_name;
     ```
 
 27. Given the `orders` table above, what is the output of:
+
     ```sql
     SELECT
         COUNT(amount) AS has_amount,
@@ -1101,6 +1110,7 @@ SELECT COUNT(DISTINCT col1, col2) FROM table_name;
 ## Debugging
 
 29. The following query returns a count that is higher than expected. Debug it:
+
     ```sql
     SELECT
         c.customer_id,
@@ -1110,6 +1120,7 @@ SELECT COUNT(DISTINCT col1, col2) FROM table_name;
     LEFT JOIN order_items oi ON o.order_id = oi.order_id
     GROUP BY c.customer_id;
     ```
+
     What is the problem and how would you fix it?
 
 30. A developer writes this query to find departments where all employees earn above 80,000:
@@ -1124,6 +1135,7 @@ SELECT COUNT(DISTINCT col1, col2) FROM table_name;
 ## Performance
 
 31. You have a table `audit_log` with 1 billion rows and a composite index on `(event_type, created_at)`. Which query is likely faster and why?
+
     ```sql
     -- Query A
     SELECT COUNT(*) FROM audit_log WHERE event_type = 'login';
@@ -1139,6 +1151,7 @@ SELECT COUNT(DISTINCT col1, col2) FROM table_name;
 34. You need to count rows in a table that is being actively written to. What isolation-level concerns exist? How would you get a consistent count?
 
 35. Compare the performance characteristics of these three approaches to count NULLs in a column:
+
     ```sql
     -- Approach A
     SELECT COUNT(*) - COUNT(col) FROM t;
@@ -1149,4 +1162,5 @@ SELECT COUNT(DISTINCT col1, col2) FROM table_name;
     -- Approach C
     SELECT COUNT(*) FROM t WHERE col IS NULL;
     ```
+
     Under what conditions might one be faster than the others?

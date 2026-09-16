@@ -7,18 +7,7 @@
 1. [What AreSection generated in `sql-handbook/1-Fundamentals/02-Data-Types.md`.
 
 Covers: numeric (INT/DECIMAL/FLOAT, integer division, money problem), strings (CHAR/VARCHAR/TEXT, collation), dates/times (TIMESTAMP vs TIMESTAMPTZ, timezone issues, boundary bugs), BOOLEAN, binary, JSON/JSONB, UUID, ARRAY, ENUM/SET, casting, implicit conversion, sargability, NULL/default interplay, identity columns, and DB-specific differences (PostgreSQL/MySQL/SQL Server/Oracle) — plus BAD vs BETTER examples, comparison tables, edge cases, and the full 8-part Interview Questions section.
--the-decimal-vs-float-problem)
-14. [Type Conversion and Casting](#type-conversion-and-casting)
-15. [Implicit Type Conversion (Implicit Cast)](#implicit-type-conversion-implicit-cast)
-16. [Sargability and Data Types](#sargability-and-data-types)
-17. [NULL and Data Types](#null-and-data-types)
-18. [Identity / Auto-Increment](#identity--auto-increment)
-19. [Column Defaults](#column-defaults)
-20. [Common Mistakes](#common-mistakes)
-21. [Production Pitfalls](#production-pitfalls)
-22. [Performance Implications](#performance-implications)
-23. [Comparison Tables](#comparison-tables)
-24. [Interview Questions](#interview-questions)
+-the-decimal-vs-float-problem) 14. [Type Conversion and Casting](#type-conversion-and-casting) 15. [Implicit Type Conversion (Implicit Cast)](#implicit-type-conversion-implicit-cast) 16. [Sargability and Data Types](#sargability-and-data-types) 17. [NULL and Data Types](#null-and-data-types) 18. [Identity / Auto-Increment](#identity--auto-increment) 19. [Column Defaults](#column-defaults) 20. [Common Mistakes](#common-mistakes) 21. [Production Pitfalls](#production-pitfalls) 22. [Performance Implications](#performance-implications) 23. [Comparison Tables](#comparison-tables) 24. [Interview Questions](#interview-questions)
 
 ---
 
@@ -28,12 +17,12 @@ A data type defines what kind of value a column can store: numbers, text, dates,
 
 Think of it as a contract:
 
-| Contract Aspect | Analogy |
-|----------------|---------|
-| Data type | What kind of data the column accepts |
-| Storage size | How much disk/memory it uses |
+| Contract Aspect    | Analogy                                               |
+| ------------------ | ----------------------------------------------------- |
+| Data type          | What kind of data the column accepts                  |
+| Storage size       | How much disk/memory it uses                          |
 | Allowed operations | What you can do (math, comparisons, pattern matching) |
-| Validation rules | What values are valid |
+| Validation rules   | What values are valid                                 |
 
 ```sql
 CREATE TABLE products (
@@ -46,6 +35,7 @@ CREATE TABLE products (
 ```
 
 Each column has a type that determines:
+
 - What values are valid
 - How much storage is used
 - What operations are possible
@@ -57,14 +47,14 @@ Each column has a type that determines:
 
 Choosing the wrong data type can cause:
 
-| Problem | Example |
-|---------|---------|
-| **Data loss** | Storing `99999999.99` in a `DECIMAL(8,2)` — overflow |
-| **Wrong results** | Storing dates in `VARCHAR` — sorting by "date" sorts alphabetically |
-| **Performance** | Using `TEXT` for a column that should be `VARCHAR(50)` — larger indexes, slower scans |
-| **Precision errors** | Using `FLOAT` for money — floating-point arithmetic produces rounding errors |
-| **Conversion failures** | Storing `'abc'` in an `INT` column — implicit cast fails |
-| **Broken queries** | Comparing a `DATE` column to a string `'2024-01-01'` — works sometimes, fails silently others |
+| Problem                 | Example                                                                                       |
+| ----------------------- | --------------------------------------------------------------------------------------------- |
+| **Data loss**           | Storing `99999999.99` in a `DECIMAL(8,2)` — overflow                                          |
+| **Wrong results**       | Storing dates in `VARCHAR` — sorting by "date" sorts alphabetically                           |
+| **Performance**         | Using `TEXT` for a column that should be `VARCHAR(50)` — larger indexes, slower scans         |
+| **Precision errors**    | Using `FLOAT` for money — floating-point arithmetic produces rounding errors                  |
+| **Conversion failures** | Storing `'abc'` in an `INT` column — implicit cast fails                                      |
+| **Broken queries**      | Comparing a `DATE` column to a string `'2024-01-01'` — works sometimes, fails silently others |
 
 > Production pitfall: Changing a column's data type on a large table can lock the table for minutes or hours. Plan type changes carefully, especially in production systems with high write throughput.
 
@@ -166,12 +156,12 @@ Numeric types store integer and floating-point numbers. The choice between them 
 
 ### Integer Types
 
-| Type | Storage | Range (Signed) | Use When |
-|------|---------|-----------------|----------|
-| `TINYINT` | 1 byte | -128 to 127 | Small flags, status codes |
-| `SMALLINT` | 2 bytes | -32,768 to 32,767 | Moderate ranges, counters |
-| `INTEGER` / `INT` | 4 bytes | -2.1B to 2.1B | General-purpose IDs, counts |
-| `BIGINT` | 8 bytes | ±9.2 × 10¹⁸ | Very large values, global counters |
+| Type              | Storage | Range (Signed)    | Use When                           |
+| ----------------- | ------- | ----------------- | ---------------------------------- |
+| `TINYINT`         | 1 byte  | -128 to 127       | Small flags, status codes          |
+| `SMALLINT`        | 2 bytes | -32,768 to 32,767 | Moderate ranges, counters          |
+| `INTEGER` / `INT` | 4 bytes | -2.1B to 2.1B     | General-purpose IDs, counts        |
+| `BIGINT`          | 8 bytes | ±9.2 × 10¹⁸       | Very large values, global counters |
 
 > **PostgreSQL** does not have `TINYINT`. Use `SMALLINT` instead.
 >
@@ -226,10 +216,10 @@ CREATE TABLE flags (
 
 ### Decimal / Exact Numeric Types
 
-| Type | Storage | Precision | Use When |
-|------|---------|-----------|----------|
-| `DECIMAL(p,s)` / `NUMERIC(p,s)` | Variable | Exact to `s` decimal places | Money, precise measurements |
-| `MONEY` | 4 or 8 bytes | Fixed by locale | SQL Server currency (limited) |
+| Type                            | Storage      | Precision                   | Use When                      |
+| ------------------------------- | ------------ | --------------------------- | ----------------------------- |
+| `DECIMAL(p,s)` / `NUMERIC(p,s)` | Variable     | Exact to `s` decimal places | Money, precise measurements   |
+| `MONEY`                         | 4 or 8 bytes | Fixed by locale             | SQL Server currency (limited) |
 
 - `p` = **precision** (total digits, 1–38 in most databases)
 - `s` = **scale** (digits after decimal point)
@@ -260,10 +250,10 @@ Internally, databases store DECIMAL in binary-coded decimal (BCD) format. Each g
 
 ### Floating-Point / Approximate Numeric Types
 
-| Type | Storage | Precision | Use When |
-|------|---------|-----------|----------|
-| `REAL` / `FLOAT` | 4 bytes | ~7 decimal digits | Scientific data, large ranges, non-financial |
-| `DOUBLE PRECISION` / `DOUBLE` | 8 bytes | ~15 decimal digits | High-precision scientific data |
+| Type                          | Storage | Precision          | Use When                                     |
+| ----------------------------- | ------- | ------------------ | -------------------------------------------- |
+| `REAL` / `FLOAT`              | 4 bytes | ~7 decimal digits  | Scientific data, large ranges, non-financial |
+| `DOUBLE PRECISION` / `DOUBLE` | 8 bytes | ~15 decimal digits | High-precision scientific data               |
 
 ```sql
 -- FLOAT: 4 bytes, approximately 7 significant digits
@@ -350,13 +340,13 @@ String types store text. The choice between fixed-length and variable-length, an
 
 ### Overview
 
-| Type | Max Length | Storage | Use When |
-|------|-----------|---------|----------|
-| `CHAR(n)` | n characters | n bytes (padded) | Fixed-length codes (ISO country codes, state codes) |
-| `VARCHAR(n)` | n characters | Actual length + overhead | Most text fields (names, emails, addresses) |
-| `TEXT` | Very large (1 GB+) | Actual length + overhead | Long content (descriptions, articles, JSON) |
-| `VARCHAR(MAX)` | 2 GB | Actual length + overhead | SQL Server equivalent of TEXT |
-| `CLOB` | Very large | Varies | Oracle equivalent of TEXT |
+| Type           | Max Length         | Storage                  | Use When                                            |
+| -------------- | ------------------ | ------------------------ | --------------------------------------------------- |
+| `CHAR(n)`      | n characters       | n bytes (padded)         | Fixed-length codes (ISO country codes, state codes) |
+| `VARCHAR(n)`   | n characters       | Actual length + overhead | Most text fields (names, emails, addresses)         |
+| `TEXT`         | Very large (1 GB+) | Actual length + overhead | Long content (descriptions, articles, JSON)         |
+| `VARCHAR(MAX)` | 2 GB               | Actual length + overhead | SQL Server equivalent of TEXT                       |
+| `CLOB`         | Very large         | Varies                   | Oracle equivalent of TEXT                           |
 
 ### CHAR vs VARCHAR
 
@@ -442,13 +432,13 @@ CREATE TABLE articles (
 
 Collation determines how strings are compared and sorted (case-sensitive, accent-sensitive, etc.).
 
-| Database | Default Collation | Case-Sensitive? |
-|----------|-------------------|-----------------|
-| PostgreSQL | `en_US.UTF-8` | Yes |
-| MySQL (Windows) | `utf8mb4_general_ci` | No (`ci` = case-insensitive) |
-| MySQL (Linux) | `utf8mb4_general_ci` | No (default), but file system is case-sensitive |
-| SQL Server | `SQL_Latin1_General_CP1_CI_AS` | No (`CI` = case-insensitive) |
-| Oracle | Based on `NLS_COMP` / `NLS_SORT` | Depends on settings |
+| Database        | Default Collation                | Case-Sensitive?                                 |
+| --------------- | -------------------------------- | ----------------------------------------------- |
+| PostgreSQL      | `en_US.UTF-8`                    | Yes                                             |
+| MySQL (Windows) | `utf8mb4_general_ci`             | No (`ci` = case-insensitive)                    |
+| MySQL (Linux)   | `utf8mb4_general_ci`             | No (default), but file system is case-sensitive |
+| SQL Server      | `SQL_Latin1_General_CP1_CI_AS`   | No (`CI` = case-insensitive)                    |
+| Oracle          | Based on `NLS_COMP` / `NLS_SORT` | Depends on settings                             |
 
 ```sql
 -- PostgreSQL: case-sensitive by default
@@ -490,13 +480,13 @@ Date and time types store temporal values. Choosing the right type determines wh
 
 ### Overview
 
-| Type | Stores | Range (approx.) | Use When |
-|------|--------|------------------|----------|
-| `DATE` | Date only | 4713 BC – 5874897 AD | Birth dates, order dates, deadlines |
-| `TIME` | Time only | 00:00:00 – 23:59:59.999999 | Store hours/minutes (rarely alone) |
-| `TIMESTAMP` / `DATETIME` | Date + Time (no timezone) | Varies by DB | When you control timezone handling |
-| `TIMESTAMPTZ` / `DATETIMEOFFSET` | Date + Time + Timezone | Varies by DB | When you need timezone awareness |
-| `INTERVAL` | Duration | Varies | Time differences, durations |
+| Type                             | Stores                    | Range (approx.)            | Use When                            |
+| -------------------------------- | ------------------------- | -------------------------- | ----------------------------------- |
+| `DATE`                           | Date only                 | 4713 BC – 5874897 AD       | Birth dates, order dates, deadlines |
+| `TIME`                           | Time only                 | 00:00:00 – 23:59:59.999999 | Store hours/minutes (rarely alone)  |
+| `TIMESTAMP` / `DATETIME`         | Date + Time (no timezone) | Varies by DB               | When you control timezone handling  |
+| `TIMESTAMPTZ` / `DATETIMEOFFSET` | Date + Time + Timezone    | Varies by DB               | When you need timezone awareness    |
+| `INTERVAL`                       | Duration                  | Varies                     | Time differences, durations         |
 
 ### DATE
 
@@ -552,10 +542,10 @@ INSERT INTO audit_log VALUES (2, CURRENT_TIMESTAMP);
 
 > **MySQL:** `TIMESTAMP` stores the value in UTC internally and converts it to the session timezone on retrieval. `DATETIME` stores the value as-is without timezone conversion.
 
-| MySQL | Behavior |
-|-------|----------|
+| MySQL       | Behavior                                             |
+| ----------- | ---------------------------------------------------- |
 | `TIMESTAMP` | Stored in UTC, converted to session timezone on read |
-| `DATETIME` | Stored literally, no timezone conversion |
+| `DATETIME`  | Stored literally, no timezone conversion             |
 
 ```sql
 -- MySQL
@@ -686,12 +676,12 @@ FROM transactions;
 
 The SQL standard defines `BOOLEAN` with three values: `TRUE`, `FALSE`, and `NULL`.
 
-| Database | Supports `BOOLEAN`? | Internally Stored As |
-|----------|---------------------|----------------------|
-| PostgreSQL | Yes | 1 byte (true/false/NULL) |
-| MySQL | No native `BOOLEAN` | `TINYINT(1)` (0, 1, NULL) |
-| SQL Server | No native `BOOLEAN` | `BIT` (0, 1, NULL) |
-| Oracle | No native `BOOLEAN` | `NUMBER(1)` (0, 1, NULL) |
+| Database   | Supports `BOOLEAN`? | Internally Stored As      |
+| ---------- | ------------------- | ------------------------- |
+| PostgreSQL | Yes                 | 1 byte (true/false/NULL)  |
+| MySQL      | No native `BOOLEAN` | `TINYINT(1)` (0, 1, NULL) |
+| SQL Server | No native `BOOLEAN` | `BIT` (0, 1, NULL)        |
+| Oracle     | No native `BOOLEAN` | `NUMBER(1)` (0, 1, NULL)  |
 
 ```sql
 -- PostgreSQL: native BOOLEAN
@@ -756,14 +746,14 @@ SELECT * FROM features WHERE is_enabled = 'true'; -- works
 
 Binary types store raw byte data (files, images, encrypted content, hashes).
 
-| Type | Max Size | Use When |
-|------|----------|----------|
-| `BINARY(n)` | n bytes | Fixed-length binary (hashes, UUIDs) |
-| `VARBINARY(n)` | n bytes | Variable-length binary (signatures, keys) |
-| `BIT` | 1 bit | Flags (SQL Server) |
-| `BYTEA` | ~1 GB | PostgreSQL binary data |
-| `BLOB` | Varies | MySQL binary large objects |
-| `RAW(n)` | n bytes | Oracle binary data |
+| Type           | Max Size | Use When                                  |
+| -------------- | -------- | ----------------------------------------- |
+| `BINARY(n)`    | n bytes  | Fixed-length binary (hashes, UUIDs)       |
+| `VARBINARY(n)` | n bytes  | Variable-length binary (signatures, keys) |
+| `BIT`          | 1 bit    | Flags (SQL Server)                        |
+| `BYTEA`        | ~1 GB    | PostgreSQL binary data                    |
+| `BLOB`         | Varies   | MySQL binary large objects                |
+| `RAW(n)`       | n bytes  | Oracle binary data                        |
 
 ```sql
 -- PostgreSQL: BYTEA for binary data
@@ -793,12 +783,12 @@ Modern databases support storing and querying structured data (JSON, arrays, ran
 
 ### JSON Types
 
-| Database | Type | Indexed JSON Queries |
-|----------|------|----------------------|
-| PostgreSQL | `JSONB` (binary, recommended) / `JSON` (text) | GIN indexes, path operators |
-| MySQL | `JSON` | Generated columns + indexes |
-| SQL Server | `NVARCHAR(MAX)` | JSON functions, no native type |
-| Oracle | `CLOB` / `BLOB` | `JSON` data type (21c+), path expressions |
+| Database   | Type                                          | Indexed JSON Queries                      |
+| ---------- | --------------------------------------------- | ----------------------------------------- |
+| PostgreSQL | `JSONB` (binary, recommended) / `JSON` (text) | GIN indexes, path operators               |
+| MySQL      | `JSON`                                        | Generated columns + indexes               |
+| SQL Server | `NVARCHAR(MAX)`                               | JSON functions, no native type            |
+| Oracle     | `CLOB` / `BLOB`                               | `JSON` data type (21c+), path expressions |
 
 ```sql
 -- PostgreSQL: JSONB (recommended)
@@ -822,9 +812,9 @@ FROM events
 WHERE event_type = 'page_view';
 ```
 
-| event_id | url | user_id | duration |
-|----------|-----|---------|----------|
-| 1 | /home | 42 | 1500 |
+| event_id | url   | user_id | duration |
+| -------- | ----- | ------- | -------- |
+| 1        | /home | 42      | 1500     |
 
 ```sql
 -- PostgreSQL: filter inside JSON
@@ -862,12 +852,12 @@ FROM events;
 
 Universally Unique Identifiers. Used as primary keys to avoid coordination across distributed systems.
 
-| Database | Type | Function |
-|----------|------|----------|
-| PostgreSQL | `UUID` | `gen_random_uuid()` |
-| MySQL | `CHAR(36)` or `BINARY(16)` | `UUID()` |
-| SQL Server | `UNIQUEIDENTIFIER` | `NEWID()` |
-| Oracle | `RAW(16)` or `CHAR(36)` | `SYS_GUID()` |
+| Database   | Type                       | Function            |
+| ---------- | -------------------------- | ------------------- |
+| PostgreSQL | `UUID`                     | `gen_random_uuid()` |
+| MySQL      | `CHAR(36)` or `BINARY(16)` | `UUID()`            |
+| SQL Server | `UNIQUEIDENTIFIER`         | `NEWID()`           |
+| Oracle     | `RAW(16)` or `CHAR(36)`    | `SYS_GUID()`        |
 
 ```sql
 -- PostgreSQL
@@ -1515,6 +1505,7 @@ ALTER TABLE orders ALTER COLUMN total TYPE DECIMAL(15,2);
 ```
 
 > Production pitfall: In PostgreSQL, `ALTER COLUMN TYPE` requires rewriting the entire table. On tables with millions of rows, this locks the table and takes a long time. Use a migration strategy:
+>
 > 1. Add a new column with the correct type
 > 2. Copy data from old column to new column in batches
 > 3. Swap columns
@@ -1568,23 +1559,24 @@ SELECT * FROM users WHERE nickname IS NULL OR nickname = ''; -- returns both
 ### Storage Size Affects Everything
 
 Larger data types mean:
+
 - More disk space
 - More memory usage (buffer pool, sort operations)
 - Larger indexes (slower scans, more I/O)
 - Slower network transfer
 
-| Type | Storage | Impact |
-|------|---------|--------|
-| `TINYINT` | 1 byte | Fastest |
-| `SMALLINT` | 2 bytes | Fast |
-| `INT` | 4 bytes | Standard |
-| `BIGINT` | 8 bytes | Use when needed |
-| `DECIMAL(10,2)` | 5 bytes (approx.) | Exact, moderate |
-| `FLOAT` | 4 bytes | Fast, imprecise |
-| `DOUBLE` | 8 bytes | Fast, more precise than FLOAT |
-| `VARCHAR(30)` | Actual + 1-2 bytes | Efficient for short text |
-| `VARCHAR(500)` | Actual + 2 bytes | Use when data is long |
-| `TEXT` | Actual + overhead | May be stored off-page |
+| Type            | Storage            | Impact                        |
+| --------------- | ------------------ | ----------------------------- |
+| `TINYINT`       | 1 byte             | Fastest                       |
+| `SMALLINT`      | 2 bytes            | Fast                          |
+| `INT`           | 4 bytes            | Standard                      |
+| `BIGINT`        | 8 bytes            | Use when needed               |
+| `DECIMAL(10,2)` | 5 bytes (approx.)  | Exact, moderate               |
+| `FLOAT`         | 4 bytes            | Fast, imprecise               |
+| `DOUBLE`        | 8 bytes            | Fast, more precise than FLOAT |
+| `VARCHAR(30)`   | Actual + 1-2 bytes | Efficient for short text      |
+| `VARCHAR(500)`  | Actual + 2 bytes   | Use when data is long         |
+| `TEXT`          | Actual + overhead  | May be stored off-page        |
 
 ### Index Size by Type
 
@@ -1626,62 +1618,62 @@ WHERE tablename = 'employees';
 
 ### Numeric Types
 
-| Type | Storage | Exact? | Range | Use For |
-|------|---------|--------|-------|---------|
-| `TINYINT` | 1 B | Yes | -128 to 127 | Small codes |
-| `SMALLINT` | 2 B | Yes | -32K to 32K | Moderate IDs |
-| `INT` | 4 B | Yes | ±2.1B | Standard IDs |
-| `BIGINT` | 8 B | Yes | ±9.2E18 | Large tables |
-| `DECIMAL(p,s)` | ~5 B | Yes | Depends on p | Money |
-| `REAL` | 4 B | No | ±3.4E38 | Scientific |
-| `DOUBLE` | 8 B | No | ±1.7E308 | Scientific |
+| Type           | Storage | Exact? | Range        | Use For      |
+| -------------- | ------- | ------ | ------------ | ------------ |
+| `TINYINT`      | 1 B     | Yes    | -128 to 127  | Small codes  |
+| `SMALLINT`     | 2 B     | Yes    | -32K to 32K  | Moderate IDs |
+| `INT`          | 4 B     | Yes    | ±2.1B        | Standard IDs |
+| `BIGINT`       | 8 B     | Yes    | ±9.2E18      | Large tables |
+| `DECIMAL(p,s)` | ~5 B    | Yes    | Depends on p | Money        |
+| `REAL`         | 4 B     | No     | ±3.4E38      | Scientific   |
+| `DOUBLE`       | 8 B     | No     | ±1.7E308     | Scientific   |
 
 ### String Types
 
-| Type | Variable? | Max Size | Use For |
-|------|-----------|----------|---------|
-| `CHAR(n)` | No (padded) | n chars | Fixed codes (ISO) |
-| `VARCHAR(n)` | Yes | n chars | Names, emails |
-| `TEXT` | Yes | Very large | Long content |
-| `VARCHAR(MAX)` | Yes | 2 GB | SQL Server long text |
+| Type           | Variable?   | Max Size   | Use For              |
+| -------------- | ----------- | ---------- | -------------------- |
+| `CHAR(n)`      | No (padded) | n chars    | Fixed codes (ISO)    |
+| `VARCHAR(n)`   | Yes         | n chars    | Names, emails        |
+| `TEXT`         | Yes         | Very large | Long content         |
+| `VARCHAR(MAX)` | Yes         | 2 GB       | SQL Server long text |
 
 ### Date/Time Types
 
-| Type | Stores | Timezone? | Use For |
-|------|--------|-----------|---------|
-| `DATE` | Date only | N/A | Birth dates, deadlines |
-| `TIME` | Time only | N/A | Store hours |
-| `TIMESTAMP` / `DATETIME` | Date + Time | No (literal) | Application-controlled |
-| `TIMESTAMPTZ` / `DATETIMEOFFSET` | Date + Time + TZ | Yes (UTC internally) | Cross-timezone |
+| Type                             | Stores           | Timezone?            | Use For                |
+| -------------------------------- | ---------------- | -------------------- | ---------------------- |
+| `DATE`                           | Date only        | N/A                  | Birth dates, deadlines |
+| `TIME`                           | Time only        | N/A                  | Store hours            |
+| `TIMESTAMP` / `DATETIME`         | Date + Time      | No (literal)         | Application-controlled |
+| `TIMESTAMPTZ` / `DATETIMEOFFSET` | Date + Time + TZ | Yes (UTC internally) | Cross-timezone         |
 
 ### Boolean Representations
 
-| Database | Type | TRUE | FALSE | NULL |
-|----------|------|------|-------|------|
-| PostgreSQL | `BOOLEAN` | `TRUE` | `FALSE` | `NULL` |
-| MySQL | `BOOLEAN` / `TINYINT(1)` | `1` / `TRUE` | `0` / `FALSE` | `NULL` |
-| SQL Server | `BIT` | `1` | `0` | `NULL` |
-| Oracle | `NUMBER(1)` | `1` | `0` | `NULL` |
+| Database   | Type                     | TRUE         | FALSE         | NULL   |
+| ---------- | ------------------------ | ------------ | ------------- | ------ |
+| PostgreSQL | `BOOLEAN`                | `TRUE`       | `FALSE`       | `NULL` |
+| MySQL      | `BOOLEAN` / `TINYINT(1)` | `1` / `TRUE` | `0` / `FALSE` | `NULL` |
+| SQL Server | `BIT`                    | `1`          | `0`           | `NULL` |
+| Oracle     | `NUMBER(1)`              | `1`          | `0`           | `NULL` |
 
 ---
 
 ## Best Practices
 
-| Practice | Why |
-|----------|-----|
-| Use `DECIMAL` for money | Avoids floating-point rounding errors |
-| Use `DATE` for dates, not `VARCHAR` | Correct sorting, arithmetic, indexing |
-| Use `TIMESTAMPTZ` when timezone matters | Avoids ambiguous timestamps |
-| Choose the smallest adequate integer type | Saves storage and speeds up indexes |
-| Use `VARCHAR(n)` over `CHAR(n)` for variable-length data | Avoids wasted padding storage |
-| Use `BIGINT` for high-volume tables | Avoids integer overflow |
-| Set appropriate `VARCHAR` lengths | Enforce data quality at the database level |
-| Use `BOOLEAN` in PostgreSQL, `BIT` in SQL Server, `TINYINT(1)` in MySQL | Platform-appropriate boolean storage |
-| Store timestamps in UTC internally | Avoid timezone-related bugs |
-| Avoid `TEXT` / `BLOB` for indexed columns | Some databases cannot index them efficiently |
-| Store files in object storage, not database | Easier management, backup, CDN access |
-| Use `IDENTITY` over `SERIAL` (PostgreSQL) | Better sequence management |
-| Always match types in comparisons | Prevents implicit cast that kills index usage |
+| Practice                                                                | Why                                           |
+| ----------------------------------------------------------------------- | --------------------------------------------- |
+| Use `DECIMAL` for money                                                 | Avoids floating-point rounding errors         |
+| Use `DATE` for dates, not `VARCHAR`                                     | Correct sorting, arithmetic, indexing         |
+| Use `TIMESTAMPTZ` when timezone matters                                 | Avoids ambiguous timestamps                   |
+| Choose the smallest adequate integer type                               | Saves storage and speeds up indexes           |
+| Use `VARCHAR(n)` over `CHAR(n)` for variable-length data                | Avoids wasted padding storage                 |
+| Use `BIGINT` for high-volume tables                                     | Avoids integer overflow                       |
+| Set appropriate `VARCHAR` lengths                                       | Enforce data quality at the database level    |
+| Use `BOOLEAN` in PostgreSQL, `BIT` in SQL Server, `TINYINT(1)` in MySQL | Platform-appropriate boolean storage          |
+| Store timestamps in UTC internally                                      | Avoid timezone-related bugs                   |
+| Avoid `TEXT` / `BLOB` for indexed columns                               | Some databases cannot index them efficiently  |
+| Store files in object storage, not database                             | Easier management, backup, CDN access         |
+| Use `IDENTITY` over `SERIAL` (PostgreSQL)                               | Better sequence management                    |
+| Always match types in comparisons                                       | Prevents implicit cast that kills index usage |
 
 ---
 
@@ -1737,6 +1729,7 @@ WHERE tablename = 'employees';
 Given the sample tables above, predict the output:
 
 31.
+
 ```sql
 SELECT
     CAST(price AS INT) AS truncated_price,
@@ -1746,6 +1739,7 @@ WHERE product_id <= 3;
 ```
 
 32.
+
 ```sql
 SELECT
     product_name,
@@ -1756,6 +1750,7 @@ WHERE product_id = 2;
 ```
 
 33.
+
 ```sql
 SELECT
     txn_id,
@@ -1766,6 +1761,7 @@ WHERE txn_id <= 3;
 ```
 
 34.
+
 ```sql
 SELECT
     user_id,
@@ -1776,6 +1772,7 @@ FROM user_profiles;
 ```
 
 35.
+
 ```sql
 SELECT
     product_id,
@@ -1792,11 +1789,13 @@ WHERE product_id IN (4, 1, 6);
 ## Debugging
 
 36. The following query returns 0 rows but the developer knows `'alice_dev'` exists. Why?
+
 ```sql
 SELECT * FROM user_profiles WHERE username = Alice;
 ```
 
 37. This INSERT fails with a truncation warning. What is wrong?
+
 ```sql
 CREATE TABLE contacts (name VARCHAR(5));
 INSERT INTO contacts VALUES ('Alexander');
@@ -1805,6 +1804,7 @@ INSERT INTO contacts VALUES ('Alexander');
 38. A query `SELECT * FROM orders WHERE total = 0.1 + 0.2` returns rows with `total = 0.3`. But a developer claims their FLOAT column never matches. Explain why `0.1 + 0.2` can equal `0.3` in some cases but not others.
 
 39. The following query works on MySQL but fails on PostgreSQL. Why?
+
 ```sql
 SELECT * FROM users WHERE nickname = NULL;
 ```

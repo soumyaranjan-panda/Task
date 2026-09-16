@@ -8,13 +8,13 @@ This is one of the **most common SQL problems** — it appears in interviews, pr
 
 ### Concrete Examples
 
-| Business Question | Group Column | "Latest" Means |
-|---|---|---|
-| Most recent order per customer | `customer_id` | Highest `order_date` |
-| Latest price per product | `product_id` | Highest `effective_date` |
-| Most recent login per user | `user_id` | Highest `login_time` |
-| Current address per customer | `customer_id` | Highest `updated_at` |
-| Last transaction per account | `account_id` | Highest `transaction_date` |
+| Business Question              | Group Column  | "Latest" Means             |
+| ------------------------------ | ------------- | -------------------------- |
+| Most recent order per customer | `customer_id` | Highest `order_date`       |
+| Latest price per product       | `product_id`  | Highest `effective_date`   |
+| Most recent login per user     | `user_id`     | Highest `login_time`       |
+| Current address per customer   | `customer_id` | Highest `updated_at`       |
+| Last transaction per account   | `account_id`  | Highest `transaction_date` |
 
 ---
 
@@ -22,12 +22,12 @@ This is one of the **most common SQL problems** — it appears in interviews, pr
 
 Before window functions, getting "the latest row per group" required workarounds that were either **slow**, **wrong**, or **fragile**:
 
-| Approach | Problem |
-|---|---|
+| Approach                             | Problem                                      |
+| ------------------------------------ | -------------------------------------------- |
 | `GROUP BY` + `MAX(date)` + JOIN back | Returns multiple rows when the max date ties |
-| Correlated subquery | O(n²) performance |
-| `DISTINCT ON` (PostgreSQL only) | Not portable |
-| Application-side filtering | Pulls unnecessary data |
+| Correlated subquery                  | O(n²) performance                            |
+| `DISTINCT ON` (PostgreSQL only)      | Not portable                                 |
+| Application-side filtering           | Pulls unnecessary data                       |
 
 `ROW_NUMBER()` provides a clean, correct, and portable solution that works across all modern databases.
 
@@ -101,7 +101,7 @@ CROSS APPLY (
 
 The `ROW_NUMBER()` approach works in two logical stages:
 
-```mermaid
+````mermaid
 flowchart LR
     A["Source table<br/>(all rows)"] --> B["Window function<br/>PARTITION BY group<br/>ORDER BY timestamp DESC<br/>Assigns rn = 1, 2, 3, ..."]
 cal QueryOnly 3 matches, all legitimate content. Let me do a broader final verification with different phrasing patterns.
@@ -175,17 +175,17 @@ FROM (
     FROM orders
 ) ranked
 WHERE rn = 1;
-```
+````
 
 **Why `order_id DESC` in the tiebreaker?** Orders 104 and 107 share the same `(customer_id, order_date)`. Without a tiebreaker, which one gets `rn = 1` is **nondeterministic** — the same query can return different results on different runs.
 
 ### Expected Output
 
 | order_id | customer_id | order_date | amount |
-|---|---|---|---|
-| 107 | 1 | 2024-03-10 | 90.00 |
-| 106 | 2 | 2024-03-05 | 275.00 |
-| 105 | 3 | 2024-02-25 | 150.00 |
+| -------- | ----------- | ---------- | ------ |
+| 107      | 1           | 2024-03-10 | 90.00  |
+| 106      | 2           | 2024-03-05 | 275.00 |
+| 105      | 3           | 2024-02-25 | 150.00 |
 
 Order 107 is chosen over 104 because `order_id DESC` places 107 before 104 within the tie.
 
@@ -210,10 +210,10 @@ WHERE rn = 1;
 ### Expected Output
 
 | product_id | price | effective_date |
-|---|---|---|
-| 101 | 27.99 | 2024-09-01 |
-| 102 | 44.99 | 2024-04-15 |
-| 103 | 15.00 | 2024-02-10 |
+| ---------- | ----- | -------------- |
+| 101        | 27.99 | 2024-09-01     |
+| 102        | 44.99 | 2024-04-15     |
+| 103        | 15.00 | 2024-02-10     |
 
 ---
 
@@ -255,11 +255,11 @@ WHERE o1.order_date = (
 **Expected (wrong) output:**
 
 | order_id | customer_id | order_date | amount |
-|---|---|---|---|
-| 104 | 1 | 2024-03-10 | 400.00 |
-| 107 | 1 | 2024-03-10 | 90.00 |
-| 106 | 2 | 2024-03-05 | 275.00 |
-| 105 | 3 | 2024-02-25 | 150.00 |
+| -------- | ----------- | ---------- | ------ |
+| 104      | 1           | 2024-03-10 | 400.00 |
+| 107      | 1           | 2024-03-10 | 90.00  |
+| 106      | 2           | 2024-03-05 | 275.00 |
+| 105      | 3           | 2024-02-25 | 150.00 |
 
 Customer 1 returns **two rows** — one more than expected.
 
@@ -462,10 +462,10 @@ ORDER BY customer_id, order_date DESC, order_id DESC;
 ### Expected Output
 
 | order_id | customer_id | order_date | amount |
-|---|---|---|---|
-| 107 | 1 | 2024-03-10 | 90.00 |
-| 106 | 2 | 2024-03-05 | 275.00 |
-| 105 | 3 | 2024-02-25 | 150.00 |
+| -------- | ----------- | ---------- | ------ |
+| 107      | 1           | 2024-03-10 | 90.00  |
+| 106      | 2           | 2024-03-05 | 275.00 |
+| 105      | 3           | 2024-02-25 | 150.00 |
 
 ### When to Use
 
@@ -483,14 +483,14 @@ ORDER BY customer_id, order_date DESC, order_id DESC;
 
 ## Comparison of All Methods
 
-| Method | Readability | Handles Ties | DB Support | Performance | When to Prefer |
-|---|---|---|---|---|---|
-| `ROW_NUMBER()` | Excellent | Yes (with tiebreaker) | All modern | Good | **Default choice** — portable, clear, correct |
-| Correlated Subquery | Poor | Only with complex fix | All | O(n²) without index | Rarely — legacy systems |
-| JOIN on MAX aggregate | Moderate | Only with complex fix | All | Good with index | When aggregate values are also needed |
-| `LATERAL` / `CROSS APPLY` | Good | Yes | PostgreSQL, MySQL 8+, SQL Server, Oracle | Excellent for small N | Large partitions, top-1 per group |
-| `NOT EXISTS` | Poor | Only with correct tiebreaker | All | Moderate | When window functions unavailable |
-| `DISTINCT ON` | Excellent | Yes (with tiebreaker) | PostgreSQL only | Excellent | PostgreSQL one-liner |
+| Method                    | Readability | Handles Ties                 | DB Support                               | Performance           | When to Prefer                                |
+| ------------------------- | ----------- | ---------------------------- | ---------------------------------------- | --------------------- | --------------------------------------------- |
+| `ROW_NUMBER()`            | Excellent   | Yes (with tiebreaker)        | All modern                               | Good                  | **Default choice** — portable, clear, correct |
+| Correlated Subquery       | Poor        | Only with complex fix        | All                                      | O(n²) without index   | Rarely — legacy systems                       |
+| JOIN on MAX aggregate     | Moderate    | Only with complex fix        | All                                      | Good with index       | When aggregate values are also needed         |
+| `LATERAL` / `CROSS APPLY` | Good        | Yes                          | PostgreSQL, MySQL 8+, SQL Server, Oracle | Excellent for small N | Large partitions, top-1 per group             |
+| `NOT EXISTS`              | Poor        | Only with correct tiebreaker | All                                      | Moderate              | When window functions unavailable             |
+| `DISTINCT ON`             | Excellent   | Yes (with tiebreaker)        | PostgreSQL only                          | Excellent             | PostgreSQL one-liner                          |
 
 ### Decision Flowchart
 
@@ -527,10 +527,10 @@ WHERE rn = 1;
 **Output:**
 
 | order_id | customer_id | order_date | amount |
-|---|---|---|---|
-| 107 | 1 | 2024-03-10 | 90.00 |
-| 106 | 2 | 2024-03-05 | 275.00 |
-| 105 | 3 | 2024-02-25 | 150.00 |
+| -------- | ----------- | ---------- | ------ |
+| 107      | 1           | 2024-03-10 | 90.00  |
+| 106      | 2           | 2024-03-05 | 275.00 |
+| 105      | 3           | 2024-02-25 | 150.00 |
 
 ### Scenario 2: Latest Price Per Product
 
@@ -553,10 +553,10 @@ WHERE rn = 1;
 **Output:**
 
 | product_id | price | effective_date |
-|---|---|---|
-| 101 | 27.99 | 2024-09-01 |
-| 102 | 44.99 | 2024-04-15 |
-| 103 | 15.00 | 2024-02-10 |
+| ---------- | ----- | -------------- |
+| 101        | 27.99 | 2024-09-01     |
+| 102        | 44.99 | 2024-04-15     |
+| 103        | 15.00 | 2024-02-10     |
 
 ### Scenario 3: Most Recent Login Per User (with JOIN to Get User Details)
 
@@ -601,11 +601,11 @@ LEFT JOIN (
 **Expected Output (with sample data):**
 
 | customer_id | customer_name | order_id | order_date | amount |
-|---|---|---|---|---|
-| 1 | (name) | 107 | 2024-03-10 | 90.00 |
-| 2 | (name) | 106 | 2024-03-05 | 275.00 |
-| 3 | (name) | 105 | 2024-02-25 | 150.00 |
-| 4 | (name) | NULL | NULL | NULL |
+| ----------- | ------------- | -------- | ---------- | ------ |
+| 1           | (name)        | 107      | 2024-03-10 | 90.00  |
+| 2           | (name)        | 106      | 2024-03-05 | 275.00 |
+| 3           | (name)        | 105      | 2024-02-25 | 150.00 |
+| 4           | (name)        | NULL     | NULL       | NULL   |
 
 Customer 4 has no orders — the `LEFT JOIN` preserves them with NULLs.
 
@@ -635,13 +635,13 @@ WHERE salary_rank = 1;
 
 **Output:**
 
-| employee_id | employee_name | department | salary |
-|---|---|---|---|
-| 3 | Charlie | Engineering | 130000 |
-| 4 | Diana | Marketing | 95000 |
-| 6 | Frank | Marketing | 95000 |
-| 7 | Grace | Sales | 105000 |
-| 8 | Hank | Sales | 105000 |
+| employee_id | employee_name | department  | salary |
+| ----------- | ------------- | ----------- | ------ |
+| 3           | Charlie       | Engineering | 130000 |
+| 4           | Diana         | Marketing   | 95000  |
+| 6           | Frank         | Marketing   | 95000  |
+| 7           | Grace         | Sales       | 105000 |
+| 8           | Hank          | Sales       | 105000 |
 
 Diana and Frank both have salary 95000 in Marketing — both are returned because `DENSE_RANK` keeps ties.
 
@@ -751,12 +751,12 @@ ROW_NUMBER() OVER (
 
 The position of NULLs depends on the database:
 
-| Database | `ORDER BY order_date DESC` | NULLs Position |
-|---|---|---|
-| PostgreSQL | NULLs first by default | Use `NULLS LAST` to push them to the bottom |
-| MySQL | NULLs last in DESC | NULLs sorted as lowest value |
-| SQL Server | NULLs last in DESC | NULLs sorted as lowest value |
-| Oracle | NULLs first by default | Use `NULLS LAST` to push them to the bottom |
+| Database   | `ORDER BY order_date DESC` | NULLs Position                              |
+| ---------- | -------------------------- | ------------------------------------------- |
+| PostgreSQL | NULLs first by default     | Use `NULLS LAST` to push them to the bottom |
+| MySQL      | NULLs last in DESC         | NULLs sorted as lowest value                |
+| SQL Server | NULLs last in DESC         | NULLs sorted as lowest value                |
+| Oracle     | NULLs first by default     | Use `NULLS LAST` to push them to the bottom |
 
 ```sql
 -- PostgreSQL / Oracle: push NULLs to the bottom
@@ -835,6 +835,7 @@ ROW_NUMBER() OVER (
 ```
 
 Without the tiebreaker, the same query can return **different results on different runs**. This causes:
+
 - Bugs in applications that cache results
 - Inconsistent reports
 - Flaky tests
@@ -935,6 +936,7 @@ ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY order_date DESC, order_id D
 ### Pitfall 1: Non-Deterministic Results
 
 Without a tiebreaker, **the same query returns different results on different runs**. In production this causes:
+
 - Application bugs when results are cached or paginated
 - Inconsistent nightly reports
 - Flaky integration tests
@@ -944,11 +946,13 @@ Without a tiebreaker, **the same query returns different results on different ru
 ### Pitfall 2: Large Sort Spilling to Disk
 
 `ROW_NUMBER` requires sorting all rows within each partition. When partitions are large (millions of rows), the sort may spill to disk, causing:
+
 - High I/O
 - Memory pressure
 - Slow queries
 
 **Mitigation:**
+
 - Create an index matching `(partition_cols, order_cols)` to avoid the sort
 - Use `EXPLAIN ANALYZE` to verify the sort is eliminated
 - Consider `LATERAL`/`CROSS APPLY` for top-1 queries on very large partitions
@@ -989,6 +993,7 @@ CREATE INDEX idx_latest_per_group
 ```
 
 This index supports:
+
 1. **Partition pruning** — scan one group at a time
 2. **Pre-sorted order** — no sort step needed
 3. **Limit pushdown** — the database can stop after 1 row per partition
@@ -997,22 +1002,22 @@ This index supports:
 
 Run `EXPLAIN ANALYZE` (PostgreSQL), `EXPLAIN` (MySQL), or the equivalent for your database.
 
-| Good Signs | Bad Signs |
-|---|---|
-| Index Scan / Index Only Scan | Full Table Scan |
-| Limit / Top-N Sort | Filesort / Sort on full partition |
-| Nested Loop with LATERAL | Hash Join on full table before ranking |
-| Partition-wise processing | Materializing entire ranked result before filtering |
+| Good Signs                   | Bad Signs                                           |
+| ---------------------------- | --------------------------------------------------- |
+| Index Scan / Index Only Scan | Full Table Scan                                     |
+| Limit / Top-N Sort           | Filesort / Sort on full partition                   |
+| Nested Loop with LATERAL     | Hash Join on full table before ranking              |
+| Partition-wise processing    | Materializing entire ranked result before filtering |
 
 ### LATERAL vs ROW_NUMBER Performance
 
-| Aspect | ROW_NUMBER | LATERAL / CROSS APPLY |
-|---|---|---|
-| Materializes all ranked rows before filtering | Yes (typically) | No — can stop at 1 |
-| Works with complex GROUP BY | Yes (via CTE) | Requires more steps |
-| Index usage | Depends on partition size | Excellent with per-group index |
-| Readability | Excellent | Good |
-| Works for top-N where N > 1 | Yes | Yes |
+| Aspect                                        | ROW_NUMBER                | LATERAL / CROSS APPLY          |
+| --------------------------------------------- | ------------------------- | ------------------------------ |
+| Materializes all ranked rows before filtering | Yes (typically)           | No — can stop at 1             |
+| Works with complex GROUP BY                   | Yes (via CTE)             | Requires more steps            |
+| Index usage                                   | Depends on partition size | Excellent with per-group index |
+| Readability                                   | Excellent                 | Good                           |
+| Works for top-N where N > 1                   | Yes                       | Yes                            |
 
 For **very large** partitions where you need only 1 row, `LATERAL`/`CROSS APPLY` can outperform `ROW_NUMBER` because it avoids sorting the entire partition. However, for most practical cases, the `ROW_NUMBER` approach is equally fast and more readable.
 
@@ -1134,6 +1139,7 @@ Use these as practice. Answers intentionally withheld.
 22. Two engineers write:
 
     **Engineer A:**
+
     ```sql
     SELECT * FROM (
         SELECT *, ROW_NUMBER() OVER (PARTITION BY dept ORDER BY hire_date DESC) rn
@@ -1142,6 +1148,7 @@ Use these as practice. Answers intentionally withheld.
     ```
 
     **Engineer B:**
+
     ```sql
     SELECT e.*
     FROM employees e

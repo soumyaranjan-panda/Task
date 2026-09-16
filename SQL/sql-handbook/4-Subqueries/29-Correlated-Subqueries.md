@@ -26,23 +26,23 @@ What makes it "correlated" is **the reference itself**, not the position. A subq
 
 ### 1.2 Correlated vs non-correlated subquery
 
-| Aspect | Non-correlated (simple) subquery | Correlated subquery |
-|---|---|---|
-| References outer columns | No | Yes |
-| Can run standalone | Yes | No |
-| Logically executed | Once | Once **per outer row candidate** |
-| Direction of dependency | Inner → Outer (result feeds the outer query) | Outer → Inner (outer row is fed into the inner query) |
-| Typical execution shape | Hash join, hash semi-join, materialized set | Nested-loop style or "apply" style (may be decorrelated by the optimizer) |
-| Example | `WHERE dept_id IN (SELECT dept_id FROM departments)` | `WHERE salary > (SELECT AVG(...) WHERE dept_id = e.dept_id)` |
+| Aspect                   | Non-correlated (simple) subquery                     | Correlated subquery                                                       |
+| ------------------------ | ---------------------------------------------------- | ------------------------------------------------------------------------- |
+| References outer columns | No                                                   | Yes                                                                       |
+| Can run standalone       | Yes                                                  | No                                                                        |
+| Logically executed       | Once                                                 | Once **per outer row candidate**                                          |
+| Direction of dependency  | Inner → Outer (result feeds the outer query)         | Outer → Inner (outer row is fed into the inner query)                     |
+| Typical execution shape  | Hash join, hash semi-join, materialized set          | Nested-loop style or "apply" style (may be decorrelated by the optimizer) |
+| Example                  | `WHERE dept_id IN (SELECT dept_id FROM departments)` | `WHERE salary > (SELECT AVG(...) WHERE dept_id = e.dept_id)`              |
 
 ### 1.3 Why does it exist?
 
 A correlated subquery solves a class of problems that are awkward or risky to express with plain joins:
 
 1. **Row-preserving existence checks** — "keep this outer row if a matching row exists in another table" without fan-out.
-2. **Per-row comparison against another row's related data** — "compare each employee against a value derived from *their own* department".
+2. **Per-row comparison against another row's related data** — "compare each employee against a value derived from _their own_ department".
 3. **Per-row derived values in the SELECT list** — "for each customer, show the amount of their most recent order".
-4. **Row-at-a-time reasoning** — it mirrors how a human thinks: *"look at this row, look up something related, decide."*
+4. **Row-at-a-time reasoning** — it mirrors how a human thinks: _"look at this row, look up something related, decide."_
 
 It exists because sometimes a JOIN either duplicates rows (one-to-many / many-to-many) or forces a GROUP BY that you do not want, while a window function may not be available or may compute more than you need.
 
@@ -95,31 +95,37 @@ Illustrative plan shapes — exact text and node names vary by engine and versio
 **Correlated scalar subquery in `WHERE` (stays correlated):**
 
 ```
+
 Seq Scan on employees e
-  Filter: (salary > (SubPlan 1))
-  SubPlan 1
-    -> Aggregate
-       -> Index Only Scan using employees_dept_salary_idx on employees e2
-          Index Cond: (dept_id = e.dept_id)
+Filter: (salary > (SubPlan 1))
+SubPlan 1
+-> Aggregate
+-> Index Only Scan using employees_dept_salary_idx on employees e2
+Index Cond: (dept_id = e.dept_id)
+
 ```
 
 **Correlated `EXISTS` (decorrelated into a semi-join):**
 
 ```
+
 Nested Loop Semi Join
-  -> Seq Scan on customers c
-  -> Index Only Scan using orders_customer_id_idx on orders o
-       Index Cond: (customer_id = c.customer_id)
+-> Seq Scan on customers c
+-> Index Only Scan using orders_customer_id_idx on orders o
+Index Cond: (customer_id = c.customer_id)
+
 ```
 
 **Correlated `NOT EXISTS` (decorrelated into an anti-join):**
 
 ```
+
 Nested Loop Anti Join
-  -> Seq Scan on customers c
-  -> Index Only Scan using orders_customer_id_idx on orders o
-       Index Cond: (customer_id = c.customer_id)
-```
+-> Seq Scan on customers c
+-> Index Only Scan using orders_customer_id_idx on orders o
+Index Cond: (customer_id = c.customer_id)
+
+````
 
 > PostgreSQL
 
@@ -153,7 +159,7 @@ WHERE o.<col> <operator> (
     FROM <inner_table> AS i
     WHERE i.<key> = o.<key>      -- correlation
 );
-```
+````
 
 The subquery must return **zero or one row** (a scalar). Zero rows → `NULL`; more than one row → runtime error.
 
@@ -277,40 +283,40 @@ CREATE TABLE orders (
 **departments**
 
 | dept_id | dept_name   |
-|---|---|
-| 1 | Engineering |
-| 2 | Sales |
-| 3 | HR |
+| ------- | ----------- |
+| 1       | Engineering |
+| 2       | Sales       |
+| 3       | HR          |
 
 **employees**
 
-| emp_id | emp_name | dept_id | salary | hire_date |
-|---|---|---|---|---|
-| 101 | Alice | 1 | 90000.00 | 2019-01-15 |
-| 102 | Bob | 1 | 75000.00 | 2020-03-01 |
-| 107 | Grace | 1 | 80000.00 | 2022-07-19 |
-| 103 | Charlie | 2 | 60000.00 | 2018-06-10 |
-| 104 | Diana | 2 | 58000.00 | 2021-09-25 |
-| 105 | Eva | 2 | 72000.00 | 2020-11-02 |
-| 106 | Frank | 3 | 50000.00 | 2017-04-18 |
-| 108 | Henry | 3 | NULL | 2023-01-30 |
+| emp_id | emp_name | dept_id | salary   | hire_date  |
+| ------ | -------- | ------- | -------- | ---------- |
+| 101    | Alice    | 1       | 90000.00 | 2019-01-15 |
+| 102    | Bob      | 1       | 75000.00 | 2020-03-01 |
+| 107    | Grace    | 1       | 80000.00 | 2022-07-19 |
+| 103    | Charlie  | 2       | 60000.00 | 2018-06-10 |
+| 104    | Diana    | 2       | 58000.00 | 2021-09-25 |
+| 105    | Eva      | 2       | 72000.00 | 2020-11-02 |
+| 106    | Frank    | 3       | 50000.00 | 2017-04-18 |
+| 108    | Henry    | 3       | NULL     | 2023-01-30 |
 
 **customers**
 
-| customer_id | customer_name | city |
-|---|---|---|
-| 201 | Northwind Traders | New York |
-| 202 | Acme Corp | Chicago |
-| 203 | Globex | Boston |
+| customer_id | customer_name     | city     |
+| ----------- | ----------------- | -------- |
+| 201         | Northwind Traders | New York |
+| 202         | Acme Corp         | Chicago  |
+| 203         | Globex            | Boston   |
 
 **orders**
 
 | order_id | customer_id | order_date | amount |
-|---|---|---|---|
-| 3001 | 201 | 2024-01-10 | 120.50 |
-| 3002 | 201 | 2024-02-14 | 80.00 |
-| 3003 | 202 | 2024-01-22 | 240.00 |
-| 3004 | 201 | 2024-03-01 | 350.00 |
+| -------- | ----------- | ---------- | ------ |
+| 3001     | 201         | 2024-01-10 | 120.50 |
+| 3002     | 201         | 2024-02-14 | 80.00  |
+| 3003     | 202         | 2024-01-22 | 240.00 |
+| 3004     | 201         | 2024-03-01 | 350.00 |
 
 Customer `203` (Globex) has **no orders**. This row is deliberately included to demonstrate anti-join and NULL behavior.
 
@@ -334,23 +340,23 @@ WHERE e.salary > (
 
 **Row-by-row trace** — this is the logical model the engine follows (or an equivalent plan):
 
-| Outer row | bound dept_id | inner result (AVG(salary)) | comparison | keep? |
-|---|---|---|---|---|
-| Alice (101) | 1 | (90000+75000+80000)/3 = 81666.67 | 90000 > 81666.67 | yes |
-| Bob (102) | 1 | 81666.67 | 75000 > 81666.67 | no |
-| Grace (107) | 1 | 81666.67 | 80000 > 81666.67 | no |
-| Charlie (103) | 2 | (60000+58000+72000)/3 = 63333.33 | 60000 > 63333.33 | no |
-| Diana (104) | 2 | 63333.33 | 58000 > 63333.33 | no |
-| Eva (105) | 2 | 63333.33 | 72000 > 63333.33 | yes |
-| Frank (106) | 3 | 50000.00 (Henry's NULL is ignored by AVG) | 50000 > 50000 | no |
-| Henry (108) | 3 | 50000.00 | NULL > 50000 → **UNKNOWN** | no |
+| Outer row     | bound dept_id | inner result (AVG(salary))                | comparison                 | keep? |
+| ------------- | ------------- | ----------------------------------------- | -------------------------- | ----- |
+| Alice (101)   | 1             | (90000+75000+80000)/3 = 81666.67          | 90000 > 81666.67           | yes   |
+| Bob (102)     | 1             | 81666.67                                  | 75000 > 81666.67           | no    |
+| Grace (107)   | 1             | 81666.67                                  | 80000 > 81666.67           | no    |
+| Charlie (103) | 2             | (60000+58000+72000)/3 = 63333.33          | 60000 > 63333.33           | no    |
+| Diana (104)   | 2             | 63333.33                                  | 58000 > 63333.33           | no    |
+| Eva (105)     | 2             | 63333.33                                  | 72000 > 63333.33           | yes   |
+| Frank (106)   | 3             | 50000.00 (Henry's NULL is ignored by AVG) | 50000 > 50000              | no    |
+| Henry (108)   | 3             | 50000.00                                  | NULL > 50000 → **UNKNOWN** | no    |
 
 **Expected output**
 
-| emp_id | emp_name | dept_id | salary |
-|---|---|---|---|
-| 101 | Alice | 1 | 90000.00 |
-| 105 | Eva | 2 | 72000.00 |
+| emp_id | emp_name | dept_id | salary   |
+| ------ | -------- | ------- | -------- |
+| 101    | Alice    | 1       | 90000.00 |
+| 105    | Eva      | 2       | 72000.00 |
 
 Three NULL-related facts visible here:
 
@@ -375,8 +381,8 @@ WHERE NOT EXISTS (
 **Expected output**
 
 | customer_id | customer_name |
-|---|---|
-| 203 | Globex |
+| ----------- | ------------- |
+| 203         | Globex        |
 
 ### 5.3 Example 3 — Most recent order amount, one row per customer
 
@@ -399,11 +405,11 @@ FROM customers c;
 
 **Expected output**
 
-| customer_id | customer_name | last_order_amount |
-|---|---|---|
-| 201 | Northwind Traders | 350.00 |
-| 202 | Acme Corp | 240.00 |
-| 203 | Globex | NULL |
+| customer_id | customer_name     | last_order_amount |
+| ----------- | ----------------- | ----------------- |
+| 201         | Northwind Traders | 350.00            |
+| 202         | Acme Corp         | 240.00            |
+| 203         | Globex            | NULL              |
 
 Globex has no matching orders, so the scalar subquery returns zero rows → `NULL`. That is how "no data" is represented, and it is distinct from an amount that is genuinely `NULL`.
 
@@ -422,16 +428,16 @@ SELECT e.emp_id, e.emp_name, e.dept_id, e.salary,
 FROM employees e;
 ```
 
-| emp_id | emp_name | dept_id | salary | dept_rank |
-|---|---|---|---|---|
-| 101 | Alice | 1 | 90000.00 | 1 |
-| 107 | Grace | 1 | 80000.00 | 2 |
-| 102 | Bob | 1 | 75000.00 | 3 |
-| 105 | Eva | 2 | 72000.00 | 1 |
-| 103 | Charlie | 2 | 60000.00 | 2 |
-| 104 | Diana | 2 | 58000.00 | 3 |
-| 106 | Frank | 3 | 50000.00 | 1 |
-| 108 | Henry | 3 | NULL | 1 |
+| emp_id | emp_name | dept_id | salary   | dept_rank |
+| ------ | -------- | ------- | -------- | --------- |
+| 101    | Alice    | 1       | 90000.00 | 1         |
+| 107    | Grace    | 1       | 80000.00 | 2         |
+| 102    | Bob      | 1       | 75000.00 | 3         |
+| 105    | Eva      | 2       | 72000.00 | 1         |
+| 103    | Charlie  | 2       | 60000.00 | 2         |
+| 104    | Diana    | 2       | 58000.00 | 3         |
+| 106    | Frank    | 3       | 50000.00 | 1         |
+| 108    | Henry    | 3       | NULL     | 1         |
 
 Two correctness caveats:
 
@@ -440,7 +446,7 @@ Two correctness caveats:
 
 > Common misconception
 
-> "The `SELECT` list can only contain columns from outer tables plus correlated aggregates." Actually a correlated scalar subquery may return *any* expression derived from the matching inner rows (here, a count). What it may not return is **more than one row**.
+> "The `SELECT` list can only contain columns from outer tables plus correlated aggregates." Actually a correlated scalar subquery may return _any_ expression derived from the matching inner rows (here, a count). What it may not return is **more than one row**.
 
 ---
 
@@ -462,13 +468,13 @@ WHERE e1.salary = (
 
 **Expected output**
 
-| emp_id | emp_name | dept_id | salary |
-|---|---|---|---|
-| 101 | Alice | 1 | 90000.00 |
-| 105 | Eva | 2 | 72000.00 |
-| 106 | Frank | 3 | 50000.00 |
+| emp_id | emp_name | dept_id | salary   |
+| ------ | -------- | ------- | -------- |
+| 101    | Alice    | 1       | 90000.00 |
+| 105    | Eva      | 2       | 72000.00 |
+| 106    | Frank    | 3       | 50000.00 |
 
-Note: with this equality pattern, a **tie at the top** returns *all* tied employees (one output row per employee, not per department). If the requirement is "one row per department", this query shape is wrong — you would need a ranking with a deterministic tie-breaker or `DISTINCT ON` (PostgreSQL).
+Note: with this equality pattern, a **tie at the top** returns _all_ tied employees (one output row per employee, not per department). If the requirement is "one row per department", this query shape is wrong — you would need a ranking with a deterministic tie-breaker or `DISTINCT ON` (PostgreSQL).
 
 ### 6.2 "Flag rows that have a related row" — a marketing list
 
@@ -487,10 +493,10 @@ WHERE EXISTS (
 
 **Expected output**
 
-| customer_id | customer_name |
-|---|---|
-| 201 | Northwind Traders |
-| 202 | Acme Corp |
+| customer_id | customer_name     |
+| ----------- | ----------------- |
+| 201         | Northwind Traders |
+| 202         | Acme Corp         |
 
 The `EXISTS` shape guarantees one output row per customer even though Northwind Traders has two qualifying orders. A plain `JOIN` on the same predicate would return Northwind twice and require `DISTINCT` (see Section 10).
 
@@ -517,12 +523,12 @@ FROM employees e;
 
 **Expected output** (partial)
 
-| emp_id | emp_name | salary | dept_avg_salary | diff |
-|---|---|---|---|---|
-| 101 | Alice | 90000.00 | 81666.67 | 8333.33 |
-| 102 | Bob | 75000.00 | 81666.67 | -6666.67 |
-| 106 | Frank | 50000.00 | 50000.00 | 0.00 |
-| 108 | Henry | NULL | 50000.00 | NULL |
+| emp_id | emp_name | salary   | dept_avg_salary | diff     |
+| ------ | -------- | -------- | --------------- | -------- |
+| 101    | Alice    | 90000.00 | 81666.67        | 8333.33  |
+| 102    | Bob      | 75000.00 | 81666.67        | -6666.67 |
+| 106    | Frank    | 50000.00 | 50000.00        | 0.00     |
+| 108    | Henry    | NULL     | 50000.00        | NULL     |
 
 This is a case where **repeating** the same correlated subquery twice in one row is wasteful. Prefer the window-function form (Section 7.2) or a CTE so the average is computed once.
 
@@ -546,7 +552,7 @@ This is the natural DML extension of Example 1. The same NULL logic applies: Hen
 
 ## 7. Alternatives to correlated subqueries
 
-Many correlated-subquery problems have a join or window-function formulation. None is *always* better — the decision depends on the optimizer, available indexes, statistics, data distribution, and the final plan. Verify each candidate with `EXPLAIN ANALYZE`.
+Many correlated-subquery problems have a join or window-function formulation. None is _always_ better — the decision depends on the optimizer, available indexes, statistics, data distribution, and the final plan. Verify each candidate with `EXPLAIN ANALYZE`.
 
 ### 7.1 Derived table + JOIN
 
@@ -581,7 +587,7 @@ Same output again, and the window variant computes each partition's average once
 
 ### 7.3 `LATERAL` / `APPLY`
 
-These allow a subquery *in the FROM clause* to reference sibling tables — the same correlation concept, but in a join context. Prefer them when you need multiple columns from the "one matching row" (a scalar subquery can only return one column per value).
+These allow a subquery _in the FROM clause_ to reference sibling tables — the same correlation concept, but in a join context. Prefer them when you need multiple columns from the "one matching row" (a scalar subquery can only return one column per value).
 
 #### PostgreSQL (and MySQL 8.0.14+)
 
@@ -623,12 +629,12 @@ CROSS APPLY (
 
 ### 7.4 Comparison table — same problem, four tools
 
-| Problem | Correlated subquery | Derived table + JOIN | Window function | LATERAL / APPLY |
-|---|---|---|---|---|
-| "Keep rows that have a match" | `EXISTS` — good, decorrelates to semi-join | `INNER JOIN` + `DISTINCT` — risk of fan-out | Not applicable | Good, but heavier-than-needed unless you also need columns |
-| "Per-row value from a related single row" | Scalar subquery — works, one column, NULL if absent | `LEFT JOIN` on the "best row" — awkward to express | `LATERAL`/`APPLY` best — multiple columns | `LATERAL`/`APPLY` |
-| "Detail rows + their group aggregate" | Works, may recompute per row | Works | **cleanest — window function** | Unnecessary |
-| "Ranking within a group" | Hand-rolled with COUNT — fragile with ties and NULL | Needs self-join + aggregation | **cleanest — `ROW_NUMBER`/`RANK`/`DENSE_RANK`** | Possible but overkill |
+| Problem                                   | Correlated subquery                                 | Derived table + JOIN                               | Window function                                 | LATERAL / APPLY                                            |
+| ----------------------------------------- | --------------------------------------------------- | -------------------------------------------------- | ----------------------------------------------- | ---------------------------------------------------------- |
+| "Keep rows that have a match"             | `EXISTS` — good, decorrelates to semi-join          | `INNER JOIN` + `DISTINCT` — risk of fan-out        | Not applicable                                  | Good, but heavier-than-needed unless you also need columns |
+| "Per-row value from a related single row" | Scalar subquery — works, one column, NULL if absent | `LEFT JOIN` on the "best row" — awkward to express | `LATERAL`/`APPLY` best — multiple columns       | `LATERAL`/`APPLY`                                          |
+| "Detail rows + their group aggregate"     | Works, may recompute per row                        | Works                                              | **cleanest — window function**                  | Unnecessary                                                |
+| "Ranking within a group"                  | Hand-rolled with COUNT — fragile with ties and NULL | Needs self-join + aggregation                      | **cleanest — `ROW_NUMBER`/`RANK`/`DENSE_RANK`** | Possible but overkill                                      |
 
 > Common misconception
 
@@ -638,17 +644,17 @@ CROSS APPLY (
 
 ## 8. Edge cases
 
-| Situation | Behavior |
-|---|---|
-| Outer query has zero rows | The subquery never executes (logically). Nothing to bind, nothing to check. |
-| Correlation column is NULL on an outer row | `i.key = NULL` is `UNKNOWN` → no inner rows match → `EXISTS` = false, scalar = NULL. |
-| No matching inner rows | Scalar → `NULL`; `EXISTS` → false; `NOT EXISTS` → true; `=` comparison with the NULL → `UNKNOWN`. |
-| More than one matching inner row | `EXISTS` is fine (only truth matters); a **scalar** subquery → **runtime error** unless you force one row (e.g. `MAX`, `FETCH FIRST`, `TOP 1`, `LIMIT 1`). |
-| Aggregate without `GROUP BY` inside | Always returns exactly one row (value may be NULL) — safe for the scalar contract. |
-| Only one row in the correlated group | The aggregate of that group equals that row's value; `>` comparisons return false, `>=` returns true. |
-| `COUNT(*)` vs `COUNT(col)` inside | `COUNT(*)` counts rows even when the correlated column is NULL; `COUNT(col)` ignores NULLs. Pick deliberately. |
-| Ties in "latest per group" | Without a deterministic `ORDER BY` tie-breaker, which tied row wins is plan-dependent — **nondeterministic**. |
-| Group aggregate that is entirely NULL | `AVG` over all-NULL → NULL; then `salary > NULL` → `UNKNOWN` → nothing kept, even if intent was otherwise. |
+| Situation                                  | Behavior                                                                                                                                                   |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Outer query has zero rows                  | The subquery never executes (logically). Nothing to bind, nothing to check.                                                                                |
+| Correlation column is NULL on an outer row | `i.key = NULL` is `UNKNOWN` → no inner rows match → `EXISTS` = false, scalar = NULL.                                                                       |
+| No matching inner rows                     | Scalar → `NULL`; `EXISTS` → false; `NOT EXISTS` → true; `=` comparison with the NULL → `UNKNOWN`.                                                          |
+| More than one matching inner row           | `EXISTS` is fine (only truth matters); a **scalar** subquery → **runtime error** unless you force one row (e.g. `MAX`, `FETCH FIRST`, `TOP 1`, `LIMIT 1`). |
+| Aggregate without `GROUP BY` inside        | Always returns exactly one row (value may be NULL) — safe for the scalar contract.                                                                         |
+| Only one row in the correlated group       | The aggregate of that group equals that row's value; `>` comparisons return false, `>=` returns true.                                                      |
+| `COUNT(*)` vs `COUNT(col)` inside          | `COUNT(*)` counts rows even when the correlated column is NULL; `COUNT(col)` ignores NULLs. Pick deliberately.                                             |
+| Ties in "latest per group"                 | Without a deterministic `ORDER BY` tie-breaker, which tied row wins is plan-dependent — **nondeterministic**.                                              |
+| Group aggregate that is entirely NULL      | `AVG` over all-NULL → NULL; then `salary > NULL` → `UNKNOWN` → nothing kept, even if intent was otherwise.                                                 |
 
 ---
 
@@ -690,7 +696,7 @@ Correlated subqueries are where NULL ignorance hurts most, because the correlate
 
 > Interview trap
 
-> "`NOT EXISTS` is the same as `NOT IN`." False — exactly when NULLs can flow from the subquery, they diverge. Always ask: *can the inner column be NULL?*
+> "`NOT EXISTS` is the same as `NOT IN`." False — exactly when NULLs can flow from the subquery, they diverge. Always ask: _can the inner column be NULL?_
 
 ---
 
@@ -726,7 +732,7 @@ WHERE amount = (SELECT amount FROM orders o WHERE o.customer_id = c.customer_id)
 Existence checks via `JOIN` fan out rows; if you then slap `DISTINCT` on to hide it, the query can be slower and the intent is obscured.
 
 **Mistake 6 — Believing a `SELECT`-list subquery is "free".**
-It executes once per *output* row logically; a huge result set × expensive inner query is a classic accidental N+1 in SQL.
+It executes once per _output_ row logically; a huge result set × expensive inner query is a classic accidental N+1 in SQL.
 
 **Mistake 7 — Nondeterministic "latest" picks.**
 Forgetting a tie-breaker in `ORDER BY` when selecting "the most recent" row.
@@ -755,7 +761,7 @@ Mitigations that must each be verified with a plan:
 
 ## 12. Performance implications
 
-### 12.1 The cost model you should *start* from
+### 12.1 The cost model you should _start_ from
 
 Logically, with no decorrelation:
 
@@ -777,7 +783,7 @@ From this starting point, three multipliers decide the outcome:
 - **Data distribution** — skew (one department with most employees) changes both estimates and cache locality.
 - **Query shape** — `EXISTS` vs scalar vs `IN` vs `LATERAL` are different shapes with different plan opportunities.
 
-> Do not assume "correlated is always slow" or "correlated is always fast". Both statements are wrong in isolation. The question is always: *what does `EXPLAIN ANALYZE` show for this query, these statistics, these indexes?*
+> Do not assume "correlated is always slow" or "correlated is always fast". Both statements are wrong in isolation. The question is always: _what does `EXPLAIN ANALYZE` show for this query, these statistics, these indexes?_
 
 ### 12.3 Sargability
 
@@ -794,13 +800,13 @@ Consider also an index on the outer correlation side and the exact inner columns
 
 ### 12.5 Should it be rewritten?
 
-| Situation | Likely better tool (verify!) |
-|---|---|
-| Existence check, outer table large | `EXISTS` → optimizer semi-join |
-| Detail rows + group aggregate in one result | Window function |
-| Need several columns from one matching row | `LATERAL` / `APPLY` |
+| Situation                                   | Likely better tool (verify!)        |
+| ------------------------------------------- | ----------------------------------- |
+| Existence check, outer table large          | `EXISTS` → optimizer semi-join      |
+| Detail rows + group aggregate in one result | Window function                     |
+| Need several columns from one matching row  | `LATERAL` / `APPLY`                 |
 | Huge outer set, correlated scalar in SELECT | CTE / derived-table materialization |
-| Small outer set, hard to decorrelate | Keep the correlated form |
+| Small outer set, hard to decorrelate        | Keep the correlated form            |
 
 The point is the decision matrix, not a rule.
 
@@ -810,8 +816,8 @@ The point is the decision matrix, not a rule.
 
 > Interview trap
 
-- **"How many times is the subquery executed?"** The logical answer is once per outer row candidate; the *physical* answer is "check the plan" — it may be decorrelated into a join, cached, or materialized. Answering with a fixed number is the trap.
-- **"A subquery in the SELECT list is correlated."** False — correlation is defined by an *outer reference*, not by position.
+- **"How many times is the subquery executed?"** The logical answer is once per outer row candidate; the _physical_ answer is "check the plan" — it may be decorrelated into a join, cached, or materialized. Answering with a fixed number is the trap.
+- **"A subquery in the SELECT list is correlated."** False — correlation is defined by an _outer reference_, not by position.
 - **`NOT IN` vs `NOT EXISTS` with NULLs.** Introduces the classic empty-result trap. Probe whether the inner column can be NULL.
 - **Scalar subquery multi-row error.** Predict when it fires (runtime, only when data grows).
 - **Correlated ranking via COUNT.** Ask about ties and NULL salaries — the naive version silently assigns rank 1 to NULL rows.
@@ -838,15 +844,15 @@ The point is the decision matrix, not a rule.
 
 ## 15. Database differences (quick map)
 
-| Feature | PostgreSQL | MySQL | SQL Server | Oracle |
-|---|---|---|---|---|
-| `LATERAL` | Yes | Yes (8.0.14+) | No keyword — uses `APPLY` | Yes (12c+) |
-| Correlated `EXISTS` → semi/anti join | Common (`Hash/Nested Loop Semi/Anti Join`) | Semi-join strategies | `Nested Loops (Apply)` or semi-join | Unnesting to semi-join |
-| Scalar correlated evaluation | Typically `SubPlan` per row | Often per output row | Sometimes `LEFT SEMI JOIN`/Apply | Scalar subquery caching possible |
-| Controlling hints | Limited | Limited | `FORCESEEK`, join hints | `NO_UNNEST`, `PUSH_SUBQ`, ... |
-| `FETCH FIRST` | Yes | No (`LIMIT`) | `OFFSET/FETCH` or `TOP` | Yes |
+| Feature                              | PostgreSQL                                 | MySQL                | SQL Server                          | Oracle                           |
+| ------------------------------------ | ------------------------------------------ | -------------------- | ----------------------------------- | -------------------------------- |
+| `LATERAL`                            | Yes                                        | Yes (8.0.14+)        | No keyword — uses `APPLY`           | Yes (12c+)                       |
+| Correlated `EXISTS` → semi/anti join | Common (`Hash/Nested Loop Semi/Anti Join`) | Semi-join strategies | `Nested Loops (Apply)` or semi-join | Unnesting to semi-join           |
+| Scalar correlated evaluation         | Typically `SubPlan` per row                | Often per output row | Sometimes `LEFT SEMI JOIN`/Apply    | Scalar subquery caching possible |
+| Controlling hints                    | Limited                                    | Limited              | `FORCESEEK`, join hints             | `NO_UNNEST`, `PUSH_SUBQ`, ...    |
+| `FETCH FIRST`                        | Yes                                        | No (`LIMIT`)         | `OFFSET/FETCH` or `TOP`             | Yes                              |
 
-These are *tendencies*; plan output differs by version and optimizer settings. Confirm on your instance.
+These are _tendencies_; plan output differs by version and optimizer settings. Confirm on your instance.
 
 ---
 
@@ -871,7 +877,7 @@ These are *tendencies*; plan output differs by version and optimizer settings. C
 ### Beginner
 
 1. What makes a subquery "correlated"? Give a two-line example that is correlated and the same two lines that are not.
-2. How many times is a correlated subquery *logically* evaluated vs a non-correlated one?
+2. How many times is a correlated subquery _logically_ evaluated vs a non-correlated one?
 3. What does `EXISTS` return when the inner query matches zero rows? What does a scalar subquery return when it matches zero rows?
 4. Where in a statement can a correlated subquery legally appear? Name at least four positions.
 5. Explain, in one sentence each, why `NOT EXISTS` and `NOT IN` can disagree.
@@ -897,7 +903,7 @@ These are *tendencies*; plan output differs by version and optimizer settings. C
 16. "Departments sorted by the salary of their best-paid employee" — write it with a correlated subquery, then with a window function. Which keeps which rows visible, and what is the grain of the output?
 17. You are asked for "every customer, with the date of their most recent order and that order's amount." Why must the answer use either a scalar (two subqueries), a `LATERAL`, or a window function instead of one correlated scalar for two columns?
 18. A support report needs "every order, plus whether that order is above its own customer's average order amount." Give two working formulations and identify which reads the inner data once.
-19. Write the `DELETE` that removes customers with no orders. Now write the equivalent query that would *accidentally* be blocked if `orders.customer_id` were nullable, and explain why it blocks.
+19. Write the `DELETE` that removes customers with no orders. Now write the equivalent query that would _accidentally_ be blocked if `orders.customer_id` were nullable, and explain why it blocks.
 20. A batch job processes one department at a time but must not re-scan all employees per department. Which formulation (correlated, derived table, window) fits this requirement, and what index would you add?
 
 ### Tricky
@@ -910,7 +916,7 @@ These are *tendencies*; plan output differs by version and optimizer settings. C
 
 ### Output Prediction
 
-26. Predict the full output of Example 1 *before* running it (which two rows survive). Justify Frank's and Henry's exclusion separately.
+26. Predict the full output of Example 1 _before_ running it (which two rows survive). Justify Frank's and Henry's exclusion separately.
 27. Predict the output of `SELECT emp_name FROM employees e WHERE salary > (SELECT AVG(salary) FROM employees e2 WHERE e2.dept_id = 999);`.
 28. Predict the `last_order_amount` column for customer 203 in Example 3. Suppose further that order 3002 is deleted — how does the answer for customer 201 change, and why is 3004 still chosen?
 29. Given the Example 4 result set, predict `dept_rank` for a fictional new row `(109, 'Igor', 1, 80000)`. What happens to Grace's rank, and which function did this just imitate?
@@ -928,7 +934,7 @@ These are *tendencies*; plan output differs by version and optimizer settings. C
 35. "Correlated subqueries are always slower than joins." True or false? Provide a concrete counterexample using the Section 4 tables.
 36. With `orders(customer_id)` indexed and `orders` unindexed, predict the plan difference for Example 2, then confirm with `EXPLAIN ANALYZE`. Which node reveals the difference?
 37. An outer table of 10 million rows runs a correlated scalar `SELECT`-list subquery. Why might a window function dominate regardless of index quality? What plan artefact would prove the per-row evaluation?
-38. Why does a *covering* index on the inner side (`orders(customer_id) INCLUDE (amount, order_date)`) change Example 3's cost, and what does `EXPLAIN` show in its place?
+38. Why does a _covering_ index on the inner side (`orders(customer_id) INCLUDE (amount, order_date)`) change Example 3's cost, and what does `EXPLAIN` show in its place?
 39. For the correlated `EXISTS` version of Example 5.2, what would make the optimizer choose a hash semi-join over a nested-loop semi-join? What statistics/plan evidence would you inspect to confirm the choice is right?
 
 Return to the **Subqueries** index when ready.

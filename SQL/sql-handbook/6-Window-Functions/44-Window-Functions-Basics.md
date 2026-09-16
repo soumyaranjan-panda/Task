@@ -6,7 +6,7 @@
 
 A **window function** performs a calculation across a set of rows that are **related to the current row** — but unlike aggregate functions with `GROUP BY`, it **does not collapse rows**. Each input row produces exactly one output row.
 
-Think of it as: *"Run a calculation, but keep every row visible."*
+Think of it as: _"Run a calculation, but keep every row visible."_
 
 ---
 
@@ -14,12 +14,12 @@ Think of it as: *"Run a calculation, but keep every row visible."*
 
 Before window functions, developers had to choose between:
 
-| Goal | Old approach | Problem |
-|---|---|---|
-| Aggregate + keep detail | Self-join back to the aggregate | Complex, error-prone, slow |
-| Running totals | Correlated subqueries | Painfully slow on large data |
-| Ranking | Variables + session state | Non-portable, unreadable |
-| Compare row to neighbors | Self-joins on row numbers | Fragile, needs physical ordering |
+| Goal                     | Old approach                    | Problem                          |
+| ------------------------ | ------------------------------- | -------------------------------- |
+| Aggregate + keep detail  | Self-join back to the aggregate | Complex, error-prone, slow       |
+| Running totals           | Correlated subqueries           | Painfully slow on large data     |
+| Ranking                  | Variables + session state       | Non-portable, unreadable         |
+| Compare row to neighbors | Self-joins on row numbers       | Fragile, needs physical ordering |
 
 Window functions solve all of these **in a single, declarative step**.
 
@@ -31,29 +31,29 @@ All examples below use two tables:
 
 ### `employees`
 
-| emp_id | name | department | salary | hire_date |
-|--------|---------|------------|--------|------------|
-| 1 | Alice | Engineering | 120000 | 2019-03-15 |
-| 2 | Bob | Engineering | 110000 | 2020-01-10 |
-| 3 | Carol | Engineering | 130000 | 2018-07-22 |
-| 4 | Dave | Marketing | 95000 | 2021-06-01 |
-| 5 | Eve | Marketing | 105000 | 2020-09-14 |
-| 6 | Frank | Sales | 85000 | 2022-02-28 |
-| 7 | Grace | Sales | 90000 | 2021-11-30 |
-| 8 | Hank | Sales | 85000 | 2023-01-05 |
+| emp_id | name  | department  | salary | hire_date  |
+| ------ | ----- | ----------- | ------ | ---------- |
+| 1      | Alice | Engineering | 120000 | 2019-03-15 |
+| 2      | Bob   | Engineering | 110000 | 2020-01-10 |
+| 3      | Carol | Engineering | 130000 | 2018-07-22 |
+| 4      | Dave  | Marketing   | 95000  | 2021-06-01 |
+| 5      | Eve   | Marketing   | 105000 | 2020-09-14 |
+| 6      | Frank | Sales       | 85000  | 2022-02-28 |
+| 7      | Grace | Sales       | 90000  | 2021-11-30 |
+| 8      | Hank  | Sales       | 85000  | 2023-01-05 |
 
 **Grain:** One row = one employee.
 
 ### `orders`
 
 | order_id | customer | amount | order_date |
-|----------|----------|--------|------------|
-| 101 | Alice | 250 | 2024-01-05 |
-| 102 | Bob | 150 | 2024-01-06 |
-| 103 | Alice | 300 | 2024-01-10 |
-| 104 | Carol | 100 | 2024-01-12 |
-| 105 | Bob | 200 | 2024-01-15 |
-| 106 | Alice | 400 | 2024-02-01 |
+| -------- | -------- | ------ | ---------- |
+| 101      | Alice    | 250    | 2024-01-05 |
+| 102      | Bob      | 150    | 2024-01-06 |
+| 103      | Alice    | 300    | 2024-01-10 |
+| 104      | Carol    | 100    | 2024-01-12 |
+| 105      | Bob      | 200    | 2024-01-15 |
+| 106      | Alice    | 400    | 2024-02-01 |
 
 **Grain:** One row = one order.
 
@@ -72,11 +72,11 @@ function_name ( arguments )
 
 ### The Three Parts of `OVER`
 
-| Part | Required? | Purpose |
-|------|-----------|---------|
-| `PARTITION BY` | No | Divides rows into groups (like a per-group window) |
-| `ORDER BY` | Depends on function | Defines the logical order of rows inside each partition |
-| `frame_clause` | No | Defines which rows in the partition are included in the calculation |
+| Part           | Required?           | Purpose                                                             |
+| -------------- | ------------------- | ------------------------------------------------------------------- |
+| `PARTITION BY` | No                  | Divides rows into groups (like a per-group window)                  |
+| `ORDER BY`     | Depends on function | Defines the logical order of rows inside each partition             |
+| `frame_clause` | No                  | Defines which rows in the partition are included in the calculation |
 
 ---
 
@@ -128,16 +128,16 @@ SELECT
 FROM employees;
 ```
 
-| name | department | salary | row_num |
-|------|------------|--------|---------|
-| Carol | Engineering | 130000 | 1 |
-| Alice | Engineering | 120000 | 2 |
-| Bob | Engineering | 110000 | 3 |
-| Eve | Marketing | 105000 | 4 |
-| Dave | Marketing | 95000 | 5 |
-| Grace | Sales | 90000 | 6 |
-| Frank | Sales | 85000 | 7 |
-| Hank | Sales | 85000 | 8 |
+| name  | department  | salary | row_num |
+| ----- | ----------- | ------ | ------- |
+| Carol | Engineering | 130000 | 1       |
+| Alice | Engineering | 120000 | 2       |
+| Bob   | Engineering | 110000 | 3       |
+| Eve   | Marketing   | 105000 | 4       |
+| Dave  | Marketing   | 95000  | 5       |
+| Grace | Sales       | 90000  | 6       |
+| Frank | Sales       | 85000  | 7       |
+| Hank  | Sales       | 85000  | 8       |
 
 Notice Frank and Hank both earn 85000, but they get **different** row numbers (7 and 8). `ROW_NUMBER` never produces ties.
 
@@ -156,16 +156,16 @@ SELECT
 FROM employees;
 ```
 
-| name | department | salary | rank_val |
-|------|------------|--------|----------|
-| Carol | Engineering | 130000 | 1 |
-| Alice | Engineering | 120000 | 2 |
-| Bob | Engineering | 110000 | 3 |
-| Eve | Marketing | 105000 | 4 |
-| Dave | Marketing | 95000 | 5 |
-| Grace | Sales | 90000 | 6 |
-| Frank | Sales | 85000 | 7 |
-| Hank | Sales | 85000 | 7 |
+| name  | department  | salary | rank_val |
+| ----- | ----------- | ------ | -------- |
+| Carol | Engineering | 130000 | 1        |
+| Alice | Engineering | 120000 | 2        |
+| Bob   | Engineering | 110000 | 3        |
+| Eve   | Marketing   | 105000 | 4        |
+| Dave  | Marketing   | 95000  | 5        |
+| Grace | Sales       | 90000  | 6        |
+| Frank | Sales       | 85000  | 7        |
+| Hank  | Sales       | 85000  | 7        |
 
 Frank and Hank share rank **7**. Notice there is **no rank 8** — it was skipped.
 
@@ -184,24 +184,24 @@ SELECT
 FROM employees;
 ```
 
-| name | department | salary | dense_rank_val |
-|------|------------|--------|----------------|
-| Carol | Engineering | 130000 | 1 |
-| Alice | Engineering | 120000 | 2 |
-| Bob | Engineering | 110000 | 3 |
-| Eve | Marketing | 105000 | 4 |
-| Dave | Marketing | 95000 | 5 |
-| Grace | Sales | 90000 | 6 |
-| Frank | Sales | 85000 | 7 |
-| Hank | Sales | 85000 | 7 |
+| name  | department  | salary | dense_rank_val |
+| ----- | ----------- | ------ | -------------- |
+| Carol | Engineering | 130000 | 1              |
+| Alice | Engineering | 120000 | 2              |
+| Bob   | Engineering | 110000 | 3              |
+| Eve   | Marketing   | 105000 | 4              |
+| Dave  | Marketing   | 95000  | 5              |
+| Grace | Sales       | 90000  | 6              |
+| Frank | Sales       | 85000  | 7              |
+| Hank  | Sales       | 85000  | 7              |
 
 Same as `RANK` in this case. The difference shows when there are ties at the **top**. If two employees shared salary 130000:
 
-| Function | Row 1 rank | Row 2 rank | Row 3 rank |
-|----------|-----------|-----------|-----------|
-| `ROW_NUMBER` | 1 | 2 | 3 |
-| `RANK` | 1 | 1 | 3 |
-| `DENSE_RANK` | 1 | 1 | 2 |
+| Function     | Row 1 rank | Row 2 rank | Row 3 rank |
+| ------------ | ---------- | ---------- | ---------- |
+| `ROW_NUMBER` | 1          | 2          | 3          |
+| `RANK`       | 1          | 1          | 3          |
+| `DENSE_RANK` | 1          | 1          | 2          |
 
 > **Interview trap:** `RANK()` vs `DENSE_RANK()` vs `ROW_NUMBER()` is one of the most frequently tested SQL topics. Know the gap behavior cold.
 
@@ -219,16 +219,16 @@ SELECT
 FROM employees;
 ```
 
-| name | salary | tercile |
-|------|--------|---------|
-| Carol | 130000 | 1 |
-| Alice | 120000 | 1 |
-| Bob | 110000 | 2 |
-| Eve | 105000 | 2 |
-| Dave | 95000 | 2 |
-| Grace | 90000 | 3 |
-| Frank | 85000 | 3 |
-| Hank | 85000 | 3 |
+| name  | salary | tercile |
+| ----- | ------ | ------- |
+| Carol | 130000 | 1       |
+| Alice | 120000 | 1       |
+| Bob   | 110000 | 2       |
+| Eve   | 105000 | 2       |
+| Dave  | 95000  | 2       |
+| Grace | 90000  | 3       |
+| Frank | 85000  | 3       |
+| Hank  | 85000  | 3       |
 
 8 rows divided into 3 buckets → 3, 3, 2. The first buckets get the extra rows when the division isn't even.
 
@@ -250,16 +250,16 @@ SELECT
 FROM employees;
 ```
 
-| name | department | salary | total_salary | avg_salary | total_employees | diff_from_avg |
-|------|------------|--------|--------------|------------|-----------------|---------------|
-| Alice | Engineering | 120000 | 820000 | 102500 | 8 | 17500 |
-| Bob | Engineering | 110000 | 820000 | 102500 | 8 | 7500 |
-| Carol | Engineering | 130000 | 820000 | 102500 | 8 | 27500 |
-| Dave | Marketing | 95000 | 820000 | 102500 | 8 | -7500 |
-| Eve | Marketing | 105000 | 820000 | 102500 | 8 | 2500 |
-| Frank | Sales | 85000 | 820000 | 102500 | 8 | -17500 |
-| Grace | Sales | 90000 | 820000 | 102500 | 8 | -12500 |
-| Hank | Sales | 85000 | 820000 | 102500 | 8 | -17500 |
+| name  | department  | salary | total_salary | avg_salary | total_employees | diff_from_avg |
+| ----- | ----------- | ------ | ------------ | ---------- | --------------- | ------------- |
+| Alice | Engineering | 120000 | 820000       | 102500     | 8               | 17500         |
+| Bob   | Engineering | 110000 | 820000       | 102500     | 8               | 7500          |
+| Carol | Engineering | 130000 | 820000       | 102500     | 8               | 27500         |
+| Dave  | Marketing   | 95000  | 820000       | 102500     | 8               | -7500         |
+| Eve   | Marketing   | 105000 | 820000       | 102500     | 8               | 2500          |
+| Frank | Sales       | 85000  | 820000       | 102500     | 8               | -17500        |
+| Grace | Sales       | 90000  | 820000       | 102500     | 8               | -12500        |
+| Hank  | Sales       | 85000  | 820000       | 102500     | 8               | -17500        |
 
 No `GROUP BY` — every row is preserved, and the aggregate is broadcast across all rows.
 
@@ -279,16 +279,16 @@ SELECT
 FROM employees;
 ```
 
-| name | department | salary | prev_salary | next_salary |
-|------|------------|--------|-------------|-------------|
-| Carol | Engineering | 130000 | NULL | 120000 |
-| Alice | Engineering | 120000 | 130000 | 110000 |
-| Bob | Engineering | 110000 | 120000 | 105000 |
-| Eve | Marketing | 105000 | 110000 | 95000 |
-| Dave | Marketing | 95000 | 105000 | 90000 |
-| Grace | Sales | 90000 | 95000 | 85000 |
-| Frank | Sales | 85000 | 90000 | 85000 |
-| Hank | Sales | 85000 | 85000 | NULL |
+| name  | department  | salary | prev_salary | next_salary |
+| ----- | ----------- | ------ | ----------- | ----------- |
+| Carol | Engineering | 130000 | NULL        | 120000      |
+| Alice | Engineering | 120000 | 130000      | 110000      |
+| Bob   | Engineering | 110000 | 120000      | 105000      |
+| Eve   | Marketing   | 105000 | 110000      | 95000       |
+| Dave  | Marketing   | 95000  | 105000      | 90000       |
+| Grace | Sales       | 90000  | 95000       | 85000       |
+| Frank | Sales       | 85000  | 90000       | 85000       |
+| Hank  | Sales       | 85000  | 85000       | NULL        |
 
 - The **first row** has no previous → `prev_salary` is `NULL`.
 - The **last row** has no next → `next_salary` is `NULL`.
@@ -319,16 +319,16 @@ SELECT
 FROM employees;
 ```
 
-| name | department | salary | highest_in_dept | lowest_in_dept |
-|------|------------|--------|-----------------|----------------|
-| Carol | Engineering | 130000 | 130000 | 110000 |
-| Alice | Engineering | 120000 | 130000 | 110000 |
-| Bob | Engineering | 110000 | 130000 | 110000 |
-| Eve | Marketing | 105000 | 105000 | 95000 |
-| Dave | Marketing | 95000 | 105000 | 95000 |
-| Grace | Sales | 90000 | 90000 | 85000 |
-| Frank | Sales | 85000 | 90000 | 85000 |
-| Hank | Sales | 85000 | 90000 | 85000 |
+| name  | department  | salary | highest_in_dept | lowest_in_dept |
+| ----- | ----------- | ------ | --------------- | -------------- |
+| Carol | Engineering | 130000 | 130000          | 110000         |
+| Alice | Engineering | 120000 | 130000          | 110000         |
+| Bob   | Engineering | 110000 | 130000          | 110000         |
+| Eve   | Marketing   | 105000 | 105000          | 95000          |
+| Dave  | Marketing   | 95000  | 105000          | 95000          |
+| Grace | Sales       | 90000  | 90000           | 85000          |
+| Frank | Sales       | 85000  | 90000           | 85000          |
+| Hank  | Sales       | 85000  | 90000           | 85000          |
 
 > **Common misconception:** `LAST_VALUE` without a frame clause does **not** return the last value in the partition. By default, the frame is `RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`, so it only looks at rows **up to and including** the current row. You must explicitly set the frame to `UNBOUNDED FOLLOWING` to get the true last value. See Frame Clauses below.
 
@@ -347,16 +347,16 @@ SELECT
 FROM employees;
 ```
 
-| name | department | salary | dept_rank |
-|------|------------|--------|-----------|
-| Carol | Engineering | 130000 | 1 |
-| Alice | Engineering | 120000 | 2 |
-| Bob | Engineering | 110000 | 3 |
-| Eve | Marketing | 105000 | 1 |
-| Dave | Marketing | 95000 | 2 |
-| Grace | Sales | 90000 | 1 |
-| Frank | Sales | 85000 | 2 |
-| Hank | Sales | 85000 | 2 |
+| name  | department  | salary | dept_rank |
+| ----- | ----------- | ------ | --------- |
+| Carol | Engineering | 130000 | 1         |
+| Alice | Engineering | 120000 | 2         |
+| Bob   | Engineering | 110000 | 3         |
+| Eve   | Marketing   | 105000 | 1         |
+| Dave  | Marketing   | 95000  | 2         |
+| Grace | Sales       | 90000  | 1         |
+| Frank | Sales       | 85000  | 2         |
+| Hank  | Sales       | 85000  | 2         |
 
 Compare this to the earlier `RANK()` without `PARTITION BY` — the ranking now restarts at 1 for each department.
 
@@ -414,10 +414,10 @@ ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
 
 ### `RANGE` vs `ROWS`
 
-| Frame type | Meaning |
-|------------|---------|
-| `ROWS` | Physical rows — exactly N rows before/after current |
-| `RANGE` | Logical values — all rows with the same `ORDER BY` value as current are grouped together |
+| Frame type | Meaning                                                                                  |
+| ---------- | ---------------------------------------------------------------------------------------- |
+| `ROWS`     | Physical rows — exactly N rows before/after current                                      |
+| `RANGE`    | Logical values — all rows with the same `ORDER BY` value as current are grouped together |
 
 ```sql
 --假设有这些数据 (salary order):
@@ -470,13 +470,13 @@ FROM orders;
 ```
 
 | order_id | customer | amount | order_date | running_total |
-|----------|----------|--------|------------|---------------|
-| 101 | Alice | 250 | 2024-01-05 | 250 |
-| 103 | Alice | 300 | 2024-01-10 | 550 |
-| 106 | Alice | 400 | 2024-02-01 | 950 |
-| 102 | Bob | 150 | 2024-01-06 | 150 |
-| 105 | Bob | 200 | 2024-01-15 | 350 |
-| 104 | Carol | 100 | 2024-01-12 | 100 |
+| -------- | -------- | ------ | ---------- | ------------- |
+| 101      | Alice    | 250    | 2024-01-05 | 250           |
+| 103      | Alice    | 300    | 2024-01-10 | 550           |
+| 106      | Alice    | 400    | 2024-02-01 | 950           |
+| 102      | Bob      | 150    | 2024-01-06 | 150           |
+| 105      | Bob      | 200    | 2024-01-15 | 350           |
+| 104      | Carol    | 100    | 2024-01-12 | 100           |
 
 ---
 
@@ -497,13 +497,13 @@ FROM orders;
 ```
 
 | order_id | customer | amount | order_date | moving_avg_3 |
-|----------|----------|--------|------------|--------------|
-| 101 | Alice | 250 | 2024-01-05 | 275.00 |
-| 103 | Alice | 300 | 2024-01-10 | 316.67 |
-| 106 | Alice | 400 | 2024-02-01 | 350.00 |
-| 102 | Bob | 150 | 2024-01-06 | 175.00 |
-| 105 | Bob | 200 | 2024-01-15 | 175.00 |
-| 104 | Carol | 100 | 2024-01-12 | 100.00 |
+| -------- | -------- | ------ | ---------- | ------------ |
+| 101      | Alice    | 250    | 2024-01-05 | 275.00       |
+| 103      | Alice    | 300    | 2024-01-10 | 316.67       |
+| 106      | Alice    | 400    | 2024-02-01 | 350.00       |
+| 102      | Bob      | 150    | 2024-01-06 | 175.00       |
+| 105      | Bob      | 200    | 2024-01-15 | 175.00       |
+| 104      | Carol    | 100    | 2024-01-12 | 100.00       |
 
 Alice row 1: only 101 and 103 exist before/after → avg(250, 300) = 275.00
 Alice row 3: only 103 and 106 exist → avg(300, 400) = 350.00
@@ -525,18 +525,19 @@ SELECT
 FROM employees;
 ```
 
-| name | department | salary | pct_rank | cum_dist |
-|------|------------|--------|----------|----------|
-| Carol | Engineering | 130000 | 0.000 | 0.125 |
-| Alice | Engineering | 120000 | 0.143 | 0.250 |
-| Bob | Engineering | 110000 | 0.286 | 0.375 |
-| Eve | Marketing | 105000 | 0.429 | 0.500 |
-| Dave | Marketing | 95000 | 0.571 | 0.625 |
-| Grace | Sales | 90000 | 0.714 | 0.750 |
-| Frank | Sales | 85000 | 0.857 | 1.000 |
-| Hank | Sales | 85000 | 0.857 | 1.000 |
+| name  | department  | salary | pct_rank | cum_dist |
+| ----- | ----------- | ------ | -------- | -------- |
+| Carol | Engineering | 130000 | 0.000    | 0.125    |
+| Alice | Engineering | 120000 | 0.143    | 0.250    |
+| Bob   | Engineering | 110000 | 0.286    | 0.375    |
+| Eve   | Marketing   | 105000 | 0.429    | 0.500    |
+| Dave  | Marketing   | 95000  | 0.571    | 0.625    |
+| Grace | Sales       | 90000  | 0.714    | 0.750    |
+| Frank | Sales       | 85000  | 0.857    | 1.000    |
+| Hank  | Sales       | 85000  | 0.857    | 1.000    |
 
 **Formulae:**
+
 - `PERCENT_RANK` = (rank - 1) / (total_rows - 1)
 - `CUME_DIST` = cumulative distribution (fraction of rows ≤ current row)
 
@@ -676,13 +677,13 @@ RANK() OVER (PARTITION BY department ORDER BY salary DESC) AS dept_rank
 
 ## Window Functions vs. Alternatives
 
-| Task | Window Function | Alternative | Notes |
-|------|----------------|-------------|-------|
-| Rank per group | `RANK() OVER (PARTITION BY ... ORDER BY ...)` | Self-join with subquery | Window function is cleaner and usually faster |
-| Running total | `SUM() OVER (ORDER BY ... ROWS ...)` | Correlated subquery | Correlated subquery is O(n²) |
-| Top N per group | `ROW_NUMBER() OVER (PARTITION BY ... ORDER BY ...)` | `LATERAL JOIN` / `CROSS APPLY` | `LATERAL` can be faster on some engines |
-| Deduplicate | `ROW_NUMBER() ... = 1` | `SELECT DISTINCT ON ...` (PostgreSQL) | `DISTINCT ON` is Postgres-specific |
-| Lead/Lag | `LAG(col) OVER (...)` | Self-join on row number | Self-join is more complex and slower |
+| Task            | Window Function                                     | Alternative                           | Notes                                         |
+| --------------- | --------------------------------------------------- | ------------------------------------- | --------------------------------------------- |
+| Rank per group  | `RANK() OVER (PARTITION BY ... ORDER BY ...)`       | Self-join with subquery               | Window function is cleaner and usually faster |
+| Running total   | `SUM() OVER (ORDER BY ... ROWS ...)`                | Correlated subquery                   | Correlated subquery is O(n²)                  |
+| Top N per group | `ROW_NUMBER() OVER (PARTITION BY ... ORDER BY ...)` | `LATERAL JOIN` / `CROSS APPLY`        | `LATERAL` can be faster on some engines       |
+| Deduplicate     | `ROW_NUMBER() ... = 1`                              | `SELECT DISTINCT ON ...` (PostgreSQL) | `DISTINCT ON` is Postgres-specific            |
+| Lead/Lag        | `LAG(col) OVER (...)`                               | Self-join on row number               | Self-join is more complex and slower          |
 
 ---
 
@@ -724,7 +725,7 @@ ORDER BY customer, order_date;
 
 **Why better:** The window function approach scans the data once. The correlated subquery executes the inner query for **every row**. On a table with 1 million rows, this can mean 1 million subquery executions.
 
-> **Performance pitfall:** Always verify with `EXPLAIN ANALYZE`. While window functions are *generally* more efficient than correlated subqueries, the optimizer may sometimes rewrite a correlated subquery into something efficient. Let the execution plan decide.
+> **Performance pitfall:** Always verify with `EXPLAIN ANALYZE`. While window functions are _generally_ more efficient than correlated subqueries, the optimizer may sometimes rewrite a correlated subquery into something efficient. Let the execution plan decide.
 
 ---
 
@@ -760,12 +761,12 @@ SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);
 
 ### What to Look For
 
-| Sign | Possible issue |
-|------|---------------|
-| Sort operations in the plan | Window function requires sorting by `ORDER BY` columns |
-| Large `work_mem` usage (Postgres) | Window function sorting spills to disk |
-| Missing index on `PARTITION BY` / `ORDER BY` columns | Database must sort in memory |
-| Nested loops for window functions | Rare, but possible on small datasets |
+| Sign                                                 | Possible issue                                         |
+| ---------------------------------------------------- | ------------------------------------------------------ |
+| Sort operations in the plan                          | Window function requires sorting by `ORDER BY` columns |
+| Large `work_mem` usage (Postgres)                    | Window function sorting spills to disk                 |
+| Missing index on `PARTITION BY` / `ORDER BY` columns | Database must sort in memory                           |
+| Nested loops for window functions                    | Rare, but possible on small datasets                   |
 
 ### Performance Factors
 
@@ -780,26 +781,30 @@ SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);
 
 ## Database-Specific Differences
 
-| Feature | PostgreSQL | MySQL | SQL Server | Oracle |
-|---------|-----------|-------|------------|--------|
-| Window functions | Full support (8.4+) | Full support (8.0+) | Full support (2005+) | Full support (8i+) |
-| `FILTER` clause | ✅ `COUNT(*) FILTER (WHERE ...)` | ❌ Use `CASE` | ❌ Use `CASE` | ❌ Use `CASE` |
-| `GROUPS` frame | ✅ | ❌ | ❌ | ❌ |
-| `RANGE` default | `UNBOUNDED PRECEDING TO CURRENT ROW` | Same | Same | Same |
-| Named windows | ✅ `WINDOW w AS (...)` | ✅ (8.0+) | ✅ (2022+) | ❌ |
-| `NULLS FIRST/LAST` | ✅ | ✅ (8.0+) | ✅ (2022+) | ✅ |
-| `IGNORE NULLS` / `RESPECT NULLS` | ❌ | ❌ | ✅ | ✅ |
+| Feature                          | PostgreSQL                           | MySQL               | SQL Server           | Oracle             |
+| -------------------------------- | ------------------------------------ | ------------------- | -------------------- | ------------------ |
+| Window functions                 | Full support (8.4+)                  | Full support (8.0+) | Full support (2005+) | Full support (8i+) |
+| `FILTER` clause                  | ✅ `COUNT(*) FILTER (WHERE ...)`     | ❌ Use `CASE`       | ❌ Use `CASE`        | ❌ Use `CASE`      |
+| `GROUPS` frame                   | ✅                                   | ❌                  | ❌                   | ❌                 |
+| `RANGE` default                  | `UNBOUNDED PRECEDING TO CURRENT ROW` | Same                | Same                 | Same               |
+| Named windows                    | ✅ `WINDOW w AS (...)`               | ✅ (8.0+)           | ✅ (2022+)           | ❌                 |
+| `NULLS FIRST/LAST`               | ✅                                   | ✅ (8.0+)           | ✅ (2022+)           | ✅                 |
+| `IGNORE NULLS` / `RESPECT NULLS` | ❌                                   | ❌                  | ✅                   | ✅                 |
 
 > **PostgreSQL** supports the `FILTER` clause, which is cleaner than `CASE` inside aggregates:
+>
 > ```sql
 > COUNT(*) FILTER (WHERE salary > 100000) OVER (PARTITION BY department)
 > ```
+>
 > Other databases require:
+>
 > ```sql>
 > COUNT(CASE WHEN salary > 100000 THEN 1 END) OVER (PARTITION BY department)
 > ```
 
 > **PostgreSQL** supports **named windows** for readability:
+>
 > ```sql
 > SELECT name, department, salary,
 >        RANK() OVER w AS rnk,
@@ -906,12 +911,12 @@ FROM (
 
 ## Comparison Table: Ranking Functions
 
-| Function | Unique values? | Gaps in sequence? | Use case |
-|----------|---------------|-------------------|----------|
-| `ROW_NUMBER()` | Yes (always unique) | No | Deduplication, pagination, top-1-per-group |
-| `RANK()` | No (ties share rank) | Yes (skips ranks) | Competitive ranking, leaderboard with ties |
-| `DENSE_RANK()` | No (ties share rank) | No (no gaps) | Ranking without gaps, grade assignment |
-| `NTILE(n)` | No | No | Bucketing, distribution analysis |
+| Function       | Unique values?       | Gaps in sequence? | Use case                                   |
+| -------------- | -------------------- | ----------------- | ------------------------------------------ |
+| `ROW_NUMBER()` | Yes (always unique)  | No                | Deduplication, pagination, top-1-per-group |
+| `RANK()`       | No (ties share rank) | Yes (skips ranks) | Competitive ranking, leaderboard with ties |
+| `DENSE_RANK()` | No (ties share rank) | No (no gaps)      | Ranking without gaps, grade assignment     |
+| `NTILE(n)`     | No                   | No                | Bucketing, distribution analysis           |
 
 ---
 

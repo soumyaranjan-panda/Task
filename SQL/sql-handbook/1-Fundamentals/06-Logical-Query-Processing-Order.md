@@ -6,10 +6,12 @@
 
 Coverage: full 9-step logical order with Mermaid diagram, worked step-by-step walkthrough on the shared schema, consequences (aliases, LEFT→INNER trap, WHERE/HAVING split), NULL behavior per step, 7 common mistakes, 7 production pitfalls, plan-verification-based performance guidance, 5 BAD vs BETTER scenarios, PostgreSQL/MySQL/SQL Server/Oracle comparison table, best practices, and 45 interview questions across all 8 requested categories.
 ep 5: Window Functions (SELECT phase)](#step-5-window-functions-select-phase)
-   - [Step 6: SELECT](#step-6-select)
-   - [Step 7: DISTINCT](#step-7-distinct)
-   - [Step 8: ORDER BY](#step-8-order-by)
-   - [Step 9: LIMIT / OFFSET / FETCH](#step-9-limit--offset--fetch)
+
+- [Step 6: SELECT](#step-6-select)
+- [Step 7: DISTINCT](#step-7-distinct)
+- [Step 8: ORDER BY](#step-8-order-by)
+- [Step 9: LIMIT / OFFSET / FETCH](#step-9-limit--offset--fetch)
+
 8. [Consequences of the Order — The "Why" Behind Famous Rules](#consequences-of-the-order--the-why-behind-famous-rules)
 9. [NULL Behavior](#null-behavior)
 10. [Common Mistakes](#common-mistakes)
@@ -26,9 +28,9 @@ ep 5: Window Functions (SELECT phase)](#step-5-window-functions-select-phase)
 
 SQL is a **declarative** language. You tell the database **what** you want, not **how** to compute it. The engine's optimizer is free to rearrange operations internally to find a fast plan.
 
-But there is one thing the database cannot rearrange: **the meaning of your query.** The logical query processing order is the conceptual sequence of steps the database engine uses to *interpret* your `SELECT` statement so that every query with the same clauses yields the same meaning.
+But there is one thing the database cannot rearrange: **the meaning of your query.** The logical query processing order is the conceptual sequence of steps the database engine uses to _interpret_ your `SELECT` statement so that every query with the same clauses yields the same meaning.
 
-> **Key idea:** The order in which you *write* clauses and the order in which the database *logically evaluates* them are **opposites**.
+> **Key idea:** The order in which you _write_ clauses and the order in which the database _logically evaluates_ them are **opposites**.
 
 ```sql
 -- You write clauses in this order:
@@ -42,7 +44,7 @@ LIMIT      ...   -- 9th logically
 ```
 
 > **Common misconception**
-> "The database reads rows top to bottom through my clauses like a pipeline." — It does not. The logical order is a *conceptual* contract. The optimizer may physically process rows in a very different sequence (e.g. `WHERE` filters during an index scan, before any "FROM join" fully materializes). Both are true: the **logical order defines the result**, the **physical plan determines the speed**.
+> "The database reads rows top to bottom through my clauses like a pipeline." — It does not. The logical order is a _conceptual_ contract. The optimizer may physically process rows in a very different sequence (e.g. `WHERE` filters during an index scan, before any "FROM join" fully materializes). Both are true: the **logical order defines the result**, the **physical plan determines the speed**.
 
 > **Interview trap**
 > "SELECT is written first, so it is evaluated first." — Wrong. `FROM` is always evaluated first. `SELECT` is near the end.
@@ -65,17 +67,17 @@ flowchart TD
     H --> I["9. LIMIT / OFFSET / FETCH"]
 ```
 
-| # | Step | What logica happens |
-|---|------|---------------------|
-| 1 | `FROM` | Build the working set. Include `JOIN`s, subqueries, CTEs, table functions. The cartesian product of the sources is formed, then join conditions are applied. |
-| 2 | `WHERE` | Filter **rows**. Row-level predicates only. Aggregate functions and aliases are **not** available yet. |
-| 3 | `GROUP BY` | Collapse rows into groups. One output row per group. |
-| 4 | `HAVING` | Filter **groups** (after grouping). Can reference aggregated values. |
-| 5 | Window functions | Compute window functions over the rows that survived steps 1–4. One output row is **kept per input row**, and the window value is attached. |
-| 6 | `SELECT` | Compute expressions, assign aliases. |
-| 7 | `DISTINCT` | Remove duplicate result rows. |
-| 8 | `ORDER BY` | Sort the result. Can reference `SELECT` aliases (and even columns not in the `SELECT` list, in most engines). |
-| 9 | `LIMIT` / `OFFSET` / `FETCH` | Truncate the result set to the requested number of rows. |
+| #   | Step                         | What logica happens                                                                                                                                          |
+| --- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | `FROM`                       | Build the working set. Include `JOIN`s, subqueries, CTEs, table functions. The cartesian product of the sources is formed, then join conditions are applied. |
+| 2   | `WHERE`                      | Filter **rows**. Row-level predicates only. Aggregate functions and aliases are **not** available yet.                                                       |
+| 3   | `GROUP BY`                   | Collapse rows into groups. One output row per group.                                                                                                         |
+| 4   | `HAVING`                     | Filter **groups** (after grouping). Can reference aggregated values.                                                                                         |
+| 5   | Window functions             | Compute window functions over the rows that survived steps 1–4. One output row is **kept per input row**, and the window value is attached.                  |
+| 6   | `SELECT`                     | Compute expressions, assign aliases.                                                                                                                         |
+| 7   | `DISTINCT`                   | Remove duplicate result rows.                                                                                                                                |
+| 8   | `ORDER BY`                   | Sort the result. Can reference `SELECT` aliases (and even columns not in the `SELECT` list, in most engines).                                                |
+| 9   | `LIMIT` / `OFFSET` / `FETCH` | Truncate the result set to the requested number of rows.                                                                                                     |
 
 Optimization note: a real optimizer may push a `WHERE` predicate down into a table scan (predicate pushdown) or reorder joins. But the **result set** must always be identical to what the logical order produces.
 
@@ -87,16 +89,16 @@ Optimization note: a real optimizer may push a `WHERE` predicate down into a tab
 
 The order is not trivia. It explains a long list of rules that confuse beginners:
 
-| Famous rule | Explanation rooted in the order |
-|---|---|
-| You cannot use a `SELECT` alias in `WHERE` | `WHERE` runs at step 2; aliases do not exist until step 6. |
-| You **can** use a `SELECT` alias in `ORDER BY` | `ORDER BY` runs at step 8, after aliases exist. |
-| Aggregate functions cannot appear in `WHERE` | Aggregation happens in `GROUP BY`/`HAVING` (steps 3–4), after `WHERE` filtering. |
-| `WHERE` filters rows *before* `GROUP BY` | Rows that fail `WHERE` never enter a group. |
-| `HAVING` filters *after* grouping | It sees the aggregates produced by `GROUP BY`. |
-| `COUNT(*)` after a join counts the *joined* rows | `FROM` (step 1) materializes every join combination before any counting. |
-| `DISTINCT` + `ORDER BY` restrictions | `DISTINCT` (step 7) removes duplicates *before* `ORDER BY` sorts (step 8), so `ORDER BY` can only use columns that survive `DISTINCT`. |
-| `LIMIT` returns arbitrary rows without `ORDER BY` | `LIMIT` is literally the last step; without an explicit sort there is no defined winner. |
+| Famous rule                                       | Explanation rooted in the order                                                                                                        |
+| ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| You cannot use a `SELECT` alias in `WHERE`        | `WHERE` runs at step 2; aliases do not exist until step 6.                                                                             |
+| You **can** use a `SELECT` alias in `ORDER BY`    | `ORDER BY` runs at step 8, after aliases exist.                                                                                        |
+| Aggregate functions cannot appear in `WHERE`      | Aggregation happens in `GROUP BY`/`HAVING` (steps 3–4), after `WHERE` filtering.                                                       |
+| `WHERE` filters rows _before_ `GROUP BY`          | Rows that fail `WHERE` never enter a group.                                                                                            |
+| `HAVING` filters _after_ grouping                 | It sees the aggregates produced by `GROUP BY`.                                                                                         |
+| `COUNT(*)` after a join counts the _joined_ rows  | `FROM` (step 1) materializes every join combination before any counting.                                                               |
+| `DISTINCT` + `ORDER BY` restrictions              | `DISTINCT` (step 7) removes duplicates _before_ `ORDER BY` sorts (step 8), so `ORDER BY` can only use columns that survive `DISTINCT`. |
+| `LIMIT` returns arbitrary rows without `ORDER BY` | `LIMIT` is literally the last step; without an explicit sort there is no defined winner.                                               |
 
 Every one of these follows directly from the numbered steps. This is the deepest payoff of the section: **memorize the order, and the rules stop being facts to memorize — they become consequences.**
 
@@ -105,7 +107,7 @@ Every one of these follows directly from the numbered steps. This is the deepest
 ## Logical Order vs Physical Execution
 
 > **Production pitfall**
-> Never confuse "logical order" with "what the query plan actually does." A query is not a program that runs these steps on a CPU. It is a contract about *meaning*, and the optimizer chooses a plan that satisfies that contract as fast as possible.
+> Never confuse "logical order" with "what the query plan actually does." A query is not a program that runs these steps on a CPU. It is a contract about _meaning_, and the optimizer chooses a plan that satisfies that contract as fast as possible.
 
 Example: `SELECT * FROM orders o JOIN customers c ON o.customer_id = c.customer_id WHERE c.country = 'US'`.
 
@@ -122,9 +124,9 @@ flowchart LR
     end
 ```
 
-Both produce the same rows. The logical order defines *what* — the planner decides *how*.
+Both produce the same rows. The logical order defines _what_ — the planner decides _how_.
 
-> This is why this section belongs in *Fundamentals*: it is the bridge between "writing SQL that compiles" and "writing SQL that means what you intend."
+> This is why this section belongs in _Fundamentals_: it is the bridge between "writing SQL that compiles" and "writing SQL that means what you intend."
 
 ---
 
@@ -133,6 +135,7 @@ Both produce the same rows. The logical order defines *what* — the planner dec
 For every example in this section we use the standard handbook schema.
 
 > **Grain:**
+>
 > - `departments`: one row = one department
 > - `employees`: one row = one employee; each employee belongs to exactly one department
 > - `customers`: one row = one customer
@@ -218,13 +221,13 @@ Input: the tables `employees` (`e`) and `departments` (`d`) from the catalog.
 
 Conceptually, the engine joins every `employees` row to every possible `departments` row (the Cartesian product), then applies the `ON` condition `e.dept_id = d.dept_id`. What survives:
 
-| emp_id | first_name | salary | dept_id | dept_id | dept_name | budget |
-|--------|-----------|--------|---------|---------|-----------|--------|
-| 101 | Alice | 95000.00 | 1 | 1 | Engineering | 500000.00 |
-| 102 | Bob | 82000.00 | 1 | 1 | Engineering | 500000.00 |
-| 103 | Carla | NULL | 2 | 2 | Sales | 300000.00 |
-| 105 | Emma | 98000.00 | 3 | 3 | Marketing | 250000.00 |
-| 106 | Frank | 70000.00 | 2 | 2 | Sales | 300000.00 |
+| emp_id | first_name | salary   | dept_id | dept_id | dept_name   | budget    |
+| ------ | ---------- | -------- | ------- | ------- | ----------- | --------- |
+| 101    | Alice      | 95000.00 | 1       | 1       | Engineering | 500000.00 |
+| 102    | Bob        | 82000.00 | 1       | 1       | Engineering | 500000.00 |
+| 103    | Carla      | NULL     | 2       | 2       | Sales       | 300000.00 |
+| 105    | Emma       | 98000.00 | 3       | 3       | Marketing   | 250000.00 |
+| 106    | Frank      | 70000.00 | 2       | 2       | Sales       | 300000.00 |
 
 David (104) has `dept_id = NULL`; `NULL = d.dept_id` is UNKNOWN for every department, so he drops out at the join. No `departments` row matches. That is a correct example of an **inner join**: unmatched rows disappear right here, at **step 1**, before any filtering.
 
@@ -232,12 +235,12 @@ David (104) has `dept_id = NULL`; `NULL = d.dept_id` is UNKNOWN for every depart
 
 Apply `e.salary IS NOT NULL`.
 
-Rows: | emp_id | first_name | salary | dept_name |
----|---|---|---|
-101 | Alice | 95000.00 | Engineering |
-102 | Bob | 82000.00 | Engineering |
-105 | Emma | 98000.00 | Marketing |
-106 | Frank | 70000.00 | Sales |
+| Rows: | emp_id | first_name | salary      | dept_name |
+| ----- | ------ | ---------- | ----------- | --------- |
+| 101   | Alice  | 95000.00   | Engineering |
+| 102   | Bob    | 82000.00   | Engineering |
+| 105   | Emma   | 98000.00   | Marketing   |
+| 106   | Frank  | 70000.00   | Sales       |
 
 Carla (103) has a NULL salary and is removed here — **before grouping**, so she will never be counted in `COUNT(*)`.
 
@@ -245,17 +248,17 @@ Carla (103) has a NULL salary and is removed here — **before grouping**, so sh
 
 Group by `dept_name`. Conceptually four input rows collapse into three groups:
 
-| dept_name | members |
-|---|---|
+| dept_name   | members    |
+| ----------- | ---------- |
 | Engineering | Alice, Bob |
-| Sales | Frank |
-| Marketing | Emma |
+| Sales       | Frank      |
+| Marketing   | Emma       |
 
 ### Step 4 — HAVING
 
 Filter groups where `COUNT(*) >= 2`. Only **Engineering** survives (2 members). Sales and Marketing are dropped.
 
-> Note: `HAVING COUNT(*) >= 2` counts *surviving rows of the group*. Since Carla was removed in step 2, Sales has only 1 row here — this is why **the order of WHERE before GROUP BY changes your HAVING result**.
+> Note: `HAVING COUNT(*) >= 2` counts _surviving rows of the group_. Since Carla was removed in step 2, Sales has only 1 row here — this is why **the order of WHERE before GROUP BY changes your HAVING result**.
 
 ### Step 5 — Window functions
 
@@ -265,9 +268,9 @@ Our query has none; this step is a no-op.
 
 Compute expressions for the surviving groups:
 
-| dept_name | emp_count | avg_salary |
-|---|---|---|
-| Engineering | 2 | 88500.00 |
+| dept_name   | emp_count | avg_salary |
+| ----------- | --------- | ---------- |
+| Engineering | 2         | 88500.00   |
 
 ### Step 7 — DISTINCT
 
@@ -275,7 +278,7 @@ Not used.
 
 ### Step 8 — ORDER BY
 
-Sort by `avg_salary DESC`. One group, so order is trivial here. `avg_salary` is a *`SELECT` alias* — legal only because `ORDER BY` runs after `SELECT`.
+Sort by `avg_salary DESC`. One group, so order is trivial here. `avg_salary` is a _`SELECT` alias_ — legal only because `ORDER BY` runs after `SELECT`.
 
 ### Step 9 — LIMIT
 
@@ -283,12 +286,12 @@ Not used.
 
 **Final output:**
 
-| dept_name | emp_count | avg_salary |
-|---|---|---|
-| Engineering | 2 | 88500.00 |
+| dept_name   | emp_count | avg_salary |
+| ----------- | --------- | ---------- |
+| Engineering | 2         | 88500.00   |
 
 > **Interview trap**
-> Ask yourself: "What happens if I move `e.salary IS NOT NULL` from `WHERE` into `HAVING`?" Answer: Carla would be *counted* in Sales (3 groups) and then *dropped* when measuring its average. The result differs — because `WHERE` filters input rows and `HAVING` filters groups. Same predicate, different step, different answer.
+> Ask yourself: "What happens if I move `e.salary IS NOT NULL` from `WHERE` into `HAVING`?" Answer: Carla would be _counted_ in Sales (3 groups) and then _dropped_ when measuring its average. The result differs — because `WHERE` filters input rows and `HAVING` filters groups. Same predicate, different step, different answer.
 
 ---
 
@@ -312,12 +315,12 @@ FROM customers c
 LEFT JOIN orders o ON o.customer_id = c.customer_id;
 ```
 
-| full_name | order_id |
-|---|---|
-| Global Goods Inc | 501 |
-| Global Goods Inc | 502 |
-| Mini Mart GmbH | 503 |
-| Piko spol. s r.o. | 504 |
+| full_name         | order_id |
+| ----------------- | -------- |
+| Global Goods Inc  | 501      |
+| Global Goods Inc  | 502      |
+| Mini Mart GmbH    | 503      |
+| Piko spol. s r.o. | 504      |
 
 A customer with zero orders would appear once with a `NULL` order (LEFT JOIN keeps all `customers` rows). Because `FROM` runs first, a `LEFT JOIN` cannot be "rescued" by a `WHERE` on the right-hand table — see [Step 2](#step-2-where) and the [consequences](#consequences-of-the-order--the-why-behind-famous-rules).
 
@@ -326,11 +329,13 @@ A customer with zero orders would appear once with a `NULL` order (LEFT JOIN kee
 `WHERE` consumes the step-1 relation and eliminates rows where the predicate is not TRUE. Because SQL uses **three-valued logic**, a predicate evaluating to `UNKNOWN` (any comparison with NULL) also eliminates the row.
 
 Available in `WHERE`:
+
 - Columns from any table in `FROM`
 - Column aliases from `FROM`-level definitions (e.g. a subquery alias referenced outer)
 - Scalar subqueries, `EXISTS`, `IN`, `LIKE`, `BETWEEN`, etc.
 
 Not available in `WHERE`:
+
 - `SELECT` aliases (created in step 6)
 - Aggregate results like `AVG(salary)` or `COUNT(*)`
 
@@ -365,14 +370,14 @@ FROM employees
 GROUP BY dept_id;
 ```
 
-| dept_id | n |
-|---|---|
-| 1 | 2 |
-| 2 | 2 |
-| 3 | 1 |
-| NULL | 1 |
+| dept_id | n   |
+| ------- | --- |
+| 1       | 2   |
+| 2       | 2   |
+| 3       | 1   |
+| NULL    | 1   |
 
-David's `dept_id IS NULL` forms its own **NULL group**. NULLs group together; the group is *not* skipped.
+David's `dept_id IS NULL` forms its own **NULL group**. NULLs group together; the group is _not_ skipped.
 
 > **Common misconception**
 > "GROUP BY sorts the output." — It may, for convenience, but there is **no ordering guarantee** unless you write `ORDER BY`. Do not rely on group-by ordering in production.
@@ -389,6 +394,7 @@ David's `dept_id IS NULL` forms its own **NULL group**. NULLs group together; th
 - combinations of the two
 
 It cannot reference:
+
 - non-grouped, non-aggregated columns (meaningless at group level)
 - `SELECT` aliases in most engines (a few allow it)
 
@@ -400,13 +406,14 @@ HAVING AVG(salary) > 80000;
 ```
 
 | dept_id | avg_salary |
-|---|---|
-| 1 | 88500.00 |
-| 3 | 98000.00 |
+| ------- | ---------- |
+| 1       | 88500.00   |
+| 3       | 98000.00   |
 
 Sales (dept 2) is dropped because its average — computed over salaries that are not NULL — is 70000.00.
 
 > **Key distinction to teach:**
+>
 > - `WHERE` filters **rows** (step 2).
 > - `HAVING` filters **groups** (step 4).
 > - You can **always** express a `HAVING` predicate over grouping columns as a `WHERE`, but you can **only** express aggregate predicates in `HAVING`.
@@ -433,12 +440,12 @@ JOIN departments d ON e.dept_id = d.dept_id
 WHERE e.salary IS NOT NULL;
 ```
 
-| first_name | dept_name | salary | dept_avg |
-|---|---|---|---|
-| Alice | Engineering | 95000.00 | 88500.00 |
-| Bob | Engineering | 82000.00 | 88500.00 |
-| Frank | Sales | 70000.00 | 70000.00 |
-| Emma | Marketing | 98000.00 | 98000.00 |
+| first_name | dept_name   | salary   | dept_avg |
+| ---------- | ----------- | -------- | -------- |
+| Alice      | Engineering | 95000.00 | 88500.00 |
+| Bob        | Engineering | 82000.00 | 88500.00 |
+| Frank      | Sales       | 70000.00 | 70000.00 |
+| Emma       | Marketing   | 98000.00 | 98000.00 |
 
 Every input row produces exactly one output row; the window `AVG` is attached to each row of its partition. Because window functions run after `WHERE`, the partition averages exclude any rows already filtered out — exactly what makes the result above differ from an aggregate over the whole table.
 
@@ -460,18 +467,18 @@ Aliases created here become visible from step 7 onward.
 
 ### Step 7: DISTINCT
 
-`DISTINCT` removes duplicate **whole rows** from the result of step 6. Duplicates are judged on the *output* row — the columns that remain after `SELECT`.
+`DISTINCT` removes duplicate **whole rows** from the result of step 6. Duplicates are judged on the _output_ row — the columns that remain after `SELECT`.
 
 ```sql
 SELECT DISTINCT dept_id FROM employees;
 ```
 
 | dept_id |
-|---|
-| 1 |
-| 2 |
-| 3 |
-| NULL |
+| ------- |
+| 1       |
+| 2       |
+| 3       |
+| NULL    |
 
 `DISTINCT` also interacts with `ORDER BY`: because `ORDER BY` runs **after** `DISTINCT`, an `ORDER BY` column must either be in the `SELECT` list or be functionally determined by it.
 
@@ -486,10 +493,10 @@ Once duplicates are removed, the result no longer contains `salary` to sort by.
 
 ### Step 8: ORDER BY
 
-Sort the results. This is the *only* step whose output is explicitly ordered. Two consequences:
+Sort the results. This is the _only_ step whose output is explicitly ordered. Two consequences:
 
 1. **`ORDER BY` can use `SELECT` aliases** — aliases exist since step 6.
-2. **Without `ORDER BY`, output order is undefined.** `LIMIT` without `ORDER BY` does not return "the first N" — it returns *your server's chosen N*, which can vary run-to-run.
+2. **Without `ORDER BY`, output order is undefined.** `LIMIT` without `ORDER BY` does not return "the first N" — it returns _your server's chosen N_, which can vary run-to-run.
 
 ```sql
 SELECT first_name, salary AS pay
@@ -497,13 +504,13 @@ FROM employees
 ORDER BY pay DESC;   -- alias is fine here
 ```
 
-| first_name | pay |
-|---|---|
-| Emma | 98000.00 |
-| Alice | 95000.00 |
-| Bob | 82000.00 |
-| Frank | 70000.00 |
-| Carla | NULL |
+| first_name | pay      |
+| ---------- | -------- |
+| Emma       | 98000.00 |
+| Alice      | 95000.00 |
+| Bob        | 82000.00 |
+| Frank      | 70000.00 |
+| Carla      | NULL     |
 
 Note Carla sorts **last** in PostgreSQL and many engines (NULLs last by default there); SQL Server historically sorts NULLs **first** for ascending order, and SQL Server 2022+ introduces `NULLS FIRST`/`NULLS LAST`. Use explicit `NULLS FIRST` / `NULLS LAST` to be unambiguous.
 
@@ -519,12 +526,12 @@ LIMIT 2;
 ```
 
 | emp_id | first_name |
-|---|---|
-| 105 | Emma |
-| 103 | Carla |
+| ------ | ---------- |
+| 105    | Emma       |
+| 103    | Carla      |
 
 > **Production pitfall**
-> `OFFSET` must first *materialize and skip* that many rows. On deep pages (`LIMIT 10 OFFSET 100000`) the engine still reads and discards 100 000 rows. This is why keyset pagination (`WHERE id > ? ORDER BY id LIMIT 10`) is preferred for large pagination. See the Pagination section in the handbook.
+> `OFFSET` must first _materialize and skip_ that many rows. On deep pages (`LIMIT 10 OFFSET 100000`) the engine still reads and discards 100 000 rows. This is why keyset pagination (`WHERE id > ? ORDER BY id LIMIT 10`) is preferred for large pagination. See the Pagination section in the handbook.
 
 ---
 
@@ -574,14 +581,14 @@ LEFT JOIN orders o
    AND o.order_date >= '2025-02-01';   -- preserved in step 1, keeps NULL rows
 ```
 
-| full_name | order_id |
-|---|---|
-| Global Goods Inc | 502 |
-| Mini Mart GmbH | NULL |
-| Piko spol. s r.o. | NULL |
+| full_name         | order_id |
+| ----------------- | -------- |
+| Global Goods Inc  | 502      |
+| Mini Mart GmbH    | NULL     |
+| Piko spol. s r.o. | NULL     |
 
 > **Interview trap**
-> "What's the difference between putting a condition in `ON` vs `WHERE` of a `LEFT JOIN`?" Answer in two parts: for `INNER JOIN` the result is **identical** (optimizer may even do the same). For outer joins, `ON` controls which rows are *matched during step 1* (extra predicate evaluated during the join), while `WHERE` unconditionally **discards** rows after the join, NULLs included.
+> "What's the difference between putting a condition in `ON` vs `WHERE` of a `LEFT JOIN`?" Answer in two parts: for `INNER JOIN` the result is **identical** (optimizer may even do the same). For outer joins, `ON` controls which rows are _matched during step 1_ (extra predicate evaluated during the join), while `WHERE` unconditionally **discards** rows after the join, NULLs included.
 
 ### 4. `WHERE` before `GROUP BY` changes `HAVING` counts
 
@@ -593,7 +600,7 @@ Already shown in Step 7: a `DISTINCT` result cannot sort by a column that no lon
 
 ### 6. `LIMIT` is last — so `ORDER BY` + `LIMIT` matters
 
-`ORDER BY` (step 8) runs before `LIMIT` (step 9), which is why top-N queries are correct: the sort determines *which* N rows are returned.
+`ORDER BY` (step 8) runs before `LIMIT` (step 9), which is why top-N queries are correct: the sort determines _which_ N rows are returned.
 
 ---
 
@@ -601,16 +608,16 @@ Already shown in Step 7: a `DISTINCT` result cannot sort by a column that no lon
 
 Logical processing interacts with NULL at almost every step:
 
-| Step | NULL behavior |
-|---|---|
-| FROM (ON) | Join condition `a = b` with NULL on either side evaluates UNKNOWN → row not matched (INNER) / kept with NULLs (LEFT). |
-| WHERE | Predicate must be TRUE; `salary = NULL` is UNKNOWN → row discarded. Use `IS NULL` / `IS NOT NULL`. |
-| GROUP BY | NULLs form their own group together (`GROUP BY dept_id` yields a NULL group). Not skipped, not split. |
-| HAVING | `COUNT(*)` counts NULL-bearing rows; `COUNT(salary)` counts only non-NULL. Aggregate input NULLs are excluded by aggregates themselves (`AVG(salary)` ignores NULL salaries). |
-| SELECT | Expressions propagate NULL: `NULL + 5` is NULL; `CONCAT(NULL,...)` depends on engine. |
-| ORDER BY | NULLs sort first or last depending on engine and `NULLS FIRST`/`NULLS LAST`. |
-| DISTINCT | All NULLs compare equal to each other → one NULL in the distinct output. |
-| LIMIT | `ORDER BY` + NULL ordering decides which rows the limit keeps. |
+| Step      | NULL behavior                                                                                                                                                                 |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| FROM (ON) | Join condition `a = b` with NULL on either side evaluates UNKNOWN → row not matched (INNER) / kept with NULLs (LEFT).                                                         |
+| WHERE     | Predicate must be TRUE; `salary = NULL` is UNKNOWN → row discarded. Use `IS NULL` / `IS NOT NULL`.                                                                            |
+| GROUP BY  | NULLs form their own group together (`GROUP BY dept_id` yields a NULL group). Not skipped, not split.                                                                         |
+| HAVING    | `COUNT(*)` counts NULL-bearing rows; `COUNT(salary)` counts only non-NULL. Aggregate input NULLs are excluded by aggregates themselves (`AVG(salary)` ignores NULL salaries). |
+| SELECT    | Expressions propagate NULL: `NULL + 5` is NULL; `CONCAT(NULL,...)` depends on engine.                                                                                         |
+| ORDER BY  | NULLs sort first or last depending on engine and `NULLS FIRST`/`NULLS LAST`.                                                                                                  |
+| DISTINCT  | All NULLs compare equal to each other → one NULL in the distinct output.                                                                                                      |
+| LIMIT     | `ORDER BY` + NULL ordering decides which rows the limit keeps.                                                                                                                |
 
 The single most important rule:
 
@@ -623,6 +630,7 @@ Null-safe comparison `IS NOT DISTINCT FROM` treats NULL = NULL as true and is ha
 ## Common Mistakes
 
 1. **Using a `SELECT` alias in `WHERE`.**
+
    ```sql
    -- ERROR
    SELECT amount * 1.21 AS brutto FROM orders WHERE brutto > 100;
@@ -636,6 +644,7 @@ Null-safe comparison `IS NOT DISTINCT FROM` treats NULL = NULL as true and is ha
 3. **Treating `GROUP BY` output as ordered.** It is not; add `ORDER BY`.
 
 4. **Counting joined rows by mistake.** `COUNT(*)` counts step-1 rows. One customer with two orders makes `COUNT(*)` return 2 even if "customer" was intended.
+
    ```sql
    -- counts order_rows, NOT customers
    SELECT COUNT(*) FROM customers c JOIN orders o ON o.customer_id = c.customer_id;
@@ -660,7 +669,7 @@ Null-safe comparison `IS NOT DISTINCT FROM` treats NULL = NULL as true and is ha
 
 3. **Appending `DISTINCT` as a "dedupe patch" on a broken JOIN.** Duplicates usually come from fan-out in `FROM` (step 1). Fix the provenance instead; `DISTINCT` hides the cause and inflates the plan cost (sort/hash of whole result).
 
-4. **Using `WHERE` on an outer-joined table** silently changes semantics. Set up a code-review rule: *predicates on the nullable side of a LEFT JOIN belong in `ON`.*
+4. **Using `WHERE` on an outer-joined table** silently changes semantics. Set up a code-review rule: _predicates on the nullable side of a LEFT JOIN belong in `ON`._
 
 5. **Relying on execution order assumptions for performance.** The optimizer reorders physical operations; logical ordering is a correctness contract, not a speed plan. Validate with `EXPLAIN ANALYZE`.
 
@@ -672,7 +681,7 @@ Null-safe comparison `IS NOT DISTINCT FROM` treats NULL = NULL as true and is ha
 
 ## Performance Implications
 
-Logical order is a *correctness* model. Performance follows the **physical plan**, which the optimizer derives from:
+Logical order is a _correctness_ model. Performance follows the **physical plan**, which the optimizer derives from:
 
 - available indexes
 - table statistics / cardinality
@@ -684,11 +693,12 @@ Logical order is a *correctness* model. Performance follows the **physical plan*
 
 Two concrete, verifiable optimizations that relate directly to logical order:
 
-**Predicate pushdown.** The planner proves it can evaluate a `WHERE` predicate *during* the scan and discards rows earlier than the "textbook" step-2 position. Result is unchanged; speed improves. This is exactly why people say "put filters early" — it's an *optimizer heuristic* expressed in physical terms, not a logical-order rule.
+**Predicate pushdown.** The planner proves it can evaluate a `WHERE` predicate _during_ the scan and discards rows earlier than the "textbook" step-2 position. Result is unchanged; speed improves. This is exactly why people say "put filters early" — it's an _optimizer heuristic_ expressed in physical terms, not a logical-order rule.
 
 **Grouping strategy.** `GROUP BY` may be executed as a hash aggregate or a sort aggregate. A query whose `WHERE` filters most rows benefits from the filter running before the group build — verified via `EXPLAIN` as a low-cardinality scan feeding the aggregation node.
 
 > **What to verify in the plan:**
+>
 > - Which node feeds the aggregate (what row count enters it)?
 > - Is the join ordered (nested loop with index) or hashed?
 > - Did the planner push the `WHERE` predicate into the base-table scan or index condition?
@@ -714,7 +724,7 @@ WHERE e.salary = (SELECT MAX(e2.salary)
                   WHERE e2.dept_id = e.dept_id);
 ```
 
-Why it is bad: correlated subquery re-scans per row; ties return *all* matching rows (maybe intended, maybe not); NULL dept_id rows match nobody.
+Why it is bad: correlated subquery re-scans per row; ties return _all_ matching rows (maybe intended, maybe not); NULL dept_id rows match nobody.
 
 BETTER — window function, and the logical order is on our side (windowing after grouping preserves per-row identity):
 
@@ -820,26 +830,30 @@ Verify with `EXPLAIN` that the SORT node disappeared and scans stopped after 10 
 ## Database-Specific Differences
 
 > PostgreSQL
+>
 > - Strictly standard: `SELECT` aliases are **not** allowed in `WHERE`; they are allowed in `ORDER BY` **and** in `GROUP BY` (as output-column names, only if unambiguous). Window functions are well supported. `LIMIT`/`OFFSET` and SQL `FETCH FIRST ... ROWS` both exist. NULLs sort `last` ascending by default; supports `NULLS FIRST/LAST` explicitly.
 
 > MySQL
+>
 > - Historically very lax: in non-strict/`ONLY_FULL_GROUP_BY`-off modes, `SELECT` aliases may be reused inside `WHERE`/`GROUP BY`/`HAVING`, and `SELECT` can reference non-grouped columns. That freedom is a high-risk pitfall: the same SQL can change meaning across mode changes. Prefer standard, portable SQL. `LIMIT`/`OFFSET`. MySQL 8.0.2+ supports `FETCH FIRST` and window functions; MySQL does **not** support `FULL OUTER JOIN` until 8.0.22+ (then it does). `GROUP BY` implicitly sorted rows before 8.0 — matching "GROUP BY orders" folklore; 8.0 removed that.
 
 > SQL Server
+>
 > - `SELECT` alias allowed in `ORDER BY`, not in `WHERE`/`GROUP BY`/`HAVING`. Top-N via `SELECT TOP (N) ...`, `OFFSET ... FETCH` supported for pagination. Window functions since SQL Server 2005/2012 (FULL support). NULLs sort lowest (first) ascending historically; `NULLS FIRST/LAST` only since SQL Server 2022 (16.x). `GROUP BY` output has no guaranteed order.
 
 > Oracle
+>
 > - `SELECT` alias allowed in `ORDER BY` only (not `WHERE`, `GROUP BY`, `HAVING`). No `LIMIT`; use `FETCH FIRST n ROWS ONLY` (Oracle 12c+) or historic `ROWNUM`. NULLs sort last ascending by default, with `NULLS FIRST/LAST`. `GROUP BY` result order is not guaranteed. Oracle's `EXPLAIN PLAN`/`DBMS_XPLAN` shows the physical operations corresponding to each logical phase.
 
-| Behavior | PostgreSQL | MySQL | SQL Server | Oracle |
-|---|---|---|---|---|
-| Alias in WHERE | No | Lax (mode-dependent) | No | No |
-| Alias in GROUP BY | Yes (standard name resolution) | Yes | No | No |
-| Alias in HAVING | No | Lax (mode-dependent) | No | No |
-| Alias in ORDER BY | Yes | Yes | Yes | Yes |
-| Top-N syntax | `LIMIT n`, `FETCH FIRST` | `LIMIT n` | `SELECT TOP (n)`; also `OFFSET/FETCH` | `FETCH FIRST` (12c+), `ROWNUM` (older) |
-| DEFAULT NULL sort (ASC) | last (NULLS LAST) | first | first | last (implementation-defined), use NULLS FIRST/LAST |
-| Window functions | Yes | 8.0+ | Yes | Yes |
+| Behavior                | PostgreSQL                     | MySQL                | SQL Server                            | Oracle                                              |
+| ----------------------- | ------------------------------ | -------------------- | ------------------------------------- | --------------------------------------------------- |
+| Alias in WHERE          | No                             | Lax (mode-dependent) | No                                    | No                                                  |
+| Alias in GROUP BY       | Yes (standard name resolution) | Yes                  | No                                    | No                                                  |
+| Alias in HAVING         | No                             | Lax (mode-dependent) | No                                    | No                                                  |
+| Alias in ORDER BY       | Yes                            | Yes                  | Yes                                   | Yes                                                 |
+| Top-N syntax            | `LIMIT n`, `FETCH FIRST`       | `LIMIT n`            | `SELECT TOP (n)`; also `OFFSET/FETCH` | `FETCH FIRST` (12c+), `ROWNUM` (older)              |
+| DEFAULT NULL sort (ASC) | last (NULLS LAST)              | first                | first                                 | last (implementation-defined), use NULLS FIRST/LAST |
+| Window functions        | Yes                            | 8.0+                 | Yes                                   | Yes                                                 |
 
 ---
 
@@ -865,10 +879,10 @@ Verify with `EXPLAIN` that the SORT node disappeared and scans stopped after 10 
 
 ## Beginner
 
-1. What is the difference between *logical* query processing order and *physical* execution?
+1. What is the difference between _logical_ query processing order and _physical_ execution?
 2. Which clause is logically evaluated first: `SELECT` or `FROM`? Why does the answer matter?
 3. Why can't you use a column alias created in `SELECT` inside a `WHERE` clause?
-4. Why *can* you use that same alias inside `ORDER BY`?
+4. Why _can_ you use that same alias inside `ORDER BY`?
 5. What is the logical order (steps) of a plain `SELECT ... FROM ... WHERE ... ORDER BY ... LIMIT` query?
 6. `WHERE` filters rows. `HAVING` filters what — and where does each sit in the logical order?
 7. In `GROUP BY`, where does a `NULL` value go?
@@ -887,7 +901,7 @@ Verify with `EXPLAIN` that the SORT node disappeared and scans stopped after 10 
 ## Advanced
 
 16. Prove that `ON`-clause predicates and `WHERE`-clause predicates are equivalent for `INNER JOIN` but not for outer joins, using the logical pipeline.
-17. Design a query where moving a predicate from `HAVING` to `WHERE` changes *the numeric result of an aggregate* — explain the mechanism.
+17. Design a query where moving a predicate from `HAVING` to `WHERE` changes _the numeric result of an aggregate_ — explain the mechanism.
 18. Explain three-valued logic in `WHERE`: why a predicate that evaluates to UNKNOWN removes the row.
 19. How does the optimizer realize the logical order without executing the clauses literally? Describe the role of relational algebra and equivalence rules.
 20. A query uses both `DISTINCT` and a window function. Where does each step run, and what restriction follows?
@@ -906,13 +920,14 @@ Verify with `EXPLAIN` that the SORT node disappeared and scans stopped after 10 
 27. Your `GROUP BY dept_id` produces a group for NULL dept_id. Is that a bug? On which engine (if any) would you see it dropped, and why?
 28. `ORDER BY` can reference a column not in the `SELECT` list. Can `DISTINCT` coexist? Explain the constraint using steps 7 and 8.
 29. Does `WHERE` run "before" a `LEFT JOIN`'s `ON`? Answer precisely for inner vs outer match semantics.
-30. A query returns the same rows with `WHERE amount > 5` placed in a subquery *and* applied at the outer level. Are they guaranteed to be identical under all optimizations? Why?
+30. A query returns the same rows with `WHERE amount > 5` placed in a subquery _and_ applied at the outer level. Are they guaranteed to be identical under all optimizations? Why?
 
 ## Output Prediction
 
 Given the seed data above, predict the output.
 
 31.
+
 ```sql
 SELECT COUNT(*)                                 AS all_rows,
        COUNT(dept_id)                            AS with_dept,
@@ -921,6 +936,7 @@ FROM employees;
 ```
 
 32.
+
 ```sql
 SELECT dept_id, COUNT(*) AS n
 FROM employees
@@ -929,6 +945,7 @@ ORDER BY dept_id;
 ```
 
 33.
+
 ```sql
 SELECT dept_id, COUNT(*) AS n, AVG(salary) AS avg_sal
 FROM employees
@@ -938,6 +955,7 @@ HAVING COUNT(*) >= 2;
 ```
 
 34.
+
 ```sql
 SELECT c.full_name, COUNT(o.order_id) AS orders
 FROM customers c
@@ -947,6 +965,7 @@ ORDER BY orders DESC;
 ```
 
 35.
+
 ```sql
 SELECT full_name, order_id
 FROM customers c
@@ -957,6 +976,7 @@ WHERE o.order_date >= '2025-02-01';
 ## Debugging
 
 36. This query should return "one row per customer with their latest order" but returns extra rows. Apply the logical order to find the bug:
+
 ```sql
 SELECT c.full_name, o.amount
 FROM customers c
@@ -965,16 +985,19 @@ WHERE o.order_date = (SELECT MAX(order_date) FROM orders);
 ```
 
 37. A co-worker's alias filter fails:
+
 ```sql
 SELECT amount * 1.21 AS brutto
 FROM orders
 WHERE brutto > 200;
 ```
+
 Explain from which logical step the error arises and how to fix it.
 
 38. The report says department counts are inflated after a person suddenly appears in two departments. Which step produced the duplicates and which clause 'fixed' it incorrectly?
+
 ```sql
-SELECT d.dept_name, COUNT(*) 
+SELECT d.dept_name, COUNT(*)
 FROM departments d
 JOIN employees e ON e.dept_id = d.dept_id
 WHERE e.dept_id = 1
@@ -990,5 +1013,5 @@ GROUP BY d.dept_name;
 41. Justify (from logical order) why `HAVING dept_id = 1` is worse than `WHERE dept_id = 1` on a huge table, and what the execution plan will show.
 42. You have an index on `(dept_id, salary)`. Will the planner be able to satisfy `GROUP BY dept_id` without a sort? What does `EXPLAIN` tell you, and what assumption must hold for efficiency?
 43. Same query, two versions — one links an aggregate in a correlated subquery, the other uses a window function. Which plan features are you comparing, and how do you measure on real data?
-44. A 10-billion-row table: why is "filter as early as possible" (in physical terms) the single biggest lever, and how does that reconcile with "WHERE is step 2"? 
+44. A 10-billion-row table: why is "filter as early as possible" (in physical terms) the single biggest lever, and how does that reconcile with "WHERE is step 2"?
 45. Design a covering index for "EMP_PER_DEPT: employees with salary above 80k per department, ordered by salary desc" and sketch the `EXPLAIN` you'd want to see.

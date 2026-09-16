@@ -24,11 +24,11 @@ mber to each row.
 
 The three defining properties:
 
-| Property | Meaning |
-|---|---|
-| Unique | No two rows in the same partition get the same number |
-| Consecutive | Numbers are `1, 2, 3, ...` with **no gaps** |
-| Ordered | Row 1 is the "first" row under the `ORDER BY`; the last row gets the highest number |
+| Property    | Meaning                                                                             |
+| ----------- | ----------------------------------------------------------------------------------- |
+| Unique      | No two rows in the same partition get the same number                               |
+| Consecutive | Numbers are `1, 2, 3, ...` with **no gaps**                                         |
+| Ordered     | Row 1 is the "first" row under the `ORDER BY`; the last row gets the highest number |
 
 ---
 
@@ -43,11 +43,11 @@ Many business questions require "pick this row per group":
 
 Before window functions these required painful workarounds:
 
-| Task | Pre-window-function approach | Problems |
-|---|---|---|
-| Latest row per group | Correlated subquery on `MAX(date)` and a join back | Wrong results when the key column ties; complex |
-| Deduplicate | Self-join with `>`, or a temp table with an identity column | Dialect hacks, error-prone |
-| Top-N per group | Correlated subquery counting "how many rows beat this one" | O(n²), unreadable |
+| Task                 | Pre-window-function approach                                | Problems                                        |
+| -------------------- | ----------------------------------------------------------- | ----------------------------------------------- |
+| Latest row per group | Correlated subquery on `MAX(date)` and a join back          | Wrong results when the key column ties; complex |
+| Deduplicate          | Self-join with `>`, or a temp table with an identity column | Dialect hacks, error-prone                      |
+| Top-N per group      | Correlated subquery counting "how many rows beat this one"  | O(n²), unreadable                               |
 
 `ROW_NUMBER()` replaces all of these with one declarative construct.
 
@@ -67,12 +67,12 @@ FROM ...
 
 ### Anatomy
 
-| Element | Required? | Purpose |
-|---|---|---|
-| `ROW_NUMBER()` | Yes | The function itself — always takes no arguments |
-| `OVER (...)` | Yes | Marks it as a window function |
-| `PARTITION BY` | No | Restarts numbering at `1` for each group. Omit → the whole result set is one partition |
-| `ORDER BY` | Yes | Defines **which row gets number 1**. Omit → numbers are assigned in arbitrary order (see [Edge Cases](#edge-cases)) |
+| Element        | Required? | Purpose                                                                                                             |
+| -------------- | --------- | ------------------------------------------------------------------------------------------------------------------- |
+| `ROW_NUMBER()` | Yes       | The function itself — always takes no arguments                                                                     |
+| `OVER (...)`   | Yes       | Marks it as a window function                                                                                       |
+| `PARTITION BY` | No        | Restarts numbering at `1` for each group. Omit → the whole result set is one partition                              |
+| `ORDER BY`     | Yes       | Defines **which row gets number 1**. Omit → numbers are assigned in arbitrary order (see [Edge Cases](#edge-cases)) |
 
 ### No frame clause
 
@@ -114,7 +114,7 @@ flowchart LR
 
 The important consequence of this pipeline: **`ROW_NUMBER()` implies a sort** unless the optimizer can reuse the physical order from an index that already matches `PARTITION BY` + `ORDER BY`.
 
-> If the `ORDER BY` inside `OVER` has duplicate values (e.g., two orders on the same date for the same customer), the sort ties them, and the database must pick *some* order — usually the physical order it happened to read the rows in. That makes the numeric assignment **non-deterministic** unless you add a unique tiebreaker column.
+> If the `ORDER BY` inside `OVER` has duplicate values (e.g., two orders on the same date for the same customer), the sort ties them, and the database must pick _some_ order — usually the physical order it happened to read the rows in. That makes the numeric assignment **non-deterministic** unless you add a unique tiebreaker column.
 
 ### Logical query-processing position
 
@@ -135,7 +135,7 @@ Consequences:
 
 - `WHERE rn = 1` fails — the number does not exist yet when `WHERE` runs.
 - `ROW_NUMBER()` after `GROUP BY` numbers the **grouped** rows (see [Edge Cases](#edge-cases)).
-- `LIMIT` applies *after* numbering, so you cannot use `LIMIT` to restrict per partition.
+- `LIMIT` applies _after_ numbering, so you cannot use `LIMIT` to restrict per partition.
 
 ---
 
@@ -146,14 +146,14 @@ Consequences:
 Grain: **one row = one order.**
 
 | order_id | customer_id | order_date | amount |
-|---|---|---|---|
-| 101 | 1 | 2024-01-15 | 250.00 |
-| 102 | 1 | 2024-02-20 | 180.00 |
-| 103 | 2 | 2024-01-18 | 320.00 |
-| 104 | 1 | 2024-03-10 | 400.00 |
-| 105 | 3 | 2024-02-25 | 150.00 |
-| 106 | 2 | 2024-03-05 | 275.00 |
-| 107 | 1 | 2024-03-10 | 90.00 |
+| -------- | ----------- | ---------- | ------ |
+| 101      | 1           | 2024-01-15 | 250.00 |
+| 102      | 1           | 2024-02-20 | 180.00 |
+| 103      | 2           | 2024-01-18 | 320.00 |
+| 104      | 1           | 2024-03-10 | 400.00 |
+| 105      | 3           | 2024-02-25 | 150.00 |
+| 106      | 2           | 2024-03-05 | 275.00 |
+| 107      | 1           | 2024-03-10 | 90.00  |
 
 Note: orders 104 and 107 fall on the **same date** for the **same customer** — deliberately included to demonstrate tie handling.
 
@@ -161,31 +161,31 @@ Note: orders 104 and 107 fall on the **same date** for the **same customer** —
 
 Grain: **one row = one employee.**
 
-| employee_id | name | department | salary | hire_date |
-|---|---|---|---|---|
-| 1 | Alice | Engineering | 90000 | 2019-03-15 |
-| 2 | Bob | Engineering | 85000 | 2020-06-01 |
-| 3 | Charlie | Engineering | 95000 | 2018-01-20 |
-| 4 | Diana | Marketing | 70000 | 2021-02-10 |
-| 5 | Eve | Marketing | 75000 | 2020-08-22 |
-| 6 | Frank | Marketing | 72000 | 2019-11-05 |
-| 7 | Grace | Sales | 65000 | 2022-01-12 |
-| 8 | Hank | Sales | 65000 | 2021-07-19 |
-| 9 | Ivy | Sales | 71000 | 2020-03-30 |
+| employee_id | name    | department  | salary | hire_date  |
+| ----------- | ------- | ----------- | ------ | ---------- |
+| 1           | Alice   | Engineering | 90000  | 2019-03-15 |
+| 2           | Bob     | Engineering | 85000  | 2020-06-01 |
+| 3           | Charlie | Engineering | 95000  | 2018-01-20 |
+| 4           | Diana   | Marketing   | 70000  | 2021-02-10 |
+| 5           | Eve     | Marketing   | 75000  | 2020-08-22 |
+| 6           | Frank   | Marketing   | 72000  | 2019-11-05 |
+| 7           | Grace   | Sales       | 65000  | 2022-01-12 |
+| 8           | Hank    | Sales       | 65000  | 2021-07-19 |
+| 9           | Ivy     | Sales       | 71000  | 2020-03-30 |
 
 ### user_logins
 
 Grain: **one row = one login event.**
 `session_id` is the entity used for de-duplication below.
 
-| login_id | user_id | session_id | login_time |
-|---|---|---|---|
-| 1 | 100 | S-AAA-001 | 2024-06-01 08:00:00 |
-| 2 | 100 | S-AAA-001 | 2024-06-01 08:05:00 |
-| 3 | 100 | S-AAA-001 | 2024-06-01 08:12:00 |
-| 4 | 100 | S-BBB-002 | 2024-06-02 09:00:00 |
-| 5 | 101 | S-AAA-001 | 2024-06-01 10:00:00 |
-| 6 | 100 | S-BBB-002 | 2024-06-02 09:07:00 |
+| login_id | user_id | session_id | login_time          |
+| -------- | ------- | ---------- | ------------------- |
+| 1        | 100     | S-AAA-001  | 2024-06-01 08:00:00 |
+| 2        | 100     | S-AAA-001  | 2024-06-01 08:05:00 |
+| 3        | 100     | S-AAA-001  | 2024-06-01 08:12:00 |
+| 4        | 100     | S-BBB-002  | 2024-06-02 09:00:00 |
+| 5        | 101     | S-AAA-001  | 2024-06-01 10:00:00 |
+| 6        | 100     | S-BBB-002  | 2024-06-02 09:07:00 |
 
 ---
 
@@ -205,15 +205,15 @@ FROM orders;
 
 **Expected output:**
 
-| order_id | customer_id | order_date | amount | rn |
-|---|---|---|---|---|
-| 107 | 1 | 2024-03-10 | 90.00 | 1 |
-| 104 | 1 | 2024-03-10 | 400.00 | 2 |
-| 106 | 2 | 2024-03-05 | 275.00 | 3 |
-| 105 | 3 | 2024-02-25 | 150.00 | 4 |
-| 102 | 1 | 2024-02-20 | 180.00 | 5 |
-| 103 | 2 | 2024-01-18 | 320.00 | 6 |
-| 101 | 1 | 2024-01-15 | 250.00 | 7 |
+| order_id | customer_id | order_date | amount | rn  |
+| -------- | ----------- | ---------- | ------ | --- |
+| 107      | 1           | 2024-03-10 | 90.00  | 1   |
+| 104      | 1           | 2024-03-10 | 400.00 | 2   |
+| 106      | 2           | 2024-03-05 | 275.00 | 3   |
+| 105      | 3           | 2024-02-25 | 150.00 | 4   |
+| 102      | 1           | 2024-02-20 | 180.00 | 5   |
+| 103      | 2           | 2024-01-18 | 320.00 | 6   |
+| 101      | 1           | 2024-01-15 | 250.00 | 7   |
 
 Without the `order_id DESC` tiebreaker, rows 104 and 107 could swap numbers between runs — both are in the same partition (the whole table) and share `order_date`.
 
@@ -234,14 +234,14 @@ FROM orders;
 **Expected output:**
 
 | order_id | customer_id | order_date | order_num_per_customer |
-|---|---|---|---|
-| 107 | 1 | 2024-03-10 | 1 |
-| 104 | 1 | 2024-03-10 | 2 |
-| 102 | 1 | 2024-02-20 | 3 |
-| 101 | 1 | 2024-01-15 | 4 |
-| 106 | 2 | 2024-03-05 | 1 |
-| 103 | 2 | 2024-01-18 | 2 |
-| 105 | 3 | 2024-02-25 | 1 |
+| -------- | ----------- | ---------- | ---------------------- |
+| 107      | 1           | 2024-03-10 | 1                      |
+| 104      | 1           | 2024-03-10 | 2                      |
+| 102      | 1           | 2024-02-20 | 3                      |
+| 101      | 1           | 2024-01-15 | 4                      |
+| 106      | 2           | 2024-03-05 | 1                      |
+| 103      | 2           | 2024-01-18 | 2                      |
+| 105      | 3           | 2024-02-25 | 1                      |
 
 Numbering restarts at `1` for each customer. Note the ordering of 104 and 107 — determined by the `order_id DESC` tiebreaker, not by chance.
 
@@ -249,7 +249,7 @@ Numbering restarts at `1` for each customer. Note the ordering of 104 and 107 �
 
 ## Scenario 1: Latest Row Per Group
 
-**Question:** For each customer, return *their most recent order* (the full order row).
+**Question:** For each customer, return _their most recent order_ (the full order row).
 
 ### The classic pattern: number, then filter in an outer query
 
@@ -273,10 +273,10 @@ WHERE rn = 1;
 **Expected output:**
 
 | order_id | customer_id | order_date | amount |
-|---|---|---|---|
-| 107 | 1 | 2024-03-10 | 90.00 |
-| 106 | 2 | 2024-03-05 | 275.00 |
-| 105 | 3 | 2024-02-25 | 150.00 |
+| -------- | ----------- | ---------- | ------ |
+| 107      | 1           | 2024-03-10 | 90.00  |
+| 106      | 2           | 2024-03-05 | 275.00 |
+| 105      | 3           | 2024-02-25 | 150.00 |
 
 ### BAD APPROACH: correlated subquery on MAX date
 
@@ -297,11 +297,11 @@ JOIN (
 
 Customer 1 has two orders on 2024-03-10 (104 and 107) → this returns **two** rows for customer 1. The `ROW_NUMBER` version with the `order_id DESC` tiebreaker returns exactly one.
 
-| Approach | Customer 1 result | Deterministic? |
-|---|---|---|
-| `JOIN` on `MAX(order_date)` | 2 rows (104, 107) | No choice — both match |
-| `ROW_NUMBER() = 1` with tiebreaker | exactly 1 row (107) | Yes |
-| `RANK() = 1` | 2 rows (104, 107) | Intended — all ties kept |
+| Approach                           | Customer 1 result   | Deterministic?           |
+| ---------------------------------- | ------------------- | ------------------------ |
+| `JOIN` on `MAX(order_date)`        | 2 rows (104, 107)   | No choice — both match   |
+| `ROW_NUMBER() = 1` with tiebreaker | exactly 1 row (107) | Yes                      |
+| `RANK() = 1`                       | 2 rows (104, 107)   | Intended — all ties kept |
 
 > **Interview trap:** "Most recent order per customer" defaults to `ROW_NUMBER`, not `RANK`. If the product says "show the latest order per customer," they almost always want exactly one row per customer.
 
@@ -325,13 +325,13 @@ FROM user_logins;
 
 **Expected output (excerpt):**
 
-| login_id | user_id | session_id | login_time | occurrence_no |
-|---|---|---|---|---|
-| 1 | 100 | S-AAA-001 | 2024-06-01 08:00:00 | 1 |
-| 2 | 100 | S-AAA-001 | 2024-06-01 08:05:00 | 2 |
-| 3 | 100 | S-AAA-001 | 2024-06-01 08:12:00 | 3 |
-| 4 | 100 | S-BBB-002 | 2024-06-02 09:00:00 | 1 |
-| 6 | 100 | S-BBB-002 | 2024-06-02 09:07:00 | 2 |
+| login_id | user_id | session_id | login_time          | occurrence_no |
+| -------- | ------- | ---------- | ------------------- | ------------- |
+| 1        | 100     | S-AAA-001  | 2024-06-01 08:00:00 | 1             |
+| 2        | 100     | S-AAA-001  | 2024-06-01 08:05:00 | 2             |
+| 3        | 100     | S-AAA-001  | 2024-06-01 08:12:00 | 3             |
+| 4        | 100     | S-BBB-002  | 2024-06-02 09:00:00 | 1             |
+| 6        | 100     | S-BBB-002  | 2024-06-02 09:07:00 | 2             |
 
 `occurrence_no > 1` marks the duplicates.
 
@@ -356,11 +356,11 @@ WHERE rn = 1;
 
 **Expected output:**
 
-| login_id | user_id | session_id | login_time |
-|---|---|---|---|
-| 1 | 100 | S-AAA-001 | 2024-06-01 08:00:00 |
-| 4 | 100 | S-BBB-002 | 2024-06-02 09:00:00 |
-| 5 | 101 | S-AAA-001 | 2024-06-01 10:00:00 |
+| login_id | user_id | session_id | login_time          |
+| -------- | ------- | ---------- | ------------------- |
+| 1        | 100     | S-AAA-001  | 2024-06-01 08:00:00 |
+| 4        | 100     | S-BBB-002  | 2024-06-02 09:00:00 |
+| 5        | 101     | S-AAA-001  | 2024-06-01 10:00:00 |
 
 ### Deleting the duplicates
 
@@ -456,14 +456,14 @@ WHERE rn <= 2;
 
 **Expected output:**
 
-| employee_id | name | department | salary |
-|---|---|---|---|
-| 3 | Charlie | Engineering | 95000 |
-| 1 | Alice | Engineering | 90000 |
-| 5 | Eve | Marketing | 75000 |
-| 6 | Frank | Marketing | 72000 |
-| 9 | Ivy | Sales | 71000 |
-| 7 | Grace | Sales | 65000 |
+| employee_id | name    | department  | salary |
+| ----------- | ------- | ----------- | ------ |
+| 3           | Charlie | Engineering | 95000  |
+| 1           | Alice   | Engineering | 90000  |
+| 5           | Eve     | Marketing   | 75000  |
+| 6           | Frank   | Marketing   | 72000  |
+| 9           | Ivy     | Sales       | 71000  |
+| 7           | Grace   | Sales       | 65000  |
 
 Note Grace versus Hank (both 65000 in Sales): the tiebreaker `employee_id` decides Grace (7) over Hank (8).
 
@@ -513,16 +513,16 @@ FROM employees;
 
 **Expected output:**
 
-| position | name | department | salary |
-|---|---|---|---|
-| 1 | Charlie | Engineering | 95000 |
-| 2 | Alice | Engineering | 90000 |
-| 3 | Bob | Engineering | 85000 |
-| 4 | Eve | Marketing | 75000 |
-| 5 | Frank | Marketing | 72000 |
-| 6 | Ivy | Sales | 71000 |
-| 7 | Grace | Sales | 65000 |
-| 8 | Hank | Sales | 65000 |
+| position | name    | department  | salary |
+| -------- | ------- | ----------- | ------ |
+| 1        | Charlie | Engineering | 95000  |
+| 2        | Alice   | Engineering | 90000  |
+| 3        | Bob     | Engineering | 85000  |
+| 4        | Eve     | Marketing   | 75000  |
+| 5        | Frank   | Marketing   | 72000  |
+| 6        | Ivy     | Sales       | 71000  |
+| 7        | Grace   | Sales       | 65000  |
+| 8        | Hank    | Sales       | 65000  |
 
 The numbers are consecutive **by construction** — that is the defining difference from `RANK` (gaps) and from the raw table `employee_id` (gaps after deletes).
 
@@ -569,15 +569,15 @@ ORDER BY order_date DESC, order_id DESC
 LIMIT 20;
 ```
 
-| Approach | Depth cost | Row-number role |
-|---|---|---|
-| `OFFSET` | O(offset) scan each page | none |
-| `ROW_NUMBER` + `BETWEEN` | O(total) sort each page | gives stable page slices |
-| Keyset (`WHERE` on last key) | O(page) via index | none — index does the work |
+| Approach                     | Depth cost               | Row-number role            |
+| ---------------------------- | ------------------------ | -------------------------- |
+| `OFFSET`                     | O(offset) scan each page | none                       |
+| `ROW_NUMBER` + `BETWEEN`     | O(total) sort each page  | gives stable page slices   |
+| Keyset (`WHERE` on last key) | O(page) via index        | none — index does the work |
 
 See [84-Pagination-and-Keyset-Pagination](../9-Optimization/84-Pagination-and-Keyset-Pagination.md).
 
-> **Production pitfall:** Never paginate a *live* result set with `OFFSET`-style or `ROW_NUMBER`-style pagination if rows are inserted/deleted between page requests — row membership shifts and items can be skipped or shown twice. Keyset pagination avoids this entirely.
+> **Production pitfall:** Never paginate a _live_ result set with `OFFSET`-style or `ROW_NUMBER`-style pagination if rows are inserted/deleted between page requests — row membership shifts and items can be skipped or shown twice. Keyset pagination avoids this entirely.
 
 ---
 
@@ -585,18 +585,18 @@ See [84-Pagination-and-Keyset-Pagination](../9-Optimization/84-Pagination-and-Ke
 
 Take three employees in the same department with salaries: 95000, 90000, 90000, 85000.
 
-| name | salary | ROW_NUMBER | RANK | DENSE_RANK |
-|---|---|---|---|---|
-| Charlie | 95000 | 1 | 1 | 1 |
-| Alice | 90000 | 2 | 2 | 2 |
-| Bob | 90000 | 3 | 2 | 2 |
-| Dana | 85000 | 4 | 4 | 3 |
+| name    | salary | ROW_NUMBER | RANK | DENSE_RANK |
+| ------- | ------ | ---------- | ---- | ---------- |
+| Charlie | 95000  | 1          | 1    | 1          |
+| Alice   | 90000  | 2          | 2    | 2          |
+| Bob     | 90000  | 3          | 2    | 2          |
+| Dana    | 85000  | 4          | 4    | 3          |
 
-| Function | Ties share value? | Gaps in sequence? | Guaranteed N rows for N values? | Typical use |
-|---|---|---|---|---|
-| `ROW_NUMBER` | No — each row gets a distinct number | No | Yes | Dedup, latest-per-group, pagination |
-| `RANK` | Yes | Yes (skips numbers) | No* | Competition leaderboards |
-| `DENSE_RANK` | Yes | No | No* | Dense standings, "top 3 distinct values" |
+| Function     | Ties share value?                    | Gaps in sequence?   | Guaranteed N rows for N values? | Typical use                              |
+| ------------ | ------------------------------------ | ------------------- | ------------------------------- | ---------------------------------------- |
+| `ROW_NUMBER` | No — each row gets a distinct number | No                  | Yes                             | Dedup, latest-per-group, pagination      |
+| `RANK`       | Yes                                  | Yes (skips numbers) | No\*                            | Competition leaderboards                 |
+| `DENSE_RANK` | Yes                                  | No                  | No\*                            | Dense standings, "top 3 distinct values" |
 
 \* Because ties share a rank, `WHERE rnk <= 3` with `RANK` can return more than 3 rows.
 
@@ -612,7 +612,7 @@ Take three employees in the same department with salaries: 95000, 90000, 90000, 
 - If the sort has ties and you add the primary key as the last sort column → deterministic.
 - If the sort has ties and you do **not** add a tiebreaker → non-deterministic: the database assigns numbers in whatever physical order it read the rows.
 
-> **Interview trap:** Ask "is `ROW_NUMBER()` deterministic?" The correct answer is *it depends on the ORDER BY having a unique tiebreaker*. It is not inherently deterministic.
+> **Interview trap:** Ask "is `ROW_NUMBER()` deterministic?" The correct answer is _it depends on the ORDER BY having a unique tiebreaker_. It is not inherently deterministic.
 
 ```sql
 -- Non-deterministic if two orders share (customer_id, order_date):
@@ -622,7 +622,7 @@ ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY order_date DESC)
 ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY order_date DESC, order_id DESC)
 ```
 
-There is also a **validity** question: is `ROW_NUMBER` *allowed* in this context?
+There is also a **validity** question: is `ROW_NUMBER` _allowed_ in this context?
 
 - Allowed in `SELECT` list and `ORDER BY` of the outer query.
 - Not allowed directly in `WHERE`, `HAVING`, `GROUP BY`, or `LIMIT` — you must wrap in a subquery/CTE first.
@@ -644,7 +644,7 @@ SELECT
 FROM employees;
 ```
 
-If you want NULLs to *not* form their own group, or to join a specific group:
+If you want NULLs to _not_ form their own group, or to join a specific group:
 
 ```sql
 -- NULL department is folded into 'Unknown'
@@ -658,11 +658,11 @@ ROW_NUMBER() OVER (
 
 The NULLs' sort position in the partition ordering differs by engine:
 
-| Engine | Default: NULLs first or last? | Override |
-|---|---|---|
-| PostgreSQL | ASC → last, DESC → first | `NULLS FIRST` / `NULLS LAST` |
-| Oracle | ASC → last, DESC → first | `NULLS FIRST` / `NULLS LAST` |
-| MySQL | ASC → first, DESC → last | `ORDER BY col IS NULL, col ...` |
+| Engine     | Default: NULLs first or last?       | Override                           |
+| ---------- | ----------------------------------- | ---------------------------------- |
+| PostgreSQL | ASC → last, DESC → first            | `NULLS FIRST` / `NULLS LAST`       |
+| Oracle     | ASC → last, DESC → first            | `NULLS FIRST` / `NULLS LAST`       |
+| MySQL      | ASC → first, DESC → last            | `ORDER BY col IS NULL, col ...`    |
 | SQL Server | nulls are "smallest" → first on ASC | indexed views/NULL ordering tricks |
 
 ```sql
@@ -670,7 +670,7 @@ The NULLs' sort position in the partition ordering differs by engine:
 ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY order_date DESC NULLS LAST, order_id DESC)
 ```
 
-Whether NULLs get row numbers at all is unaffected — they always do; only their *position* changes.
+Whether NULLs get row numbers at all is unaffected — they always do; only their _position_ changes.
 
 ---
 
@@ -721,10 +721,10 @@ GROUP BY customer_id;
 **Expected output:**
 
 | customer_id | order_count | rank_by_volume |
-|---|---|---|
-| 1 | 4 | 1 |
-| 2 | 2 | 2 |
-| 3 | 1 | 3 |
+| ----------- | ----------- | -------------- |
+| 1           | 4           | 1              |
+| 2           | 2           | 2              |
+| 3           | 1           | 3              |
 
 `ROW_NUMBER` numbers groups, not raw orders — a frequent source of 10× row-count confusion.
 
@@ -739,7 +739,7 @@ SELECT DISTINCT department, salary,
 FROM employees;
 ```
 
-If you need to deduplicate **before** numbering or deduplicate *away* the numbering, move the `DISTINCT` into a subquery first:
+If you need to deduplicate **before** numbering or deduplicate _away_ the numbering, move the `DISTINCT` into a subquery first:
 
 ```sql
 SELECT department, salary,
@@ -882,7 +882,7 @@ A nightly "top N list" that omits a tiebreaker can reorder itself run to run, co
 
 ### 6. Applying `ROW_NUMBER` before expensive joins/filters
 
-The database usually hoists `WHERE` filters before window evaluation, but placing a `DISTINCT`/`GROUP BY` *before* numbering (via subqueries) often shrinks the input the sort must handle. Measure, don't assume.
+The database usually hoists `WHERE` filters before window evaluation, but placing a `DISTINCT`/`GROUP BY` _before_ numbering (via subqueries) often shrinks the input the sort must handle. Measure, don't assume.
 
 ---
 
@@ -892,13 +892,13 @@ The database usually hoists `WHERE` filters before window evaluation, but placin
 
 Use the execution plan, not folklore:
 
-| Plan element (PostgreSQL/PG-style) | Meaning for `ROW_NUMBER` |
-|---|---|
-| `Sort` node before `WindowAgg` | The engine is sorting each partition — output grows with total rows |
-| `WindowAgg` node | Where numbering happens; check its `rows`/`loops` |
-| Temp file / external merge writes | Sort spilled to disk — partitions are too big for memory |
-| Index-only scan leveraging `(partition, order)` | Sort avoided; usually much cheaper |
-| `Incremental Sort` | Engine exploits index prefix ordering to reduce work |
+| Plan element (PostgreSQL/PG-style)              | Meaning for `ROW_NUMBER`                                            |
+| ----------------------------------------------- | ------------------------------------------------------------------- |
+| `Sort` node before `WindowAgg`                  | The engine is sorting each partition — output grows with total rows |
+| `WindowAgg` node                                | Where numbering happens; check its `rows`/`loops`                   |
+| Temp file / external merge writes               | Sort spilled to disk — partitions are too big for memory            |
+| Index-only scan leveraging `(partition, order)` | Sort avoided; usually much cheaper                                  |
+| `Incremental Sort`                              | Engine exploits index prefix ordering to reduce work                |
 
 ### Cost model intuition
 
@@ -952,7 +952,7 @@ It defines numbering only; the final row order needs an explicit outer `ORDER BY
 ## Best Practices
 
 1. **Always include a unique tiebreaker** (usually the primary key) as the last column of the window `ORDER BY` when a stable, deterministic number matters.
-2. **State the grain.** A `ROW_NUMBER` query still returns one output row per input row — document what the number *represents* (e.g., "order 1 = most recent order for the customer").
+2. **State the grain.** A `ROW_NUMBER` query still returns one output row per input row — document what the number _represents_ (e.g., "order 1 = most recent order for the customer").
 3. **Filter with `WHERE rn = N`** in an outer query or CTE; never inline it.
 4. **Prefer `ROW_NUMBER` for "exactly one per group"**, `RANK`/`DENSE_RANK` when ties matter.
 5. **Add a matching index** `(partition_cols ..., order_cols ...)` and confirm with `EXPLAIN ANALYZE` that the sort disappears.
@@ -981,7 +981,7 @@ Use these as practice. Answers intentionally withheld.
 6. Write a query to return, for every customer, the single most recent order (full order row).
 7. Write a query returning the top 3 highest-earning employees per department.
 8. When two rows tie under the window `ORDER BY`, what decides which gets the smaller number? How do you force a decision?
-9. How would you number employees *after* collapsing them with `GROUP BY department`? What does the number then mean?
+9. How would you number employees _after_ collapsing them with `GROUP BY department`? What does the number then mean?
 10. Why does `SELECT DISTINCT department, salary, ROW_NUMBER() OVER (...)` still return all rows?
 
 ## Advanced
@@ -996,7 +996,7 @@ Use these as practice. Answers intentionally withheld.
 
 16. You have `events(event_id, user_id, event_time, event_type)`. For each user, find the last event of type 'login' per calendar day.
 17. A nightly job ingests a `transactions` table that sometimes contains exact duplicate rows. Write a query that reports how many duplicates exist per `(account_id, tx_time, amount)`, then delete all but one.
-18. Product wants a "versioned" export: every product's *current* price plus its price one revision ago. `ROW_NUMBER`-based approach vs `LAG` — compare and pick.
+18. Product wants a "versioned" export: every product's _current_ price plus its price one revision ago. `ROW_NUMBER`-based approach vs `LAG` — compare and pick.
 19. Orders often arrive with `order_placed_at` NULL. How must your "latest order" query change so customers with NULL placement dates are still handled predictably?
 20. A dashboard calls your query 50 times/second with a `row_num` slice. How would you refactor performance-wise while keeping the same numbers stable?
 
@@ -1004,7 +1004,7 @@ Use these as practice. Answers intentionally withheld.
 
 21. Same data, same query, two runs — `ROW_NUMBER` output order differs on the second run. What is the likely cause and the fix?
 22. `ROW_NUMBER() OVER (PARTITION BY department ORDER BY salary)` vs `RANK()` on the same window — when do they stop being interchangeable?
-23. You number rows, then `ORDER BY amount DESC, order_id` at the query level. Are the numbers still what you expected? Is the *output order* guaranteed?
+23. You number rows, then `ORDER BY amount DESC, order_id` at the query level. Are the numbers still what you expected? Is the _output order_ guaranteed?
 24. `PARTITION BY department` where some `department` values are NULL — how many "partitions" do the NULL rows form?
 25. Can `ROW_NUMBER()` accept a frame clause (`ROWS BETWEEN ...`)? What do PostgreSQL, MySQL, SQL Server, and Oracle do if you write one?
 
@@ -1013,26 +1013,31 @@ Use these as practice. Answers intentionally withheld.
 Given `orders` (sample above, including orders 104 and 107 tying on 2024-03-10 for customer 1):
 
 26. Predict exactly which row gets `rn = 1` for:
+
 ```sql
 ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY order_date DESC, order_id DESC)
 ```
+
 Then predict the output of the same window without `order_id DESC`. What changed and why?
 
 27. Predict the numbers for:
+
 ```sql
 ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY amount DESC, order_id)
 ```
+
 per (customer_id, order_id).
 
 28. Given the grouped query in Edge Case 5, predict `row_num` values for customers 1, 2, 3 and confirm why the largest order count maps to `1`.
 
-29. Predict the result of numbering the employees table with `PARTITION BY department ORDER BY salary` with Grace and Hank tied at 65000 but no tiebreaker. Which row is more likely to be 7 versus 8 and why is it *not guaranteed*?
+29. Predict the result of numbering the employees table with `PARTITION BY department ORDER BY salary` with Grace and Hank tied at 65000 but no tiebreaker. Which row is more likely to be 7 versus 8 and why is it _not guaranteed_?
 
-30. Predict `rn` when `ROW_NUMBER() OVER ()` without ordering is applied to the orders table. Now argue why your prediction is correct *or* impossible to guarantee.
+30. Predict `rn` when `ROW_NUMBER() OVER ()` without ordering is applied to the orders table. Now argue why your prediction is correct _or_ impossible to guarantee.
 
 ## Debugging
 
 31. This query claims to return the newest order per customer but returns 4 rows for customer 1. Find the bug.
+
 ```sql
 SELECT order_id, customer_id, order_date, amount
 FROM (
@@ -1054,6 +1059,7 @@ WHERE rn = 1;
 ## Performance
 
 36. What single index shape is most likely to remove the sort from this query, and why is it not guaranteed to work?
+
 ```sql
 ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY order_date DESC, order_id)
 ```

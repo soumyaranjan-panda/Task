@@ -1,8 +1,9 @@
 # 17 — RIGHT JOIN & FULL OUTER JOIN
 
-A **RIGHT JOIN** (a.k.a. RIGHT OUTER JOIN) returns **every row from the right tablWrote the complete RIGHT & FULL JOIN section to `sql-handbook/3-Joins/17-RIGHT-FULL-JOIN.md`, consistent with the INNER/LEFT JOIN sections' style.
+A **RIGHT JOIN** (a.k.a. RIGHT OUTER JOIN) returns \*\*every row from the right tablWrote the complete RIGHT & FULL JOIN section to `sql-handbook/3-Joins/17-RIGHT-FULL-JOIN.md`, consistent with the INNER/LEFT JOIN sections' style.
 
 Key coverage:
+
 - **Mental model** — both joins as preserved-side logic; FULL as both-sides preserved; `LEFT UNION RIGHT` vs true FULL
 - **Grain check + sample tables** — reused from prior sections for direct contrast
 - **RIGHT JOIN internals** — optimizer rewrites it to a LEFT JOIN internally (plan shows "Left" nodes), confirmed via EXPLAIN
@@ -12,7 +13,8 @@ Key coverage:
 - **Scenarios** — empty departments + unassigned employees, slowly-changing dimension diff, two-system reconciliation, headcount with `COALESCE('Unassigned')`
 - **Comparison tables, Mermaid diagrams, common mistakes, best practices, performance (EXPLAIN-verified)**
 - **Interview Questions** — Beginner → Performance (36 items, left unanswered for practice)
- for matches in the left table using the `ON` condition.
+  for matches in the left table using the `ON` condition.
+
 3. If zero matches: emit the right row with all left columns `NULL`. If one or more matches: emit once per match (fan-out).
 
 ```
@@ -26,7 +28,7 @@ RIGHT(A, B) =
 
 The union of LEFT JOIN and RIGHT JOIN:
 
-1. Start from **both** tables — every row from *either* side survives at least once.
+1. Start from **both** tables — every row from _either_ side survives at least once.
 2. Match rows where the `ON` condition is `TRUE`.
 3. Unmatched rows from **both** sides are NULL-padded.
 
@@ -45,38 +47,38 @@ FULL(A, B) =
 
 ## Grain Check — The Sample Tables
 
-**customers** — *one row per customer.*
+**customers** — _one row per customer._
 
 | customer_id | name  | country |
-|-------------|-------|---------|
+| ----------- | ----- | ------- |
 | 1           | Alice | USA     |
 | 2           | Bob   | UK      |
 | 3           | Carol | Germany |
 | 4           | Dave  | NULL    |
 
-**orders** — *one row per order.*
+**orders** — _one row per order._
 
 | order_id | customer_id | order_date | amount |
-|----------|-------------|------------|--------|
+| -------- | ----------- | ---------- | ------ |
 | 101      | 1           | 2026-01-05 | 250.00 |
 | 102      | 2           | 2026-01-07 | 120.50 |
-| 103      | 1           | 2026-01-12 |  89.99 |
+| 103      | 1           | 2026-01-12 | 89.99  |
 | 104      | 3           | 2026-01-20 | 450.00 |
-| 105      | NULL        | 2026-02-01 |  30.00 |
+| 105      | NULL        | 2026-02-01 | 30.00  |
 | 106      | 5           | 2026-02-03 | 610.00 |
 
-**departments** — *one row per department.*
+**departments** — _one row per department._
 
 | department_id | dept_name   |
-|---------------|-------------|
+| ------------- | ----------- |
 | 10            | Engineering |
 | 20            | Sales       |
 | 30            | Marketing   |
 
-**employees** — *one row per employee.*
+**employees** — _one row per employee._
 
 | employee_id | name  | department_id |
-|-------------|-------|---------------|
+| ----------- | ----- | ------------- |
 | 1           | Alice | 10            |
 | 2           | Bob   | 10            |
 | 3           | Carol | 20            |
@@ -154,12 +156,12 @@ ORDER BY o.order_id;
 **Expected result:**
 
 | customer_id | name  | order_id | amount |
-|-------------|-------|----------|--------|
+| ----------- | ----- | -------- | ------ |
 | 1           | Alice | 101      | 250.00 |
 | 2           | Bob   | 102      | 120.50 |
-| 1           | Alice | 103      |  89.99 |
+| 1           | Alice | 103      | 89.99  |
 | 3           | Carol | 104      | 450.00 |
-| NULL        | NULL  | 105      |  30.00 |
+| NULL        | NULL  | 105      | 30.00  |
 | NULL        | NULL  | 106      | 610.00 |
 
 **What happened:**
@@ -188,12 +190,12 @@ ORDER BY COALESCE(o.order_id, 9999), c.customer_id;
 **Expected result:**
 
 | customer_id | name  | order_id | amount |
-|-------------|-------|----------|--------|
+| ----------- | ----- | -------- | ------ |
 | 1           | Alice | 101      | 250.00 |
 | 2           | Bob   | 102      | 120.50 |
-| 1           | Alice | 103      |  89.99 |
+| 1           | Alice | 103      | 89.99  |
 | 3           | Carol | 104      | 450.00 |
-| NULL        | NULL  | 105      |  30.00 |
+| NULL        | NULL  | 105      | 30.00  |
 | NULL        | NULL  | 106      | 610.00 |
 | 4           | Dave  | NULL     | NULL   |
 
@@ -203,7 +205,7 @@ ORDER BY COALESCE(o.order_id, 9999), c.customer_id;
 - Every customer is present (left-preserved): Alice, Bob, Carol, Dave.
 - Dave has no order → his `order_id` and `amount` are NULL-padded.
 - Orders 105 and 106 have no matching customer → their `customer_id` and `name` are NULL-padded.
-- **7 rows** — more than either table alone. The FULL OUTER JOIN is the only join that can produce unmatched rows from *both* sides.
+- **7 rows** — more than either table alone. The FULL OUTER JOIN is the only join that can produce unmatched rows from _both_ sides.
 
 > Interview trap: "How many rows does a FULL OUTER JOIN return?" It depends — between `max(|A|, |B|)` and `|A| × |B|` in the worst case (with duplicates). It is not simply "the sum of both tables" or "the union."
 
@@ -345,12 +347,12 @@ ORDER BY o.order_id;
 ```
 
 | order_id | name  | amount |
-|----------|-------|--------|
+| -------- | ----- | ------ |
 | 101      | Alice | 250.00 |
 | 102      | Bob   | 120.50 |
-| 103      | Alice |  89.99 |
+| 103      | Alice | 89.99  |
 | 104      | Carol | 450.00 |
-| 105      | NULL  |  30.00 |
+| 105      | NULL  | 30.00  |
 | 106      | NULL  | 610.00 |
 
 - Order 105: `customer_id` is NULL → no match → `c.name` is NULL-padded.
@@ -398,7 +400,7 @@ ORDER BY d.dept_name, e.name;
 **Expected result:**
 
 | dept_name   | name  |
-|-------------|-------|
+| ----------- | ----- |
 | Engineering | Alice |
 | Engineering | Bob   |
 | Marketing   | NULL  |
@@ -418,19 +420,19 @@ Compare with `departments LEFT JOIN employees`: Marketing would appear but Dave 
 
 ### Scenario B — Compare two versions of a dimension (slowly changing)
 
-**current_products** — *one row per product (current catalog).*
+**current_products** — _one row per product (current catalog)._
 
 | product_id | product_name | price |
-|------------|--------------|-------|
+| ---------- | ------------ | ----- |
 | 1          | Widget       | 10.00 |
 | 2          | Gadget       | 25.00 |
 | 3          | Gizmo        | 15.00 |
 
-**previous_products** — *one row per product (last quarter's catalog).*
+**previous_products** — _one row per product (last quarter's catalog)._
 
 | product_id | product_name | price |
-|------------|--------------|-------|
-| 1          | Widget       |  8.00 |
+| ---------- | ------------ | ----- |
+| 1          | Widget       | 8.00  |
 | 2          | Gadget       | 25.00 |
 | 4          | Doohickey    | 30.00 |
 
@@ -449,7 +451,7 @@ ORDER BY product_id;
 **Expected result:**
 
 | product_id | current_name | previous_name | current_price | previous_price |
-|------------|--------------|---------------|---------------|----------------|
+| ---------- | ------------ | ------------- | ------------- | -------------- |
 | 1          | Widget       | Widget        | 10.00         | 8.00           |
 | 2          | Gadget       | Gadget        | 25.00         | 25.00          |
 | 3          | Gizmo        | NULL          | 15.00         | NULL           |
@@ -516,12 +518,12 @@ ORDER BY headcount DESC;
 
 **Expected result:**
 
-| department   | headcount |
-|--------------|-----------|
-| Engineering  | 2         |
-| Sales        | 1         |
-| Unassigned   | 1         |
-| Marketing    | 0         |
+| department  | headcount |
+| ----------- | --------- |
+| Engineering | 2         |
+| Sales       | 1         |
+| Unassigned  | 1         |
+| Marketing   | 0         |
 
 Both empty departments (Marketing) and unassigned employees (Dave) are visible. A `departments LEFT JOIN employees` would miss Dave; an `employees LEFT JOIN departments` would miss Marketing.
 
@@ -669,12 +671,12 @@ Products new this year: `last_year` = 0. Products discontinued: `this_year` = 0.
 
 ## Comparison Table
 
-| Operation | Preserved side(s) | NULL-padded side(s) | Typical use |
-|-----------|-------------------|----------------------|-------------|
-| `INNER JOIN` | Neither (only matches) | Neither | Combine matched data only |
-| `LEFT JOIN` | Left | Right | "All of A, with B if any" |
-| `RIGHT JOIN` | Right | Left | "All of B, with A if any" (prefer flipping to LEFT) |
-| `FULL OUTER JOIN` | Both | Both | Compare two sets; show orphans on both sides |
+| Operation         | Preserved side(s)      | NULL-padded side(s) | Typical use                                         |
+| ----------------- | ---------------------- | ------------------- | --------------------------------------------------- |
+| `INNER JOIN`      | Neither (only matches) | Neither             | Combine matched data only                           |
+| `LEFT JOIN`       | Left                   | Right               | "All of A, with B if any"                           |
+| `RIGHT JOIN`      | Right                  | Left                | "All of B, with A if any" (prefer flipping to LEFT) |
+| `FULL OUTER JOIN` | Both                   | Both                | Compare two sets; show orphans on both sides        |
 
 ### RIGHT JOIN vs LEFT JOIN (flipped)
 
@@ -691,22 +693,22 @@ FROM orders o LEFT JOIN customers c ON c.customer_id = o.customer_id;
 
 ### FULL OUTER JOIN vs LEFT JOIN UNION RIGHT JOIN
 
-| Approach | Pros | Cons |
-|----------|------|------|
-| `FULL OUTER JOIN` | Single operation; optimizer can choose best plan; clean syntax | Not supported in MySQL |
-| `LEFT JOIN UNION RIGHT JOIN` | Works everywhere | Two scans; `UNION` dedup overhead; more verbose |
+| Approach                     | Pros                                                           | Cons                                            |
+| ---------------------------- | -------------------------------------------------------------- | ----------------------------------------------- |
+| `FULL OUTER JOIN`            | Single operation; optimizer can choose best plan; clean syntax | Not supported in MySQL                          |
+| `LEFT JOIN UNION RIGHT JOIN` | Works everywhere                                               | Two scans; `UNION` dedup overhead; more verbose |
 
 ### Join type cheat sheet
 
-| I need… | Use |
-|---------|-----|
-| Only rows both tables agree on | `INNER JOIN` |
-| All rows from A, with B if any | `LEFT JOIN` |
-| All rows from B, with A if any | `RIGHT JOIN` (or flip to LEFT) |
-| All rows from both, with the other if any | `FULL OUTER JOIN` |
-| Rows in A with no B | `LEFT JOIN ... WHERE B.key IS NULL` or `NOT EXISTS` |
-| Rows in B with no A | `RIGHT JOIN ... WHERE A.key IS NULL` or `LEFT JOIN` (flipped) |
-| Rows in either with no match in the other | `FULL OUTER JOIN ... WHERE A.key IS NULL OR B.key IS NULL` |
+| I need…                                   | Use                                                           |
+| ----------------------------------------- | ------------------------------------------------------------- |
+| Only rows both tables agree on            | `INNER JOIN`                                                  |
+| All rows from A, with B if any            | `LEFT JOIN`                                                   |
+| All rows from B, with A if any            | `RIGHT JOIN` (or flip to LEFT)                                |
+| All rows from both, with the other if any | `FULL OUTER JOIN`                                             |
+| Rows in A with no B                       | `LEFT JOIN ... WHERE B.key IS NULL` or `NOT EXISTS`           |
+| Rows in B with no A                       | `RIGHT JOIN ... WHERE A.key IS NULL` or `LEFT JOIN` (flipped) |
+| Rows in either with no match in the other | `FULL OUTER JOIN ... WHERE A.key IS NULL OR B.key IS NULL`    |
 
 ---
 
@@ -832,7 +834,7 @@ Use the sample tables above (`customers`, `orders`, `employees`, `departments`, 
 ## Intermediate
 
 6. Write a FULL OUTER JOIN between `departments` and `employees` that shows every department with its employees, including empty departments and employees with no department. What does the result look like?
-7. Why does `WHERE c.country = 'USA'` after a `FULL OUTER JOIN` potentially remove unmatched rows from *both* sides?
+7. Why does `WHERE c.country = 'USA'` after a `FULL OUTER JOIN` potentially remove unmatched rows from _both_ sides?
 8. Explain the MySQL emulation of FULL OUTER JOIN. Why must you use `UNION` and not `UNION ALL`?
 9. In a FULL OUTER JOIN between `customers` and `orders`, how many rows does the result contain for the sample data? Walk through each row.
 10. Write an anti-join pattern using FULL OUTER JOIN: find customers with no orders AND orders with no customers in a single query.

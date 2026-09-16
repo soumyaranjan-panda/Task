@@ -12,14 +12,14 @@ Each row in the junction table represents **one pair**: `(left_id, right_id)`.
 
 Real-world examples:
 
-| Left table | Right table | Junction table | One junction row is... |
-|---|---|---|---|
-| `students` | `courses` | `enrollments` | one student enrolled in one course |
-| `orders` | `products` | `order_items` | one product line on one order |
-| `authors` | `books` | `book_authors` | one author credited on one book |
-| `users` | `roles` | `user_roles` | one user assigned one role |
-| `posts` | `tags` | `post_tags` | one tag applied to one post |
-| `users` | `users` (self) | `follows` | one user following another user |
+| Left table | Right table    | Junction table | One junction row is...             |
+| ---------- | -------------- | -------------- | ---------------------------------- |
+| `students` | `courses`      | `enrollments`  | one student enrolled in one course |
+| `orders`   | `products`     | `order_items`  | one product line on one order      |
+| `authors`  | `books`        | `book_authors` | one author credited on one book    |
+| `users`    | `roles`        | `user_roles`   | one user assigned one role         |
+| `posts`    | `tags`         | `post_tags`    | one tag applied to one post        |
+| `users`    | `users` (self) | `follows`      | one user following another user    |
 
 A many-to-many relationship is really **two one-to-many relationships that share the junction table as the "many" side of both**.
 
@@ -51,6 +51,7 @@ erDiagram
 **When to use a junction table:** the relationship is genuinely pairwise and both sides are "many".
 
 **When NOT to use a many-to-many design:**
+
 - The relationship is really one-to-many (e.g., every `order` belongs to exactly one `customer`) — a plain foreign key column is correct.
 - One side is always limited (e.g., a user has one role) — store it as a column or a small lookup key.
 - You could get away with a comma-separated list, but that sacrifices queryability, integrity, and normalization. Prefer the junction table unless the constraint is trivial and read-only.
@@ -166,12 +167,12 @@ ORDER BY s.student_name, c.course_name;
 
 Expected result:
 
-| student_name | course_name |
-|---|---|
-| Alice | Intro to SQL |
-| Alice | Python |
-| Bob | Intro to SQL |
-| Dana | REST APIs |
+| student_name | course_name  |
+| ------------ | ------------ |
+| Alice        | Intro to SQL |
+| Alice        | Python       |
+| Bob          | Intro to SQL |
+| Dana         | REST APIs    |
 
 5 rows. Carroll appears nowhere (no enrollments), and Machine Learning appears nowhere (no students). Alice appears twice because of fan-out.
 
@@ -189,13 +190,13 @@ LEFT JOIN courses c
 ORDER BY s.student_name, c.course_name;
 ```
 
-| student_name | course_name |
-|---|---|
-| Alice | Intro to SQL |
-| Alice | Python |
-| Bob | Intro to SQL |
-| Carol | **NULL** |
-| Dana | REST APIs |
+| student_name | course_name  |
+| ------------ | ------------ |
+| Alice        | Intro to SQL |
+| Alice        | Python       |
+| Bob          | Intro to SQL |
+| Carol        | **NULL**     |
+| Dana         | REST APIs    |
 
 Carol is kept, and the missing `course_name` is `NULL`. Her enrollment count is 0 — the row survives because of the **LEFT** join on the first edge.
 
@@ -211,15 +212,15 @@ LEFT JOIN students s
 ORDER BY c.course_name;
 ```
 
-| course_name | student_name |
-|---|---|
-| Intro to SQL | Alice |
-| Intro to SQL | Bob |
-| Machine Learning | **NULL** |
-| Python | **NULL** |
-| REST APIs | Dana |
+| course_name      | student_name |
+| ---------------- | ------------ |
+| Intro to SQL     | Alice        |
+| Intro to SQL     | Bob          |
+| Machine Learning | **NULL**     |
+| Python           | **NULL**     |
+| REST APIs        | Dana         |
 
-> **Production pitfall:** a condition on the *right* table in the `WHERE` clause (e.g., `WHERE c.course_name <> 'Python'`) converts the LEFT JOIN back into an INNER JOIN, silently dropping the zero-match rows again. Conditions that should preserve unmatched rows must live in the `ON` clause. See section **LEFT JOIN becoming INNER JOIN**.
+> **Production pitfall:** a condition on the _right_ table in the `WHERE` clause (e.g., `WHERE c.course_name <> 'Python'`) converts the LEFT JOIN back into an INNER JOIN, silently dropping the zero-match rows again. Conditions that should preserve unmatched rows must live in the `ON` clause. See section **LEFT JOIN becoming INNER JOIN**.
 
 ---
 
@@ -235,7 +236,7 @@ FROM courses c
 JOIN enrollments e ON e.course_id = c.course_id;
 ```
 
-This works, but it first **materializes the fan-out** (one row per enrollment) and then de-duplicates. If you only care about *whether* a match exists, you built full rows and threw most away.
+This works, but it first **materializes the fan-out** (one row per enrollment) and then de-duplicates. If you only care about _whether_ a match exists, you built full rows and threw most away.
 
 **BETTER APPROACH — semi-join via EXISTS**
 
@@ -261,10 +262,10 @@ WHERE c.course_id IN (
 
 All three return:
 
-| course_id | course_name |
-|---|---|
-| 101 | Intro to SQL |
-| 103 | REST APIs |
+| course_id | course_name  |
+| --------- | ------------ |
+| 101       | Intro to SQL |
+| 103       | REST APIs    |
 
 Machine Learning is excluded.
 
@@ -276,7 +277,7 @@ Machine Learning is excluded.
 
 **Goal: number of students per course.**
 
-If you need course *names*, join courses → enrollments:
+If you need course _names_, join courses → enrollments:
 
 ```sql
 SELECT c.course_name,
@@ -288,12 +289,12 @@ GROUP BY c.course_id, c.course_name
 ORDER BY c.course_name;
 ```
 
-| course_name | num_students |
-|---|---|
-| Intro to SQL | 2 |
-| Machine Learning | 0 |
-| Python | 0 |
-| REST APIs | 1 |
+| course_name      | num_students |
+| ---------------- | ------------ |
+| Intro to SQL     | 2            |
+| Machine Learning | 0            |
+| Python           | 0            |
+| REST APIs        | 1            |
 
 **Goal: number of courses per student.**
 
@@ -308,13 +309,14 @@ ORDER BY s.student_name;
 ```
 
 | student_name | num_courses |
-|---|---|
-| Alice | 2 |
-| Bob | 1 |
-| Carol | 0 |
-| Dana | 1 |
+| ------------ | ----------- |
+| Alice        | 2           |
+| Bob          | 1           |
+| Carol        | 0           |
+| Dana         | 1           |
 
 > **Best practice:** join the **fewest tables you need**. Counting a student's courses requires `students` and `enrollments` only — the `courses` table contributes nothing to this count and only adds fan-out risk and work. Grains and question phrases matter:
+>
 > - "How many courses is Alice in?" → count `enrollments` rows.
 > - "Which courses exist?" → read `courses` alone.
 
@@ -357,7 +359,7 @@ JOIN books b ON b.book_id = ba.book_id;
 
 Result: **4**.
 
-But there are only **3 books**. The answer 4 came from counting *credit pairs*, because *SQL Deep Dive* is fan-out to two output rows (one per author).
+But there are only **3 books**. The answer 4 came from counting _credit pairs_, because _SQL Deep Dive_ is fan-out to two output rows (one per author).
 
 **BETTER APPROACH — match the grain of the question**
 
@@ -378,10 +380,10 @@ ORDER BY a.author_name;
 ```
 
 | author_name | book_count |
-|---|---|
-| Ada | 1 |
-| Jane | 2 |
-| Mark | 1 |
+| ----------- | ---------- |
+| Ada         | 1          |
+| Jane        | 2          |
+| Mark        | 1          |
 
 Every author appears exactly once — the LEFT JOIN kept Ada (well, kept her; she has 1) and any author with zero books would appear as `0`.
 
@@ -413,13 +415,13 @@ SELECT AVG(price) FROM products;  -- (50+30+200)/3 = 93.33
 
 The keyboard's price of 50 was counted **twice**, once per category, so the naive join average is wrong for "average price per product."
 
-> **Interview trap:** just because a query *runs* and *looks plausible*, it can still be wrong at the grain level. The mental model: **what does one output row represent, and which rows will be repeated by fan-out?**
+> **Interview trap:** just because a query _runs_ and _looks plausible_, it can still be wrong at the grain level. The mental model: **what does one output row represent, and which rows will be repeated by fan-out?**
 
 Rules of thumb for fan-out + aggregation:
 
 - Always ask: **do I want the aggregate over junction rows, or over distinct entities?**
-- If you want per-parent aggregates *and* the parents multiply rows, **aggregate before joining** (derived table or CTE), or use a window function (`COUNT(*) OVER (...)`).
-- If you need `SUM`/`AVG` over a parent-side column *after* fan-out, confirm the repetition is semantically intended.
+- If you want per-parent aggregates _and_ the parents multiply rows, **aggregate before joining** (derived table or CTE), or use a window function (`COUNT(*) OVER (...)`).
+- If you need `SUM`/`AVG` over a parent-side column _after_ fan-out, confirm the repetition is semantically intended.
 
 ---
 
@@ -495,16 +497,16 @@ Notice:
 
 ## Common Mistakes
 
-| # | Mistake | Consequence |
-|---|---|---|
-| 1 | Joining the two parents directly, forgetting the junction | Either a Cartesian product or random false matches if a coincidentally-shared column exists |
-| 2 | `SELECT COUNT(*)` after a triple join and calling it a parent count | Double counting (4 ≠ 3 books) |
-| 3 | Joining tables that contribute no columns or predicates | Extra fan-out, wasted I/O |
-| 4 | `DISTINCT` everywhere to mask duplication | Hides the real fix (grain) and forces extra work |
-| 5 | Filtering right-side columns in `WHERE` | LEFT JOIN silently becomes INNER JOIN |
-| 6 | Assuming an execution order from the written `FROM` order | The optimizer is free to reorder; read `EXPLAIN` |
-| 7 | No composite PK on the junction | Duplicate relationship rows pass silently |
-| 8 | Aggregating parent columns after fan-out | Statistics skewed (the 82.5 vs 93.33 problem) |
+| #   | Mistake                                                             | Consequence                                                                                 |
+| --- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| 1   | Joining the two parents directly, forgetting the junction           | Either a Cartesian product or random false matches if a coincidentally-shared column exists |
+| 2   | `SELECT COUNT(*)` after a triple join and calling it a parent count | Double counting (4 ≠ 3 books)                                                               |
+| 3   | Joining tables that contribute no columns or predicates             | Extra fan-out, wasted I/O                                                                   |
+| 4   | `DISTINCT` everywhere to mask duplication                           | Hides the real fix (grain) and forces extra work                                            |
+| 5   | Filtering right-side columns in `WHERE`                             | LEFT JOIN silently becomes INNER JOIN                                                       |
+| 6   | Assuming an execution order from the written `FROM` order           | The optimizer is free to reorder; read `EXPLAIN`                                            |
+| 7   | No composite PK on the junction                                     | Duplicate relationship rows pass silently                                                   |
+| 8   | Aggregating parent columns after fan-out                            | Statistics skewed (the 82.5 vs 93.33 problem)                                               |
 
 ---
 
@@ -538,21 +540,21 @@ Never assert a universal "fastest" pattern. What matters and what to verify:
 
 **Relationship cardinalities:**
 
-| Relationship | Model | One parent produces... | Example |
-|---|---|---|---|
-| One-to-one | FK + UNIQUE on the child | at most 1 child row | `users` ↔ `user_profiles` |
-| One-to-many | FK column on the child | many child rows | `departments` ↔ `employees` |
-| Many-to-many | junction table (2 FKs) | many children × many parents | `students` ↔ `courses` |
+| Relationship | Model                    | One parent produces...       | Example                     |
+| ------------ | ------------------------ | ---------------------------- | --------------------------- |
+| One-to-one   | FK + UNIQUE on the child | at most 1 child row          | `users` ↔ `user_profiles`   |
+| One-to-many  | FK column on the child   | many child rows              | `departments` ↔ `employees` |
+| Many-to-many | junction table (2 FKs)   | many children × many parents | `students` ↔ `courses`      |
 
 **Existence-check patterns:**
 
-| Pattern | Semantics | Fan-out materialized? | Notes |
-|---|---|---|---|
-| `JOIN` + `DISTINCT` | return distinct parents with a match | Yes (rows built then deduped) | optimizer may rewrite |
-| `EXISTS` (correlated) | stop at first match per parent | No | often cleanest to read |
-| `IN` (uncorrelated) | set membership on subquery result | No | NULL trap if subquery yields NULL |
+| Pattern               | Semantics                            | Fan-out materialized?         | Notes                             |
+| --------------------- | ------------------------------------ | ----------------------------- | --------------------------------- |
+| `JOIN` + `DISTINCT`   | return distinct parents with a match | Yes (rows built then deduped) | optimizer may rewrite             |
+| `EXISTS` (correlated) | stop at first match per parent       | No                            | often cleanest to read            |
+| `IN` (uncorrelated)   | set membership on subquery result    | No                            | NULL trap if subquery yields NULL |
 
-> These are *tendencies, not guarantees*. Validate with `EXPLAIN ANALYZE`.
+> These are _tendencies, not guarantees_. Validate with `EXPLAIN ANALYZE`.
 
 ---
 
@@ -589,7 +591,7 @@ Never assert a universal "fastest" pattern. What matters and what to verify:
 
 - JOIN fundamentals and **JOIN duplication / fan-out** — see sections on JOINs and one-to-many joins.
 - **LEFT JOIN becoming INNER JOIN / ON vs WHERE** — see section **JOIN pitfalls**.
-- **COUNT(*), COUNT(col), COUNT(DISTINCT col)** and **GROUP BY vs window functions** — see aggregation sections.
+- **COUNT(\*), COUNT(col), COUNT(DISTINCT col)** and **GROUP BY vs window functions** — see aggregation sections.
 - **EXISTS / IN / NOT IN + NULL / NOT EXISTS** — see the subquery and NULL-safety sections.
 - **COALESCE / NULLIF, IS NULL / IS DISTINCT FROM** — see the NULL sections.
 - **Composite indexes, covering indexes, sargability, execution plans** — see the Indexing and Optimization sections.
@@ -618,7 +620,7 @@ Answers are intentionally not provided so you can attempt them first.
 ### Advanced
 
 10. Write a "people you may know" (friends-of-friends) query against a self-referential `follows` table. How do you prevent recommending people the user already follows, and avoid duplicates?
-11. When you need both per-student aggregates *and* the full student↔course list in one result, why might you aggregate in a derived table/CTE before joining? Provide a scenario.
+11. When you need both per-student aggregates _and_ the full student↔course list in one result, why might you aggregate in a derived table/CTE before joining? Provide a scenario.
 12. Explain the potential double counting when you `AVG(price)` after joining products to categories. What is the correct grain for the "average product price" question, and how does fan-out change the result?
 13. How could you decide between nested-loop and hash join for a large junction query, and what specific numbers from `EXPLAIN ANALYZE` would you read?
 14. A junction table must support fast lookups in both directions but can only have one PK. How do you index it, and what must you check afterward?

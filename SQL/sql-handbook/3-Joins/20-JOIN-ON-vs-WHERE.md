@@ -21,7 +21,7 @@ The single most important idea in this section:
 > `ON` decides **how the join matches rows**.
 > `WHERE` decides **which rows survive in the final result**.
 
-For an `INNER JOIN`, the two are **functionally equivalent** — the same condition in either place produces the same result set. This equivalence is *exactly* what causes the number-one JOIN bug:
+For an `INNER JOIN`, the two are **functionally equivalent** — the same condition in either place produces the same result set. This equivalence is _exactly_ what causes the number-one JOIN bug:
 
 > **Production pitfall**
 > For a `LEFT JOIN`, a condition written in `WHERE` that references the **right** (nullable) table **silently turns the `LEFT JOIN` into an `INNER JOIN`**. Rows you expected to keep disappear with no error and no warning.
@@ -34,8 +34,8 @@ Why? Because a `LEFT JOIN` preserves left-table rows that have no match — but 
 
 Think of `LEFT JOIN ... ON ...` as "keep everything from the left table, attach a matching right row **if the `ON` condition succeeds**."
 
-- `ON` = the matching rule → controls *attachment*.
-- `WHERE` = a filter applied *after* that attachment → controls *survival*.
+- `ON` = the matching rule → controls _attachment_.
+- `WHERE` = a filter applied _after_ that attachment → controls _survival_.
 
 Once you internalize that, every example below is predictable.
 
@@ -56,7 +56,7 @@ ORDER BY    -- sort
 LIMIT/OFFSET-- page
 ```
 
-Because `ON` runs during the `FROM` phase and `WHERE` runs after the join is assembled, a `WHERE` predicate can see the *fully joined row* (including `NULL` fill-ins), while `ON` only sees the two tables being joined.
+Because `ON` runs during the `FROM` phase and `WHERE` runs after the join is assembled, a `WHERE` predicate can see the _fully joined row_ (including `NULL` fill-ins), while `ON` only sees the two tables being joined.
 
 > **Interview trap**
 > "For a `LEFT JOIN`, which is applied first, `ON` or `WHERE`?"
@@ -99,19 +99,19 @@ INSERT INTO employees (emp_id, emp_name, dept_id, salary) VALUES
 **employees**
 
 | emp_id | emp_name | dept_id | salary |
-|-------:|:---------|--------:|-------:|
-| 1 | Alice | 10 | 80000 |
-| 2 | Bob   | 10 | 90000 |
-| 3 | Carol | 20 | 70000 |
-| 4 | Dave  | NULL | 65000 |
+| -----: | :------- | ------: | -----: |
+|      1 | Alice    |      10 |  80000 |
+|      2 | Bob      |      10 |  90000 |
+|      3 | Carol    |      20 |  70000 |
+|      4 | Dave     |    NULL |  65000 |
 
 **departments**
 
-| dept_id | dept_name      |
-|--------:|:---------------|
-| 10 | Engineering      |
-| 20 | Marketing        |
-| 30 | Human Resources  |
+| dept_id | dept_name       |
+| ------: | :-------------- |
+|      10 | Engineering     |
+|      20 | Marketing       |
+|      30 | Human Resources |
 
 ---
 
@@ -173,8 +173,8 @@ ORDER BY e.emp_id;
 
 Result:
 
-| emp_name | dept_name  |
-|:---------|:-----------|
+| emp_name | dept_name   |
+| :------- | :---------- |
 | Alice    | Engineering |
 | Bob      | Engineering |
 
@@ -192,14 +192,14 @@ ORDER BY e.emp_id;
 
 Result:
 
-| emp_name | dept_name  |
-|:---------|:-----------|
+| emp_name | dept_name   |
+| :------- | :---------- |
 | Alice    | Engineering |
 | Bob      | Engineering |
 | Carol    | NULL        |
 | Dave     | NULL        |
 
-Now "all employees" is preserved. Carol and Dave simply get a `NULL` department, because the `ON` rule ("is the department id 10 *and* does it match?") failed, and `LEFT JOIN` keeps the left row anyway.
+Now "all employees" is preserved. Carol and Dave simply get a `NULL` department, because the `ON` rule ("is the department id 10 _and_ does it match?") failed, and `LEFT JOIN` keeps the left row anyway.
 
 This is the difference in one picture:
 
@@ -215,14 +215,14 @@ flowchart LR
 
 ### Decision matrix
 
-| Condition references… | Join type | In `ON` | In `WHERE` |
-|---|---|---|---|
-| right table, equality for joining | INNER | matches rows | same result |
-| right table, filter predicate | INNER | same result | same result |
-| right table, filter predicate | LEFT/RIGHT | **keeps unmatched outer rows** | **drops unmatched outer rows (becomes INNER)** |
-| left table, filter predicate | LEFT | affects *matching*, but keeps all left rows | removes left rows that fail |
-| either table | FULL OUTER | preserves failed rows on both sides | drops failed rows on both sides |
-| aggregate/group level | any | not applicable | use `HAVING`, not `WHERE` (see below) |
+| Condition references…             | Join type  | In `ON`                                     | In `WHERE`                                     |
+| --------------------------------- | ---------- | ------------------------------------------- | ---------------------------------------------- |
+| right table, equality for joining | INNER      | matches rows                                | same result                                    |
+| right table, filter predicate     | INNER      | same result                                 | same result                                    |
+| right table, filter predicate     | LEFT/RIGHT | **keeps unmatched outer rows**              | **drops unmatched outer rows (becomes INNER)** |
+| left table, filter predicate      | LEFT       | affects _matching_, but keeps all left rows | removes left rows that fail                    |
+| either table                      | FULL OUTER | preserves failed rows on both sides         | drops failed rows on both sides                |
+| aggregate/group level             | any        | not applicable                              | use `HAVING`, not `WHERE` (see below)          |
 
 ---
 
@@ -234,12 +234,13 @@ A very common but wrong mental model is:
 
 The `ON` clause is the **join condition**: it directly determines pairings and, for outer joins, whether a row of the preserved table is emitted with `NULL`s on the other side. It is not merely a filter relocated.
 
-For the inner side of an **outer** join, a `WHERE` predicate can only run *after* the join has produced the `NULL`-padded rows, and it can never re-introduce a row — so orphaned outer rows die. The `ON` predicate participates in the join itself.
+For the inner side of an **outer** join, a `WHERE` predicate can only run _after_ the join has produced the `NULL`-padded rows, and it can never re-introduce a row — so orphaned outer rows die. The `ON` predicate participates in the join itself.
 
 > **Interview trap**
 > "Write a query returning all customers and the number of orders they placed in 2024 — including customers with zero orders."
 >
 > BAD:
+>
 > ```sql
 > SELECT c.customer_id, COUNT(o.order_id)
 > FROM customers c
@@ -249,6 +250,7 @@ For the inner side of an **outer** join, a `WHERE` predicate can only run *after
 > ```
 >
 > BETTER:
+>
 > ```sql
 > SELECT c.customer_id, COUNT(o.order_id)
 > FROM customers c
@@ -275,8 +277,8 @@ LEFT JOIN departments d
 ORDER BY e.emp_id;
 ```
 
-| emp_name | dept_name  |
-|:---------|:-----------|
+| emp_name | dept_name   |
+| :------- | :---------- |
 | Alice    | NULL        |
 | Bob      | Engineering |
 | Carol    | NULL        |
@@ -291,19 +293,19 @@ WHERE e.salary > 85000
 ORDER BY e.emp_id;
 ```
 
-| emp_name | dept_name  |
-|:---------|:-----------|
+| emp_name | dept_name   |
+| :------- | :---------- |
 | Bob      | Engineering |
 
-The `ON` version keeps *all* employees but only attaches a department when the salary rule holds. The `WHERE` version removes Alice, Carol, and Dave entirely. If you want "all employees, with departments attached only for high earners", `ON` is required; if you want "only high earners and their departments", `WHERE` (or an inner join) is correct.
+The `ON` version keeps _all_ employees but only attaches a department when the salary rule holds. The `WHERE` version removes Alice, Carol, and Dave entirely. If you want "all employees, with departments attached only for high earners", `ON` is required; if you want "only high earners and their departments", `WHERE` (or an inner join) is correct.
 
-> Best practice: predicate belongs to the table being *filtered for the final result* → `WHERE`; predicate belongs to the matching rule → `ON`.
+> Best practice: predicate belongs to the table being _filtered for the final result_ → `WHERE`; predicate belongs to the matching rule → `ON`.
 
 ---
 
 ## The anti-join pattern: `LEFT JOIN ... WHERE inner_col IS NULL`
 
-There is one extremely common case where a `WHERE` predicate on the nullable side is **exactly what you want**: finding outer rows that have *no* match.
+There is one extremely common case where a `WHERE` predicate on the nullable side is **exactly what you want**: finding outer rows that have _no_ match.
 
 ```sql
 -- departments with NO employees
@@ -315,11 +317,12 @@ WHERE e.emp_id IS NULL;
 
 Result:
 
-| dept_name      |
-|:---------------|
-| Human Resources|
+| dept_name       |
+| :-------------- |
+| Human Resources |
 
 How it works:
+
 1. The `LEFT JOIN` keeps every department.
 2. `Human Resources` has no employee → the employee columns are `NULL`, including `e.emp_id`.
 3. `WHERE e.emp_id IS NULL` is `TRUE` only for exactly those orphaned rows.
@@ -333,23 +336,27 @@ For pure existence checks, prefer `NOT EXISTS` over this pattern; it is usually 
 
 ## NULL behavior in ON vs WHERE
 
-| Situation | `ON` | `WHERE` |
-|---|---|---|
-| `NULL = something` | `UNKNOWN` → no match (inner: dropped; outer: preserved with `NULL`) | `UNKNOWN` → row dropped |
-| `ON ... AND x = 1` with `NULL` in `x` | outer row preserved as unmatched | row dropped |
-| `WHERE col IS NULL` | n/a (existence test after join) | keeps only null (anti-join works here) |
-| `WHERE col <> 10` with NULLs | n/a | `NULL <> 10` is `UNKNOWN` → null rows dropped too |
-| `WHERE col NOT IN (10,20)` with NULLs anywhere | n/a | can drop everything — see [18-NOT-IN-vs-NOT-EXISTS] |
+| Situation                                      | `ON`                                                                | `WHERE`                                             |
+| ---------------------------------------------- | ------------------------------------------------------------------- | --------------------------------------------------- |
+| `NULL = something`                             | `UNKNOWN` → no match (inner: dropped; outer: preserved with `NULL`) | `UNKNOWN` → row dropped                             |
+| `ON ... AND x = 1` with `NULL` in `x`          | outer row preserved as unmatched                                    | row dropped                                         |
+| `WHERE col IS NULL`                            | n/a (existence test after join)                                     | keeps only null (anti-join works here)              |
+| `WHERE col <> 10` with NULLs                   | n/a                                                                 | `NULL <> 10` is `UNKNOWN` → null rows dropped too   |
+| `WHERE col NOT IN (10,20)` with NULLs anywhere | n/a                                                                 | can drop everything — see [18-NOT-IN-vs-NOT-EXISTS] |
 
 > **Interview trap**
-> In an outer join, if you want "everything *except* value X" you cannot write:
+> In an outer join, if you want "everything _except_ value X" you cannot write:
+>
 > ```sql
 > WHERE d.dept_name <> 'Human Resources'
 > ```
+>
 > because unmatched employees (Dave) have `d.dept_name = NULL`, and `NULL <> 'Human Resources'` is `UNKNOWN`, so Dave disappears. Fix by pushing the exclusion into `ON`, or by adding the null escape hatch:
+>
 > ```sql
 > WHERE d.dept_name <> 'Human Resources' OR d.dept_name IS NULL
 > ```
+>
 > Better: express intent as an inner join when you truly don't need unmatched rows.
 
 ---
@@ -368,7 +375,7 @@ JOIN products p ON p.product_id = oi.product_id
 WHERE o.status = 'paid';
 ```
 
-`WHERE`, by contrast, sees the entire joined row. This makes `ON` the natural place to express *matching business rules* across tables — such as temporal or territory-membership conditions — while `WHERE` stays the "final answer" filter.
+`WHERE`, by contrast, sees the entire joined row. This makes `ON` the natural place to express _matching business rules_ across tables — such as temporal or territory-membership conditions — while `WHERE` stays the "final answer" filter.
 
 ---
 
@@ -396,18 +403,20 @@ The `JOIN locations` only matches rows where `d` is not null, so Dave (no depart
 ### Conceptual evaluation
 
 Logically:
+
 1. `FROM a LEFT JOIN b ON pred` produces all `a` rows, attaching a `b` row when `pred` is true, else `NULL`s.
 2. `WHERE X` then removes any of those rows where `X` is not `TRUE`.
 
-So a `WHERE` predicate on `b` executes *after* step 1 and *cannot restore* a dropped attachment.
+So a `WHERE` predicate on `b` executes _after_ step 1 and _cannot restore_ a dropped attachment.
 
 ### What the optimizer actually does
 
-- **INNER JOIN**: join and filter can be reordered freely. A `WHERE` equality on a table column is often *pushed* into that table's scan as an `IndexCond`/`Filter`, so it runs before the join in the physical plan — making `ON` and `WHERE` both cheap and equivalent.
+- **INNER JOIN**: join and filter can be reordered freely. A `WHERE` equality on a table column is often _pushed_ into that table's scan as an `IndexCond`/`Filter`, so it runs before the join in the physical plan — making `ON` and `WHERE` both cheap and equivalent.
 - **LEFT JOIN, predicate on the inner side in `WHERE`**: the engine cannot push this predicate below the join without changing the result (it would remove rows the join was supposed to preserve). It typically appears as a filter above the join node — the full inner table may need to be scanned/hashed first.
-- **LEFT JOIN, same predicate in `ON`**: it is part of the join clause, so the engine can often **filter the inner input during the scan/build phase** (and may use an index on that column) — less data flows through the join. This is why `ON` *tends* to be cheaper here.
+- **LEFT JOIN, same predicate in `ON`**: it is part of the join clause, so the engine can often **filter the inner input during the scan/build phase** (and may use an index on that column) — less data flows through the join. This is why `ON` _tends_ to be cheaper here.
 
 > Directly and carefully — do **not** assume it is faster:
+>
 > ```sql
 > EXPLAIN (ANALYZE, BUFFERS)
 > SELECT ... FROM employees e
@@ -418,6 +427,7 @@ So a `WHERE` predicate on `b` executes *after* step 1 and *cannot restore* a dro
 > LEFT JOIN departments d ON e.dept_id = d.dept_id
 > WHERE d.dept_name = 'Engineering';
 > ```
+>
 > Compare rows scanned, join algorithm (Hash/Nested Loop/Merge), and actual rows vs rows removed. `PostgreSQL`, `MySQL`, `SQL Server` (Actual execution plan), and `Oracle` (EXPLAIN PLAN + statistics) each expose this differently.
 
 The same `EXPLAIN` discipline applies to the "pre-filter the right side with a subquery" alternative, which is semantically equivalent to `ON` for inner-side predicates:
@@ -437,7 +447,7 @@ For `LEFT JOIN`, `ON`-with-predicate and `LEFT JOIN`-to-pre-filtered-subquery gi
 
 ### Sargability side note
 
-Whether a predicate can use an index is decided by its *function form* (e.g. `d.dept_name = 'Engineering'` is sargable; `LOWER(d.dept_name) = 'engineering'` is not) — not by whether it sits in `ON` or `WHERE`. Cross-reference: [33-sargability].
+Whether a predicate can use an index is decided by its _function form_ (e.g. `d.dept_name = 'Engineering'` is sargable; `LOWER(d.dept_name) = 'engineering'` is not) — not by whether it sits in `ON` or `WHERE`. Cross-reference: [33-sargability].
 
 ---
 
@@ -461,14 +471,14 @@ flowchart TD
 
 Rule of thumb:
 
-| Goal | Clause |
-|---|---|
-| Define the join / matching rule | `ON` |
-| Choose which matched-but-wrong rows to drop in a pure filter | `WHERE` |
-| Keep all left/right rows, conditionally attach | `ON` |
-| Anti-join (find rows with no match) | `LEFT JOIN ... WHERE inner_col IS NULL` (or `NOT EXISTS`) |
-| Filter rows *before* grouping | `WHERE` |
-| Filter groups *after* grouping | `HAVING` |
+| Goal                                                         | Clause                                                    |
+| ------------------------------------------------------------ | --------------------------------------------------------- |
+| Define the join / matching rule                              | `ON`                                                      |
+| Choose which matched-but-wrong rows to drop in a pure filter | `WHERE`                                                   |
+| Keep all left/right rows, conditionally attach               | `ON`                                                      |
+| Anti-join (find rows with no match)                          | `LEFT JOIN ... WHERE inner_col IS NULL` (or `NOT EXISTS`) |
+| Filter rows _before_ grouping                                | `WHERE`                                                   |
+| Filter groups _after_ grouping                               | `HAVING`                                                  |
 
 ---
 
@@ -494,7 +504,7 @@ Rule of thumb:
 
 ## Edge cases
 
-- **Full outer join** with a `WHERE` predicate on either side: unmatched rows of the *other* side are dropped (they're `NULL` on the filtered side).
+- **Full outer join** with a `WHERE` predicate on either side: unmatched rows of the _other_ side are dropped (they're `NULL` on the filtered side).
 - **`ON 1=1`** (always true) is a cross join with join syntax — MySQL and several engines accept it; results can be a Cartesian product. Cross-reference: [24-cartesian-products].
 - **Correlated condition in `ON`** referencing an earlier table (temporal joins like `ON o.order_date BETWEEN p.start_date AND p.end_date`) is only expressible in `ON`, not `WHERE`.
 - **`USING (dept_id)` vs `ON e.dept_id = d.dept_id`**: with `USING`, the join column is coalesced into a single column in `SELECT *` and cannot be double-qualified; with `ON`, both columns remain. Semantic of outer-join preservation is otherwise identical.
@@ -521,7 +531,7 @@ Rule of thumb:
 ## Best practices
 
 1. State the grain of your driving table before writing the query ([section 1]).
-2. Ask: *do I want rows kept even when the other side is missing?*
+2. Ask: _do I want rows kept even when the other side is missing?_
    - Yes → outer join, and **every predicate on the other side goes in `ON`**.
    - No → inner join (or `EXISTS`/`IN`), predicate may go in `WHERE`.
 3. Keep `ON` purely about matching; keep `WHERE` purely about what survives.
@@ -537,8 +547,8 @@ Rule of thumb:
 ## Beginner
 
 1. In an `INNER JOIN`, do `ON` and `WHERE` ever produce different results for the same predicate? Explain.
-2. In query-plan *logical order* of operations, which runs first — `ON` or `WHERE`?
-3. Which clause is used to filter rows *before* grouping, and which filters *after* grouping?
+2. In query-plan _logical order_ of operations, which runs first — `ON` or `WHERE`?
+3. Which clause is used to filter rows _before_ grouping, and which filters _after_ grouping?
 
 ## Intermediate
 

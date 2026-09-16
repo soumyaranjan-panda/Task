@@ -43,25 +43,25 @@ A ⋈ B  =  { (a, b) : a ∈ A, b ∈ B, AND condition(a, b) = TRUE }
 
 Always state the grain of each table before joining. It prevents most JOIN bugs. Throughout this section we use:
 
-**customers** — *one row per customer.*
+**customers** — _one row per customer._
 
-| customer_id | name    | country  |
-|-------------|---------|----------|
-| 1           | Alice   | USA      |
-| 2           | Bob     | UK       |
-| 3           | Carol   | Germany  |
-| 4           | Dave    | NULL     |
+| customer_id | name  | country |
+| ----------- | ----- | ------- |
+| 1           | Alice | USA     |
+| 2           | Bob   | UK      |
+| 3           | Carol | Germany |
+| 4           | Dave  | NULL    |
 
-**orders** — *one row per order.*
+**orders** — _one row per order._
 
-| order_id | customer_id | order_date  | amount |
-|----------|-------------|-------------|--------|
-| 101      | 1           | 2026-01-05  | 250.00 |
-| 102      | 2           | 2026-01-07  | 120.50 |
-| 103      | 1           | 2026-01-12  |  89.99 |
-| 104      | 3           | 2026-01-20  | 450.00 |
-| 105      | NULL        | 2026-02-01  |  30.00 |
-| 106      | 5           | 2026-02-03  | 610.00 |
+| order_id | customer_id | order_date | amount |
+| -------- | ----------- | ---------- | ------ |
+| 101      | 1           | 2026-01-05 | 250.00 |
+| 102      | 2           | 2026-01-07 | 120.50 |
+| 103      | 1           | 2026-01-12 | 89.99  |
+| 104      | 3           | 2026-01-20 | 450.00 |
+| 105      | NULL        | 2026-02-01 | 30.00  |
+| 106      | 5           | 2026-02-03 | 610.00 |
 
 **Grain check:** `orders.customer_id` references `customers.customer_id`. Customer 4 (Dave) has no orders; order 105 has no customer; order 106 references customer 5, who does not exist in customers.
 
@@ -111,10 +111,10 @@ JOIN orders o
 ### Expected result
 
 | name  | order_id | amount |
-|-------|----------|--------|
+| ----- | -------- | ------ |
 | Alice | 101      | 250.00 |
 | Bob   | 102      | 120.50 |
-| Alice | 103      |  89.99 |
+| Alice | 103      | 89.99  |
 | Carol | 104      | 450.00 |
 
 **What happened:**
@@ -209,9 +209,9 @@ This is one of the most important subtleties of INNER JOIN.
 
 **Example.** The rows with `customer_id = NULL` (order 105) and the missing customer 5 (order 106) are both dropped. But note the difference:
 
-| Order | customer_id | Why dropped |
-|-------|-------------|-------------|
-| 105   | NULL        | `NULL = NULL` is UNKNOWN, never TRUE. |
+| Order | customer_id | Why dropped                                        |
+| ----- | ----------- | -------------------------------------------------- |
+| 105   | NULL        | `NULL = NULL` is UNKNOWN, never TRUE.              |
 | 106   | 5           | No row with `customer_id = 5` exists in customers. |
 
 For a join condition `o.customer_id = c.customer_id`:
@@ -247,9 +247,9 @@ Use an INNER JOIN when you need **columns from both tables** and you want **only
 ## When NOT to Use INNER JOIN
 
 - You need every row of the left table even without a match → use LEFT JOIN.
-- You only need to know *whether* a match exists, not any columns from the other table → consider `EXISTS` (`EXISTS` stops at the first match and may be cheaper; see performance section).
+- You only need to know _whether_ a match exists, not any columns from the other table → consider `EXISTS` (`EXISTS` stops at the first match and may be cheaper; see performance section).
 - You want all combinations regardless of match → `CROSS JOIN`.
-- You want rows that do *not* match → anti-join patterns: `LEFT JOIN ... WHERE ... IS NULL` or `NOT EXISTS`.
+- You want rows that do _not_ match → anti-join patterns: `LEFT JOIN ... WHERE ... IS NULL` or `NOT EXISTS`.
 
 ---
 
@@ -290,12 +290,12 @@ Both are logically equivalent here, but evaluation strategy differs (see [Perfor
 
 ### Scenario 3: Aggregate across two tables — pay attention to grain
 
-**orders** — *one row per order* (as above).
+**orders** — _one row per order_ (as above).
 
-**payments** — *one row per payment.*
+**payments** — _one row per payment._
 
 | payment_id | order_id | amount | paid_at    |
-|------------|----------|--------|------------|
+| ---------- | -------- | ------ | ---------- |
 | 1          | 101      | 100.00 | 2026-01-06 |
 | 2          | 101      | 150.00 | 2026-01-08 |
 | 3          | 102      | 120.50 | 2026-01-09 |
@@ -314,7 +314,7 @@ GROUP BY o.order_id, o.amount;
 **Result:**
 
 | order_id | order_amount | paid_amount |
-|----------|--------------|-------------|
+| -------- | ------------ | ----------- |
 | 101      | 250.00       | 250.00      |
 | 102      | 120.50       | 120.50      |
 
@@ -331,10 +331,10 @@ GROUP BY o.order_id;
 ```
 
 | order_id | order_amount | paid_amount |
-|----------|--------------|-------------|
+| -------- | ------------ | ----------- |
 | 101      | 500.00       | 250.00      |
 
-> Production pitfall: This is the **fan-out / double-counting** bug. Joining a one-to-many table and then aggregating a column from the *one* side inflates numbers. Best practice: aggregate the *many* side in a subquery/CTE first, then join:
+> Production pitfall: This is the **fan-out / double-counting** bug. Joining a one-to-many table and then aggregating a column from the _one_ side inflates numbers. Best practice: aggregate the _many_ side in a subquery/CTE first, then join:
 
 ```sql
 SELECT o.order_id,
@@ -352,25 +352,25 @@ Now order 101 appears once with `order_amount = 250` and `paid_amount = 250`.
 
 ### Scenario 4: Many-to-many join
 
-**employees** — *one row per employee.*
+**employees** — _one row per employee._
 
-| employee_id | name |
-|-------------|------|
+| employee_id | name  |
+| ----------- | ----- |
 | 1           | Alice |
 | 2           | Bob   |
 | 3           | Carol |
 
-**projects** — *one row per project.*
+**projects** — _one row per project._
 
 | project_id | project_name |
-|------------|--------------|
-| 10         | Apollo |
-| 20         | Orion  |
+| ---------- | ------------ |
+| 10         | Apollo       |
+| 20         | Orion        |
 
-**assignments** — *one row per (employee, project) pair.*
+**assignments** — _one row per (employee, project) pair._
 
 | employee_id | project_id |
-|-------------|------------|
+| ----------- | ---------- |
 | 1           | 10         |
 | 1           | 20         |
 | 2           | 10         |
@@ -386,7 +386,7 @@ ORDER BY e.name, p.project_name;
 **Result:**
 
 | name  | project_name |
-|-------|--------------|
+| ----- | ------------ |
 | Alice | Apollo       |
 | Alice | Orion        |
 | Bob   | Apollo       |
@@ -451,7 +451,7 @@ This is often an unexpected **deduplication of data** on row matching.
 
 ### 4. Out of order join conditions
 
-`A JOIN B JOIN C` — with INNER JOIN, the associativity doesn't change the final result (all rows must satisfy all conditions), but it changes the *intermediate* row counts the optimizer sees, and thus potentially the chosen plan.
+`A JOIN B JOIN C` — with INNER JOIN, the associativity doesn't change the final result (all rows must satisfy all conditions), but it changes the _intermediate_ row counts the optimizer sees, and thus potentially the chosen plan.
 
 ---
 
@@ -534,15 +534,15 @@ A forgotten `ON` causes a Cartesian product. With 1M customers and 3M orders tha
 
 ## Comparison Table
 
-| Operation | What it returns | NULL handling | When to prefer |
-|-----------|----------------|---------------|----------------|
-| `INNER JOIN ... ON` | Combines rows with `TRUE` condition | NULLs never match | Need columns from both; only matching rows |
-| `LEFT JOIN ... ON` | All rows from left, NULLs for unmatched right | Left NULLs are padded | Preserve left rows even without match |
-| `RIGHT JOIN` | Mirror of LEFT | Right rows padded | Rarely; flip the tables instead |
-| `FULL OUTER JOIN` | Both sides preserved | Both padded | Compare two sets incl. differences |
-| `CROSS JOIN` | Every combination | All combinations | Deliberate Cartesian products |
-| `WHERE EXISTS` | No join duplication; existence test only | Uses equality semantics | Existence checks; avoid fan-out |
-| `IN` / subquery | Set membership (see NULL caveats in NOT IN section) | NULLs can poison `NOT IN` | Membership checks |
+| Operation           | What it returns                                     | NULL handling             | When to prefer                             |
+| ------------------- | --------------------------------------------------- | ------------------------- | ------------------------------------------ |
+| `INNER JOIN ... ON` | Combines rows with `TRUE` condition                 | NULLs never match         | Need columns from both; only matching rows |
+| `LEFT JOIN ... ON`  | All rows from left, NULLs for unmatched right       | Left NULLs are padded     | Preserve left rows even without match      |
+| `RIGHT JOIN`        | Mirror of LEFT                                      | Right rows padded         | Rarely; flip the tables instead            |
+| `FULL OUTER JOIN`   | Both sides preserved                                | Both padded               | Compare two sets incl. differences         |
+| `CROSS JOIN`        | Every combination                                   | All combinations          | Deliberate Cartesian products              |
+| `WHERE EXISTS`      | No join duplication; existence test only            | Uses equality semantics   | Existence checks; avoid fan-out            |
+| `IN` / subquery     | Set membership (see NULL caveats in NOT IN section) | NULLs can poison `NOT IN` | Membership checks                          |
 
 ---
 

@@ -2,7 +2,7 @@ The file exists but is empty. I have the conventions from sections 30, 14, and 2
 Wrote `sql-handbook/4-Subqueries/31-NOT-IN-vs-NOT-EXISTS.md` (937 lines).
 
 Covers: fundamentals & semantic contrast (value-comparison vs row-existence), ANSI syntax, grain-stated sample data, internal machinery (anti-join operators, NULL-proof requirement, materialization, Oracle's `ANTI SNA`), the NULL trap (both outer and inner axes), when/why the two agree, 8 scenarios with BAD vs BETTER, edge cases (empty set, all-NULL set, aggregates, `OR`, multiplicity), mistakes, production pitfalls, performance with plan-verification tools per engine, dialect notes, comparison tables + Mermaid decision flow, best practices, and an unanswered Interview Questions bank (Beginner → Performance), cross-referenced to Sections 30, 14, and 23 instead of repeating them.
- there.
+there.
 
 ---
 
@@ -34,12 +34,12 @@ Both `NOT IN (subquery)` and `NOT EXISTS (subquery)` try to answer the same busi
 
 > "Which rows of the outer table have **no matching row** in the inner set?"
 
-They are *logically equivalent* when neither side can ever be NULL. When NULLs can appear in the subquery result — and in most real schemas they can — they diverge badly:
+They are _logically equivalent_ when neither side can ever be NULL. When NULLs can appear in the subquery result — and in most real schemas they can — they diverge badly:
 
 - `NOT IN` is a **value comparison**, so it obeys three-valued logic, and one NULL in the inner set makes every comparison `UNKNOWN`. **Result: zero rows, silently, with no error.**
 - `NOT EXISTS` is a **row-existence test**, so it never compares values at all. `NULL` is irrelevant to it. **Result: the correct anti-answer every time.**
 
-That is the entire section in one sentence: `NOT IN` asks "is this value unequal to *every* returned value?" and `NOT EXISTS` asks "does this inner query return zero rows?" — and those are different questions as soon as NULL enters the picture.
+That is the entire section in one sentence: `NOT IN` asks "is this value unequal to _every_ returned value?" and `NOT EXISTS` asks "does this inner query return zero rows?" — and those are different questions as soon as NULL enters the picture.
 
 ---
 
@@ -61,7 +61,7 @@ NOT ( x = y1 OR x = y2 OR x = y3 OR ... )
 x <> y1 AND x <> y2 AND x <> y3 AND ...
 ```
 
-Notice the expansion: one `<>` comparison **per returned value**. If the subquery returns a million rows, this is conceptually a million `<>` comparisons (the optimizer almost never literally does that — see §5 — but the *semantics* are per-value).
+Notice the expansion: one `<>` comparison **per returned value**. If the subquery returns a million rows, this is conceptually a million `<>` comparisons (the optimizer almost never literally does that — see §5 — but the _semantics_ are per-value).
 
 Because it is built out of `=` and `<>`, `NOT IN` inherits every piece of NULL behavior from three-valued logic.
 
@@ -85,13 +85,13 @@ Historically, `NOT IN` came first and was the "natural" way to write a negation.
 
 1. NULL-safety by construction (no value comparison happens).
 2. Richer predicates — the correlate condition can be any expression, not just equality (e.g. "no order above $100").
-3. A friendlier mental model for anti-joins read naturally as English: *"keep rows for which there does not exist a matching row."*
+3. A friendlier mental model for anti-joins read naturally as English: _"keep rows for which there does not exist a matching row."_
 
 ### 2.5 The relationship to anti-joins
 
-Both operators are *expressions* of a single relational operation: the **anti-join** — "rows of A with no match in B." See *Section 23: Anti-Joins* for the full family of spellings. The important consequence here:
+Both operators are _expressions_ of a single relational operation: the **anti-join** — "rows of A with no match in B." See _Section 23: Anti-Joins_ for the full family of spellings. The important consequence here:
 
-`NOT EXISTS` is almost always recognized by the optimizer and executed as a genuine anti-join operator (nested-loop, hash, or merge). `NOT IN` **can also** be executed as an anti-join — but **only if the optimizer can prove the subquery never returns NULL**. If it cannot, the engine is forced to evaluate row-by-row with UNKNOWN semantics, which is both slower *and* wrong.
+`NOT EXISTS` is almost always recognized by the optimizer and executed as a genuine anti-join operator (nested-loop, hash, or merge). `NOT IN` **can also** be executed as an anti-join — but **only if the optimizer can prove the subquery never returns NULL**. If it cannot, the engine is forced to evaluate row-by-row with UNKNOWN semantics, which is both slower _and_ wrong.
 
 ---
 
@@ -214,7 +214,7 @@ INSERT INTO order_items VALUES
 **Data facts you should be able to state from memory:**
 
 - `employees.department_id` contains a **NULL** (Dave, id 104). This is the value that will poison every direct `NOT IN` against employees.
-- `orders.customer_id` contains **no NULLs** here — so a `NOT IN` against orders happens to be safe *in this sample*. (Note: the column is still defined as nullable — that is the trap.)
+- `orders.customer_id` contains **no NULLs** here — so a `NOT IN` against orders happens to be safe _in this sample_. (Note: the column is still defined as nullable — that is the trap.)
 - `department 4 (Finance)` has zero employees.
 - Customer 4 (Delta) has zero orders.
 - Product 13 (Monitor) appears in no order_items row.
@@ -248,9 +248,9 @@ flowchart TD
 
 The inner probe is only cheap if the targeted column is **indexed**; otherwise it degenerates to a scan of the inner table per outer row (see §12).
 
-### 5.2 `NOT IN` → anti-join *only when provably NULL-free*
+### 5.2 `NOT IN` → anti-join _only when provably NULL-free_
 
-`NOT IN` has identical *goal* semantics, but the optimizer must first prove the subquery's output column is non-null before it is allowed to treat it as an anti-join. The decisive inputs to that proof:
+`NOT IN` has identical _goal_ semantics, but the optimizer must first prove the subquery's output column is non-null before it is allowed to treat it as an anti-join. The decisive inputs to that proof:
 
 1. A `NOT NULL` constraint on the inner column.
 2. A filter in the subquery like `WHERE col IS NOT NULL` that the optimizer can see.
@@ -260,8 +260,8 @@ If the proof succeeds → the engine can use a genuine anti-join, and `NOT IN` i
 
 If the proof fails → the engine must handle the semantics literally, because `x NOT IN (set_with_null)` demands UNKNOWN evaluation. Some engines:
 
-- **PostgreSQL**: `NOT IN` with a provably-non-null subquery becomes an anti-join; with a nullable subquery it typically plans as a sequential-scan filter with a SubPlan (per-row evaluation), which is why it can be both slow *and* NULL-poisoned.
-- **Oracle**: has a special operator, **`HASH JOIN ANTI SNA`** ("Scalar N/A" — NULL-aware anti-join), designed exactly for the `NOT IN` case where the subquery may contain NULLs. Oracle can execute NULL-aware `NOT IN` *correctly* with a hash anti join — but note: "correctly" means "keeping the poison behavior": when the inner set contains NULL, the NULL-aware anti join *deliberately* returns **zero rows**, because that is what three-valued logic dictates.
+- **PostgreSQL**: `NOT IN` with a provably-non-null subquery becomes an anti-join; with a nullable subquery it typically plans as a sequential-scan filter with a SubPlan (per-row evaluation), which is why it can be both slow _and_ NULL-poisoned.
+- **Oracle**: has a special operator, **`HASH JOIN ANTI SNA`** ("Scalar N/A" — NULL-aware anti-join), designed exactly for the `NOT IN` case where the subquery may contain NULLs. Oracle can execute NULL-aware `NOT IN` _correctly_ with a hash anti join — but note: "correctly" means "keeping the poison behavior": when the inner set contains NULL, the NULL-aware anti join _deliberately_ returns **zero rows**, because that is what three-valued logic dictates.
 - **MySQL**: uses semi-join materialization / anti-join strategies; a `NOT IN` subquery may be materialized into a temp table first, then anti-joined.
 - **SQL Server**: rewrites `NOT IN` to a `Left Anti Semi Join` when it can prove no NULLs; otherwise it too falls back to an `Anti` filtered probe or a per-row check.
 
@@ -283,7 +283,7 @@ flowchart LR
 - The **number of executions** of the inner side. For an uncorrelated subquery it should be ≈ 1 (materialize once). For a correlated anti-join it is ≈ number of outer rows (each with a cheap index probe).
 - **Estimated vs actual rows** at each node — a big gap means stale statistics and a possibly terrible plan.
 
-> Common misconception: "The engine always flattens `NOT IN` into a join." It *may* — or it may materialize the subquery, or run it per outer row. The only source of truth is the execution plan on *your* engine, version, statistics, and data. Section §12 shows the exact commands.
+> Common misconception: "The engine always flattens `NOT IN` into a join." It _may_ — or it may materialize the subquery, or run it per outer row. The only source of truth is the execution plan on _your_ engine, version, statistics, and data. Section §12 shows the exact commands.
 
 ---
 
@@ -307,7 +307,7 @@ WHERE d.department_id NOT IN (SELECT department_id FROM employees);
 
 **Actual result:** **zero rows.**
 
-**Why:** `employees.department_id` contains Dave's `NULL`. Expand the `NOT IN` with three-valued logic (see *Section 14* for the deep dive):
+**Why:** `employees.department_id` contains Dave's `NULL`. Expand the `NOT IN` with three-valued logic (see _Section 14_ for the deep dive):
 
 ```sql
 d.department_id <> 1        -- TRUE for department 4
@@ -316,7 +316,7 @@ AND d.department_id <> 3    -- TRUE
 AND d.department_id <> NULL -- UNKNOWN — always, for every department
 ```
 
-`TRUE AND TRUE AND TRUE AND UNKNOWN = UNKNOWN` → the row is filtered. And because `department_id <> NULL` is UNKNOWN for **every** department, *not a single department survives* — including departments that happily have employees.
+`TRUE AND TRUE AND TRUE AND UNKNOWN = UNKNOWN` → the row is filtered. And because `department_id <> NULL` is UNKNOWN for **every** department, _not a single department survives_ — including departments that happily have employees.
 
 **BETTER APPROACH — `NOT EXISTS`:**
 
@@ -331,12 +331,12 @@ WHERE NOT EXISTS (
 ```
 
 | department_id | department_name |
-|---|---|
-| 4 | Finance |
+| ------------- | --------------- |
+| 4             | Finance         |
 
-**Why it works:** `NOT EXISTS` never compares values. It runs the correlated subquery and asks "did it return any rows?" For Finance, `e.department_id = 4` matches no employee, so the subquery returns zero rows and `NOT EXISTS` is TRUE. Dave's NULL makes `e.department_id = d.department_id` UNKNOWN for *his* row only, so his row contributes no match — but that cannot poison any other row. NULL is structurally irrelevant to existence checks.
+**Why it works:** `NOT EXISTS` never compares values. It runs the correlated subquery and asks "did it return any rows?" For Finance, `e.department_id = 4` matches no employee, so the subquery returns zero rows and `NOT EXISTS` is TRUE. Dave's NULL makes `e.department_id = d.department_id` UNKNOWN for _his_ row only, so his row contributes no match — but that cannot poison any other row. NULL is structurally irrelevant to existence checks.
 
-Equivalent safe alternative (see *Section 23: Anti-Joins*):
+Equivalent safe alternative (see _Section 23: Anti-Joins_):
 
 ```sql
 SELECT d.department_id, d.department_name
@@ -347,16 +347,16 @@ WHERE e.employee_id IS NULL;
 
 ### 6.2 The three NULL scenarios condensed
 
-| Subquery result | `NOT IN` | `NOT EXISTS` |
-|---|---|---|
-| Empty (no rows) | all rows survive (vacuous truth) | all rows survive |
-| Only NULLs | **zero rows** | all rows survive |
-| Mix: values + one NULL | **zero rows** | the correct anti-answer |
-| Values, provably NOT NULL | the correct anti-answer | the correct anti-answer |
+| Subquery result           | `NOT IN`                         | `NOT EXISTS`            |
+| ------------------------- | -------------------------------- | ----------------------- |
+| Empty (no rows)           | all rows survive (vacuous truth) | all rows survive        |
+| Only NULLs                | **zero rows**                    | all rows survive        |
+| Mix: values + one NULL    | **zero rows**                    | the correct anti-answer |
+| Values, provably NOT NULL | the correct anti-answer          | the correct anti-answer |
 
 The killer is the third row. The subquery looks fine, most of its values are real IDs, one NULL slips in (an unassigned employee, a legacy migration, a LEFT JOIN inside the subquery), and the entire query silently collapses to nothing.
 
-> **Interview trap:** "`NOT IN` returns the empty result set whenever the subquery returns at least one NULL." Also: `NOT IN` returns *no rows* here **even when the outer value clearly has no match** (this is what makes it a silent bug rather than a merely-odd one).
+> **Interview trap:** "`NOT IN` returns the empty result set whenever the subquery returns at least one NULL." Also: `NOT IN` returns _no rows_ here **even when the outer value clearly has no match** (this is what makes it a silent bug rather than a merely-odd one).
 
 ### 6.3 NULL on the outer (left) side
 
@@ -381,13 +381,13 @@ WHERE NOT EXISTS (
 ```
 
 | employee_id | name |
-|---|---|
-| 104 | Dave |
+| ----------- | ---- |
+| 104         | Dave |
 
 So there are **two independent NULL axes**:
 
 1. NULL in the outer value → `NOT IN` drops the row; `NOT EXISTS` keeps it.
-2. NULL in the inner set → `NOT IN` drops *every* row; `NOT EXISTS` is unaffected.
+2. NULL in the inner set → `NOT IN` drops _every_ row; `NOT EXISTS` is unaffected.
 
 ### 6.4 `NOT IN` with a literal list containing NULL
 
@@ -426,19 +426,19 @@ Here the three forms agree completely. Both `NOT IN` (provably NOT NULL) and `NO
 
 **How to prove "the inner column never has NULL" — three escalating levels:**
 
-| Level | Proof | Strength |
-|---|---|---|
-| Schema | The column has a `NOT NULL` or PRIMARY KEY constraint | Strong, but only if the constraint is real (see waterfall trap below) |
-| Query | The subquery adds `WHERE col IS NOT NULL` | Strong, explicit, always portable |
-| Runtime | `SELECT COUNT(*) FROM t WHERE col IS NULL` returns 0 *today* | Weak — true today, breaks tomorrow |
+| Level   | Proof                                                        | Strength                                                              |
+| ------- | ------------------------------------------------------------ | --------------------------------------------------------------------- |
+| Schema  | The column has a `NOT NULL` or PRIMARY KEY constraint        | Strong, but only if the constraint is real (see waterfall trap below) |
+| Query   | The subquery adds `WHERE col IS NOT NULL`                    | Strong, explicit, always portable                                     |
+| Runtime | `SELECT COUNT(*) FROM t WHERE col IS NULL` returns 0 _today_ | Weak — true today, breaks tomorrow                                    |
 
-> **Production pitfall (the waterfall trap):** a `NOT NULL` constraint is only as good as the pipeline that feeds it. If a nightly ETL loads data with a NULL default (`COALESCE`-less ingestion, a buggy source extract, a bad merge), the constraint — if any — will *reject* the load and you'll notice. But plenty of schemas have **no** constraint ("it was always clean"), and then a single NULL silently poisons a `NOT IN` without anyone noticing. Even worse: if the constraint exists but your subquery **derives** a column (via a LEFT JOIN inside the subquery, or a `COALESCE`'d expression) the constraint does not protect you. The plan-proof "this column is NOT NULL" applies to the *derived* value, not the constraint.
+> **Production pitfall (the waterfall trap):** a `NOT NULL` constraint is only as good as the pipeline that feeds it. If a nightly ETL loads data with a NULL default (`COALESCE`-less ingestion, a buggy source extract, a bad merge), the constraint — if any — will _reject_ the load and you'll notice. But plenty of schemas have **no** constraint ("it was always clean"), and then a single NULL silently poisons a `NOT IN` without anyone noticing. Even worse: if the constraint exists but your subquery **derives** a column (via a LEFT JOIN inside the subquery, or a `COALESCE`'d expression) the constraint does not protect you. The plan-proof "this column is NOT NULL" applies to the _derived_ value, not the constraint.
 
-> **Interview trap:** the "yes, but it always works" argument. A developer tests `NOT IN` on data that happens to be clean, declares it safe, and ships it. Correctness was *data-dependent*, not *query-dependent*. This is why interviews love re-asking it with one NULL injected.
+> **Interview trap:** the "yes, but it always works" argument. A developer tests `NOT IN` on data that happens to be clean, declares it safe, and ships it. Correctness was _data-dependent_, not _query-dependent_. This is why interviews love re-asking it with one NULL injected.
 
 ### 7.1 The one case where `NOT IN` can match extra rows... (spoiler: it can't, in the other direction)
 
-There is no case where `NOT IN` returns a *superset* of `NOT EXISTS` on the same question — when both return rows, they return the same rows (given the conditions above) or `NOT IN` returns a strict *subset* (due to NULL dropping). The difference is always in the loss direction: `NOT EXISTS` ≥ `NOT IN` (as sets), with equality when no NULLs are involved. If your `NOT IN` query returns rows *and* your `NOT EXISTS` returns more rows, diff them on NULL keys — that is exactly the poison you are missing.
+There is no case where `NOT IN` returns a _superset_ of `NOT EXISTS` on the same question — when both return rows, they return the same rows (given the conditions above) or `NOT IN` returns a strict _subset_ (due to NULL dropping). The difference is always in the loss direction: `NOT EXISTS` ≥ `NOT IN` (as sets), with equality when no NULLs are involved. If your `NOT IN` query returns rows _and_ your `NOT EXISTS` returns more rows, diff them on NULL keys — that is exactly the poison you are missing.
 
 ---
 
@@ -480,14 +480,14 @@ WHERE o.order_id NOT IN (SELECT p.order_id FROM payments p);
 
 Right: the point is **ranking the decision.**
 
-- If the inner column is `NOT NULL` (constrained) the optimizer *may* even rewrite `NOT IN` as an anti-join, so results and often cost equal `NOT EXISTS`.
-- But note the sentence "the optimizer may": you must still verify the plan. And the *schema could change*. A future `ALTER TABLE payments ALTER COLUMN order_id DROP NOT NULL` silently turns your "safe" query into a zero-row-machine.
+- If the inner column is `NOT NULL` (constrained) the optimizer _may_ even rewrite `NOT IN` as an anti-join, so results and often cost equal `NOT EXISTS`.
+- But note the sentence "the optimizer may": you must still verify the plan. And the _schema could change_. A future `ALTER TABLE payments ALTER COLUMN order_id DROP NOT NULL` silently turns your "safe" query into a zero-row-machine.
 
 **Recommendation:** even here, many teams standardize on `NOT EXISTS` purely for uniformity — one pattern to review, no proof required per query.
 
 ### 8.3 Products never ordered
 
-**grain:** one row per product; one row per order item. `order_items.product_id` is a NOT NULL FK — but the `order_items` table as a whole may be *empty*.
+**grain:** one row per product; one row per order item. `order_items.product_id` is a NOT NULL FK — but the `order_items` table as a whole may be _empty_.
 
 ```sql
 -- BAD (fragile even though it "works" today)
@@ -505,11 +505,11 @@ WHERE NOT EXISTS (
 
 **Result (with §4 data):** only `Monitor` (13) — Laptop and Mouse both appear in `order_items`.
 
-Edge worth teaching: if `order_items` were **empty**, `NOT IN` returns *all* products (vacuous truth — the only "safe-looking" NULL edge). `NOT EXISTS` also returns all products. Good — for an empty inner table they agree. The divergence needs exactly one NULL row.
+Edge worth teaching: if `order_items` were **empty**, `NOT IN` returns _all_ products (vacuous truth — the only "safe-looking" NULL edge). `NOT EXISTS` also returns all products. Good — for an empty inner table they agree. The divergence needs exactly one NULL row.
 
 ### 8.4 No order above $100 — complex predicate (impossible with plain `NOT IN`)
 
-`NOT IN` can only test membership by value equality. The moment "no match" means *"no match satisfying a predicate"*, `NOT IN` cannot express it and `NOT EXISTS` is the natural tool:
+`NOT IN` can only test membership by value equality. The moment "no match" means _"no match satisfying a predicate"_, `NOT IN` cannot express it and `NOT EXISTS` is the natural tool:
 
 ```sql
 -- Customers with NO order above $100
@@ -522,7 +522,7 @@ WHERE NOT EXISTS (
 );
 ```
 
-There is no `NOT IN` equivalent for the `AND o.total_amount > 100` condition. (You *could* build the "set of customers with a big order" as a subquery and then `NOT IN` against it, which is correct but clunkier and still nullable-fragile.)
+There is no `NOT IN` equivalent for the `AND o.total_amount > 100` condition. (You _could_ build the "set of customers with a big order" as a subquery and then `NOT IN` against it, which is correct but clunkier and still nullable-fragile.)
 
 ### 8.5 Multi-column "never matched" (composite key)
 
@@ -538,7 +538,7 @@ WHERE NOT EXISTS (
 );
 ```
 
-Correlating only one column (`WHERE a.student_id = e.student_id`) is a classic bug — it answers "students who attended *anything*", not "this exact enrollment."
+Correlating only one column (`WHERE a.student_id = e.student_id`) is a classic bug — it answers "students who attended _anything_", not "this exact enrollment."
 
 ### 8.6 The "empty subquery" special case
 
@@ -588,7 +588,7 @@ WHERE NOT EXISTS (
 );
 ```
 
-> Production pitfall: `NOT IN` over a subquery that **derives** its output (LEFT JOINs, UNION, COALESCE, CASE) is doubly fragile. The inner table column may be NOT NULL while the *derived* value is not. The plan's "not null" knowledge depends on what the subquery actually produces, and it is easy to reason wrongly about it.
+> Production pitfall: `NOT IN` over a subquery that **derives** its output (LEFT JOINs, UNION, COALESCE, CASE) is doubly fragile. The inner table column may be NOT NULL while the _derived_ value is not. The plan's "not null" knowledge depends on what the subquery actually produces, and it is easy to reason wrongly about it.
 
 ### 8.8 BAD vs BETTER summary of the whole section
 
@@ -616,11 +616,11 @@ WHERE e.employee_id IS NULL;
 
 ### 9.1 Empty subquery → vacuous truth
 
-| | `NOT IN` | `NOT EXISTS` |
-|---|---|---|
+|                 | `NOT IN`                               | `NOT EXISTS`                 |
+| --------------- | -------------------------------------- | ---------------------------- |
 | Inner set empty | all rows kept (`NOT IN ()` is vacuous) | all rows kept (0 inner rows) |
 
-Surprising wrinkle: **even a NULL outer key is kept** by `NOT IN` over an empty subquery, because there is no value to compare against: `NULL NOT IN (empty)` is TRUE, while `NULL NOT IN (1, 2)` is UNKNOWN. The presence of *any* element in the list activates the comparison and NULL dies again.
+Surprising wrinkle: **even a NULL outer key is kept** by `NOT IN` over an empty subquery, because there is no value to compare against: `NULL NOT IN (empty)` is TRUE, while `NULL NOT IN (1, 2)` is UNKNOWN. The presence of _any_ element in the list activates the comparison and NULL dies again.
 
 ### 9.2 Subquery returns only NULLs
 
@@ -637,7 +637,7 @@ For "list the employees not assigned to a listed department," the business usual
 
 ### 9.4 Duplicate keys on the right
 
-`orders` with 1,000 duplicate rows for customer 1 changes nothing in the output of any anti-join form (existence is binary). It can change the *cost*: `NOT EXISTS` may short-circuit at the first match; a materialized `NOT IN` builds a set (dedup takes care of itself); a `LEFT JOIN` fans out the 1,000 rows before filtering. Same answer, different plan — verify.
+`orders` with 1,000 duplicate rows for customer 1 changes nothing in the output of any anti-join form (existence is binary). It can change the _cost_: `NOT EXISTS` may short-circuit at the first match; a materialized `NOT IN` builds a set (dedup takes care of itself); a `LEFT JOIN` fans out the 1,000 rows before filtering. Same answer, different plan — verify.
 
 ### 9.5 Duplicate keys on the left (multiplicity)
 
@@ -661,7 +661,7 @@ If the sub-subquery returns one row, fine. But if it returns **NULL** (e.g. the 
 WHERE name NOT IN ('Alice') OR department_id NOT IN (SELECT ...)
 ```
 
-Each `NOT IN` is evaluated independently; if *either* is poisoned, that OR-branch collapses for all rows, and `TRUE OR UNKNOWN = TRUE` can still keep rows via the other branch. NULL logic inside OR/AND expressions interacts in non-obvious ways — this is where three-valued logic bites the hardest. Test each branch in isolation.
+Each `NOT IN` is evaluated independently; if _either_ is poisoned, that OR-branch collapses for all rows, and `TRUE OR UNKNOWN = TRUE` can still keep rows via the other branch. NULL logic inside OR/AND expressions interacts in non-obvious ways — this is where three-valued logic bites the hardest. Test each branch in isolation.
 
 ### 9.8 Type and collation mismatches
 
@@ -671,14 +671,14 @@ Each `NOT IN` is evaluated independently; if *either* is poisoned, that OR-branc
 
 ## 10. Common mistakes
 
-1. **`NOT IN` against a nullable inner column → silent zero rows.** The single most common SQL bug. The query *looks* correct and returns a clean (empty) result — no error anywhere.
-2. **Believing "`NOT IN` is just the opposite of `IN`."** It is *semantically* the negation, but under three-valued logic the negation of an UNKNOWN term is still UNKNOWN. `NOT EXISTS` is the NULL-safe negation.
+1. **`NOT IN` against a nullable inner column → silent zero rows.** The single most common SQL bug. The query _looks_ correct and returns a clean (empty) result — no error anywhere.
+2. **Believing "`NOT IN` is just the opposite of `IN`."** It is _semantically_ the negation, but under three-valued logic the negation of an UNKNOWN term is still UNKNOWN. `NOT EXISTS` is the NULL-safe negation.
 3. **Using a NULLable business column as the left key** with `NOT IN` → legitimately unmatched NULL-key rows vanish.
 4. **`NOT IN` subquery returning more than one column** → "subquery must return only one column" error.
 5. **`NOT IN (subquery)` when you actually meant a correlated predicate** — e.g. "no order above $100" cannot be `NOT IN`.
 6. **Defending `NOT IN` with `IS NOT NULL` filters** instead of just switching to `NOT EXISTS` — the fix works but adds review complexity forever after.
-7. **Relying on the plan to "fix" NULL semantics** — the optimizer cannot make `NOT IN` correct against NULLs; it can only refuse to turn it into an anti-join (and then it's *slower*, still wrong).
-8. **Putting the `IS NULL` sentinel on a nullable column in the LEFT JOIN anti-join** — conflating "unmatched" with "value unknown" (see *Section 23*).
+7. **Relying on the plan to "fix" NULL semantics** — the optimizer cannot make `NOT IN` correct against NULLs; it can only refuse to turn it into an anti-join (and then it's _slower_, still wrong).
+8. **Putting the `IS NULL` sentinel on a nullable column in the LEFT JOIN anti-join** — conflating "unmatched" with "value unknown" (see _Section 23_).
 9. **Using `EXCEPT` where multiplicity matters** — it deduplicates (see §9.5).
 10. **Testing on clean data only.** A single NULL in a real workload changes everything; load a NULL-laced table in staging before trusting `NOT IN`.
 
@@ -688,7 +688,7 @@ Each `NOT IN` is evaluated independently; if *either* is poisoned, that OR-branc
 
 > **Production pitfall (silent data loss):** `NOT IN` against a subquery that can yield NULL does not error — it quietly returns fewer rows (often zero). Reports shrink, ETL transfers truncate, dashboards clear, and nobody is alerted. It is the worst class of bug: no crash, no log, just wrong data flowing downstream.
 
-> **Production pitfall (derived NULLs):** the subquery's inner column has a `NOT NULL` constraint, but the subquery itself derives its output — `LEFT JOIN` producing NULLs, `UNION`, `COALESCE(x, something)` — so the *value* being compared can still be NULL. The constraint proves nothing about the expression.
+> **Production pitfall (derived NULLs):** the subquery's inner column has a `NOT NULL` constraint, but the subquery itself derives its output — `LEFT JOIN` producing NULLs, `UNION`, `COALESCE(x, something)` — so the _value_ being compared can still be NULL. The constraint proves nothing about the expression.
 
 > **Production pitfall (the ETL DELETE/UPDATE):** a `DELETE FROM staging WHERE id NOT IN (SELECT id FROM production)` — if `production.id` contains one NULL, the delete silently deletes **nothing**, leaving stale rows forever. Same structure also applies to `UPDATE`.
 
@@ -696,7 +696,7 @@ Each `NOT IN` is evaluated independently; if *either* is poisoned, that OR-branc
 
 > **Production pitfall (chained derives):** `SELECT ... WHERE a NOT IN (SELECT b FROM x LEFT JOIN y ...)` — the inner LEFT JOIN can hand NULLs to the outer `NOT IN`. Two layers of "clever" interact to poison a report both ways (extra NULL from the join, or NULL-derived comparison).
 
-> **Production pitfall (performance):** in PostgreSQL, `NOT IN` over a *nullable* column typically falls back to a SubPlan executed per outer row, which can be vastly slower than the anti-join `NOT EXISTS` produces — so the risky form is often also the slow form. Oracle's `HASH JOIN ANTI SNA` is the notable exception that executes NULL-aware `NOT IN` efficiently (but with the *correct-by-spec* zero-row result when a NULL exists).
+> **Production pitfall (performance):** in PostgreSQL, `NOT IN` over a _nullable_ column typically falls back to a SubPlan executed per outer row, which can be vastly slower than the anti-join `NOT EXISTS` produces — so the risky form is often also the slow form. Oracle's `HASH JOIN ANTI SNA` is the notable exception that executes NULL-aware `NOT IN` efficiently (but with the _correct-by-spec_ zero-row result when a NULL exists).
 
 ---
 
@@ -708,7 +708,7 @@ Each `NOT IN` is evaluated independently; if *either* is poisoned, that OR-branc
 > Common misconception: "`NOT IN` is always faster when the list is small."
 > Common misconception: "Anti-joins are always faster than any subquery form."
 
-None of these are laws. Actual performance depends on the optimizer, indexes, statistics, cardinality, data distribution, query shape, and engine — and on which **physical operator** each shape compiles to. Section 5 explains the operators; this section explains how to *choose* and *verify*.
+None of these are laws. Actual performance depends on the optimizer, indexes, statistics, cardinality, data distribution, query shape, and engine — and on which **physical operator** each shape compiles to. Section 5 explains the operators; this section explains how to _choose_ and _verify_.
 
 ### 12.2 When `NOT EXISTS` tends to win
 
@@ -720,7 +720,7 @@ None of these are laws. Actual performance depends on the optimizer, indexes, st
 
 - The inner column is provably `NOT NULL` → the optimizer can anti-join it too, and the plans may be identical.
 - The subquery is **uncorrelated** and cheap to materialize once (build a hash set, probe many outer rows) vs a correlated `NOT EXISTS` probing N times.
-- Historically, Oracle's NULL-aware hash anti join (`HASH JOIN ANTI SNA`) makes `NOT IN` *efficient* even with unknown NULL presence — an explicit exception to the "NOT IN is slow" folklore.
+- Historically, Oracle's NULL-aware hash anti join (`HASH JOIN ANTI SNA`) makes `NOT IN` _efficient_ even with unknown NULL presence — an explicit exception to the "NOT IN is slow" folklore.
 
 ### 12.4 The plan is the only arbiter — what to run
 
@@ -732,14 +732,14 @@ None of these are laws. Actual performance depends on the optimizer, indexes, st
 Read, in order:
 
 1. **Operator shape:** is there an `Anti` / `Anti Semi` node? Both forms should be anti-joins when NULL-safe; if `NOT IN` shows a `SubPlan` + per-row filter, NULLs (or decorrelation limits) blocked the rewrite.
-2. **Which side is built vs probed** in a hash anti join — you generally want the *large* duplicated side built once and the outer rows probed.
+2. **Which side is built vs probed** in a hash anti join — you generally want the _large_ duplicated side built once and the outer rows probed.
 3. **Inner index usage:** an index on the correlated inner column (`orders(customer_id)`, `payments(order_id)`) turns N outer probes into N index seeks instead of N scans.
 4. **Number of executions of the inner side:** an uncorrelated materialized subquery should execute ≈1 time; a correlated anti-join executes per outer row, each cheap only if indexed.
 5. **Estimated vs actual rows** — a wide gap means stale statistics; refresh them before concluding anything about "which is faster."
 
 ### 12.5 What changes if results differ between forms but plans look identical
 
-If `NOT IN` (nullable) and `NOT EXISTS` produce *different row counts* but *similar plans*, the query is correct-by-accident-on-data — the plan difference you don't see is "NULL-aware" handling (e.g. Oracle `SNA`), or `IS NOT NULL` predicates the optimizer added automatically. Diff the two result sets; the missing rows are NULL-keyed rows. Fix the data or the query — don't chase the plan.
+If `NOT IN` (nullable) and `NOT EXISTS` produce _different row counts_ but _similar plans_, the query is correct-by-accident-on-data — the plan difference you don't see is "NULL-aware" handling (e.g. Oracle `SNA`), or `IS NOT NULL` predicates the optimizer added automatically. Diff the two result sets; the missing rows are NULL-keyed rows. Fix the data or the query — don't chase the plan.
 
 ### 12.6 When anti-joins get expensive regardless of form
 
@@ -753,26 +753,31 @@ If `NOT IN` (nullable) and `NOT EXISTS` produce *different row counts* but *simi
 ## 13. Database-specific behavior
 
 > **PostgreSQL**
+>
 > - `NOT IN (subquery)` on a provably-NOT-NULL column → anti-join. On a nullable column → typically a per-row `SubPlan` filter (slow) with the built-in NULL poison.
 > - `NOT EXISTS` → anti-join, no proof needed.
 > - `x NOT IN (...)` ≡ `x <> ALL (SELECT ...)`, which makes three-valued logic explicit.
 > - `IS [NOT] DISTINCT FROM` available if you want NULL rows to count as matching inside a correlation.
 
 > **MySQL**
+>
 > - Semi-join strategies (materialization / FirstMatch / exists / loose index scan, 5.6+; 8.0 rewrites subqueries aggressively). A `NOT IN` subquery may be materialized into a temporary table before anti-joining.
 > - `LIMIT`, `GROUP BY`, `ORDER BY` inside the subquery can force materialization and change the plan entirely — re-EXPLAIN after shape changes.
 > - `EXCEPT` only from 8.0.31.
 
 > **SQL Server**
+>
 > - Rewrites `NOT IN` (NULL-free) and `NOT EXISTS` to `Left Anti Semi Join`; with NULLable subqueries it keeps an anti probe with NULL-awareness, so plans can differ.
-> - `NOT IN` on a nullable column is frequently both wrong *and* the slower spelling; prefer `NOT EXISTS`.
+> - `NOT IN` on a nullable column is frequently both wrong _and_ the slower spelling; prefer `NOT EXISTS`.
 > - Note about the "Subquery returned more than one value" error: that belongs to scalar subqueries (`= (SELECT ...)`, `<> (SELECT ...)`), never to `IN`/`NOT IN`, which tolerate multi-row results.
 
 > **Oracle**
-> - The exception that proves the rule: `HASH JOIN ANTI SNA` (NULL-aware anti join) executes `NOT IN` *efficiently* even when NULL presence is unknown — but it preserves the correct three-valued result: zero rows if the inner set contains a NULL. Fast and wrong is still wrong.
+>
+> - The exception that proves the rule: `HASH JOIN ANTI SNA` (NULL-aware anti join) executes `NOT IN` _efficiently_ even when NULL presence is unknown — but it preserves the correct three-valued result: zero rows if the inner set contains a NULL. Fast and wrong is still wrong.
 > - `MINUS` for whole-row set difference; `IN`-list cap historically ~1000 elements.
 
 > **MySQL / DuckDB / Spark-syntax families**
+>
 > - DuckDB/Spark/SQLite3.30+ etc. have explicit `ANTI JOIN` / `LEFT ANTI JOIN` keywords in some engines — non-ANSI, not available in the big four.
 
 ---
@@ -781,30 +786,30 @@ If `NOT IN` (nullable) and `NOT EXISTS` produce *different row counts* but *simi
 
 ### 14.1 NOT IN vs NOT EXISTS feature matrix
 
-| Aspect | `NOT IN (subquery)` | `NOT EXISTS (subquery)` |
-|---|---|---|
-| Conceptual model | value *not-equal to every element* of a set | subquery returns **zero rows** |
-| Value comparison happens? | yes — per returned value | no — existence only |
-| Usually correlated? | no (decorrelated) | yes |
-| Subquery columns | exactly 1 column | SELECT list ignored (`SELECT 1`) |
-| NULL in inner set | **zero rows (poison)** | safe |
-| NULL outer value | row dropped (UNKNOWN) | row kept |
-| Can express non-equality predicates (`no order > $100`)? | no | yes |
-| Optimizer→anti-join | only if inner provably NOT NULL | always a candidate |
-| Empty inner set | all rows kept (vacuous) | all rows kept |
-| Multi-column correlation | hard / non-portable (row-value) | natural |
-| Readability of anti-join intent | deceptively simple | explicit "no such row exists" |
+| Aspect                                                   | `NOT IN (subquery)`                         | `NOT EXISTS (subquery)`          |
+| -------------------------------------------------------- | ------------------------------------------- | -------------------------------- |
+| Conceptual model                                         | value _not-equal to every element_ of a set | subquery returns **zero rows**   |
+| Value comparison happens?                                | yes — per returned value                    | no — existence only              |
+| Usually correlated?                                      | no (decorrelated)                           | yes                              |
+| Subquery columns                                         | exactly 1 column                            | SELECT list ignored (`SELECT 1`) |
+| NULL in inner set                                        | **zero rows (poison)**                      | safe                             |
+| NULL outer value                                         | row dropped (UNKNOWN)                       | row kept                         |
+| Can express non-equality predicates (`no order > $100`)? | no                                          | yes                              |
+| Optimizer→anti-join                                      | only if inner provably NOT NULL             | always a candidate               |
+| Empty inner set                                          | all rows kept (vacuous)                     | all rows kept                    |
+| Multi-column correlation                                 | hard / non-portable (row-value)             | natural                          |
+| Readability of anti-join intent                          | deceptively simple                          | explicit "no such row exists"    |
 
 ### 14.2 NULL behavior matrix (both forms, both sides)
 
-| Situation | `NOT IN` | `NOT EXISTS` | `LEFT JOIN ... IS NULL` | `EXCEPT` / `MINUS` |
-|---|---|---|---|---|
-| Outer key NULL | dropped | kept | kept | dropped (NULL= for sets) |
-| Inner set contains a NULL, no match for outer row | **dropped (poison)** | kept | kept | kept |
-| Inner set empty | all kept (incl. NULL keys) | all kept | all kept | all kept |
-| Inner set all NULLs | zero rows | all kept | all kept | all non-NULL outer kept |
-| Inner set is only values (NOT NULL) | correct anti-answer | correct anti-answer | correct anti-answer | correct (with NULL= caveat) |
-| Duplicate outer rows | preserved | preserved | preserved | **deduplicated** |
+| Situation                                         | `NOT IN`                   | `NOT EXISTS`        | `LEFT JOIN ... IS NULL` | `EXCEPT` / `MINUS`          |
+| ------------------------------------------------- | -------------------------- | ------------------- | ----------------------- | --------------------------- |
+| Outer key NULL                                    | dropped                    | kept                | kept                    | dropped (NULL= for sets)    |
+| Inner set contains a NULL, no match for outer row | **dropped (poison)**       | kept                | kept                    | kept                        |
+| Inner set empty                                   | all kept (incl. NULL keys) | all kept            | all kept                | all kept                    |
+| Inner set all NULLs                               | zero rows                  | all kept            | all kept                | all non-NULL outer kept     |
+| Inner set is only values (NOT NULL)               | correct anti-answer        | correct anti-answer | correct anti-answer     | correct (with NULL= caveat) |
+| Duplicate outer rows                              | preserved                  | preserved           | preserved               | **deduplicated**            |
 
 ### 14.3 Decision flowchart
 
@@ -837,10 +842,10 @@ flowchart TD
 1. **Default to `NOT EXISTS` for anti-joins.** It is NULL-safe by construction, optimizer-friendly, expresses complex predicates, and reads like English. Write `NOT IN` only for literal lists you can see (`status NOT IN ('cancelled', 'refunded')`).
 2. **If you keep `NOT IN (subquery)`, make NULL-absence explicit and local:** add `WHERE col IS NOT NULL` in the subquery and note it in review.
 3. **Prefer `NOT NULL` / PRIMARY KEY constraints on FKs** — this is what lets the optimizer safely anti-join `NOT IN` and makes the data honest.
-4. **Watch for *derived* NULLs:** a subquery built on a LEFT JOIN, UNION, or COALESCE can hand NULL to `NOT IN` even when the base column is constrained.
+4. **Watch for _derived_ NULLs:** a subquery built on a LEFT JOIN, UNION, or COALESCE can hand NULL to `NOT IN` even when the base column is constrained.
 5. **Treat NULL-keyed outer rows deliberately:** decide up front whether "not matched" includes rows whose key is NULL, and write the explicit `IS NOT NULL` guard if not.
 6. **Never put a `NULL` literal into a `NOT IN` list.** `NOT IN ('a', NULL)` is always zero rows.
-7. **Prefer the `LEFT JOIN ... IS NULL` spelling when you already join for other columns**, and remember two rules: the sentinel is a NOT NULL column, and extra conditions stay in `ON` (see *Section 23*).
+7. **Prefer the `LEFT JOIN ... IS NULL` spelling when you already join for other columns**, and remember two rules: the sentinel is a NOT NULL column, and extra conditions stay in `ON` (see _Section 23_).
 8. **Always verify with the plan** (commands in §12.4) before discussing speed; re-verify when statistics or cardinality change.
 9. **Standardize on one anti-join pattern per codebase** (`NOT EXISTS`) so reviews check correctness once, not per query.
 10. **Audit existing code** with a grep for `NOT IN (SELECT` and re-review each hit against §6's poison checklist.
@@ -849,10 +854,10 @@ flowchart TD
 
 ## 16. Cross-references (browse in this order for depth)
 
-- *Section 30: IN vs EXISTS* — positive forms, plan-shape details, semi joins.
-- *Section 14 (NULL & Logic): NOT IN + NULL Pitfalls* — the mechanical truth-table walk-through of the poison.
-- *Section 23 (JOINs): Anti-Joins* — `NOT EXISTS` / `NOT IN` / `LEFT JOIN ... IS NULL` / `EXCEPT` as four spellings of one operation, plus sentinel rules and multi-hop traps.
-- *Sections 9–11 (NULL & Logic)* — three-valued logic, `NULL = NULL`, `IS [NOT] DISTINCT FROM`.
+- _Section 30: IN vs EXISTS_ — positive forms, plan-shape details, semi joins.
+- _Section 14 (NULL & Logic): NOT IN + NULL Pitfalls_ — the mechanical truth-table walk-through of the poison.
+- _Section 23 (JOINs): Anti-Joins_ — `NOT EXISTS` / `NOT IN` / `LEFT JOIN ... IS NULL` / `EXCEPT` as four spellings of one operation, plus sentinel rules and multi-hop traps.
+- _Sections 9–11 (NULL & Logic)_ — three-valued logic, `NULL = NULL`, `IS [NOT] DISTINCT FROM`.
 
 ---
 
@@ -871,8 +876,8 @@ Answers are intentionally not given — solve them first. (Use the §4 sample da
 
 5. Using the §4 data (Dave has `department_id = NULL`), expand `department_id NOT IN (SELECT department_id FROM employees)` step by step with three-valued logic and explain why **zero** departments come back.
 6. Say the same query with `NOT EXISTS` — what comes back now, and why is the NULL harmless here?
-7. Compare the result of `NOT IN` when the subquery returns an *empty* set vs a set *containing one NULL*. Both edge cases, one sentence each.
-8. Under what conditions is `NOT IN` safe to use? How do you prove them *permanently*, not just for today's data?
+7. Compare the result of `NOT IN` when the subquery returns an _empty_ set vs a set _containing one NULL_. Both edge cases, one sentence each.
+8. Under what conditions is `NOT IN` safe to use? How do you prove them _permanently_, not just for today's data?
 
 ### Advanced
 
@@ -885,12 +890,13 @@ Answers are intentionally not given — solve them first. (Use the §4 sample da
 
 13. A nightly job computes "customers who have never placed an order" with `NOT IN`. Last night it returned zero rows for the first time. Order the checks you run: schema constraints, data scan for NULLs, execution plan, result diff against `NOT EXISTS`. What is the most likely root cause?
 14. `payments.order_id` is a NOT NULL FK. "Orders never paid" with `NOT IN` happens to be correct and plans as an anti-join. The DBA plans to drop the FK. What is your recommendation, and what query would you write that doesn't depend on the constraint?
-15. Write "users who never logged in" two ways — one `NOT IN`, one `NOT EXISTS` — for a schema where `logins` is joined *inside* a subquery that also references a `device` table. Explain which one you would ship and why.
+15. Write "users who never logged in" two ways — one `NOT IN`, one `NOT EXISTS` — for a schema where `logins` is joined _inside_ a subquery that also references a `device` table. Explain which one you would ship and why.
 16. Reconcile: query A (with `NOT IN`) and query B (with `NOT EXISTS`) return different counts. Diff the actual result sets and explain exactly which rows differ and why (NULL keys on which side?).
 
 ### Tricky
 
 - Predict outputs (use §4 data or pure logic):
+
 17. `SELECT 1 WHERE 10 NOT IN (20, 30, NULL);`
 18. `SELECT 1 WHERE NULL NOT IN (SELECT department_id FROM employees WHERE 1=0);` (empty subquery, NULL on the left)
 19. `SELECT name FROM employees WHERE name NOT IN ('Alice', NULL);`
@@ -919,7 +925,7 @@ FROM customers
 WHERE customer_id NOT IN (SELECT customer_id FROM orders);
 ```
 
-For Q25, state which data property makes this safe *today* and whether the column definition makes it safe *forever*.
+For Q25, state which data property makes this safe _today_ and whether the column definition makes it safe _forever_.
 
 ### Debugging
 
@@ -932,7 +938,7 @@ For Q25, state which data property makes this safe *today* and whether the colum
 29. `NOT IN` shows a `SubPlan` node executed once per outer row, while `NOT EXISTS` on the same tables shows a nested-loop anti join with an index probe. Which wins? What index, if added, changes the verdict? Which plan tool did you use?
 30. Two anti-joins give identical results and identical row counts, but one uses `NOT EXISTS` and one uses `LEFT JOIN ... IS NULL` with `SELECT DISTINCT`. The `DISTINCT` version sorts the whole product of both tables. Explain the fan-out and why the plan hides it.
 31. Your company benchmarks "NOT EXISTS is faster" on a small dev box, adopting it as a rule. Explain why that evidence is not portable: which of the §12.1 factors (optimizer, stats, cardinality, data distribution, query shape, engine) are dev-box-specific?
-32. Oracle with `HASH JOIN ANTI SNA` vs PostgreSQL with per-row SubPlan for the *same logical query* on the *same data*. Which one is faster *and* correct? Why can the answer differ per engine? (Include the NULL case in your answer.)
+32. Oracle with `HASH JOIN ANTI SNA` vs PostgreSQL with per-row SubPlan for the _same logical query_ on the _same data_. Which one is faster _and_ correct? Why can the answer differ per engine? (Include the NULL case in your answer.)
 33. A `NOT IN` subquery is uncorrelated and returns 5 million IDs; the outer table has 10 million rows with an index on the compared column. Walk through what each engine (choose one) is likely to do — hash materialize vs per-row — and what to verify in `EXPLAIN`.
 
 ---

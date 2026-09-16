@@ -7,9 +7,9 @@
 
 - [What this section is](#what-this-section-is)
 - [Sample tables (grain check)](#sample-tableThe first write got corrupted with stray text. I'll rewrite the file cleanly in controlled chunks, verifying each.
-The placeholder write from before had stray text; I've now overwritten cleanly with the real chunk. Let me verify and continue.
-The heredoc input keeps glitching by splicing stray task-commentary into the content. I'll surgically remove the junk fragments, then continue with shorter, tightly-controlled chunks.
-n type](#pitfall-group-d--wrong-join-type)
+  The placeholder write from before had stray text; I've now overwritten cleanly with the real chunk. Let me verify and continue.
+  The heredoc input keeps glitching by splicing stray task-commentary into the content. I'll surgically remove the junk fragments, then continue with shorter, tightly-controlled chunks.
+  n type](#pitfall-group-d--wrong-join-type)
 - [Pitfall Group E — Aggregation + JOIN mistakes](#pitfall-group-e--aggregation--join-mistakes)
 - [Pitfall Group F — Accidental Cartesian products](#pitfall-group-f--accidental-cartesian-products)
 - [Pitfall Group G — SARGability and join-column traps](#pitfall-group-g--sargability-and-join-column-traps)
@@ -33,7 +33,7 @@ This one teaches you **how joins break** — the recurring, expensive, silent bu
 show up in production dashboards and interview questions again and again.
 
 A JOIN is the single most common source of **wrong answers that return successfully**.
-Not syntax errors, not crashes: queries that *run*, return rows, and are subtly —
+Not syntax errors, not crashes: queries that _run_, return rows, and are subtly —
 sometimes wildly — wrong. The database will not warn you. A fan-out produces no error.
 A doubled `SUM` produces no error. A `LEFT JOIN` that quietly turned into an
 `INNER JOIN` produces no error. Only humans catch it.
@@ -52,10 +52,10 @@ Each pitfall follows the same shape:
 
 State the grain first — always. These tables drive every example in this section.
 
-- **users** — *one row per user.*
-- **orders** — *one row per order* (a user can have many orders).
-- **order_items** — *one row per line item* (an order can have many items).
-- **payments** — *one row per payment* (an order can have many payments).
+- **users** — _one row per user._
+- **orders** — _one row per order_ (a user can have many orders).
+- **order_items** — _one row per line item_ (an order can have many items).
+- **payments** — _one row per payment_ (an order can have many payments).
 
 ```sql
 CREATE TABLE users (
@@ -110,12 +110,12 @@ INSERT INTO payments (payment_id, order_id, amount) VALUES
 (9004, 103, 24.00);
 ```
 
-| Table | Grain | Fan-out risk example |
-|---|---|---|
-| `users` | 1 row = 1 user | — (driving side, unique) |
-| `orders` | 1 row = 1 order | Ana has 2 orders |
-| `order_items` | 1 row = 1 line item | order 101 has 2 items |
-| `payments` | 1 row = 1 payment | order 101 has 2 payments |
+| Table         | Grain               | Fan-out risk example     |
+| ------------- | ------------------- | ------------------------ |
+| `users`       | 1 row = 1 user      | — (driving side, unique) |
+| `orders`      | 1 row = 1 order     | Ana has 2 orders         |
+| `order_items` | 1 row = 1 line item | order 101 has 2 items    |
+| `payments`    | 1 row = 1 payment   | order 101 has 2 payments |
 
 **Relationship summary:** `users → orders → order_items` is 1 : N at each hop, and
 `orders → payments` is 1 : N as well. Joining across **two** 1:N legs at once

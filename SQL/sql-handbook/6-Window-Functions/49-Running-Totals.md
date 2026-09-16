@@ -36,11 +36,11 @@ SUM(column) OVER(
 ) AS running_total
 ```
 
-| Clause | Purpose |
-|---|---|
-| `SUM(column)` | The value being accumulated |
-| `PARTITION BY` | Resets the running total for each group (optional) |
-| `ORDER BY` | Defines the accumulation order — **required for meaningful running totals** |
+| Clause                                             | Purpose                                                                         |
+| -------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `SUM(column)`                                      | The value being accumulated                                                     |
+| `PARTITION BY`                                     | Resets the running total for each group (optional)                              |
+| `ORDER BY`                                         | Defines the accumulation order — **required for meaningful running totals**     |
 | `ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW` | The frame; this is the default when `ORDER BY` is present, so it can be omitted |
 
 > Common misconception: Many people write `SUM() OVER(ORDER BY ...)` and assume it always produces a running total. It does — but only because the **default frame** is `RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`. This distinction between `ROWS` and `RANGE` matters. See the [Frame Clause Pitfall](#frame-clause-ranges-vs-rows) section.
@@ -112,15 +112,15 @@ ORDER BY order_date, order_id;
 **Expected Result:**
 
 | order_id | order_date | amount | running_total |
-|----------|------------|--------|---------------|
-| 1 | 2024-01-05 | 100.00 | 100.00 |
-| 4 | 2024-01-08 | 300.00 | 400.00 |
-| 7 | 2024-01-10 | 500.00 | 900.00 |
-| 2 | 2024-01-12 | 250.00 | 1150.00 |
-| 5 | 2024-01-20 | 200.00 | 1350.00 |
-| 3 | 2024-02-03 | 150.00 | 1500.00 |
-| 6 | 2024-02-14 | 400.00 | 1900.00 |
-| 8 | 2024-03-01 | 100.00 | 2000.00 |
+| -------- | ---------- | ------ | ------------- |
+| 1        | 2024-01-05 | 100.00 | 100.00        |
+| 4        | 2024-01-08 | 300.00 | 400.00        |
+| 7        | 2024-01-10 | 500.00 | 900.00        |
+| 2        | 2024-01-12 | 250.00 | 1150.00       |
+| 5        | 2024-01-20 | 200.00 | 1350.00       |
+| 3        | 2024-02-03 | 150.00 | 1500.00       |
+| 6        | 2024-02-14 | 400.00 | 1900.00       |
+| 8        | 2024-03-01 | 100.00 | 2000.00       |
 
 ---
 
@@ -145,15 +145,15 @@ ORDER BY customer_id, order_date, order_id;
 **Expected Result:**
 
 | customer_id | order_id | order_date | amount | customer_running_total |
-|-------------|----------|------------|--------|------------------------|
-| 101 | 1 | 2024-01-05 | 100.00 | 100.00 |
-| 101 | 2 | 2024-01-12 | 250.00 | 350.00 |
-| 101 | 3 | 2024-02-03 | 150.00 | 500.00 |
-| 102 | 4 | 2024-01-08 | 300.00 | 300.00 |
-| 102 | 5 | 2024-01-20 | 200.00 | 500.00 |
-| 102 | 6 | 2024-02-14 | 400.00 | 900.00 |
-| 103 | 7 | 2024-01-10 | 500.00 | 500.00 |
-| 103 | 8 | 2024-03-01 | 100.00 | 600.00 |
+| ----------- | -------- | ---------- | ------ | ---------------------- |
+| 101         | 1        | 2024-01-05 | 100.00 | 100.00                 |
+| 101         | 2        | 2024-01-12 | 250.00 | 350.00                 |
+| 101         | 3        | 2024-02-03 | 150.00 | 500.00                 |
+| 102         | 4        | 2024-01-08 | 300.00 | 300.00                 |
+| 102         | 5        | 2024-01-20 | 200.00 | 500.00                 |
+| 102         | 6        | 2024-02-14 | 400.00 | 900.00                 |
+| 103         | 7        | 2024-01-10 | 500.00 | 500.00                 |
+| 103         | 8        | 2024-03-01 | 100.00 | 600.00                 |
 
 ---
 
@@ -176,12 +176,12 @@ ORDER BY txn_date, txn_id;
 
 **Expected Result:**
 
-| txn_id | txn_date | txn_amount | running_balance |
-|--------|----------|------------|-----------------|
-| 1 | 2024-01-01 | 500.00 | 500.00 |
-| 2 | 2024-01-03 | -200.00 | 300.00 |
-| 3 | 2024-01-05 | 100.00 | 400.00 |
-| 4 | 2024-01-08 | -350.00 | 50.00 |
+| txn_id | txn_date   | txn_amount | running_balance |
+| ------ | ---------- | ---------- | --------------- |
+| 1      | 2024-01-01 | 500.00     | 500.00          |
+| 2      | 2024-01-03 | -200.00    | 300.00          |
+| 3      | 2024-01-05 | 100.00     | 400.00          |
+| 4      | 2024-01-08 | -350.00    | 50.00           |
 
 ---
 
@@ -224,15 +224,15 @@ ORDER BY order_date, order_id;
 **Expected Result:**
 
 | order_id | order_date | amount | last_3_orders_total |
-|----------|------------|--------|----------------------|
-| 1 | 2024-01-05 | 100.00 | 100.00 |
-| 4 | 2024-01-08 | 300.00 | 400.00 |
-| 7 | 2024-01-10 | 500.00 | 900.00 |
-| 2 | 2024-01-12 | 250.00 | 1050.00 |
-| 5 | 2024-01-20 | 200.00 | 950.00 |
-| 3 | 2024-02-03 | 150.00 | 600.00 |
-| 6 | 2024-02-14 | 400.00 | 750.00 |
-| 8 | 2024-03-01 | 100.00 | 650.00 |
+| -------- | ---------- | ------ | ------------------- |
+| 1        | 2024-01-05 | 100.00 | 100.00              |
+| 4        | 2024-01-08 | 300.00 | 400.00              |
+| 7        | 2024-01-10 | 500.00 | 900.00              |
+| 2        | 2024-01-12 | 250.00 | 1050.00             |
+| 5        | 2024-01-20 | 200.00 | 950.00              |
+| 3        | 2024-02-03 | 150.00 | 600.00              |
+| 6        | 2024-02-14 | 400.00 | 750.00              |
+| 8        | 2024-03-01 | 100.00 | 650.00              |
 
 ### Moving Average (Last 3 Orders)
 
@@ -293,10 +293,10 @@ ORDER BY order_date, order_id;
 Both rows on `2024-01-05` see each other in the frame because `RANGE` treats them as a group. The running total for **both** rows includes both amounts:
 
 | order_id | order_date | amount | range_running_total |
-|----------|------------|--------|----------------------|
-| 1 | 2024-01-05 | 100.00 | 500.00 |
-| 9 | 2024-01-05 | 150.00 | 500.00 |
-| 10 | 2024-01-05 | 250.00 | 500.00 |
+| -------- | ---------- | ------ | ------------------- |
+| 1        | 2024-01-05 | 100.00 | 500.00              |
+| 9        | 2024-01-05 | 150.00 | 500.00              |
+| 10       | 2024-01-05 | 250.00 | 500.00              |
 
 **ROWS behavior (explicit):**
 
@@ -316,10 +316,10 @@ ORDER BY order_date, order_id;
 ```
 
 | order_id | order_date | amount | rows_running_total |
-|----------|------------|--------|---------------------|
-| 1 | 2024-01-05 | 100.00 | 100.00 |
-| 9 | 2024-01-05 | 150.00 | 250.00 |
-| 10 | 2024-01-05 | 250.00 | 500.00 |
+| -------- | ---------- | ------ | ------------------ |
+| 1        | 2024-01-05 | 100.00 | 100.00             |
+| 9        | 2024-01-05 | 150.00 | 250.00             |
+| 10       | 2024-01-05 | 250.00 | 500.00             |
 
 > Production pitfall: If your `ORDER BY` column has many ties and you use the default `RANGE` frame, you may get unexpected "jumps" in your running total. Always add a **tiebreaker** column (like `order_id`) to the `ORDER BY` clause, or explicitly use `ROWS`.
 
@@ -346,8 +346,8 @@ ORDER BY order_date;
 ```
 
 | order_id | order_date | amount | running_total |
-|----------|------------|--------|---------------|
-| 11 | 2024-01-15 | NULL | NULL |
+| -------- | ---------- | ------ | ------------- |
+| 11       | 2024-01-15 | NULL   | NULL          |
 
 > **All subsequent rows in the running total will also be NULL** because `SUM(anything + NULL) = NULL`.
 
@@ -367,8 +367,8 @@ ORDER BY order_date;
 ```
 
 | order_id | order_date | amount | running_total |
-|----------|------------|--------|---------------|
-| 11 | 2024-01-15 | 0.00 | 0.00 |
+| -------- | ---------- | ------ | ------------- |
+| 11       | 2024-01-15 | 0.00   | 0.00          |
 
 > NULL behavior: `SUM()` ignores NULLs when aggregating a group, but in a window function with `ORDER BY`, a NULL in the value column causes the entire running total to become NULL from that row onward. This is because the frame accumulation includes the current row, and `SUM(accumulated, NULL) = NULL`.
 
@@ -394,6 +394,7 @@ ORDER BY o1.order_date, o1.order_id;
 ```
 
 **Problems:**
+
 - Executes the subquery **once per row** — O(n²) in the worst case
 - Hard to read
 - Error-prone with date logic
@@ -415,8 +416,9 @@ ORDER BY order_date, order_id;
 ```
 
 **Why it's better:**
+
 - Single pass over the data (or sort + single pass)
-- Declarative — you say *what* you want, not *how* to compute it
+- Declarative — you say _what_ you want, not _how_ to compute it
 - Optimizer-friendly
 - Readable
 
@@ -437,6 +439,7 @@ ORDER BY a.order_date, a.order_id;
 ```
 
 **Problems:**
+
 - Multiplies rows before aggregation
 - Very expensive on large datasets
 - Unnecessarily complex
@@ -470,13 +473,13 @@ With `ROWS` frame, the accumulator is a simple running sum. With `RANGE` frame, 
 
 ### What Affects Performance
 
-| Factor | Impact |
-|---|---|
-| `PARTITION BY` columns | Partitions data; fewer rows per partition = faster accumulation |
-| `ORDER BY` columns | Requires sorting; indexes on these columns can avoid a sort operation |
-| `ROWS` vs `RANGE` | `RANGE` may require additional work to handle ties |
-| Data volume | Window functions are generally O(n log n) due to sorting |
-| Indexes | A composite index on `(partition_cols, order_cols, value_col)` can provide a **covering index** |
+| Factor                 | Impact                                                                                          |
+| ---------------------- | ----------------------------------------------------------------------------------------------- |
+| `PARTITION BY` columns | Partitions data; fewer rows per partition = faster accumulation                                 |
+| `ORDER BY` columns     | Requires sorting; indexes on these columns can avoid a sort operation                           |
+| `ROWS` vs `RANGE`      | `RANGE` may require additional work to handle ties                                              |
+| Data volume            | Window functions are generally O(n log n) due to sorting                                        |
+| Indexes                | A composite index on `(partition_cols, order_cols, value_col)` can provide a **covering index** |
 
 ### Index Recommendation
 
@@ -486,6 +489,7 @@ ON orders (customer_id, order_date, order_id, amount);
 ```
 
 This index can:
+
 - Avoid the sort for `PARTITION BY customer_id ORDER BY order_date, order_id`
 - Serve as a covering index (no table lookup needed)
 
@@ -503,13 +507,13 @@ This index can:
 
 ## Comparison: Running Total Approaches
 
-| Approach | Readability | Performance | Handles PARTITION BY | Handles NULLs | Recommended |
-|---|---|---|---|---|---|
-| `SUM() OVER(ORDER BY ...)` | Excellent | Excellent | Yes | With COALESCE | Yes |
-| Correlated subquery | Poor | Poor (O(n²)) | Verbose | Manual | No |
-| Self-join + GROUP BY | Poor | Poor | Verbose | Manual | No |
-| CTE + lateral join | Moderate | Moderate | Verbose | Manual | Sometimes |
-| Procedural loop | Poor | Poor | Verbose | Manual | No |
+| Approach                   | Readability | Performance  | Handles PARTITION BY | Handles NULLs | Recommended |
+| -------------------------- | ----------- | ------------ | -------------------- | ------------- | ----------- |
+| `SUM() OVER(ORDER BY ...)` | Excellent   | Excellent    | Yes                  | With COALESCE | Yes         |
+| Correlated subquery        | Poor        | Poor (O(n²)) | Verbose              | Manual        | No          |
+| Self-join + GROUP BY       | Poor        | Poor         | Verbose              | Manual        | No          |
+| CTE + lateral join         | Moderate    | Moderate     | Verbose              | Manual        | Sometimes   |
+| Procedural loop            | Poor        | Poor         | Verbose              | Manual        | No          |
 
 ---
 
@@ -618,21 +622,25 @@ GREATEST(
 ## Database-Specific Notes
 
 > **PostgreSQL**
+>
 > - Supports `ROWS`, `GROUPS`, and `RANGE` frame types
 > - `GROUPS` frame (PostgreSQL 11+) groups tied rows then counts groups
 > - Default frame with `ORDER BY`: `RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`
 
 > **MySQL 8.0+**
+>
 > - Supports `ROWS` and `RANGE` frames
 > - Default frame with `ORDER BY`: `RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`
 > - Does not support `GROUPS` frame
 
 > **SQL Server**
+>
 > - Supports `ROWS` and `RANGE` frames
 > - Default frame with `ORDER BY`: `RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`
 > - `EXACT_COUNT_DISTINCT` is not a function — use `COUNT(DISTINCT ...)`
 
 > **Oracle**
+>
 > - Supports `ROWS`, `RANGE`, and `GROUPS` frames
 > - Default frame with `ORDER BY`: `RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`
 > - `SUM() OVER()` without `ORDER BY` returns the entire partition total on every row
@@ -680,28 +688,34 @@ GREATEST(
 14. What happens to the running total if two rows have the same `order_date` and you use `RANGE` frame? What if you use `ROWS` frame?
 
 15. A student writes:
+
 ```sql
 SELECT order_id, SUM(amount) OVER(ORDER BY order_date ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING) AS running_total
 FROM orders;
 ```
+
 Is this a running total? What does it actually compute?
 
 16. Explain why this query does NOT produce a running total:
+
 ```sql
 SELECT order_id, amount, SUM(amount) OVER(ORDER BY amount) AS running_total
 FROM orders;
 ```
+
 What does it produce instead?
 
 ### Output Prediction
 
 17. Given:
+
 ```sql
 CREATE TABLE t (id INT, val INT);
 INSERT INTO t VALUES (1, 10), (2, 20), (3, 20), (4, 30);
 ```
 
 Predict the output of:
+
 ```sql
 SELECT id, val,
     SUM(val) OVER(ORDER BY val ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS rows_total,
@@ -712,10 +726,12 @@ FROM t;
 ### Debugging
 
 18. A developer reports that their running total "jumps" unexpectedly. They show this query:
+
 ```sql
 SELECT order_date, SUM(amount) OVER(ORDER BY order_date) AS running_total
 FROM orders;
 ```
+
 What is likely wrong, and how would you fix it?
 
 ### Performance

@@ -7,7 +7,8 @@ Generated `sql-handbook/1-Fundamentals/08-CASE-Expressions.md` (998 lines). Cove
 - **Database differences**: PostgreSQL, MySQL (`IF()`), SQL Server (`IIF`), Oracle (`DECODE` NULL-equality trap)
 - **Mistakes / pitfalls / performance**: no absolute claims, all verified via `EXPLAIN ANALYZE`; BAD vs BETTER approaches with rationales
 - **50 interview questions** across Beginner / Intermediate / Advanced / Scenario / Tricky / Output-Prediction / Debugging / Performance
-ion)
+  ion)
+
 14. [CASE for Custom Ordering](#case-for-custom-ordering)
 15. [CASE for Validation / Checklist Queries](#case-for-validation--checklist-queries)
 16. [Nested CASE](#nested-case)
@@ -23,11 +24,11 @@ ion)
 
 ## What This Section Covers
 
-`CASE` is SQL's **conditional expression** — the closest thing SQL has to an `if / else if / else` statement in other programming languages. It lets you evaluate a condition and return different values depending on the outcome, all *within a single SQL statement*.
+`CASE` is SQL's **conditional expression** — the closest thing SQL has to an `if / else if / else` statement in other programming languages. It lets you evaluate a condition and return different values depending on the outcome, all _within a single SQL statement_.
 
 Unlike imperative `if` statements, `CASE` is **an expression**: it always produces exactly one value, and it can appear almost anywhere an expression is allowed — `SELECT`, `WHERE`, `ORDER BY`, `GROUP BY`, `HAVING`, `ON`, and even inside aggregate functions.
 
-> **Grain reminder:** `CASE` never changes the *number of rows* a query returns by itself. It transforms values *within* each row. When you combine `CASE` with aggregates, the grain you asked about comes from the aggregate, not the `CASE`.
+> **Grain reminder:** `CASE` never changes the _number of rows_ a query returns by itself. It transforms values _within_ each row. When you combine `CASE` with aggregates, the grain you asked about comes from the aggregate, not the `CASE`.
 
 ---
 
@@ -37,23 +38,23 @@ Unlike imperative `if` statements, `CASE` is **an expression**: it always produc
 
 Three core facts you must internalize:
 
-| Fact | Detail |
-|------|--------|
+| Fact                                 | Detail                                                                                   |
+| ------------------------------------ | ---------------------------------------------------------------------------------------- |
 | It is an expression, not a statement | It returns a single value. It cannot execute multiple actions like a flow-control block. |
-| It evaluates in document order | Conditions are checked **top-to-bottom**. The first `WHEN` that is true wins. |
-| It stops at the first match | Once a `WHEN` matches, later `WHEN` clauses are not evaluated. |
+| It evaluates in document order       | Conditions are checked **top-to-bottom**. The first `WHEN` that is true wins.            |
+| It stops at the first match          | Once a `WHEN` matches, later `WHEN` clauses are not evaluated.                           |
 
 ---
 
 ## The Two Forms: Searched CASE vs Simple CASE
 
-| Aspect | Searched CASE | Simple CASE |
-|--------|---------------|-------------|
-| Syntax | `CASE WHEN <condition> THEN <expr> ...` | `CASE <expr> WHEN <value> THEN <expr> ...` |
-| Condition | Any boolean expression (comparisons, `LIKE`, `IN`, subqueries, etc.) | Equality comparison `=` only |
-| Flexibility | Works with ranges, `NULL`, complex logic, function calls in the condition | Only tests whether an expression equals a literal or expression |
-| NULL handling | You explicitly write `IS NULL` | `WHEN NULL` never matches (see [NULL Behavior](#null-behavior)) |
-| When to prefer | Almost always | Only when matching simple known values |
+| Aspect         | Searched CASE                                                             | Simple CASE                                                     |
+| -------------- | ------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Syntax         | `CASE WHEN <condition> THEN <expr> ...`                                   | `CASE <expr> WHEN <value> THEN <expr> ...`                      |
+| Condition      | Any boolean expression (comparisons, `LIKE`, `IN`, subqueries, etc.)      | Equality comparison `=` only                                    |
+| Flexibility    | Works with ranges, `NULL`, complex logic, function calls in the condition | Only tests whether an expression equals a literal or expression |
+| NULL handling  | You explicitly write `IS NULL`                                            | `WHEN NULL` never matches (see [NULL Behavior](#null-behavior)) |
+| When to prefer | Almost always                                                             | Only when matching simple known values                          |
 
 > **Interview trap:** Many candidates reach for the simple form and write `CASE status WHEN NULL THEN ...` expecting it to work. It won't — a simple `CASE` compares with `=`, and `x = NULL` is `NULL` (unknown), never `TRUE`. You must use the searched form (`WHEN status IS NULL`) or `CASE NULL WHEN ...` techniques described later.
 
@@ -114,29 +115,29 @@ All examples in this section use the following tables unless stated otherwise.
 
 ### orders
 
-| order_id | customer_id | status      | total     | order_date  |
-|----------|-------------|-------------|-----------|-------------|
-| 1001     | 1           | shipped     | 120.50    | 2024-01-05  |
-| 1002     | 2           | pending     | 45.00     | 2024-01-07  |
-| 1003     | 1           | delivered   | 310.00    | 2024-01-12  |
-| 1004     | 3           | cancelled   | 89.99     | 2024-01-15  |
-| 1005     | 2           | pending     | NULL      | 2024-02-01  |
-| 1006     | 4           | returned    | 200.00    | 2024-02-09  |
-| 1007     | 5           | shipped     | 75.25     | 2024-02-14  |
-| 1008     | 2           | NULL        | 40.00     | 2024-03-01  |
+| order_id | customer_id | status    | total  | order_date |
+| -------- | ----------- | --------- | ------ | ---------- |
+| 1001     | 1           | shipped   | 120.50 | 2024-01-05 |
+| 1002     | 2           | pending   | 45.00  | 2024-01-07 |
+| 1003     | 1           | delivered | 310.00 | 2024-01-12 |
+| 1004     | 3           | cancelled | 89.99  | 2024-01-15 |
+| 1005     | 2           | pending   | NULL   | 2024-02-01 |
+| 1006     | 4           | returned  | 200.00 | 2024-02-09 |
+| 1007     | 5           | shipped   | 75.25  | 2024-02-14 |
+| 1008     | 2           | NULL      | 40.00  | 2024-03-01 |
 
 **Grain:** One row = one order. `status` may be `NULL` if the order has not been assigned a status yet. `total` may be `NULL` if the invoice has not been finalized.
 
 ### employees
 
-| id | name    | department_id | salary  | performance_rating | leave_days_used |
-|----|---------|---------------|---------|--------------------|-----------------|
-| 1  | Alice   | 1             | 95000   | 5                  | 12              |
-| 2  | Bob     | 1             | 72000   | 3                  | 25              |
-| 3  | Charlie | 2             | 88000   | 4                  | 8               |
-| 4  | Diana   | 2             | 67000   | NULL               | 30              |
-| 5  | Eve     | 3             | 110000  | 5                  | 15              |
-| 6  | Frank   | NULL          | 55000   | 2                  | 6               |
+| id  | name    | department_id | salary | performance_rating | leave_days_used |
+| --- | ------- | ------------- | ------ | ------------------ | --------------- |
+| 1   | Alice   | 1             | 95000  | 5                  | 12              |
+| 2   | Bob     | 1             | 72000  | 3                  | 25              |
+| 3   | Charlie | 2             | 88000  | 4                  | 8               |
+| 4   | Diana   | 2             | 67000  | NULL               | 30              |
+| 5   | Eve     | 3             | 110000 | 5                  | 15              |
+| 6   | Frank   | NULL          | 55000  | 2                  | 6               |
 
 **Grain:** One row = one employee. `performance_rating` may be `NULL` (no review yet). `department_id` may be `NULL` (not assigned).
 
@@ -161,20 +162,20 @@ ORDER BY order_id;
 
 **Expected result (note the `NULL` total):**
 
-| order_id | total   | order_size |
-|----------|---------|------------|
-| 1001     | 120.50  | medium     |
-| 1002     | 45.00   | small      |
-| 1003     | 310.00  | large      |
-| 1004     | 89.99   | small      |
-| 1005     | NULL    | NULL       |
-| 1006     | 200.00  | medium     |
-| 1007     | 75.25   | small      |
-| 1008     | 40.00   | small      |
+| order_id | total  | order_size |
+| -------- | ------ | ---------- |
+| 1001     | 120.50 | medium     |
+| 1002     | 45.00  | small      |
+| 1003     | 310.00 | large      |
+| 1004     | 89.99  | small      |
+| 1005     | NULL   | NULL       |
+| 1006     | 200.00 | medium     |
+| 1007     | 75.25  | small      |
+| 1008     | 40.00  | small      |
 
 **Why the `NULL` row returned `NULL`:** `total < 100` with `total = NULL` evaluates to `UNKNOWN`, not `TRUE` or `FALSE`. The first two `WHEN`s are skipped, and with no `ELSE`, the expression falls through to `NULL`.
 
-> **Common misconception:** "NULL falls into the ELSE." It does not — `ELSE` is only reached after no `WHEN` *matched*. A `NULL` comparison produces `UNKNOWN`, which is treated as *not matched*, and if there is no `ELSE`, the result is `NULL`. If you want `NULL` to get a bucket, write the condition explicitly: `WHEN total IS NULL THEN 'unknown'`.
+> **Common misconception:** "NULL falls into the ELSE." It does not — `ELSE` is only reached after no `WHEN` _matched_. A `NULL` comparison produces `UNKNOWN`, which is treated as _not matched_, and if there is no `ELSE`, the result is `NULL`. If you want `NULL` to get a bucket, write the condition explicitly: `WHEN total IS NULL THEN 'unknown'`.
 
 ### Example 2 — Mapping known values (simple CASE)
 
@@ -193,16 +194,16 @@ ORDER BY order_id;
 
 **Expected result (order 1008 has `status = NULL`):**
 
-| order_id | status     | status_code |
-|----------|------------|-------------|
-| 1001     | shipped    | S           |
-| 1002     | pending    | U           |
-| 1003     | delivered  | D           |
-| 1004     | cancelled  | CLOSED      |
-| 1005     | pending    | U           |
-| 1006     | returned   | CLOSED      |
-| 1007     | shipped    | S           |
-| 1008     | NULL       | CLOSED      |
+| order_id | status    | status_code |
+| -------- | --------- | ----------- |
+| 1001     | shipped   | S           |
+| 1002     | pending   | U           |
+| 1003     | delivered | D           |
+| 1004     | cancelled | CLOSED      |
+| 1005     | pending   | U           |
+| 1006     | returned  | CLOSED      |
+| 1007     | shipped   | S           |
+| 1008     | NULL      | CLOSED      |
 
 > **Notice:** Order 1008's `NULL` status lands in `ELSE`, because `NULL = 'pending'` is `UNKNOWN` (skipped), `NULL = 'shipped'` is `UNKNOWN` (skipped), and so on until `ELSE` catches it. This is the opposite of the searched-form behavior above — here `ELSE` IS where `NULL` goes, precisely because no simple `WHEN` can match `NULL`. Keep the two forms straight; this is a classic interview trap.
 
@@ -288,7 +289,7 @@ HAVING SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) > 1;
 **Expected result:**
 
 | customer_id | pending_count |
-|-------------|---------------|
+| ----------- | ------------- |
 | 2           | 2             |
 
 Customer 2 has two orders with status `pending` (orders 1002 and 1005).
@@ -303,7 +304,7 @@ LEFT JOIN departments d
    AND (CASE WHEN d.budget < 350000 THEN 1 ELSE 0 END) = 1;
 ```
 
-> When to put a condition in `ON` vs `WHERE` is subtle — putting it in `ON` preserves rows from the left table even when the join clause fails (it only controls *matching*), while putting it in `WHERE` filters after the join and can convert a `LEFT JOIN` into an inner join. `CASE` in `ON` is rare; prefer plain boolean predicates in `ON`. Cross-reference the JOIN section of this handbook.
+> When to put a condition in `ON` vs `WHERE` is subtle — putting it in `ON` preserves rows from the left table even when the join clause fails (it only controls _matching_), while putting it in `WHERE` filters after the join and can convert a `LEFT JOIN` into an inner join. `CASE` in `ON` is rare; prefer plain boolean predicates in `ON`. Cross-reference the JOIN section of this handbook.
 
 ---
 
@@ -311,14 +312,14 @@ LEFT JOIN departments d
 
 `CASE` interacts with `NULL` in specific, predictable ways:
 
-| Situation | Result | Reason |
-|-----------|--------|--------|
-| Arithmetic/expression in a `WHEN` encounters `NULL` | `UNKNOWN` → `WHEN` skipped | Three-valued logic: comparisons with `NULL` are `UNKNOWN` |
-| Simple form: `CASE x WHEN NULL THEN ...` | Never matches | It translates to `x = NULL`, which is `UNKNOWN` |
-| No `WHEN` matches and no `ELSE` | Returns `NULL` | Fall-through result |
-| `THEN NULL` explicitly written | Returns `NULL` for that branch | Explicit |
-| `ELSE NULL` | Same as omitting `ELSE` | `ELSE NULL` is the default |
-| `WHEN x IS NULL THEN 'unknown'` | Matches | Uses `IS NULL`, not `=` |
+| Situation                                           | Result                         | Reason                                                    |
+| --------------------------------------------------- | ------------------------------ | --------------------------------------------------------- |
+| Arithmetic/expression in a `WHEN` encounters `NULL` | `UNKNOWN` → `WHEN` skipped     | Three-valued logic: comparisons with `NULL` are `UNKNOWN` |
+| Simple form: `CASE x WHEN NULL THEN ...`            | Never matches                  | It translates to `x = NULL`, which is `UNKNOWN`           |
+| No `WHEN` matches and no `ELSE`                     | Returns `NULL`                 | Fall-through result                                       |
+| `THEN NULL` explicitly written                      | Returns `NULL` for that branch | Explicit                                                  |
+| `ELSE NULL`                                         | Same as omitting `ELSE`        | `ELSE NULL` is the default                                |
+| `WHEN x IS NULL THEN 'unknown'`                     | Matches                        | Uses `IS NULL`, not `=`                                   |
 
 ### Making NULL bucketing explicit (the searched form)
 
@@ -335,16 +336,16 @@ FROM orders
 ORDER BY order_id;
 ```
 
-| order_id | total   | order_size |
-|----------|---------|------------|
-| 1001     | 120.50  | medium     |
-| 1002     | 45.00   | small      |
-| 1003     | 310.00  | large      |
-| 1004     | 89.99   | small      |
-| 1005     | NULL    | unknown    |
-| 1006     | 200.00  | medium     |
-| 1007     | 75.25   | small      |
-| 1008     | 40.00   | small      |
+| order_id | total  | order_size |
+| -------- | ------ | ---------- |
+| 1001     | 120.50 | medium     |
+| 1002     | 45.00  | small      |
+| 1003     | 310.00 | large      |
+| 1004     | 89.99  | small      |
+| 1005     | NULL   | unknown    |
+| 1006     | 200.00 | medium     |
+| 1007     | 75.25  | small      |
+| 1008     | 40.00  | small      |
 
 ---
 
@@ -366,14 +367,14 @@ FROM employees;
 
 **Expected result:**
 
-| name    | leave_profile |
-|---------|---------------|
+| name    | leave_profile  |
+| ------- | -------------- | ------------------------------------- |
 | Alice   | moderate_leave |
-| Bob     | high_leave    |
+| Bob     | high_leave     |
 | Charlie | moderate_leave |
-| Diana   | high_leave    |  -- leave_days_used = 30, no NULL here
+| Diana   | high_leave     | -- leave_days_used = 30, no NULL here |
 | Eve     | moderate_leave |
-| Frank   | low_leave     |
+| Frank   | low_leave      |
 
 > Range conditions must be written so the boundaries do not overlap in meaning. `>= 25` comes before `>= 10` because evaluation is top-to-bottom — the first match wins. Writing them in the reverse order would never produce `'high_leave'`.
 
@@ -395,7 +396,7 @@ FROM orders;
 ```
 
 | pending_count | total_count |
-|---------------|-------------|
+| ------------- | ----------- |
 | 2             | 8           |
 
 **Why `COUNT(CASE ... END)` counts only matches:** `COUNT(<expression>)` counts **non-NULL** values. A non-matching row produces `NULL` (no `ELSE`, no `THEN` fires), so it is not counted. A matching row produces `1`, which is counted.
@@ -417,15 +418,15 @@ FROM orders;
 
 The pattern `COUNT(CASE WHEN cond THEN 1 ELSE NULL END)` counts matches, but what about `COUNT(CASE WHEN cond THEN 0 ELSE 1 END)`? That counts **rows where `cond` produced a value at all** — both 0 and 1 are non-NULL, so nothing is truly filtered. Get the semantics right:
 
-| Expression | What it counts |
-|------------|----------------|
-| `COUNT(CASE WHEN c THEN 1 END)` | rows where `c` is true |
+| Expression                             | What it counts                   |
+| -------------------------------------- | -------------------------------- |
+| `COUNT(CASE WHEN c THEN 1 END)`        | rows where `c` is true           |
 | `COUNT(CASE WHEN c THEN 1 ELSE 0 END)` | **all** rows (0 is non-NULL too) |
-| `COUNT(CASE WHEN c THEN NULL END)` | 0 (NULL is not counted) |
-| `SUM(CASE WHEN c THEN 1 ELSE 0 END)` | rows where `c` is true |
-| `AVG(CASE WHEN c THEN amount END)` | average over matching rows only |
+| `COUNT(CASE WHEN c THEN NULL END)`     | 0 (NULL is not counted)          |
+| `SUM(CASE WHEN c THEN 1 ELSE 0 END)`   | rows where `c` is true           |
+| `AVG(CASE WHEN c THEN amount END)`     | average over matching rows only  |
 
-> **Interview trap:** `COUNT(CASE WHEN cond THEN 1 ELSE 0 END)` returns the total row count, not the matched count — because `COUNT` stops at the first non-NULL value *for each row*. Many people trip on this. If you want a count, think "then 1, else nothing." If you want a sum, `then 1 else 0` is fine.
+> **Interview trap:** `COUNT(CASE WHEN cond THEN 1 ELSE 0 END)` returns the total row count, not the matched count — because `COUNT` stops at the first non-NULL value _for each row_. Many people trip on this. If you want a count, think "then 1, else nothing." If you want a sum, `then 1 else 0` is fine.
 
 ---
 
@@ -497,7 +498,7 @@ ORDER BY customer_id;
 **Expected result:**
 
 | customer_id | total_orders | pending | shipped | delivered | cancelled | returned |
-|-------------|--------------|---------|---------|-----------|-----------|----------|
+| ----------- | ------------ | ------- | ------- | --------- | --------- | -------- |
 | 1           | 2            | 0       | 1       | 1         | 0         | 0        |
 | 2           | 3            | 2       | 0       | 0         | 0         | 0        |
 | 3           | 1            | 0       | 0       | 0         | 1         | 0        |
@@ -529,16 +530,16 @@ ORDER BY
 
 **Expected result:**
 
-| order_id | status     |
-|----------|------------|
-| 1004     | cancelled  |
-| 1002     | pending    |
-| 1005     | pending    |
-| 1001     | shipped    |
-| 1007     | shipped    |
-| 1003     | delivered  |
-| 1006     | returned   |
-| 1008     | NULL       |
+| order_id | status    |
+| -------- | --------- |
+| 1004     | cancelled |
+| 1002     | pending   |
+| 1005     | pending   |
+| 1001     | shipped   |
+| 1007     | shipped   |
+| 1003     | delivered |
+| 1006     | returned  |
+| 1008     | NULL      |
 
 `returned` and `NULL` fall in the `ELSE` bucket (5). Within a bucket, ties are ordered by `order_id` (the default index order here).
 
@@ -564,16 +565,16 @@ FROM orders;
 
 **Expected result:**
 
-| order_id | status     | audit_flag                                    |
-|----------|------------|-----------------------------------------------|
-| 1001     | shipped    | ok                                            |
-| 1002     | pending    | ok                                            |
-| 1003     | delivered  | ok                                            |
-| 1004     | cancelled  | suspicious: cancelled but invoiced            |
-| 1005     | pending    | ok                                            |  -- total is NULL, so NOT matched by second branch
-| 1006     | returned   | ok                                            |
-| 1007     | shipped    | ok                                            |
-| 1008     | NULL       | suspicious: no status but charged             |
+| order_id | status    | audit_flag                         |
+| -------- | --------- | ---------------------------------- | ------------------------------------------------- |
+| 1001     | shipped   | ok                                 |
+| 1002     | pending   | ok                                 |
+| 1003     | delivered | ok                                 |
+| 1004     | cancelled | suspicious: cancelled but invoiced |
+| 1005     | pending   | ok                                 | -- total is NULL, so NOT matched by second branch |
+| 1006     | returned  | ok                                 |
+| 1007     | shipped   | ok                                 |
+| 1008     | NULL      | suspicious: no status but charged  |
 
 Order 1005's `total` is `NULL`, so `total > 0` is `UNKNOWN` and the second `WHEN` is skipped. Only genuinely suspicious rows get flagged.
 
@@ -621,14 +622,14 @@ FROM employees;
 
 ### Syntax compatibility
 
-`CASE` is ANSI SQL, so the searched and simple forms work identically in all four engines. What differs is how *other* conditional functions compete with `CASE`:
+`CASE` is ANSI SQL, so the searched and simple forms work identically in all four engines. What differs is how _other_ conditional functions compete with `CASE`:
 
-| Engine | Alternative to CASE | Notes |
-|--------|---------------------|-------|
-| PostgreSQL | `CASE` (native), no big shortcuts | `CASE` used universally; `NULLIF` and `COALESCE` cover special cases |
-| MySQL | `IF(cond, a, b)`, `IFNULL(a, b)`, `CASE` | `IF()` is MySQL-specific and not portable; prefer `CASE` for portability |
-| SQL Server | `IIF(cond, a, b)`, `COALESCE`, `CASE` | `IIF` is a thin synonym for a two-branch `CASE`; `CASE` is preferable for anything more than a single condition |
-| Oracle | `DECODE(expr, v1, r1, ..., default)`, `CASE` | `DECODE` is Oracle-specific, equates `NULL` to `NULL` (differs from CASE !), and is case-sensitive on strings |
+| Engine     | Alternative to CASE                          | Notes                                                                                                           |
+| ---------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| PostgreSQL | `CASE` (native), no big shortcuts            | `CASE` used universally; `NULLIF` and `COALESCE` cover special cases                                            |
+| MySQL      | `IF(cond, a, b)`, `IFNULL(a, b)`, `CASE`     | `IF()` is MySQL-specific and not portable; prefer `CASE` for portability                                        |
+| SQL Server | `IIF(cond, a, b)`, `COALESCE`, `CASE`        | `IIF` is a thin synonym for a two-branch `CASE`; `CASE` is preferable for anything more than a single condition |
+| Oracle     | `DECODE(expr, v1, r1, ..., default)`, `CASE` | `DECODE` is Oracle-specific, equates `NULL` to `NULL` (differs from CASE !), and is case-sensitive on strings   |
 
 ### The big Oracle difference: DECODE treats NULL as equal
 
@@ -729,14 +730,14 @@ WHERE status <> 'cancelled' OR status IS NULL
 
 `CASE` itself is cheap: evaluating a short chain of comparisons is trivial compared to I/O and sorting. The performance question is usually about **what the optimizer can and cannot do around it**, not the cost of `CASE`. Do not assume; verify with `EXPLAIN` on every engine.
 
-| Pattern | Typical cost | What to verify |
-|---------|--------------|----------------|
-| `CASE` in SELECT (simple bucketing) | Cheap per row | Whether it stops the optimizer from using an index for an adjacent `ORDER BY` |
-| `CASE` in WHERE wrapping a column | Can disable index seek | Whether the plan shows an index scan instead of a seek |
-| `CASE` in GROUP BY | Forces computed-value grouping | Whether a sort/hash dominates vs. a pre-computed category column |
-| `CASE` inside aggregates | One pass over matching rows | Whether an index on the *condition column* narrows the scanned set |
-| Long chains of `WHEN` | Linear in branch count | Whether the first-match condition always holds (left-most selectivity) |
-| Custom ORDER BY with CASE | Extra per-row computation | Whether the sort key can leverage an index (almost never can) |
+| Pattern                             | Typical cost                   | What to verify                                                                |
+| ----------------------------------- | ------------------------------ | ----------------------------------------------------------------------------- |
+| `CASE` in SELECT (simple bucketing) | Cheap per row                  | Whether it stops the optimizer from using an index for an adjacent `ORDER BY` |
+| `CASE` in WHERE wrapping a column   | Can disable index seek         | Whether the plan shows an index scan instead of a seek                        |
+| `CASE` in GROUP BY                  | Forces computed-value grouping | Whether a sort/hash dominates vs. a pre-computed category column              |
+| `CASE` inside aggregates            | One pass over matching rows    | Whether an index on the _condition column_ narrows the scanned set            |
+| Long chains of `WHEN`               | Linear in branch count         | Whether the first-match condition always holds (left-most selectivity)        |
+| Custom ORDER BY with CASE           | Extra per-row computation      | Whether the sort key can leverage an index (almost never can)                 |
 
 ### Practical notes
 
@@ -754,7 +755,7 @@ ALTER TABLE orders ADD COLUMN order_size
 CREATE INDEX idx_orders_size ON orders (order_size);
 ```
 
-- **For filtered aggregates, an index on the filter column matters more than anything else.** `SUM(CASE WHEN status = 'x' THEN total END)` scans fewer rows if an index on `status` lets the planner fetch only matching rows (index-only scan in PostgreSQL, covering index elsewhere). *Verify* — a full scan beats a fragile index in many real data distributions.
+- **For filtered aggregates, an index on the filter column matters more than anything else.** `SUM(CASE WHEN status = 'x' THEN total END)` scans fewer rows if an index on `status` lets the planner fetch only matching rows (index-only scan in PostgreSQL, covering index elsewhere). _Verify_ — a full scan beats a fragile index in many real data distributions.
 
 ### The verdict
 
@@ -945,7 +946,7 @@ GROUP BY size;
 
 23. An alerts table has a `severity` column with the domain `{low, medium, high, critical}`. Write a query that sorts alerts "most urgent first" but pins a special `severity = NULL` batch to the very bottom.
 24. A dashboard shows "Avg order value by size bucket" where size buckets are `<100`, `100-299`, `>=300`, plus "unknown". What happens to a `total = NULL` order in each bucket and in the average? Write the query producing exactly 4 clean buckets.
-25. A billing team wants a revenue report that excludes `cancelled` orders but *includes* rows where `total` is not yet set, summing them as 0. Show the query and explain the NULL behavior.
+25. A billing team wants a revenue report that excludes `cancelled` orders but _includes_ rows where `total` is not yet set, summing them as 0. Show the query and explain the NULL behavior.
 26. An audit query must flag orders that are `cancelled` but have a non-NULL `paid_at` date. Write it with `CASE` and then rewrite it without `CASE`. Which would you prefer and why?
 27. Every row of `event_logs` has a `duration_seconds`; some rows have `NULL`. A report needs `slow/fast/unknown`. Write it so slow is `> 60`, fast is `<= 60`, and `NULL` is `unknown`. What happens if you forget the `IS NULL` branch?
 
@@ -977,7 +978,7 @@ For the following queries against the sample `orders` table, write the exact out
 41. This query returns `pending` as 0 for every customer. Fix it:
     `SELECT customer_id, COUNT(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS pending FROM orders GROUP BY customer_id;`
 42. Orders with `NULL` status do not appear in a "status breakdown" report. Where is the silent hole and how do you add an explicit bucket?
-43. A "total revenue excluding cancelled" query returns a number *higher* than "gross revenue". Find the bug: `SELECT SUM(CASE WHEN status <> 'cancelled' THEN NULL ELSE total END)`.
+43. A "total revenue excluding cancelled" query returns a number _higher_ than "gross revenue". Find the bug: `SELECT SUM(CASE WHEN status <> 'cancelled' THEN NULL ELSE total END)`.
 44. Two rows with `value = NULL` disappear from both `WHEN value < 10` and `ELSE`. Explain with three-valued logic why the `ELSE` does not catch them, and propose the corrected `CASE`.
 45. A `CASE` in `ORDER BY` produces a plan with a sort on a computed key, and the query is slow on 40M rows. What design change (indexable) would you propose, and how would you prove it with `EXPLAIN`?
 
