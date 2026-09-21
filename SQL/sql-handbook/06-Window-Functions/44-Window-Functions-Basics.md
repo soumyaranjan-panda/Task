@@ -420,7 +420,7 @@ ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
 | `RANGE`    | Logical values — all rows with the same `ORDER BY` value as current are grouped together |
 
 ```sql
---假设有这些数据 (salary order):
+-- Assume we have these data (salary order):
 -- salary: 100, 200, 200, 300
 
 -- RANGE frame (default):

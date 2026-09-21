@@ -130,7 +130,7 @@ WHERE department IS DISTINCT FROM 'Sales';
 This works correctly. But what if you want to compare two columns to each other?
 
 ```sql
---假设有另一个表
+-- Assume there is another table
 CREATE TABLE employee_assignments (
     employee_id INT,
     assigned_dept VARCHAR(50)

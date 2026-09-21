@@ -1,10 +1,4 @@
-I have a clear picture of the handbook structure and conventions. Section 72 is the first (empty) file in the `9-Optimization` category. Now I'll write the comprehensive section.
-Let me review the file for typos and clean up two artifacts.
-The sample `orders` table lacks the `payment_reference` column used in later examples. Let me make the schema consistent.
-The file's opening was corrupted — the first lines contain stray text and TOC items 1–5 are missing. Let me inspect the exact bytes and fix the file header.
-The file has been corrupted by stray text. Let me read the full state and rebuild it properly.
-The file's top is corrupted. Let me find where the real content starts and rewrite the file correctly.
-(#b-tree-search--step-by-step) 12. [How the Optimizer Decides Whether to Use an Index](#how-the-optimizer-decides-whether-to-use-an-index) 13. [Do Indexes Always Make Queries Faster?](#do-indexes-always-make-queries-faster) 14. [When to Use an Index](#when-to-use-an-index) 15. [When NOT to Use an Index](#when-not-to-use-an-index) 16. [Types of Indexes at a Glance](#types-of-indexes-at-a-glance) 17. [NULL and Indexes](#null-and-indexes) 18. [Indexes and DML — The Write Cost](#indexes-and-dml--the-write-cost) 19. [Indexes and Constraints](#indexes-and-constraints) 20. [Edge Cases](#edge-cases) 21. [BAD vs BETTER Approaches](#bad-vs-better-approaches) 22. [Common Mistakes](#common-mistakes) 23. [Production Pitfalls](#production-pitfalls) 24. [Performance Implications](#performance-implications) 25. [Behavior Differences Across Engines](#behavior-differences-across-engines) 26. [Best Practices](#best-practices) 27. [Real-World Scenario](#real-world-scenario) 28. [Cross-References](#cross-references) 29. [Interview Questions](#interview-questions)
+# 72 — Indexes: Basics
 
 ---
 

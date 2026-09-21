@@ -1,27 +1,6 @@
-Now I have a thorough understanding of the handbook's style and the existing coverage. Let me write Section 83.
-Section 83 — **Index Design Strategy** has been generated (1,334 lines) at `sql-handbook/9-Optimization/83-Index-Design-Strategy.md`.
+# 83 — Index Design Strategy
 
-**Coverage includes:**
-
-- **Strategy framework** — 8-step decision flowchart (collect workload → classify → design → verify → iterate)
-- **Workload collection** — `pg_stat_statements`, `performance_schema`, Query Store, slow query logs
-- **Access pattern analysis** — equality-first/range-later rule with decision matrix
-- **Composite index design** — worked examples for `orders`, `order_items`, `customers`
-- **Covering & partial indexes** — with engine-specific syntax (PostgreSQL `INCLUDE`, MySQL workarounds, SQL Server, Oracle)
-- **Redundant index detection** — queries for PostgreSQL and MySQL, safe removal process
-- **EXPLAIN verification checklist** — full before/after worked example
-- **Data distribution & selectivity** — why the optimizer sometimes ignores indexes
-- **Index-join interaction** — inner-table rule, join+filter patterns
-- **Index-ORDER BY/GROUP BY** — sort avoidance, direction matching
-- **Pagination strategies** — offset-based vs keyset
-- **Expression indexes** — cross-engine syntax
-- **Index-transaction interaction** — lock scope, concurrency
-- **5 edge cases** — wide columns, low-cardinality, implicit casting, expression in ORDER BY, NOT IN + NULL
-- **10 common mistakes**, **5 production pitfalls**, **15 best practices**
-- **Engine comparison table** (8 features across PG/MySQL/SQL Server/Oracle)
-- **Real-world scenario** — e-commerce order system (20M rows, 5 queries, step-by-step design)
-- **44 interview questions** across all 8 categories
-  t of "always create these indexes."\*\* Every workload is different. AOLP (Online Analytical Processing) and OLTP (Online Transaction Processing) need fundamentally different strategies.
+Index design is a workload-driven process, not a list of indexes to create by default. Every workload is different: analytical and transactional systems need fundamentally different strategies.
 - **NOT the same as composite index design** (Section 73). Composite indexes are a tool; strategy decides when and how to use them.
 - **NOT guesswork.** Strategy is grounded in execution plans, workload analysis, and measurement — never intuition.
 - **NOT "add an index and see."** That is cargo-cult tuning. Strategy is systematic.

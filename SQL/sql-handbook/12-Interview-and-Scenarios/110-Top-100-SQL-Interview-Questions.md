@@ -1,26 +1,12 @@
-# 110. Top 100 SQL Interview Questions
+# 110 — Top 100 SQL Interview Questions
 
-> Category: 12-Interview-and-Scenarios · Section 110
-> Cross-references:The content is too large for a single write. I'll write it in chunks.
-Now let me verify the complete file:
-All 100 questions confirmed. Let me verify the section structure and check for any issues:
-Section `110-Top-100-SQL-Interview-Questions.md` generated (3228 lines, exactly 100 questions).
+> Category: Interview and Scenarios. The examples below use a shared schema and emphasize correctness, NULL behavior, and portable alternatives where syntax differs.
 
-**Structure:**
-- **Shared schema** — 6 tables (`departments`, `employees`, `customers`, `orders`, `order_items`, `products`) with grain table, Mermaid ER diagram, full setup SQL, sample data, and memorizable facts
-- **Category 1 — Fundamentals (Q1–15)**: SELECT/JOIN basics, DISTINCT, COUNT, top-N, date/string filtering, GROUP BY/HAVING, self-join, anti-join
-- **Category 2 — NULL & Three-Valued Logic (Q16–25)**: `= NULL`, `NULL = NULL`, `COALESCE`, `NULLIF`, `NOT IN + NULL`, COUNT vs COUNT(column)
-- **Category 3 — JOINs (Q26–40)**: INNER vs LEFT, LEFT-JOIN-to-INNER trap, fan-out, CROSS JOIN, FULL OUTER, semi/anti-join, relational division, self-joins
-- **Category 4 — Subqueries & CTEs (Q41–55)**: scalar/correlated subqueries, CTEs, running totals, relational division, EXISTS vs IN
-- **Category 5 — Aggregation & GROUP BY (Q56–70)**: HAVING, conditional aggregation, date truncation, MoM growth, median across engines
-- **Category 6 — Window Functions (Q71–85)**: ROW_NUMBER/RANK/DENSE_RANK, PARTITION BY, LAG/LEAD, moving averages, FIRST/LAST_VALUE frame trap
-- **Category 7 — Date/Time & String (Q86–92)**: date arithmetic, extraction, day names, CONCAT + COALESCE, LIKE, LENGTH (with PG/MySQL/SQL Server/Oracle variants)
-- **Category 8 — Optimization & Indexing (Q93–100)**: B-tree, composite/covering indexes, SARGability, execution plans (no absolute performance claims)
-- **Best Practices**: 10 habits, rapid-fire mistake table, technique-mapping comparison table
-- **80 practice questions** unanswered: Beginner, Intermediate, Advanced, Scenario Based, Tricky, Output Prediction, Debugging, Performance
+## Shared schema and grain
 
-Every concept includes BAD APPROACH → BETTER APPROACH with expected output, labeled interview traps, production pitfalls, and NULL behavior, consistent with the handbook's style.
-mer | `id`, `name`, `email`, `city`, `created_at` |
+| Table | One row represents | Key columns |
+| --- | --- | --- |
+| `customers` | one customer | `id`, `name`, `email`, `city`, `created_at` |
 | `orders` | one order | `id`, `customer_id`, `order_date`, `total`, `status` |
 | `order_items` | one line item in an order | `id`, `order_id`, `product_id`, `quantity`, `unit_price` |
 | `products` | one product | `id`, `name`, `category`, `price` |

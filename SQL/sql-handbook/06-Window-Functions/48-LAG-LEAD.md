@@ -53,7 +53,7 @@ LEAD( expression [, offset [, default]] ) OVER (
 )
 ```
 
-(PostgreSQL/MySQL also allow the `IGNORE NULLS | RESPECT NULLS` clause; details below.)
+(Oracle and SQL Server support `IGNORE NULLS` / `RESPECT NULLS` variants. PostgreSQL implements only the standard default behavior (`RESPECT NULLS`), and MySQL parses `IGNORE NULLS` but does not support it.)
 
 ### Parameters
 
@@ -65,7 +65,7 @@ LEAD( expression [, offset [, default]] ) OVER (
 
 Three properties worth stating up front:
 
-1. **`ORDER BY` is mandatory** in the window for both functions (all major engines raise a syntax error without it). The `ORDER BY` inside `OVER` defines the logical order used to compute the offset — it is _not_ optional, and it is _not_ the same thing as the query's outer `ORDER BY`.
+1. **Use `ORDER BY` in the window whenever “previous” or “next” has a meaningful order.** Some engines permit `LAG`/`LEAD` without it, but then the physical row order is unspecified and the result is not reliable. The `ORDER BY` inside `OVER` defines the logical order used to compute the offset; it is not the same as the query's outer `ORDER BY`.
 2. `PARTITION BY` is optional. Without it, the whole result set is one partition.
 3. `LAG`/`LEAD` **ignore the window frame** (`ROWS`/`RANGE`). They always walk positions from the start of the partition. Oracle rejects the frame clause for them; PostgreSQL and MySQL permit it but ignore it. Simply don't write one.
 

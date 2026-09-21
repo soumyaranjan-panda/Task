@@ -8,20 +8,12 @@
 
 ### The one-paragraph answer
 
-Conditional aggregation is the technique of putting a `CASE` expression _inside_ an aggregate function (or attaching a `FILTER (WHERE ...)` clause to it) so that each aggregate only considers the rows that satisfy a condition.The corruption is fixed and the grep confirms no other interleavings in section 42 (matches were in unrelated pre-existing files). Let me do a final structure check.
-Section 42 written to `sql-handbook/5-Aggregation/42-Conditional-Aggregation.md` (852 lines), matching the handbook's style:
+Conditional aggregation is the technique of putting a `CASE` expression _inside_ an aggregate function (or attaching a `FILTER (WHERE ...)` clause to it) so that each aggregate only considers the rows that satisfy a condition.
 
-- **Fundamentals** — what/why, three moving parts, the mental model (grain preserved)
-- **Syntax** — ANSI `CASE` form, `FILTER (WHERE ...)` (SQL:2003) with verified dialect support (PostgreSQL/SQLite/DuckDB/BigQuery; Oracle 23ai+; not MySQL/SQL Server), engine shortcuts (`IF`/`IIF`/`DECODE`/`COUNTIF`), and the four count-if spellings
-- **Internal working** — logical position, why NULL-skipping is the core trick, FILTER vs CASE mechanism (verified via PostgreSQL docs/jOOQ benchmark framing), and the `COUNT(DISTINCT ...)` disables-parallel-aggregation detail
-- **Sample tables** — employees/orders/shipments with stated grains
-- **10 worked examples** with verified expected outputs — status matrix, per-department conditional matrix, AVG/percentage (integer-division trap), MIN/MAX, conditional `COUNT(DISTINCT)`, FILTER equivalents, month-as-columns pivot-lite, carrier on-time report, conditional aggregate in `HAVING`
-- **NULL behavior, edge cases (8), common mistakes, production pitfalls, performance** (EXPLAIN-driven, no absolute claims), **comparison tables, and a Mermaid decision flow**
-- **# Interview Questions** across all 8 categories (33 questions, unanswered for practice)
-
-One corruption was introduced during the write (my output text bled into the opening paragraph); I detected and repaired it and verified no other interleavings exist.
-Self-join `employees a JOIN employees b` | Row duplication, fragile |
-| "Share of late shipments by carrier" | `LEFT JOIN` a late-only aggregate | Complexity, NULL-row traps |
+| Business Question                        | Without Conditional Agg                     | Problem with Naive Approach       |
+| ---------------------------------------- | ------------------------------------------- | --------------------------------- |
+| "Hires vs terminations per department"   | Self-join `employees a JOIN employees b`    | Row duplication, fragile           |
+| "Share of late shipments by carrier"     | `LEFT JOIN` a late-only aggregate           | Complexity, NULL-row traps         |
 
 Conditional aggregation answers all of them with **one scan** and no self-joins. That is its reason for being: fewer passes over the same data, fewer moving parts, output already shaped like the report (rows in one column each).
 

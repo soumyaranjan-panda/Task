@@ -193,7 +193,7 @@ Use the decision table below. The idea is to map the **meaning** of the question
 | Page of results | keyset pagination for large sets; OFFSET only for small/throwaway | huge offsets |
 | Zero-filled time series | calendar/generate_series LEFT JOIN to aggregates | — |
 
-> **Remember:** do not make absolute performance claims. `EXISTS` is not "always faster" than `IN`, and a join is not "always faster" than a correlated subquery. The optimizer may rewrite them identically. What IS always true is *semantic*: `EXISTS`/`NOT EXISTS` are safe with NULLs, `IN`/`NOT IN` are not. See [30-IN-vs-EXISTS] and [31-NOT-IN-vs-NOT-EXISTS].
+> **Remember:** do not make absolute performance claims. `EXISTS` is not "always faster" than `IN`, and a join is not "always faster" than a correlated subquery. The optimizer may rewrite them identically. The important NULL distinction is negative membership: `NOT EXISTS` is safe when the inner key can be NULL, whereas `NOT IN` is not. Positive `IN` is safe for filtering matches, but a NULL inner value makes non-matches evaluate to `UNKNOWN`. See [30-IN-vs-EXISTS] and [31-NOT-IN-vs-NOT-EXISTS].
 
 ---
 

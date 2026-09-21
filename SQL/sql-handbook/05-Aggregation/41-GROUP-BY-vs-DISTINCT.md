@@ -8,10 +8,9 @@
 
 ### The one-paragraph answer
 
-`GROUP BY` collapses rows into \*\*groSection 41 written to `sql-handbook/5-Aggregation/41-GROUP-BY-vs-DISTINCT.md`.
+`GROUP BY` collapses rows into groups and lets you apply aggregate functions per group. `DISTINCT` removes duplicate rows but cannot aggregate. They produce the same output only when the `SELECT` list is exactly the `GROUP BY` list and there are no aggregates.
 
-Covered: equivalence rule (`GROUP BY` == `DISTINCT` only when SELECT = GROUP BY list, no aggregates), sample tables with stated grain, NULL bucket and the `COUNT(DISTINCT)` vs grouped-`COUNT(*)` trap, execution-order internals, fan-out/double-counting via JOIN, engine-specific divergences (PostgreSQL functional dependency, MySQL `ONLY_FULL_GROUP_BY`, `DISTINCT ON`, multi-column `COUNT(DISTINCT)`), performance guidance framed around `EXPLAIN` (no absolute claims), comparison tables, a Mermaid decision diagram, BAD vs BETTER approaches, and unanswered practice questions across all 8 levels.
-regate is used. The moment you add `SUM(...)`, `HAVING`, or any column outside the group key, the tools diverge completely: `GROUP BY` aggregates, `DISTINCT` cannot.
+The moment you add `SUM(...)`, `HAVING`, or any column outside the group key, the tools diverge completely: `GROUP BY` aggregates, `DISTINCT` cannot.
 
 ---
 

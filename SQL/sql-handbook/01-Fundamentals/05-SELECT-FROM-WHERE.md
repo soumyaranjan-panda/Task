@@ -387,17 +387,19 @@ This is equivalent to `WHERE department_id IS NULL` but works in a boolean expre
 
 Any arithmetic with NULL produces NULL:
 
+**Any arithmetic with NULL produces NULL.** Take Frank (`id = 6`): his `department_id` is NULL, so arithmetic on that column yields NULL:
+
 ```sql
-SELECT salary, salary + 1000 AS salary_plus_bonus
+SELECT name, department_id, department_id + 100 AS dept_with_bonus
 FROM employees
 WHERE id = 6;
 ```
 
-| salary | salary_plus_bonus |
-| ------ | ----------------- |
-| 55000  | NULL              |
+| name  | department_id | dept_with_bonus |
+| ----- | ------------- | --------------- |
+| Frank | NULL          | NULL            |
 
-Wait — Frank's salary is 55000, not NULL. But what if a column itself is NULL?
+The NULL in `department_id` propagates through the expression. The same is true of literals:
 
 ```sql
 SELECT 100 + NULL AS result;
@@ -478,7 +480,6 @@ WHERE NOT department_id = 1;
 | Charlie | 2             |
 | Diana   | 2             |
 | Eve     | 3             |
-| Frank   | NULL          |
 
 > **Important:** `NOT department_id = 1` does NOT return rows where `department_id` is NULL. `NOT (NULL = 1)` → `NOT (UNKNOWN)` → `UNKNOWN`, which is filtered out.
 

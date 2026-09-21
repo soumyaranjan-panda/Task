@@ -16,16 +16,26 @@
 4. [Case Conversion](#4-case-conversion)
 5. [Trimming & Padding](#5-trimming--padding)
 6. [Concatenation](#6-concatenation)
-7. [ELet me verify a few specific claims I want to be certain about before finalizing.
-   Good — several corrections needed based on live verification. Let me fix them.
-   Now let me verify the fixes are correct and check the overall quality.
-   Let me do one final quality check — scan for obvious issues:
-   Replaced the one-line placeholder with a complete 1,713-line section at `7-Dates-and-Strings/63-String-Functions.md`.
+7. [Extraction & Substrings](#7-extraction--substrings)
+8. [Search & Position](#8-search--position)
+9. [Replacement & Translation](#9-replacement--translation)
+10. [Repeat & Reverse](#10-repeat--reverse)
+11. [Splitting & Parsing](#11-splitting--parsing)
+12. [NULL Behavior (Cross-Database)](#12-null-behavior-cross-database)
+13. [Case Sensitivity & Collation](#13-case-sensitivity--collation)
+14. [Encoding & Unicode Gotchas](#14-encoding--unicode-gotchas)
+15. [Real-World Scenarios](#15-real-world-scenarios)
+16. [Common Mistakes](#16-common-mistakes)
+17. [Comparison Tables](#17-comparison-tables)
+18. [Performance](#18-performance)
+19. [Best Practices](#19-best-practices)
+20. [Interview Questions](#20-interview-questions)
 
-**Structure (20 subsections):** fundamentals, encoding/collation primer, then per-family coverage of length, case conversion, trim/pad, concatenation, substrings, position/search, replace/translate, repeat/reverse, split/parse — each with syntax, dialect matrices, examples, expected output, NULL tables, edge cases, and when to use/avoid. Followed by a cross-database NULL table, collation/equality deep-dive, Unicode gotchas, 8 real-world scenarios (email dedupe, name splitting, phone normalization, PII masking, slugs, version sorting, case-insensitive search), 8 BAD→BETTER mistakes, a DB comparison table, performance section, best practices, and 40 unanswered interview questions across all 8 categories. Includes a Mermaid decision diagram for split functions.
+---
 
-**Accuracy:** Key claims were live-verified against PostgreSQL 17 (NULL propagation in `||` vs `CONCAT`, `REPLACE` NULL behavior, negative `LEFT`, byte-vs-char `LENGTH`, `SPLIT_PART` returning `''` for missing parts, `LPAD` truncation, `'1'+'1'` ambiguity), and the edits reflect those verified results. MySQL/SQL Server/Oracle differences are flagged with labeled callouts and comparison tables rather than unverified specifics.
-output row represent? 2. Is the column `NULL` allowed, and what should the result be when it is? 3. Do I mean characters or bytes? 4. Is the database comparison case-sensitive in this collation? 5. Does the function name mean the same thing in my database? (It often does not.)
+## 1. Why String Functions Matter
+
+Every output row must answer five questions: What does each output row represent? Is the column NULL allowed, and what should the result be when it is? Do I mean characters or bytes? Is the database comparison case-sensitive in this collation? Does the function name mean the same thing in my database? (It often does not.)
 
 > **See also:** Data types (section on String Types), `COALESCE`/`NULLIF`
 > (COALESCE-NULLIF), NULL deep-dive, `LIKE` operators (Filtering Operators),

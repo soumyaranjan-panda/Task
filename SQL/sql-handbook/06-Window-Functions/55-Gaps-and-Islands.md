@@ -2,19 +2,7 @@
 
 ## What It Is
 
-"Gaps and Islands" is a family of problems about \*\*consecuThe file exists but is empty, and I've reviewed the conventions of the sibling section. Now I'll write the comprehensive Gaps and Islands section.
-Let me verify the file integrity — balanced code fences and structure.
-Section `55-Gaps-and-Islands.md` is complete (904 lines). Coverage:
-
-- **Fundamentals** — gap/island vocabulary, the "two counters, constant difference" core insight, grain rules, decision flowchart
-- **4 techniques** — ROW_NUMBER subtraction, LAG neighbor check, running-SUM flag for categorical/state islands, and gap detection (numbers table + `generate_series`/`EXCEPT`)
-- **Sample tables** — `user_logins`, `seq_numbers`, `team_games` with stated grain, plus duplicates and NULLs baked in deliberately
-- **Scenarios** — streaks, price validity merging, hotel availability, churn recapture; BAD vs BETTER pairs throughout
-- **NULL behavior, 8 edge cases, 8 mistakes, 6 production pitfalls**
-- **Dialect table** — `DATEADD`/`DATE_SUB`/`-rn`/interval arithmetic for PG/MySQL/SQL Server/Oracle; DST and month-end warnings
-- **Performance** — plan-sign tables, sort-elimination index, no absolute claims, `EXPLAIN ANALYZE` guidance
-- **34 interview questions** across Beginner → Performance, answers withheld; cross-references to sections 44, 46, 48, 49, 73, 78, and NULL/aggregation sections.
-  cutive rows together" sounds like it should need procedural code — a cursor, a loop, or application-side processing. SQL is set-based, so early attempts were either:
+"Gaps and Islands" is a family of problems about **consecutive rows** — finding streaks, detecting breaks, and merging contiguous ranges. These problems sound like they should need procedural code — a cursor, a loop, or application-side processing. SQL is set-based, so early attempts were either:
 
 - **Barely correct:** self-joins that explode combinatorially.
 - **Fragile:** relying on `IDENTITY`/`AUTO_INCREMENT` gaps being absent.

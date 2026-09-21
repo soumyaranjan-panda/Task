@@ -1,27 +1,12 @@
 # MoM, YoY & Rolling Metrics
 
-> **What it is:** Period-over-period comparison and rolling-window metrics — the core building blocks of business dashboards, financial reporting, and KNow let me check for any other stray injected text throughout the file.
-> The header is fixed and no stray text remains. Let me verify code fence balance and overall structure.
-> All fences are balanced (45 open / 45 close). Let me add the "partition-by-month trick" example referenced in the comparison table but not yet shown in the body.
-> Section 62 written to `62-MoM-YoY-Rolling-Metrics.md` (1,275 lines, Markdown only).
+> **What it is:** Period-over-period comparison and rolling-window metrics — the core building blocks of business dashboards, financial reporting, and KPI tracking.
 
-**Coverage:**
+---
 
-- **Fundamentals & vocabulary** — MoM/YoY/QoQ/WoW/DoD, MTD/QTD/YTD, TTM, growth rate; 2 mermaid diagrams
-- **Sample tables** with explicit grain (`monthly_revenue` 1 row/month; `orders` 1 row/order)
-- **MoM** — `LAG`, self-join, raw-order-to-month, multi-grain table
-- **YoY** — `LAG(...,12)` vs `INTERVAL '1 year'` self-join vs composite-key `EXTRACT` self-join, plus the gap-robust "partition-by-month" trick; MoM-vs-YoY seasonality with worked example
-- **QoQ** + cross-engine quarter truncation (PG/MySQL/SQL Server/Oracle)
-- **Rolling metrics** — TTM, 3-month MA, rolling max/min, TTM growth, and the non-additive rolling `COUNT(DISTINCT)` trap
-- **Period-to-date** — MTD/QTD/YTD and YTD-vs-prior-year-YTD
-- **Growth math** — `NULLIF` guards, growth-from-zero semantics, compound MoM via `LN`/`EXP`, CAGR
-- **Gap filling** for all 4 engines; **fiscal calendars** (Apr-start FY, 4-4-5)
-- **Internal working** of `LAG`, self-join, and rolling frames; `NULL`/edge-case table
-- **BAD vs BETTER** in 5 spots; common mistakes; production pitfalls
-- **Performance** — no absolute claims, `EXPLAIN` verification tables per engine, suggested indexes
-- **Comparison tables** — LAG vs self-join, MoM vs YoY vs TTM, `ROWS` vs `RANGE` (with engine support notes)
-- **40 interview questions** across all 8 required categories, left unanswered as practice
-  oM, YoY, and rolling metrics provide that context.
+## Fundamentals
+
+Period-over-period comparisons answer the question: "How are we doing compared to before?" MoM, YoY, and rolling metrics provide that context.
 
 | Business Question                                  | Metric Type   | What It Compares                         |
 | -------------------------------------------------- | ------------- | ---------------------------------------- |

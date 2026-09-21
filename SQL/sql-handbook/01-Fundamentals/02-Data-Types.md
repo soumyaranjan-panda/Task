@@ -4,10 +4,30 @@
 
 ## Table of Contents
 
-1. [What AreSection generated in `sql-handbook/1-Fundamentals/02-Data-Types.md`.
-
-Covers: numeric (INT/DECIMAL/FLOAT, integer division, money problem), strings (CHAR/VARCHAR/TEXT, collation), dates/times (TIMESTAMP vs TIMESTAMPTZ, timezone issues, boundary bugs), BOOLEAN, binary, JSON/JSONB, UUID, ARRAY, ENUM/SET, casting, implicit conversion, sargability, NULL/default interplay, identity columns, and DB-specific differences (PostgreSQL/MySQL/SQL Server/Oracle) — plus BAD vs BETTER examples, comparison tables, edge cases, and the full 8-part Interview Questions section.
--the-decimal-vs-float-problem) 14. [Type Conversion and Casting](#type-conversion-and-casting) 15. [Implicit Type Conversion (Implicit Cast)](#implicit-type-conversion-implicit-cast) 16. [Sargability and Data Types](#sargability-and-data-types) 17. [NULL and Data Types](#null-and-data-types) 18. [Identity / Auto-Increment](#identity--auto-increment) 19. [Column Defaults](#column-defaults) 20. [Common Mistakes](#common-mistakes) 21. [Production Pitfalls](#production-pitfalls) 22. [Performance Implications](#performance-implications) 23. [Comparison Tables](#comparison-tables) 24. [Interview Questions](#interview-questions)
+1. [What Are Data Types?](#what-are-data-types)
+2. [Why Data Types Matter](#why-data-types-matter)
+3. [Sample Schema](#sample-schema)
+4. [Numeric Types](#numeric-types)
+5. [Character / String Types](#character--string-types)
+6. [Date and Time Types](#date-and-time-types)
+7. [Boolean Type](#boolean-type)
+8. [Binary Types](#binary-types)
+9. [JSON and Structured Types](#json-and-structured-types)
+10. [UUID Type](#uuid-type)
+11. [ARRAY Type](#array-type)
+12. [ENUM and SET Types](#enum-and-set-types)
+13. [Money and Currency — The DECIMAL vs FLOAT Problem](#money-and-currency--the-decimal-vs-float-problem)
+14. [Type Conversion and Casting](#type-conversion-and-casting)
+15. [Implicit Type Conversion (Implicit Cast)](#implicit-type-conversion-implicit-cast)
+16. [Sargability and Data Types](#sargability-and-data-types)
+17. [NULL and Data Types](#null-and-data-types)
+18. [Identity / Auto-Increment](#identity--auto-increment)
+19. [Column Defaults](#column-defaults)
+20. [Common Mistakes](#common-mistakes)
+21. [Production Pitfalls](#production-pitfalls)
+22. [Performance Implications](#performance-implications)
+23. [Comparison Tables](#comparison-tables)
+24. [Interview Questions](#interview-questions)
 
 ---
 
@@ -246,7 +266,7 @@ SELECT
 
 #### DECIMAL Storage
 
-Internally, databases store DECIMAL in binary-coded decimal (BCD) format. Each group of 9 digits is packed into 4 bytes. This is slower than native binary arithmetic but guarantees exact results.
+Internally, databases pack DECIMAL digits using a compact binary-coded-decimal representation (e.g. SQL Server and MySQL pack roughly 9 digits per 4 bytes; PostgreSQL uses a base-10000 format storing ~4 digits per 2 bytes plus a few bytes of header). This is slower than native binary arithmetic but guarantees exact results.
 
 ### Floating-Point / Approximate Numeric Types
 
@@ -255,8 +275,12 @@ Internally, databases store DECIMAL in binary-coded decimal (BCD) format. Each g
 | `REAL` / `FLOAT`              | 4 bytes | ~7 decimal digits  | Scientific data, large ranges, non-financial |
 | `DOUBLE PRECISION` / `DOUBLE` | 8 bytes | ~15 decimal digits | High-precision scientific data               |
 
+> **PostgreSQL:** the bare `FLOAT` is a synonym for `DOUBLE PRECISION` (8 bytes, ~15 digits). To get the 4-byte `REAL`, write `REAL` (or `FLOAT(24)`). The storage/digits in the table apply to `REAL` and to `FLOAT` in MySQL.
+
 ```sql
--- FLOAT: 4 bytes, approximately 7 significant digits
+-- FLOAT as a 4-byte value is database-dependent:
+-- MySQL:    FLOAT = 4 bytes, ~7 digits
+-- PostgreSQL: FLOAT defaults to DOUBLE PRECISION (8 bytes) — use REAL for 4 bytes
 CREATE TABLE measurements (
     reading_id INT PRIMARY KEY,
     temperature FLOAT NOT NULL,
@@ -265,13 +289,14 @@ CREATE TABLE measurements (
 ```
 
 ```sql
-SELECT
-    0.1 + 0.2 AS result;
-    -- FLOAT:     0.30000000000000004 (NOT 0.3)
-    -- DECIMAL:   0.3 (exact)
+-- PostgreSQL: 0.1 and 0.2 are NUMERIC literals, so the result is exact:
+SELECT 0.1 + 0.2 AS result;     -- 0.3 (exact, numeric)
+
+-- But cast to float (FLOAT/DOUBLE) and IEEE 754 kicks in:
+SELECT 0.1::FLOAT8 + 0.2::FLOAT8 AS result;   -- 0.30000000000000004
 ```
 
-> **Critical:** `0.1 + 0.2 != 0.3` in floating-point arithmetic. This is not a SQL bug — it is how IEEE 754 floating-point works.
+> **Critical:** `0.1 + 0.2 != 0.3` in floating-point arithmetic. This is not a SQL bug — it is how IEEE 754 floating-point works. PostgreSQL only avoids it here because `0.1` is a `NUMERIC` literal; cast it to `FLOAT8` (or store columns as `FLOAT`) and the error appears.
 
 ### DECIMAL vs FLOAT — Side-by-Side
 
@@ -326,8 +351,9 @@ SELECT 7 / 2 FROM DUAL; -- 3.5
 SELECT 10 / 3 AS result;     -- 3 (in PostgreSQL, SQL Server, MySQL)
 
 -- BETTER: Force decimal division
-SELECT 10.0 / 3 AS result;   -- 3.3333333333333335
-SELECT CAST(10 AS DECIMAL(10,1)) / 3 AS result; -- 3.333333...
+SELECT 10.0 / 3 AS result;   -- 3.3333333333333333 (in PostgreSQL numeric division)
+SELECT 10.0 / 3::DOUBLE PRECISION AS result; -- 3.3333333333333335 (float division)
+SELECT CAST(10 AS DECIMAL(10,1)) / 3 AS result; -- 3.3333333333333333 (numeric, exact)
 ```
 
 > Interview trap: `SELECT 10 / 3` returns `3` in most databases (integer division). Many candidates expect `3.33`.
@@ -379,7 +405,7 @@ SELECT * FROM char_vs_varchar WHERE variable = 'AB';
 >
 > **When to use VARCHAR:** Almost everywhere else — names, emails, addresses, product names, descriptions.
 
-> PostgreSQL has no `CHAR(n)` type in practice. It stores `CHAR(n)` as `VARCHAR(n)` internally but still enforces the length constraint.
+> PostgreSQL implements `CHAR(n)` (also `CHARACTER(n)`, internal name `bpchar`). It pads short values with spaces to the full length — like the SQL standard. In practice most people use `VARCHAR(n)` for text, reserving `CHAR(n)` for fixed-length codes.
 
 ### VARCHAR Length
 
@@ -624,8 +650,8 @@ WHERE txn_timestamp >= '2024-01-01'
 
 -- An order at '2024-01-31 00:00:00' is included
 -- An order at '2024-02-01 00:00:00' is excluded (correct)
--- But: '2024-01-31 23:59:59.999' is included, while
---      '2024-02-01 00:00:00.000' is excluded
+-- But note: '2024-01-31 23:59:59.999' is also EXCLUDED by the BAD query,
+-- which silently misses almost all orders placed on Jan 31 after midnight.
 
 -- BETTER: Use exclusive upper bound
 SELECT * FROM transactions
@@ -706,15 +732,21 @@ CREATE TABLE features (
     is_enabled BOOLEAN NOT NULL DEFAULT FALSE
 );
 
--- These are equivalent:
+-- TRUE / FALSE are aliases for 1 / 0:
 INSERT INTO features VALUES (1, TRUE);
 INSERT INTO features VALUES (1, 1);
+
+-- BEWARE: the STRING 'true' does NOT convert to 1.
+-- MySQL casts 'true' to a number, which yields 0 (with a warning),
+-- or errors under strict SQL mode:
+-- INSERT INTO features VALUES (1, 'true');  -- stores 0, NOT 1
+
+-- '1' converts to 1 (leading numeric digits):
 INSERT INTO features VALUES (1, '1');
-INSERT INTO features VALUES (1, 'true');  -- MySQL casts string to int
 
 SELECT * FROM features WHERE is_enabled = TRUE;
 SELECT * FROM features WHERE is_enabled = 1;
-SELECT * FROM features WHERE is_enabled;   -- works in MySQL
+SELECT * FROM features WHERE is_enabled;   -- works in MySQL (nonzero = TRUE)
 ```
 
 ```sql
@@ -738,7 +770,7 @@ SELECT * FROM features WHERE is_enabled = 'true'; -- works
 
 > **Oracle** does not have a BOOLEAN type in SQL at all. PL/SQL has `BOOLEAN`, but you cannot use it in table columns. Use `NUMBER(1)` with `CHECK (col IN (0, 1))`.
 
-> Common misconception: In MySQL, `BOOLEAN` columns accept `TRUE`, `FALSE`, `0`, `1`, `'true'`, `'false'`, `'yes'`, `'no'`, and more. It is purely a `TINYINT(1)` alias. Don't assume type safety.
+> Common misconception: In MySQL, `BOOLEAN` columns accept `TRUE`/`FALSE` (aliases for `1`/`0`), numeric `0`/`1`, and numeric strings like `'1'`. The literal strings `'true'`, `'yes'`, `'no'` do **not** convert to `1` — they cast to `0` (with a warning) or error under strict mode. It is purely a `TINYINT(1)` alias. Don't assume type safety.
 
 ---
 
@@ -970,7 +1002,7 @@ CREATE TABLE product_features (
 INSERT INTO product_features VALUES (1, 'wireless,ergonomic');
 ```
 
-> **Production pitfall with ENUM:** Adding a new value requires an `ALTER TABLE` which can lock the table. PostgreSQL ENUMs require `ALTER TYPE ... ADD VALUE` which cannot be done inside a transaction. CHECK constraints on VARCHAR are often more flexible and easier to maintain.
+> **Production pitfall with ENUM:** Adding a new value requires an `ALTER TABLE` which can lock the table. PostgreSQL requires `ALTER TYPE ... ADD VALUE`, and a new value added inside a transaction cannot be **used** until the transaction commits ("unsafe use of new value" error). CHECK constraints on VARCHAR are often more flexible and easier to maintain.
 
 > **Oracle** does not have ENUM or SET types. Use CHECK constraints.
 
@@ -1306,7 +1338,7 @@ SET IDENTITY_INSERT employees OFF;
 ```
 
 ```sql
--- Oracle:SEQUENCE + trigger (or IDENTITY in 12c+)
+-- Oracle: SEQUENCE + trigger (or IDENTITY in 12c+)
 -- Oracle 12c+:
 CREATE TABLE employees (
     employee_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,

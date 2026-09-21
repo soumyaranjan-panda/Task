@@ -2,10 +2,13 @@
 
 ## Table of Contents
 
-1. [What Is Logical Query Processing Order?]Section generated at `sql-handbook/1-Fundamentals/06-Logical-Query-Processing-Order.md` (1001 lines).
-
-Coverage: full 9-step logical order with Mermaid diagram, worked step-by-step walkthrough on the shared schema, consequences (aliases, LEFT→INNER trap, WHERE/HAVING split), NULL behavior per step, 7 common mistakes, 7 production pitfalls, plan-verification-based performance guidance, 5 BAD vs BETTER scenarios, PostgreSQL/MySQL/SQL Server/Oracle comparison table, best practices, and 45 interview questions across all 8 requested categories.
-ep 5: Window Functions (SELECT phase)](#step-5-window-functions-select-phase)
+1. [What Is Logical Query Processing Order?](#what-is-logical-query-processing-order)
+2. [The Eight Steps](#the-eight-steps)
+3. [Why the Order Matters](#why-the-order-matters)
+4. [Logical Order vs Physical Execution](#logical-order-vs-physical-execution)
+5. [Sample Tables and Data](#sample-tables-and-data)
+6. [Step-by-Step Walkthrough](#step-by-step-walkthrough)
+7. [Close Examination of Each Step](#close-examination-of-each-step)
 
 - [Step 6: SELECT](#step-6-select)
 - [Step 7: DISTINCT](#step-7-distinct)
@@ -67,7 +70,7 @@ flowchart TD
     H --> I["9. LIMIT / OFFSET / FETCH"]
 ```
 
-| #   | Step                         | What logica happens                                                                                                                                          |
+| #   | Step                         | What logically happens                                                                                                                                    |
 | --- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 1   | `FROM`                       | Build the working set. Include `JOIN`s, subqueries, CTEs, table functions. The cartesian product of the sources is formed, then join conditions are applied. |
 | 2   | `WHERE`                      | Filter **rows**. Row-level predicates only. Aggregate functions and aliases are **not** available yet.                                                       |
@@ -506,13 +509,14 @@ ORDER BY pay DESC;   -- alias is fine here
 
 | first_name | pay      |
 | ---------- | -------- |
+| Carla      | NULL     |
 | Emma       | 98000.00 |
 | Alice      | 95000.00 |
 | Bob        | 82000.00 |
 | Frank      | 70000.00 |
-| Carla      | NULL     |
+| David      | 64000.00 |
 
-Note Carla sorts **last** in PostgreSQL and many engines (NULLs last by default there); SQL Server historically sorts NULLs **first** for ascending order, and SQL Server 2022+ introduces `NULLS FIRST`/`NULLS LAST`. Use explicit `NULLS FIRST` / `NULLS LAST` to be unambiguous.
+> **NULL sorting gotcha:** by default PostgreSQL sorts NULLs **last** for ascending order, but **first** for descending (`DESC` swaps the default). So `ORDER BY pay DESC` above puts Carla (NULL) at the top. SQL Server historically sorts NULLs **first** for ascending order, and SQL Server 2022+ introduces `NULLS FIRST`/`NULLS LAST` (PostgreSQL supports them too). Use explicit `NULLS FIRST` / `NULLS LAST` to be unambiguous. The doc example intended NULLs last — that requires `ORDER BY pay DESC NULLS LAST`.
 
 ### Step 9: LIMIT / OFFSET / FETCH
 
@@ -584,8 +588,10 @@ LEFT JOIN orders o
 | full_name         | order_id |
 | ----------------- | -------- |
 | Global Goods Inc  | 502      |
+| Piko spol. s r.o. | 504      |
 | Mini Mart GmbH    | NULL     |
-| Piko spol. s r.o. | NULL     |
+
+Note: Piko's only order (504) was placed 2025-03-02, so it still matches with the date in `ON` — only Mini Mart (order 503, 2025-01-20) is filtered out and appears with NULL.
 
 > **Interview trap**
 > "What's the difference between putting a condition in `ON` vs `WHERE` of a `LEFT JOIN`?" Answer in two parts: for `INNER JOIN` the result is **identical** (optimizer may even do the same). For outer joins, `ON` controls which rows are _matched during step 1_ (extra predicate evaluated during the join), while `WHERE` unconditionally **discards** rows after the join, NULLs included.

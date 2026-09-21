@@ -1,15 +1,6 @@
-The section has been generated at `sql-handbook/1-Fundamentals/07-Filtering-Operators.md`. Let me verify it.
-Section `07-Filtering-Operators` is complete at `sql-handbook/1-Fundamentals/07-Filtering-Operators.md` (2,086 lines) and matches the handbook's conventions:
+# 07 — Filtering Operators
 
-- **Fundamentals:** all filtering operators — comparison (`=`, `<>`, `<`, `>`), `BETWEEN`, `IN`/`NOT IN`, `LIKE`/`NOT LIKE`, `IS NULL`/`IS NOT NULL`, `IS DISTINCT FROM`, `EXISTS`/`NOT EXISTS`, `ANY`/`ALL`, row-value expressions, and `REGEXP`.
-- **Deep NULL coverage:** three-valued logic, the `NOT IN + NULL` zero-rows trap, `BETWEEN` timestamp boundary bug, and `NULL` per-operator.
-- **Realistic sample data** (`employees`, `departments`, `orders`) with grain stated, plus expected outputs for every example.
-- **BAD vs BETTER** approaches with rationale, sargability table, and execution-plan verification guidance (`EXPLAIN ANALYZE` per database) — no absolute performance claims.
-- **Database-specific callouts** for PostgreSQL, MySQL, SQL Server, Oracle.
-- **55 interview questions** across Beginner / Intermediate / Advanced / Scenario / Tricky / Output Prediction / Debugging / Performance.
-
-Both `07` files existed in the `sql-handbook` tree as empty placeholders, so the generated content now fills one of them (the canonical handbook location, consistent with prior sections).
-se-specific extensions. It explains not just syntax, but the _semantics_, _NULL behavior_, _performance_, and _edge cases_ of each operator.
+Filtering operators select rows by evaluating conditions. This section explains their syntax, semantics, NULL behavior, performance implications, and dialect-specific extensions.
 
 > **Grain reminder:** Before writing a filter, ask: _"What does one row in my result represent?"_ A filter that ignores the grain produces wrong answers.
 
@@ -542,13 +533,11 @@ expression NOT LIKE pattern
 | -------- | ----------------------- | --------- | -------------------------------- |
 | `%`      | Zero or more characters | `'A%'`    | 'Alice', 'A', 'AB'               |
 | `_`      | Exactly one character   | `'A_'`    | 'Al', 'Ab', but NOT 'A' or 'Ali' |
-| `%%`     | Literal `%` (escape)    | `'100%%'` | '100%'                           |
-| `/_`     | Literal `_` (escape)    | `'a/_b'`  | 'a_b'                            |
+| `\%`     | Literal `%` (escaped)   | `'100\%'` | '100%'                           |
+| `\_`     | Literal `_` (escaped)   | `'a\_b'`  | 'a_b'                            |
 
-> **PostgreSQL:** Use `ESCAPE` clause for custom escape: `LIKE '%100#%' ESCAPE '#'`.
-> **MySQL:** Default escape character is `\`.
-> **SQL Server:** Default escape character is `\`.
-> **Oracle:** Default escape character is `\`, or use `ESCAPE` clause.
+> **PostgreSQL / MySQL:** Default escape character is `\` — `LIKE '100\%'` matches the literal string `100%`. You can also set a custom escape char: `LIKE '100#%' ESCAPE '#'`.
+> **SQL Server / Oracle:** No default escape character — write `ESCAPE` explicitly (e.g. `LIKE '100\%' ESCAPE '\'`). SQL Server also supports bracket notation: `LIKE '100[%]'` matches `100%`, and `LIKE 'a[_]b'` matches `a_b`.
 
 ### Examples
 
@@ -1079,9 +1068,11 @@ expression > ALL (subquery)
 **= ANY (same as IN):**
 
 ```sql
+-- PostgreSQL: ANY takes an array; MySQL/SQL Server require a subquery.
+-- Prefer the equivalent IN (...) for static lists.
 SELECT name
 FROM employees
-WHERE dept_id = ANY (1, 3);
+WHERE dept_id = ANY (ARRAY[1, 3]);
 ```
 
 | name  |
@@ -1095,16 +1086,8 @@ WHERE dept_id = ANY (1, 3);
 ```sql
 SELECT name, salary
 FROM employees
-WHERE salary > ANY (70000, 88000);
+WHERE salary > ANY (ARRAY[70000, 88000]);
 ```
-
-| name    | salary |
-| ------- | ------ |
-| Alice   | 95000  |
-| Charlie | 88000  |
-| Eve     | 110000 |
-
-Salary 72000 (Bob) is > 70000, so Bob qualifies. Wait — let me recheck: Bob's salary is 72000 which is > 70000. Actually Bob should be included:
 
 | name    | salary |
 | ------- | ------ |
@@ -1113,14 +1096,16 @@ Salary 72000 (Bob) is > 70000, so Bob qualifies. Wait — let me recheck: Bob's 
 | Charlie | 88000  |
 | Eve     | 110000 |
 
-> Charlie's salary (88000) is NOT > 88000, but Charlie is > 70000, so Charlie qualifies via `> ANY`.
+Salary 72000 (Bob) is > 70000, so Bob qualifies. Charlie's salary (88000) is NOT > 88000, but Charlie is > 70000, so Charlie qualifies via `> ANY`.
+
+> **Interview trap:** `> ANY (list)` has no required upper bound — the value only needs to exceed the smallest element (or any element).
 
 **> ALL (greater than all):**
 
 ```sql
 SELECT name, salary
 FROM employees
-WHERE salary > ALL (70000, 88000);
+WHERE salary > ALL (ARRAY[70000, 88000]);
 ```
 
 | name  | salary |
@@ -1134,7 +1119,7 @@ Only Alice and Eve have salaries greater than both 70000 AND 88000.
 
 ```sql
 -- ANY with NULL: NULL comparisons produce UNKNOWN
-SELECT * FROM employees WHERE salary > ANY (70000, NULL);
+SELECT * FROM employees WHERE salary > ANY (ARRAY[70000, NULL]);
 ```
 
 This works: `salary > 70000` can produce `TRUE` for some rows. The `NULL` in the list just means one comparison is `UNKNOWN`, but `ANY` only needs one `TRUE`.
@@ -1142,7 +1127,7 @@ This works: `salary > 70000` can produce `TRUE` for some rows. The `NULL` in the
 ```sql
 -- ALL with NULL: if ANY comparison is UNKNOWN, and others are TRUE,
 -- the result is still UNKNOWN for that row
-SELECT * FROM employees WHERE salary > ALL (70000, NULL);
+SELECT * FROM employees WHERE salary > ALL (ARRAY[70000, NULL]);
 ```
 
 `salary > NULL` is always `UNKNOWN`. `UNKNOWN AND (salary > 70000)` is `UNKNOWN` when the second part is `TRUE`. So no rows qualify. `ALL` with `NULL` in the subquery is dangerous — similar to `NOT IN` with `NULL`.
@@ -1151,12 +1136,12 @@ SELECT * FROM employees WHERE salary > ALL (70000, NULL);
 
 ### ANY vs ALL Comparison
 
-| Expression     | ANY                 | ALL                                                     |
-| -------------- | ------------------- | ------------------------------------------------------- |
-| `= ANY (1,3)`  | Same as `IN (1,3)`  | Only if value = 1 AND value = 3 (impossible unless 1=3) |
-| `<> ANY (1,3)` | Value <> 1 OR <> 3  | Same as `NOT IN (1,3)`                                  |
-| `> ANY (1,3)`  | Value > 1 (the min) | Value > 3 (the max)                                     |
-| `> ALL (1,3)`  | Value > 3 (the max) | Value > 3 (the max)                                     |
+| Expression                 | ANY                     | ALL                                                          |
+| -------------------------- | ----------------------- | ------------------------------------------------------------ |
+| `= ANY (ARRAY[1,3])`       | Same as `IN (1,3)`      | Only if value = 1 AND value = 3 (impossible unless 1=3)      |
+| `<> ANY (ARRAY[1,3])`      | Value <> 1 OR value <> 3 | Same as `NOT IN (1,3)`                                       |
+| `> ANY (ARRAY[1,3])`       | Value > 1 (the min)     | Value > 3 (the max)                                          |
+| `> ALL (ARRAY[1,3])`       | Value > 3 (the max)     | Value > 3 (the max)                                          |
 
 ### When to Use
 
@@ -1426,8 +1411,8 @@ WHERE NULL OR FALSE          -- UNKNOWN
 WHERE NOT NULL               -- UNKNOWN
 WHERE NULL IN (1, 2, 3)     -- UNKNOWN
 WHERE NULL NOT IN (1, 2, 3) -- UNKNOWN (not FALSE!)
-WHERE NULL > ANY (1, 2, 3)  -- UNKNOWN
-WHERE NULL > ALL (1, 2, 3)  -- UNKNOWN
+WHERE NULL > ANY (ARRAY[1, 2, 3])  -- UNKNOWN
+WHERE NULL > ALL (ARRAY[1, 2, 3])  -- UNKNOWN
 ```
 
 ### NULL-Safe Operators Summary
@@ -1970,7 +1955,7 @@ WHERE salary > 80000;
 36. What is the result of `NULL IN (1, 2, NULL)` — `TRUE`, `FALSE`, or `UNKNOWN`?
 37. What is the result of `NULL NOT IN (1, 2, NULL)` — `TRUE`, `FALSE`, or `UNKNOWN`?
 38. What is the result of `NULL > ALL (1, 2, 3)` — `TRUE`, `FALSE`, or `UNKNOWN`?
-39. What is the result of `NULL > ANY (1, 2, 3)` — `TRUE`, `FALSE`, or `UNKNOWN`?
+39. What is the result of `NULL > ANY (ARRAY[1, 2, 3])` — `TRUE`, `FALSE`, or `UNKNOWN`?
 40. Does `WHERE col IN (1)` produce the same result as `WHERE col = 1` when `col` is NULL?
 
 ## Output Prediction

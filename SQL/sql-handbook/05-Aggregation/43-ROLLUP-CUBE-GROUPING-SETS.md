@@ -8,8 +8,7 @@
 
 ### The one-paragraph answer
 
-`ROLLUP`, `CUBE`, and `GROUPING SETS` are three extensions of the `GROUP BY` clause that let a single query produce **several aggregation levels at once**: regular row-level groups, subtotals, and a grSection 43 is clean now (the remaining matches are pre-existing corruption in section 42, not mine to fix). Verifying the full section 43 structure.
-pear as `NULL`.
+`ROLLUP`, `CUBE`, and `GROUPING SETS` are three extensions of the `GROUP BY` clause that let a single query produce **several aggregation levels at once**: regular row-level groups, subtotals, and a grand total — all in one pass. Subtotal rows appear as `NULL`.
 
 - `GROUP BY ROLLUP (a, b, c)` — the "hierarchical drill-down" tool: groups `(a,b,c)`, then `(a,b)`, then `(a)`, then the grand total `()`. Order of columns matters.
 - `GROUP BY CUBE (a, b, c)` — the "all combinations" tool: every possible subset of the listed columns, plus the grand total.

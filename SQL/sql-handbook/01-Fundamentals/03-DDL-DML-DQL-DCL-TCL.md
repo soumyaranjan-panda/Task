@@ -1,6 +1,6 @@
 # DDL, DML, DQL, DCL, TCL — SQL Command Categories
 
-SQL commands are grouped into five sub-languages based on what they do. Knowing which category a statement belongs to helps you reason about side effects, transaction safety, and权限控制.
+SQL commands are grouped into five sub-languages based on what they do. Knowing which category a statement belongs to helps you reason about side effects, transaction safety, and permission control.
 
 ---
 
@@ -126,7 +126,7 @@ ALTER TABLE employees ADD CONSTRAINT chk_salary CHECK (salary > 0);
 ALTER TABLE employees DROP CONSTRAINT chk_salary;
 ```
 
-> Production pitfall: `ALTER TABLE` on large tables can lock the table for extended periods. In PostgreSQL, adding a column with a non-volatile `DEFAULT` rewrites the table (though PostgreSQL 11+ optimizes `DEFAULT` for fixed values). In MySQL with InnoDB, online `ALTER` behavior depends on the specific change — use `ALGORITHM=INPLACE` or `ALGORITHM=INSTANT` when possible.
+> Production pitfall: `ALTER TABLE` on large tables can lock the table for extended periods. In PostgreSQL, adding a column with a constant `DEFAULT` is fast since PostgreSQL 11 (metadata-only, no table rewrite) — it only rewrites the table for volatile defaults. In MySQL with InnoDB, online `ALTER` behavior depends on the specific change — use `ALGORITHM=INPLACE` or `ALGORITHM=INSTANT` when possible.
 
 ### 1.3 DROP
 
@@ -163,10 +163,12 @@ TRUNCATE TABLE employees;
 | WHERE clause            | Not allowed                       | Allowed                         |
 | Rollback                | Depends on database (see below)   | Yes, within a transaction       |
 | Triggers                | Does not fire (PostgreSQL, MySQL) | Fires                           |
-| Identity/sequence reset | Yes                               | No                              |
+| Identity/sequence reset | Yes, with `RESTART IDENTITY`\*    | No                              |
 | Logging                 | Minimal (page deallocation)       | Full row-level logging          |
 | Locking                 | Table-level lock (typically)      | Row-level locks                 |
 | Space reclamation       | Immediate                         | Deferred (VACUUM in PostgreSQL) |
+
+\* MySQL resets `AUTO_INCREMENT` by default on `TRUNCATE`. In PostgreSQL, plain `TRUNCATE` does **not** reset the column sequence — only `TRUNCATE TABLE ... RESTART IDENTITY` does (verified).
 
 Database-specific behavior for TRUNCATE:
 
@@ -193,11 +195,14 @@ Database-specific behavior for TRUNCATE:
 ### 1.5 RENAME
 
 ```sql
--- PostgreSQL, MySQL
+-- MySQL
 RENAME TABLE employees TO staff;
 
--- PostgreSQL, SQL Server
+-- PostgreSQL
 ALTER TABLE employees RENAME TO staff;
+
+-- SQL Server (table): sp_rename, like the column form
+EXEC sp_rename 'employees', 'staff';
 
 -- SQL Server (column)
 EXEC sp_rename 'employees.phone', 'phone_number', 'COLUMN';
@@ -273,7 +278,12 @@ VALUES (101, 'Alice', 'Chen', 1, 97000, '2020-03-15', 'alice@co')
 ON CONFLICT (emp_id)
 DO UPDATE SET salary = EXCLUDED.salary;
 
--- MySQL
+-- MySQL (values-references alias form, preferred in MySQL 8.0.20+)
+INSERT INTO employees (emp_id, first_name, last_name, dept_id, salary, hire_date, email)
+VALUES (101, 'Alice', 'Chen', 1, 97000, '2020-03-15', 'alice@co') AS new
+ON DUPLICATE KEY UPDATE salary = new.salary;
+
+-- MySQL (legacy form; VALUES() is deprecated since MySQL 8.0.20)
 INSERT INTO employees (emp_id, first_name, last_name, dept_id, salary, hire_date, email)
 VALUES (101, 'Alice', 'Chen', 1, 97000, '2020-03-15', 'alice@co')
 ON DUPLICATE KEY UPDATE salary = VALUES(salary);
@@ -411,21 +421,13 @@ OUTPUT deleted.*;
 > Production pitfall: Deleting millions of rows in a single transaction can fill up WAL (PostgreSQL), redo logs (Oracle/MySQL), or transaction logs (SQL Server). Batch deletes:
 >
 > ```sql
-> -- PostgreSQL / MySQL
+> -- PostgreSQL / MySQL — repeat until 0 rows affected
 > DELETE FROM employees
 > WHERE emp_id IN (
-> ```
-
-    SELECT emp_id FROM employees
-    WHERE hire_date < '2015-01-01'
-    LIMIT 10000
-
-);
-
-> -- Repeat until 0 rows affected
->
-> ```
->
+>     SELECT emp_id FROM employees
+>     WHERE hire_date < '2015-01-01'
+>     LIMIT 10000
+> );
 > ```
 
 ### 2.4 MERGE
@@ -667,7 +669,7 @@ COMMIT;  -- Jack is inserted, Kate is not
 | REPEATABLE READ  | Prevented  | Prevented           | Possible\*   |
 | SERIALIZABLE     | Prevented  | Prevented           | Prevented    |
 
-\* SQL Server's `REPEATABLE READ` prevents phantoms. PostgreSQL's `REPEATABLE READ` uses MVCC snapshots, which also prevents phantoms.
+\* SQL Server's `REPEATABLE READ` locks individual rows but does not take range locks, so phantom reads are still possible (only `SERIALIZABLE` blocks them there). PostgreSQL's `REPEATABLE READ` uses MVCC snapshots, which also prevents phantoms.
 
 ```sql
 -- Set isolation level (PostgreSQL, MySQL)

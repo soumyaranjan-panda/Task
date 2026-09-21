@@ -1,10 +1,26 @@
-Now I'll generate the comprehensive section for ROWS vs RANGE vs GROUPS.
-Now let me verify the complete file and check the math throughout:
-The file's first lines are corrupted (prologue text leaked in). Let me examine and fix:
-Something unusual is happening — my reasoning text appears to be leaking into the file. Let me investigate:
-I understand the situation — the `script.sh` pipes streamed session output into these files, which is why narration text leaks in. Let me check the current state of the file and clean it up:
-I now understand the setup: `script.sh` launched `opencode run` (PID 192966) for this exact section, and it's streaming session output into the file concurrently. Let me check its status and the current file state:
--groups) 10. [Side-by-Side Visual Comparison](#side-by-side-visual-comparison) 11. [When ROWS and RANGE Produce Identical Results](#when-rows-and-range-produce-identical-results) 12. [Edge Cases](#edge-cases) 13. [NULL Behavior](#null-behavior) 14. [Common Mistakes](#common-mistakes) 15. [Production Pitfalls](#production-pitfalls) 16. [Performance Implications](#performance-implications) 17. [Comparison Tables](#comparison-tables) 18. [Best Practices](#best-practices) 19. [Interview Questions](#interview-questions)
+# 52 — ROWS vs RANGE vs GROUPS
+
+## Table of Contents
+
+1. [What Are ROWS, RANGE, and GROUPS?](#what-are-rows-range-and-groups)
+2. [Why Three Types Exist](#why-three-types-exist)
+3. [Syntax](#syntax)
+4. [How Each Type Works Internally](#how-each-type-works-internally)
+5. [Sample Tables](#sample-tables)
+6. [Core Comparison](#core-comparison)
+7. [Deep Dive: ROWS Frame](#deep-dive-rows-frame)
+8. [Deep Dive: RANGE Frame](#deep-dive-range-frame)
+9. [Deep Dive: GROUPS Frame](#deep-dive-groups-frame)
+10. [Side-by-Side Visual Comparison](#side-by-side-visual-comparison)
+11. [When ROWS and RANGE Produce Identical Results](#when-rows-and-range-produce-identical-results)
+12. [Edge Cases](#edge-cases)
+13. [NULL Behavior](#null-behavior)
+14. [Common Mistakes](#common-mistakes)
+15. [Production Pitfalls](#production-pitfalls)
+16. [Performance Implications](#performance-implications)
+17. [Comparison Tables](#comparison-tables)
+18. [Best Practices](#best-practices)
+19. [Interview Questions](#interview-questions)
 
 ---
 

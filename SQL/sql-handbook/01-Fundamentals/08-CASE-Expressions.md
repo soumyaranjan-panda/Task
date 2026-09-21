@@ -1,14 +1,20 @@
-Generated `sql-handbook/1-Fundamentals/08-CASE-Expressions.md` (998 lines). Covers:
+# 08 — CASE Expressions
 
-- **Fundamentals**: searched vs simple CASE, syntax, internal evaluation order, output tables
-- **Clause usage**: SELECT, WHERE, ORDER BY (custom sort), GROUP BY, HAVING, ON
-- **NULL behavior**: full table + the simple-CASE `WHEN NULL` trap, `COUNT(CASE ...)` semantics
-- **Patterns**: categorization, conditional aggregation, pivoting, safe division, custom ordering, audit/validation, nested CASE
-- **Database differences**: PostgreSQL, MySQL (`IF()`), SQL Server (`IIF`), Oracle (`DECODE` NULL-equality trap)
-- **Mistakes / pitfalls / performance**: no absolute claims, all verified via `EXPLAIN ANALYZE`; BAD vs BETTER approaches with rationales
-- **50 interview questions** across Beginner / Intermediate / Advanced / Scenario / Tricky / Output-Prediction / Debugging / Performance
-  ion)
+## Table of Contents
 
+1. [What This Section Covers](#what-this-section-covers)
+2. [What Is a CASE Expression](#what-is-a-case-expression)
+3. [The Two Forms: Searched CASE vs Simple CASE](#the-two-forms-searched-case-vs-simple-case)
+4. [Syntax](#syntax)
+5. [Internal Working](#internal-working)
+6. [Sample Tables](#sample-tables)
+7. [Fundamental Examples](#fundamental-examples)
+8. [CASE in Different Clauses](#case-in-different-clauses)
+9. [NULL Behavior](#null-behavior)
+10. [CASE for Data Transformation / Categorization](#case-for-data-transformation--categorization)
+11. [CASE with Aggregate Functions](#case-with-aggregate-functions)
+12. [CASE to Fix NULL and Division Problems](#case-to-fix-null-and-division-problems)
+13. [CASE for Pivoting (Conditional Aggregation)](#case-for-pivoting-conditional-aggregation)
 14. [CASE for Custom Ordering](#case-for-custom-ordering)
 15. [CASE for Validation / Checklist Queries](#case-for-validation--checklist-queries)
 16. [Nested CASE](#nested-case)
@@ -160,7 +166,7 @@ FROM orders
 ORDER BY order_id;
 ```
 
-**Expected result (note the `NULL` total):**
+**Expected result (note the `NULL` total row):**
 
 | order_id | total  | order_size |
 | -------- | ------ | ---------- |
@@ -168,14 +174,14 @@ ORDER BY order_id;
 | 1002     | 45.00  | small      |
 | 1003     | 310.00 | large      |
 | 1004     | 89.99  | small      |
-| 1005     | NULL   | NULL       |
+| 1005     | NULL   | large      |
 | 1006     | 200.00 | medium     |
 | 1007     | 75.25  | small      |
 | 1008     | 40.00  | small      |
 
-**Why the `NULL` row returned `NULL`:** `total < 100` with `total = NULL` evaluates to `UNKNOWN`, not `TRUE` or `FALSE`. The first two `WHEN`s are skipped, and with no `ELSE`, the expression falls through to `NULL`.
+**Why the `NULL` row returned `'large'`:** `total < 100` with `total = NULL` evaluates to `UNKNOWN`, not `TRUE` or `FALSE`, so both `WHEN`s are skipped. Because this example has an `ELSE 'large'`, the `NULL` total lands in the **`ELSE` bucket** — it does _not_ become `NULL`. Compare the explicit-`IS NULL` version in [NULL Behavior](#null-behavior) and the simple-form `ELSE` capture in Example 2 to see the two ways a `NULL` can be caught.
 
-> **Common misconception:** "NULL falls into the ELSE." It does not — `ELSE` is only reached after no `WHEN` _matched_. A `NULL` comparison produces `UNKNOWN`, which is treated as _not matched_, and if there is no `ELSE`, the result is `NULL`. If you want `NULL` to get a bucket, write the condition explicitly: `WHEN total IS NULL THEN 'unknown'`.
+> **Common misconception:** "No `WHEN` matched, so a `NULL` row produces `NULL`." Only if there is **no `ELSE`**. `ELSE` is the catch-all: a `NULL` comparison produces `UNKNOWN`, which is treated as _not matched_, and then the `ELSE` value wins. If you want `NULL` to get its own bucket _distinct_ from the `ELSE`, write the condition explicitly: `WHEN total IS NULL THEN 'unknown'`.
 
 ### Example 2 — Mapping known values (simple CASE)
 
@@ -368,11 +374,11 @@ FROM employees;
 **Expected result:**
 
 | name    | leave_profile  |
-| ------- | -------------- | ------------------------------------- |
+| ------- | -------------- |
 | Alice   | moderate_leave |
 | Bob     | high_leave     |
-| Charlie | moderate_leave |
-| Diana   | high_leave     | -- leave_days_used = 30, no NULL here |
+| Charlie | low_leave      |
+| Diana   | high_leave     |
 | Eve     | moderate_leave |
 | Frank   | low_leave      |
 
@@ -566,7 +572,7 @@ FROM orders;
 **Expected result:**
 
 | order_id | status    | audit_flag                         |
-| -------- | --------- | ---------------------------------- | ------------------------------------------------- |
+| -------- | --------- | ---------------------------------- |
 | 1001     | shipped   | ok                                 |
 | 1002     | pending   | ok                                 |
 | 1003     | delivered | ok                                 |

@@ -1,29 +1,15 @@
 # 59 · Timestamp Filtering
 
 > **Category:** 7-Dates-and-Strings · Section 59
-> **Prerequisites:** \*Date & Time BasicSection 59 — Timestamp Filtering has been written to `/home/soumrnjn/Desktop/Task/SQL/sql-handbook/7-Dates-and-Strings/59-Timestamp-Filtering.md` (943 lines).
+> **Prerequisites:** Date & Time Basics (57), Date Arithmetic (58)
 
-**Contents:**
+## Fundamentals
 
-| Section                          | Topics                                                                                                                                                                 |
-| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. Fundamentals                  | What/why, grain rule                                                                                                                                                   |
-| 2. Half-Open Intervals           | Core principle, Mermaid diagram                                                                                                                                        |
-| 3. Internal Working              | Literal parsing per engine, sargable vs non-sargable internals                                                                                                         |
-| 4. Syntax Cheat Sheet            | Filter patterns across PG/MySQL/SQL Server/Oracle                                                                                                                      |
-| 5. Sample Data                   | 10-row `events` table with NULL, midnight boundaries                                                                                                                   |
-| 6. Core Operations (10 examples) | Single day, relative window, month, NULLs, today/yesterday, timezone conversion, compound conditions, NULLIF sentinels, subquery boundaries, window function filtering |
-| 7. NULL Behavior                 | Three-valued logic table, COUNT differences                                                                                                                            |
-| 8. Edge Cases                    | Midnight boundary, DST spring-forward, fall-back overlap, sub-second precision, epoch, far-future, type mismatch                                                       |
-| 9. Common Mistakes (6)           | `.999`, non-sargable functions, timezone, `=` on timestamps, DATEDIFF, NULL exclusion                                                                                  |
-| 10. Production Pitfalls          | 8 real-world dangers                                                                                                                                                   |
-| 11. Performance Implications     | Sargability table, composite/covering indexes, partition pruning, statistics                                                                                           |
-| 12. Comparison Tables            | Filter pattern comparison, engine-specific "filter today" syntax                                                                                                       |
-| 13. Best Practices               | 10 rules                                                                                                                                                               |
-| 14. Cross-References             | Links to related handbook sections                                                                                                                                     |
-| Interview Questions              | 32 questions (Beginner → Performance) with full answers in a collapsible `<details>` block                                                                             |
+### What it is
 
-Core Principle: Half-Open Intervals
+Timestamp filtering is the art of **correctly comparing timestamps to date boundaries** — ensuring your queries hit the right rows, use indexes efficiently, and don't silently lose data at midnight or during DST transitions.
+
+## Core Principle: Half-Open Intervals
 
 The most important concept in timestamp filtering:
 

@@ -1,26 +1,6 @@
-# 80. Join Algorithms
+# 80 — Join Algorithms
 
-> This section belongs to **Category 9 — Optimization**. It explains the _physical_ algorithms a database enI have full context on the handbook conventions. Now I'll write the complete Section 80.
-> I noticed a stray error line in the Mermaid diagram. Let me fix it.
-> Let me verify the fixed diagram and scan the rest of the file for issues.
-> Scenario 5's query is convoluted; let me make it cleaner and more idiomatic.
-> Section 80 `80-Join-Algorithms.md` written (939 lines). It matches the handbook's established style from adjacent sections.
-
-Covers:
-
-- **Fundamentals** — logical vs physical joins, why algorithms exist, the cost model
-- **The 3 classic algorithms** — nested loop, hash, merge, each with what/why/how it works, cost model, use/avoid tables, engine node names, and BAD vs BETTER examples (inner-index traps, hash spills, sort-merge waste, wrong driving side)
-- **Semi/anti joins** — `EXISTS`/`IN`/`NOT EXISTS` physical forms and NULL caveats
-- **Optimizer decision inputs** — estimates, indexes, sortedness, memory, predicate shape, plus a decision flowchart and a "what the EXPLAIN row tells you" table
-- **Sample tables & grain** (`customers`/`orders`/`order_items`/`payments`, consistent with Sec 78)
-- **7 scenario examples** — healthy NLJ, NLJ gone wrong, correct hash join, merge via indexes, EXISTS→semi join, NOT EXISTS→anti join, hash spill
-- **NULL behavior** per algorithm + `IS NOT DISTINCT FROM` (PG16 note)
-- **Edge cases** — skew, type/collation coercion, expression keys, full outer, `<>`, self-join
-- **Engine comparison table**, common mistakes, production pitfalls (sniffing, skew, memory × concurrency, aggregate-before-join), performance verification via `EXPLAIN ANALYZE`, best practices, cross-references
-- **33 interview questions** across all 8 categories (answers omitted for practice)
-
-All illustrative plan outputs are flagged as such, and no absolute performance claims are made — every algorithm choice is tied back to execution-plan verification.
-ompare every row of A against every row of B — costs `|A| × |B|` comparisons (a full Cartesian product). For 10 million × 10 million rows that is undoable. Join algorithms exist to get the same logical result with far less work:
+Logical SQL joins describe which rows should match; the optimizer chooses a physical algorithm to produce those matches. Without an efficient algorithm, a join could compare every row of A with every row of B, requiring `|A| × |B|` comparisons. Join algorithms avoid that work by exploiting indexes, hashing, or sorted inputs:
 
 - **Sorted or indexed data** → binary-search lookups instead of full scans (nested loop over an index).
 - **Hashing** → probe a bucket in ~O(1) expectation instead of scanning (hash join).

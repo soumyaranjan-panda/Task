@@ -8,9 +8,15 @@
 
 ### What they are
 
-`COUNT`, `SUM`, `AVG`, `MIN`, and `MAX` are the five **scalar aggregate functions**. Each one takes many values and coSection 38 written to `sql-handbook/5-Aggregation/38-COUNT-SUM-AVG-MIN-MAX.md`, matching the handbook style of sections 36/37 (grain-stated sample tables, verified expected outputs, labeled traps, DB-specific notes, EXPLAIN-driven performance guidance, mermaid pipeline diagram, and a full Interview Questions set with no answers).
-`| "What is the smallest?" | any orderable values | the smallest non-NULL value |
-|`MAX` | "What is the largest?" | any orderable values | the largest non-NULL value |
+`COUNT`, `SUM`, `AVG`, `MIN`, and `MAX` are the five **scalar aggregate functions**. Each one takes many values and returns a single result.
+
+| Function | Question It Answers           | Input                  | Result                                  |
+| -------- | ----------------------------- | ---------------------- | --------------------------------------- |
+| `COUNT`  | "How many rows?"              | any values             | number of non-NULL values (or all rows) |
+| `SUM`    | "What is the total?"          | numeric values         | sum of all non-NULL values              |
+| `AVG`    | "What is the average?"        | numeric values         | sum / count of non-NULL values          |
+| `MIN`    | "What is the smallest?"       | any orderable values   | the smallest non-NULL value             |
+| `MAX`    | "What is the largest?"        | any orderable values   | the largest non-NULL value              |
 
 "Scalar" means they return a single value per _group_ — where the "group" is either:
 

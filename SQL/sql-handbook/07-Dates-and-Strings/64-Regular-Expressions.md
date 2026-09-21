@@ -1,18 +1,38 @@
 # 64 — Regular Expressions
 
-> **What it is:** A declarative mini-langThe file is empty. Let me now write the comprehensive section:
-> Let me verify the file was written correctly:
-> The section has been written to `/home/soumrnjn/Desktop/Task/SQL/sql-handbook/7-Dates-and-Strings/64-Regular-Expressions.md` — **1,407 lines**.
+> **What it is:** A declarative mini-language for pattern matching and text manipulation in SQL. Regular expressions extend the simple `LIKE` pattern into a full toolkit for finding, extracting, replacing, and splitting text based on flexible patterns.
 
-**Structure (21 subsections):**
+---
 
-| #   | Section                        | Coverage                                                      |
-| --- | ------------------------------ | ------------------------------------------------------------- | -------------- |
-| 1   | Why Regular Expressions Matter | Motivation, real-world use cases                              |
-| 2   | Regex vs LIKE                  | Comparison table, rule of thumb                               |
-| 3   | Database Dialect Overview      | PostgreSQL, MySQL, SQL Server, Oracle syntax matrix           |
-| 4   | Sample Data                    | `customers`, `orders` tables with realistic edge cases        |
-| 5   | REGEXP_LIKE / ~                | Pattern testing, syntax per engine, examples                  |
+## Table of Contents
+
+1. [Why Regular Expressions Matter](#1-why-regular-expressions-matter)
+2. [Regex vs LIKE](#2-regex-vs-like)
+3. [Database Dialect Overview](#3-database-dialect-overview)
+4. [Sample Data](#4-sample-data)
+5. [REGEXP_LIKE / ~](#5-regexp_like--)
+6. [REGEXP_MATCHES](#6-regexp_matches)
+7. [REGEXP_SUBSTR](#7-regexp_substr)
+8. [REGEXP_REPLACE](#8-regexp_replace)
+9. [Anchors & Boundaries](#9-anchors--boundaries)
+10. [Character Classes](#10-character-classes)
+11. [Quantifiers (Greedy vs Lazy)](#11-quantifiers-greedy-vs-lazy)
+12. [Groups & Alternation](#12-groups--alternation)
+13. [Case Sensitivity](#13-case-sensitivity)
+14. [Common Patterns Cookbook](#14-common-patterns-cookbook)
+15. [NULL Behavior](#15-null-behavior)
+16. [Edge Cases](#16-edge-cases)
+17. [Common Mistakes](#17-common-mistakes)
+18. [When to Use / Not Use](#18-when-to-use--not-use)
+19. [Performance](#19-performance)
+20. [Best Practices](#20-best-practices)
+21. [Interview Questions](#21-interview-questions)
+
+---
+
+## 1. Why Regular Expressions Matter
+
+`LIKE` handles simple prefix/suffix/contains patterns. Regular expressions handle everything else: emails, phone numbers, log lines, structured text, multi-format data, and any pattern where the rules are too complex for wildcards alone.
 | 6   | REGEXP_MATCHES                 | Extracting all matches, `g` flag, set-returning behavior      |
 | 7   | REGEXP_SUBSTR                  | First/Nth match extraction, capture group indexing            |
 | 8   | REGEXP_REPLACE                 | Global replace, backreferences, masking, camelCase→snake_case |

@@ -1,14 +1,6 @@
-The placeholder file exists and is empty. I'll now write the full section.
-Let me verify the file and fix two small artifacts I noticed while writing.
-Generated `sql-handbook/2-NULL-and-Logic/09-NULL-Deep-Dive.md` (1,673 lines).
+# 09 — NULL: Deep Dive
 
-Covers:
-
-- **Fundamentals:** what NULL is, storage, "absence" semantics, three-valued logic truth tables (AND/OR/NOT) + the `FALSE AND UNKNOWN` / `TRUE OR UNKNOWN` rules, and the 10 golden rules
-- **Operators/functions:** comparison, `IS [NOT] NULL`, `IS [NOT] DISTINCT FROM` (with per-DB support matrix), `COALESCE`, `NULLIF`, arithmetic/concatenation (incl. Oracle's `''`==NULL and `'a' || NULL`), aggregates (`COUNT(*)`/`COUNT(col)`/`SUM` returning NULL), `GROUP BY`/`DISTINCT`/`UNION` NULL bucketing, `ORDER BY` defaults per engine, `IN`/`NOT IN` zero-rows trap, `EXISTS`/`NOT EXISTS`, JOINs + LEFT→INNER trap, window functions, `CASE`, constraints (`CHECK` lets NULL through), CRUD/`MERGE`
-- **Realistic sample data** with grain stated, expected outputs for every example, BAD vs BETTER patterns, sargability table, `EXPLAIN` verification guidance (no absolute performance claims), DB-specific callouts, labeled misconceptions/traps/pitfalls, Mermaid decision diagram
-- **Interview Questions:** 74 questions across all 8 requested categories (Beginner → Performance), including output-prediction prompts for the sample data, with answers withheld for practice.
-  es)
+## Table of Contents
 
 20. [NULL in CRUD: INSERT, UPDATE, MERGE](#null-in-crud-insert-update-merge)
 21. [Empty String vs NULL](#empty-string-vs-null)

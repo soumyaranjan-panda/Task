@@ -271,12 +271,11 @@ When the referenced row is deleted or updated, the database must decide what to 
 
 | Action                                    | Behavior                                                        | Use Case                                              |
 | ----------------------------------------- | --------------------------------------------------------------- | ----------------------------------------------------- |
-| `RESTRICT` (default in PostgreSQL)        | Reject the DELETE/UPDATE                                        | Most common; safe default                             |
-| `NO ACTION`                               | Same as RESTRICT but checked at end of transaction (PostgreSQL) | Deferred checks                                       |
+| `RESTRICT` (default in MySQL)             | Reject the DELETE/UPDATE immediately; cannot be deferred        | Most common; safe default                             |
+| `NO ACTION` (default in PostgreSQL, Oracle, SQL Server) | Behaviorally identical to `RESTRICT` unless deferred — checked at end of statement, but can be deferred to commit with `DEFERRABLE` (PostgreSQL/Oracle); SQL Server has no `RESTRICT` keyword | Deferred checks |
 | `CASCADE`                                 | Delete/update referencing rows too                              | Dependent data that has no meaning without the parent |
 | `SET NULL`                                | Set FK column to NULL                                           | Optional relationships                                |
 | `SET DEFAULT`                             | Set FK column to its default value                              | Rare                                                  |
-| `RESTRICT` (default in MySQL, SQL Server) | Reject the DELETE/UPDATE                                        | —                                                     |
 
 ```sql
 CREATE TABLE order_items (
@@ -432,7 +431,7 @@ UNIQUE (col1, col2)
 
 | Feature          | UNIQUE                                                                    | PRIMARY KEY              |
 | ---------------- | ------------------------------------------------------------------------- | ------------------------ |
-| NULLs allowed    | **Yes** (one NULL in most databases, multiple NULLs in PostgreSQL/Oracle) | **No**                   |
+| NULLs allowed    | **Yes** (one NULL in SQL Server; multiple NULLs in PostgreSQL, MySQL, Oracle) | **No**                   |
 | Number per table | **Multiple**                                                              | **One**                  |
 | Creates index    | **Yes** (unique index)                                                    | **Yes** (unique index)   |
 | Can be FK target | Only if all columns are NOT NULL                                          | **Yes**                  |
@@ -664,7 +663,7 @@ CREATE TABLE users (
 ALTER TABLE orders
 ALTER COLUMN status SET DEFAULT 'pending';                    -- PostgreSQL
 
-ALTER TABLE orders ALTER COLUMN status DEFAULT 'pending';     -- MySQL
+ALTER TABLE orders ALTER COLUMN status SET DEFAULT 'pending';   -- MySQL
 
 ALTER TABLE orders ADD CONSTRAINT df_status                   -- SQL Server
 DEFAULT 'pending' FOR status;
@@ -694,11 +693,14 @@ Unnamed constraints get auto-generated names (e.g., `employees_email_check`, `or
 
 ```sql
 CREATE TABLE orders (
-    order_id INT,
+    order_id   INT,
+    cust_id    INT NOT NULL,
+    order_date DATE NOT NULL,
+    status     VARCHAR(20),
     CONSTRAINT pk_orders PRIMARY KEY (order_id),
     CONSTRAINT fk_orders_customer
         FOREIGN KEY (cust_id) REFERENCES customers(cust_id),
-    CONSTRAINT uq_order_date
+    CONSTRAINT nn_order_date
         CHECK (order_date IS NOT NULL),
     CONSTRAINT chk_status
         CHECK (status IN ('pending','shipped','delivered','cancelled'))

@@ -1,9 +1,4 @@
-I have a clear picture of the handbook conventions and the target file is empty. Now I'll write the complete section.
-Wrote the complete section to `sql-handbook/8-DML-and-Sets/65-UNION-UNION-ALL.md` (~1,490 lines), matching the handbook style.
-
-**Covers:** fundamentals & mental model (stack vs stack+dedup), grain-checked sample tables, ANSI syntax, per-engine `DISTINCT` keywords and type coercion, whole-vs-branch `ORDER BY`/`LIMIT`/`TOP` rules, internal working (Append/Concatenation + deducting SORT UNIQUE/HashAggregate/Distinct-Sort plans, illustrative — always verify with EXPLAIN), NULL behavior (NULL=NULL during dedup, type inference, ORDER BY NULL placement), 8 scenarios with BAD→BETTER, edge cases, 8 mistakes, production pitfalls, performance with plan-verification emphasis, 4 comparison tables, best practices, 2 Mermaid diagrams, consolidated dialect notes, and 40 unanswered interview questions across all 8 categories.
-
-All example outputs are computed against the shared dataset. I steered clear of absolute performance claims and flagged every dialect-specific behavior (PostgreSQL/MySQL/SQL Server/Oracle). 3. [Database-Specific Notes](#13-database-specific-notes) 14. [Interview Questions](#interview-questions)
+# 65 — UNION and UNION ALL
 
 > **See also:** [Section 40 — DISTINCT](#) for duplicate-removal semantics,
 > [Section 33 — CTEs](#) and [Section 34 — Recursive CTEs](#) (recursion is

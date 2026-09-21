@@ -8,27 +8,28 @@
 2. [Why It Exists](#why-it-exists)
 3. [Syntax](#syntax)
 4. [How It Works Internally](#how-it-works-internally)
-5. [Sample TablWrote `sql-handbook/6-Window-Functions/46-ROW-NUMBER.md` (comprehensive, ~line 900+). It covers:
+5. [Sample Tables](#sample-tables)
+6. [Scenarios](#scenarios)
+7. [Comparisons](#comparisons)
+8. [Edge Cases](#edge-cases)
+9. [Common Mistakes](#common-mistakes)
+10. [Production Pitfalls](#production-pitfalls)
+11. [Performance](#performance)
+12. [Interview Questions](#interview-questions)
 
-- **Fundamentals** — what `ROW_NUMBER()` is, why it exists, the three defining properties (unique, consecutive, ordered), and internal pipeline (partition → sort → enumerate) with a mermaid diagram
-- **Syntax** — `OVER`, PARTITION BY, no-frame restriction (with per-engine behavior), named windows
-- **Sample tables** — `orders`, `employees`, `user_logins` with stated grain, including deliberately tied rows
-- **5 scenarios** — latest row per group, de-duplication (with `DELETE` patterns for SQL Server/PostgreSQL/MySQL/Oracle), top-N per group, continuous numbering, and pagination vs keyset
-- **Comparisons** — ROW_NUMBER vs RANK vs DENSE_RANK table, determinism, NULL handling with per-dialect sort-position table
-- **Edge cases, mistakes, production pitfalls, performance** (EXPLAIN/plan nodes, index shape, no absolute claims), interview traps, best practices
-- **Interview Questions** — Beginner / Intermediate / Advanced / Scenario Based / Tricky / Output Prediction / Debugging / Performance (40 questions, answers withheld)
-- **Cross-references** to 44, 45, 47, 53, 54, 84, 78, 73
+---
 
-Also fixed a data inconsistency I introduced in the de-duplication excerpt so `login_id`s match the sample table.
-mber to each row.
+## What It Is
+
+`ROW_NUMBER()` assigns a unique, consecutive integer to each row within a partition, ordered by a specified column. No two rows in the same partition get the same number, and numbers are always `1, 2, 3, ...` with no gaps.
 
 The three defining properties:
 
-| Property    | Meaning                                                                             |
-| ----------- | ----------------------------------------------------------------------------------- |
-| Unique      | No two rows in the same partition get the same number                               |
-| Consecutive | Numbers are `1, 2, 3, ...` with **no gaps**                                         |
-| Ordered     | Row 1 is the "first" row under the `ORDER BY`; the last row gets the highest number |
+| Property     | Meaning                                                            |
+| ------------ | ------------------------------------------------------------------ |
+| Unique       | No two rows in the same partition get the same number              |
+| Consecutive  | Numbers are `1, 2, 3, ...` with no gaps                            |
+| Ordered      | Row 1 is the "first" row under the `ORDER BY`; the last row gets the highest number |
 
 ---
 

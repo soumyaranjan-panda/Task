@@ -1,19 +1,6 @@
-Now I have a clear picture of the existing handbook format and the empty placeholder. Let me write the comprehensive section.
-The section is complete. Written 1,561 lines to `12-COALESCE-NULLIF.md`.
+# 12 — COALESCE and NULLIF
 
-Coverage summary:
-
-- **COALESCE & NULLIF** — fundamentals, internal `CASE`-expansion mechanics, short-circuit evaluation, type resolution, syntax
-- **Sample data** with stated grain (`employees`, `products`, `orders`) and expected output for every example (incl. output for both `AVG(quantity)` variants)
-- **Edge cases** incl. the non-intuitive `NULLIF(1, NULL) = 1`, `COALESCE(0, 5) = 0`, collation-sensitive `NULLIF('abc','ABC')`
-- **Composition** — the `COALESCE(NULLIF(x, sentinel), default)` pattern, safe-division pattern, Mermaid decision diagram
-- **SAX vs other functions** — NVL/NVL2 (Oracle), IFNULL (MySQL), ISNULL (SQL Server), type-resolution differences
-- **Per-engine callouts** for PostgreSQL, MySQL, SQL Server, Oracle (incl. Oracle's `'' == NULL`)
-- **Sargability + EXPLAIN** guidance with no absolute performance claims
-- **BAD vs BETTER** patterns (division, display fallback, empty-string normalization, safe average)
-- **Labeled** misconceptions, interview traps, production pitfalls
-- **50 interview questions** across all 8 categories (answers withheld for practice)
-  ](#interview-questions)
+## Table of Contents
 
 ---
 

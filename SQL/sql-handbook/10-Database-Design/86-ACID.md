@@ -87,7 +87,7 @@ Database-specific syntax:
 
 | Engine         | Begin                                                           | Commit               | Rollback               | Notes                         |
 | -------------- | --------------------------------------------------------------- | -------------------- | ---------------------- | ----------------------------- |
-| PostgreSQL     | `BEGIN` or `START TRANSACTION`                                  | `COMMIT` or `END`    | `ROLLBACK` or `ABORT`  | Auto-commit is OFF by default |
+| PostgreSQL     | `BEGIN` or `START TRANSACTION`                                  | `COMMIT` or `END`    | `ROLLBACK` or `ABORT`  | Server behavior is transactional; common clients such as `psql` default to autocommit ON |
 | MySQL (InnoDB) | `START TRANSACTION` or `BEGIN`                                  | `COMMIT`             | `ROLLBACK`             | Auto-commit is ON by default  |
 | SQL Server     | `BEGIN TRANSACTION`                                             | `COMMIT TRANSACTION` | `ROLLBACK TRANSACTION` | Auto-commit ON by default     |
 | Oracle         | Implicit (each statement is a transaction) or `SET TRANSACTION` | `COMMIT`             | `ROLLBACK`             | DDL auto-commits              |

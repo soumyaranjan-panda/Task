@@ -66,21 +66,12 @@ for each candidate row R produced by the outer query:
 flowchart TD
     A[Outer query produces a candidate row R] --> B[Bind correlation cols of R into inner SQL]
     B --> C[Execute inner query with bound values]
-    C --> D{Does the inner result satisfy the oThe file is truncated mid-generation. I'll write the complete section.
-Section 29 complete: written to `sql-handbook/4-Subqueries/29-Correlated-Subqueries.md` (941 lines, 64 code fences balanced).
+    C --> D{Does the inner result satisfy the condition?}
+    D -->|Yes| E[Keep or compute the outer row]
+    D -->|No| F[Discard row or return NULL]
+```
 
-Covers all 14 required dimensions:
-- **Fundamentals** — what makes a subquery correlated, correlated vs non-correlated table
-- **Internal working** — logical per-row loop, optimizer decorrelation (mermaid), `SubPlan`/`InitPlan`, engine-specific plan artifacts
-- **Syntax** — correlated scalar in `WHERE`/`SELECT`, `EXISTS`/`NOT EXISTS`, `IN`, `HAVING`/`ON`/`UPDATE`/`DELETE`
-- **Sample tables** with stated grain (employees, departments, customers, orders) and one deliberately NULL + one zero-relationship row
-- **4 worked examples** with expected output + row-by-row trace, BAD/BETTER pairs, and scenario examples
-- **Alternatives** — derived table+JOIN, window functions, `LATERAL`/`APPLY`, comparison matrix
-- **Edge cases table, NULL/3VL deep dive, mistakes, production pitfalls, performance (plan-verified, no absolute claims), interview traps, best practices, DB differences, cross-references**
-- **Interview Questions** — 39 practice questions across all 8 required categories, answers withheld
-
-All computed outputs (dept averages, ranks, latest orders) were verified against the sample data.
-row" cost model often does **not** apply — the join order, hash tables, and indexes decide the real cost.
+The preceding loop is a logical model, not a promise of physical execution. Optimizers can often rewrite an `EXISTS` or `IN` correlated subquery as a semi-join, so a literal “one inner query per outer row” cost model often does **not** apply — join order, hash tables, and indexes decide the real cost.
 - A correlated **scalar** subquery that must produce a per-row value more often stays as a nested-loop-like node, but the optimizer may still partially decorrelate it (for example, computing the grouped aggregate once and then applying it).
 - Whether decorrelation happens depends on the query shape, whether it is safe (correct results preserved), and engine-specific optimizer rules.
 

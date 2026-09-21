@@ -1,0 +1,19 @@
+QUERY PLAN                                                                                                        |
+------------------------------------------------------------------------------------------------------------------+
+Seq Scan on employees  (cost=0.00..26663.00 rows=298333 width=75) (actual time=0.018..171.499 rows=300001 loops=1)|
+  Filter: (dept_id = 1)                                                                                           |
+  Rows Removed by Filter: 699999                                                                                  |
+Planning Time: 0.189 ms                                                                                           |
+Execution Time: 187.620 ms                                                                                        |
+
+
+
+QUERY PLAN                                                                                                                        |
+----------------------------------------------------------------------------------------------------------------------------------+
+Bitmap Heap Scan on employees  (cost=3328.51..21220.67 rows=298333 width=75) (actual time=14.904..117.694 rows=300001 loops=1)    |
+  Recheck Cond: (dept_id = 1)                                                                                                     |
+  Heap Blocks: exact=14163                                                                                                        |
+  ->  Bitmap Index Scan on idx_emp_dept  (cost=0.00..3253.92 rows=298333 width=0) (actual time=11.743..11.744 rows=300001 loops=1)|
+        Index Cond: (dept_id = 1)                                                                                                 |
+Planning Time: 0.304 ms                                                                                                           |
+Execution Time: 133.381 ms                                                                                                        |

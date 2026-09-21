@@ -310,6 +310,7 @@ WHERE salary > 70000 AND department_id = 1;
 | first_name | salary   | department_id |
 | ---------- | -------- | ------------- |
 | Alice      | 95000.00 | 1             |
+| Bob        | 72000.00 | 1             |
 | Eve        | 85000.00 | 1             |
 
 ```sql
@@ -339,8 +340,9 @@ WHERE NOT department_id = 1;
 | Charlie    | 110000.00 |
 | Diana      | 68000.00  |
 | Frank      | 125000.00 |
-| Grace      | 55000.00  |
 | Hank       | NULL      |
+
+> Note: Grace is **not** returned. Her `department_id` is `NULL`, and `NOT (NULL = 1)` evaluates to `UNKNOWN` (`NOT UNKNOWN` is `UNKNOWN`), which is excluded by `WHERE`.
 
 ### IN Operator
 
@@ -401,7 +403,7 @@ SELECT first_name FROM employees WHERE first_name LIKE 'A%';
 
 -- Names with exactly 3 characters
 SELECT first_name FROM employees WHERE first_name LIKE '___';
--- Result: Eve
+-- Result: Bob, Eve
 
 -- Email contains '@co'
 SELECT first_name FROM employees WHERE email LIKE '%@co%';
@@ -515,12 +517,12 @@ Restricts the number of rows returned.
 
 ### Syntax Differences
 
-| Database                  | Syntax                                     |
-| ------------------------- | ------------------------------------------ |
-| PostgreSQL, MySQL, SQLite | `LIMIT n OFFSET m` or `LIMIT m, n`         |
-| SQL Server                | `OFFSET m ROWS FETCH NEXT n ROWS ONLY`     |
+| Database                  | Syntax                                 |
+| ------------------------- | --------------------------------------- |
+| PostgreSQL                | `LIMIT n OFFSET m`                      |
+| MySQL, SQLite             | `LIMIT n OFFSET m` or `LIMIT m, n`      |
+| SQL Server                | `OFFSET m ROWS FETCH NEXT n ROWS ONLY`  |
 | Oracle                    | `FETCH FIRST n ROWS ONLY` (12c+) or rownum |
-| MySQL (older)             | `LIMIT m, n`                               |
 
 ```sql
 -- PostgreSQL / MySQL
@@ -827,14 +829,14 @@ SELECT
 ```sql
 SELECT
     COUNT(*)            AS count_all,      -- 8 (all rows)
-    COUNT(email)        AS count_email,    -- 6 (NULLs excluded)
+    COUNT(email)        AS count_email,    -- 7 (NULLs excluded)
     COUNT(department_id) AS count_dept     -- 7 (Grace has NULL department_id)
 FROM employees;
 ```
 
 | count_all | count_email | count_dept |
 | --------- | ----------- | ---------- |
-| 8         | 6           | 7          |
+| 8         | 7           | 7          |
 
 ### COUNT(\*) vs COUNT(1)
 
@@ -988,12 +990,12 @@ And `department_id <> NULL` is always UNKNOWN. So the entire expression is UNKNO
 ```sql
 -- Calculate average salary, treating NULL as 0
 SELECT
-    COALESCE(AVG(salary), 0) AS avg_salary
+    AVG(COALESCE(salary, 0)) AS avg_salary
 FROM employees;
--- With NULL salary for Hank, AVG without COALESCE would be:
--- (95000 + 72000 + 110000 + 68000 + 85000 + 125000 + 55000 + NULL) / 7 rows
+-- With NULL salary for Hank, plain AVG(salary) would be:
+-- (95000 + 72000 + 110000 + 68000 + 85000 + 125000 + 55000) / 7 rows
 -- COUNT(salary) = 7 (NULL excluded), so AVG = 610000 / 7 ≈ 87142.86
--- With COALESCE: (95000 + 72000 + 110000 + 68000 + 85000 + 125000 + 55000 + 0) / 8 = 76250.00
+-- With AVG(COALESCE(salary, 0)): (95000 + 72000 + 110000 + 68000 + 85000 + 125000 + 55000 + 0) / 8 = 76250.00
 ```
 
 ---
