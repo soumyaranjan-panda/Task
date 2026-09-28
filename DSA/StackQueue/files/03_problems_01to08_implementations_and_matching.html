@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>03_problems_01to08_implementations_and_matching</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        :root {
+            --bg-color: var(--vscode-editor-background, #ffffff);
+            --text-color: var(--vscode-editor-foreground, #1a1a1b);
+            --heading-color: var(--vscode-editor-foreground, #0f172a);
+            --secondary-text: var(--vscode-descriptionForeground, #64748b);
+            --accent-color: var(--vscode-textLink-foreground, #3b82f6);
+            --code-bg: var(--vscode-textCodeBlock-background, rgba(241, 245, 249, 0.4));
+            --border-color: var(--vscode-widget-border, #e2e8f0);
+            --header-bg: var(--vscode-editor-background, #ffffff);
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            line-height: 1.75;
+            color: var(--text-color);
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 5rem 2rem 3rem;
+            background-color: var(--bg-color);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .export-header {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            padding: 0.75rem 2rem; background: var(--header-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: flex-end; gap: 0.75rem;
+            backdrop-filter: blur(8px); display: none;
+        }
+
+        .btn {
+            background: var(--accent-color); color: white; border: none;
+            padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.85rem;
+            font-weight: 500; cursor: pointer; transition: opacity 0.2s;
+            font-family: 'Outfit', sans-serif;
+        }
+        .btn:hover { opacity: 0.9; }
+
+        h1, h2, h3 { font-family: 'Outfit', sans-serif; color: var(--heading-color); font-weight: 700; margin-top: 2rem; }
+        h1 { font-size: 2.25rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; }
+        
+        pre { background: var(--code-bg); padding: 1.25rem; border-radius: 12px; border: 1px solid var(--border-color); overflow-x: auto; margin: 1.5rem 0; }
+        code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.9em; padding: 0.2rem 0.4rem; border-radius: 6px; background-color: var(--code-bg); }
+        
+        .mermaid { background: white; padding: 1rem; border-radius: 12px; margin: 1.5rem 0; display: flex; justify-content: center; border: 1px solid var(--border-color); }
+        svg { max-width: 100% !important; height: auto !important; }
+
+        @media print { .export-header { display: none; } body { padding: 0; } }
+    </style>
+</head>
+<body>
+    <div class="export-header">
+        <button class="btn" onclick="exportFile('html')">Export HTML</button>
+        <button class="btn" onclick="exportFile('pdf')">Export PDF</button>
+        <button class="btn" onclick="exportFile('docx')">Export DOCX</button>
+    </div>
+    <div class="content"><h1>Stack &amp; Queue Interview Guide — Part 3A: Problems 1–8</h1>
+<p><strong>Guide map:</strong> <code>00_START_HERE.md</code> → <code>01_foundation...md</code> → <code>02_universal_thinking_framework.md</code> → <strong><code>03_problems_01to08...md</code></strong> (you are here) → <code>04_problems_09to14...md</code> → (more coming)</p>
+<p>All Java code in this file was written into a real compiler and run against expected outputs before being placed here — see the note at the end of <code>00_START_HERE.md</code> if you want the details.</p>
+<hr>
+<h1>1. Implement Stack using Arrays</h1>
+<h3>1. Problem Understanding</h3>
+<p>Build <code>push</code>, <code>pop</code>, <code>peek</code>, <code>isEmpty</code> (LIFO behavior) using a <strong>plain fixed-size array</strong> as the only storage — no built-in <code>Stack</code>/<code>Deque</code>/<code>ArrayList</code>.</p>
+<ul>
+<li><strong>Input:</strong> a sequence of operations (<code>push x</code>, <code>pop</code>, <code>peek</code>, <code>isEmpty</code>).</li>
+<li><strong>Output:</strong> the results of <code>pop</code>/<code>peek</code> calls.</li>
+<li><strong>Constraint:</strong> a known maximum capacity.</li>
+<li><strong>Observation:</strong> an array gives O(1) access to <em>any</em> index — we just need one variable that always tells us &quot;where does the used part of the array currently end?&quot;</li>
+</ul>
+<p>Example: <code>push(10) → push(20) → push(30) → pop()</code> should return <code>30</code>.</p>
+<h3>2. How to Think About the Problem</h3>
+<p><strong>What should I notice first?</strong> The problem only ever touches <em>one end</em>. That means I need exactly one piece of bookkeeping: a pointer to &quot;the end.&quot;</p>
+<p><strong>What would I try first?</strong> Use an array plus an integer <code>top</code> marking the current end of the used region.</p>
+<p><strong>Clue → Observation → Pattern → Data Structure → Algorithm:</strong>
+<code>push/pop only touch one end</code> → <code>an array index can act as &quot;the end&quot; pointer</code> → <code>Basic Stack Implementation</code> → <code>array + top index</code> → <code>increment top then write on push; read then decrement top on pop</code>.</p>
+<p>This problem has no &quot;trick&quot; beyond that — it <em>is</em> the foundational pattern every later problem&#39;s stack is built out of (whether hand-rolled like here, or <code>ArrayDeque</code> under the hood).</p>
+<h3>3. Pattern Recognition</h3>
+<p><strong>Problem clue:</strong> only one end is ever touched; the problem literally says &quot;stack.&quot;
+<strong>Pattern:</strong> Basic Stack Implementation.
+<strong>Why this pattern:</strong> LIFO is given directly by the problem name.
+<strong>Mental model:</strong> array + a single pointer marking &quot;how full am I.&quot;
+<strong>Similar problems:</strong> Problem 5 (Stack using Linked List) — identical external behavior, different internal storage.</p>
+<h3>4. Brute Force</h3>
+<p>There&#39;s a genuine naive-but-wrong-headed instinct here: pin <code>top</code> at <strong>index 0</strong> (thinking of &quot;top&quot; as &quot;the front of the array&quot;), and shift every element on every push/pop to keep it there.</p>
+<pre><code class="language-java">// Naive: insists the top must live at index 0
+void pushNaive(int[] arr, int size, int x) {
+    for (int i = size; i &gt; 0; i--) arr[i] = arr[i - 1]; // shift everyone right
+    arr[0] = x;
+}
+</code></pre>
+<p><strong>Why is this too slow?</strong> Every push re-copies the <em>entire</em> current contents, purely because of an arbitrary decision that index 0 must always hold the top. The data itself never needed to move — only our choice of &quot;where top lives&quot; forced it to.</p>
+<h3>5. Observation</h3>
+<p>The top doesn&#39;t have to live at a fixed index. If we let it live at the <strong>highest used index</strong> instead, insertion/removal there touches exactly one slot, because nothing else needs to shift out of the way.</p>
+<h3>6. Optimal Approach</h3>
+<p>Array + <code>top</code> index, starting at <code>-1</code> (empty).</p>
+<ul>
+<li><code>push(x)</code>: increment <code>top</code>, then write <code>arr[top] = x</code>.</li>
+<li><code>pop()</code>: read <code>arr[top]</code>, then decrement <code>top</code>.</li>
+<li><code>peek()</code>: read <code>arr[top]</code>.</li>
+<li><code>isEmpty()</code>: <code>top == -1</code>. <code>isFull()</code>: <code>top == capacity - 1</code>.</li>
+</ul>
+<h3>7. Invariant</h3>
+<blockquote>
+<p><strong>Invariant:</strong> At all times, <code>arr[0..top]</code> (inclusive) holds exactly the current stack contents in push order, with <code>arr[top]</code> being the most-recently-pushed, next-to-pop element. Indices beyond <code>top</code> are unused/stale.</p>
+</blockquote>
+<p>This stays true after every push (we extend the valid range by one, at the new <code>top</code>) and every pop (we shrink it by one, abandoning the old <code>top</code> without erasing it — it&#39;s simply outside the valid range now).</p>
+<h3>8. Dry Run</h3>
+<table>
+<thead>
+<tr>
+<th>op</th>
+<th>stack before (arr[0..top])</th>
+<th>operation</th>
+<th>stack after</th>
+<th>answer</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>push(10)</code></td>
+<td><code>[]</code>, top=-1</td>
+<td><code>arr[0]=10</code>, top=0</td>
+<td><code>[10]</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>push(20)</code></td>
+<td><code>[10]</code>, top=0</td>
+<td><code>arr[1]=20</code>, top=1</td>
+<td><code>[10,20]</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>push(30)</code></td>
+<td><code>[10,20]</code>, top=1</td>
+<td><code>arr[2]=30</code>, top=2</td>
+<td><code>[10,20,30]</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>pop()</code></td>
+<td><code>[10,20,30]</code>, top=2</td>
+<td>read arr[2], top=1</td>
+<td><code>[10,20]</code></td>
+<td><strong>30</strong></td>
+</tr>
+<tr>
+<td><code>peek()</code></td>
+<td><code>[10,20]</code>, top=1</td>
+<td>read arr[1]</td>
+<td><code>[10,20]</code></td>
+<td><strong>20</strong></td>
+</tr>
+</tbody></table>
+<h3>9. Why Does It Work?</h3>
+<p>Array indexing is direct memory access — O(1) regardless of how big the array is. Since push/pop <em>only ever</em> read or write <code>arr[top]</code>, and <code>top</code> is updated in the same operation, no other slot is ever touched, so nothing needs to be searched for or shifted. LIFO order falls out automatically: the most recently written index is, by construction, always the current <code>top</code>.</p>
+<h3>10. Java Code</h3>
+<pre><code class="language-java">class ArrayStack {
+    private int[] arr;
+    private int top;
+    private int capacity;
+
+    public ArrayStack(int capacity) {
+        this.capacity = capacity;
+        this.arr = new int[capacity];
+        this.top = -1; // empty
+    }
+
+    public boolean isEmpty() { return top == -1; }
+    public boolean isFull()  { return top == capacity - 1; }
+
+    public void push(int x) {
+        if (isFull()) throw new RuntimeException(&quot;Stack Overflow&quot;);
+        arr[++top] = x;      // advance top FIRST, then write
+    }
+
+    public int pop() {
+        if (isEmpty()) throw new RuntimeException(&quot;Stack Underflow&quot;);
+        return arr[top--];   // read, THEN pull top back
+    }
+
+    public int peek() {
+        if (isEmpty()) throw new RuntimeException(&quot;Stack is empty&quot;);
+        return arr[top];
+    }
+}
+</code></pre>
+<h3>11. Complexity</h3>
+<p><strong>Time:</strong> O(1) for every operation — a single index read/write, no traversal, no shifting.
+<strong>Space:</strong> O(capacity) — fixed and pre-allocated, independent of how many elements are actually in use right now.</p>
+<h3>12. Edge Cases</h3>
+<ul>
+<li>Pop/peek on empty (must guard — <code>top == -1</code> would otherwise read <code>arr[-1]</code>).</li>
+<li>Push on full (<code>isFull()</code> check).</li>
+<li>Single push then pop (returns to exactly empty).</li>
+<li>Capacity of 0 or 1.</li>
+</ul>
+<h3>13. Common Mistakes</h3>
+<ul>
+<li><strong><code>arr[top++] = x</code> instead of <code>arr[++top] = x</code>.</strong> With <code>top</code> starting at <code>-1</code>, post-increment writes to <code>arr[-1]</code> first (crash), <em>then</em> advances <code>top</code>. Pre-increment advances first, so the write lands in a valid slot. This exact off-by-one is the single most common bug in this problem.</li>
+<li><strong><code>isFull()</code> checked as <code>top == capacity</code></strong> instead of <code>top == capacity - 1</code> — off-by-one, since valid indices only go up to <code>capacity - 1</code>.</li>
+<li>Forgetting <code>isEmpty()</code> guards before <code>pop()</code>/<code>peek()</code>.</li>
+</ul>
+<h3>14. Pattern to Remember</h3>
+<pre><code class="language-text">Problem clue:  implement basic LIFO container with a raw array
+Pattern:       Basic Stack Implementation
+Data structure: array + top index
+Stores:        raw values (no monotonic property here)
+Push:          increment top, then write
+Pop:           read at top, then decrement
+Invariant:     arr[0..top] holds the stack; arr[top] = most recent
+Key insight:   keep &quot;top&quot; at the END of the used region, not the front
+Time / Space:  O(1) per op / O(capacity)
+</code></pre>
+<p><strong>Memory trick:</strong> <em>&quot;Top lives at the end, not the front — that&#39;s the whole trick.&quot;</em></p>
+<h3>15. Interview Trigger</h3>
+<blockquote>
+<p>If asked to implement a stack with a raw array, I immediately think: I need exactly one pointer, <code>top</code>, living at the <em>highest</em> used index — so push/pop never shift anything. Initialize <code>top = -1</code> for empty; push does <code>arr[++top] = x</code>; pop does <code>return arr[top--]</code>.</p>
+</blockquote>
+<hr>
+<h1>2. Implement Queue using Arrays</h1>
+<h3>1. Problem Understanding</h3>
+<p>Build <code>enqueue</code>, <code>dequeue</code>, <code>front</code>, <code>isEmpty</code> (FIFO behavior) using a plain fixed-size array.</p>
+<ul>
+<li><strong>Input:</strong> sequence of enqueue/dequeue/front calls.</li>
+<li><strong>Output:</strong> results of dequeue/front.</li>
+<li><strong>Constraint:</strong> known fixed capacity.</li>
+<li><strong>What makes this different from Problem 1:</strong> a queue genuinely touches <strong>both ends</strong> — insert at the back, remove from the front. That single fact is the whole story of this problem.</li>
+</ul>
+<h3>2. How to Think About the Problem</h3>
+<p><strong>First instinct:</strong> keep &quot;front&quot; pinned at index 0 (the simplest possible mental model). Enqueue writes at the next free slot; dequeue reads <code>arr[0]</code>, then <strong>shifts everything left by one</strong> so index 0 is still the front.</p>
+<p><strong>Why might that be too slow?</strong> Shifting is O(n) <em>per dequeue</em>, because every remaining element has to physically move — even though logically, nothing about the data itself required moving.</p>
+<p><strong>What observation unlocks the better solution?</strong> &quot;Front&quot; doesn&#39;t have to be a <em>fixed</em> index — it can be a <strong>pointer that walks forward</strong>. Then dequeue is just &quot;read <code>arr[front]</code>, then <code>front++</code>&quot; — zero data movement.</p>
+<p><strong>But then:</strong> after enough dequeues, <code>rear</code> eventually runs past the end of the array, even though slots at the <em>beginning</em> are free again (vacated by earlier dequeues). The fix: treat the array as <strong>circular</strong> — wrap indices with <code>% capacity</code> so freed space gets reused automatically.</p>
+<h3>3. Pattern Recognition</h3>
+<p><strong>Problem clue:</strong> FIFO + fixed-size raw array.
+<strong>Pattern:</strong> Basic Queue Implementation (circular buffer).
+<strong>Why this pattern:</strong> two ends both matter, unlike a stack.
+<strong>Mental model:</strong> two pointers walking around a circular track.
+<strong>Similar problems:</strong> Problem 6 (Queue via Linked List) needs the same &quot;track both ends&quot; thinking, but no wraparound arithmetic, since a linked list can just grow.
+<strong>Recognizing this elsewhere:</strong> any time you need O(1) FIFO on top of a <em>fixed-size</em> array without a linked list, &quot;circular buffer&quot; is the keyword to reach for.</p>
+<h3>4. Brute Force</h3>
+<pre><code class="language-java">class NaiveArrayQueue {
+    private int[] arr;
+    private int size, capacity;
+
+    NaiveArrayQueue(int capacity) { this.capacity = capacity; arr = new int[capacity]; }
+
+    boolean isEmpty() { return size == 0; }
+    boolean isFull()  { return size == capacity; }
+
+    void enqueue(int x) {
+        if (isFull()) throw new RuntimeException(&quot;Queue full&quot;);
+        arr[size++] = x;
+    }
+
+    int dequeue() {
+        if (isEmpty()) throw new RuntimeException(&quot;Queue empty&quot;);
+        int front = arr[0];
+        for (int i = 1; i &lt; size; i++) arr[i - 1] = arr[i]; // shift everyone left
+        size--;
+        return front;
+    }
+}
+</code></pre>
+<p><strong>Why is brute force too slow?</strong> Every <code>dequeue()</code> re-shifts the <em>entire</em> remaining array, even though only one element (the front) logically needed to be removed. Dequeue <code>n</code> times in a row and total shifting work is <code>n + (n-1) + (n-2) + ... ≈ O(n²)</code> for what should be <code>n</code> O(1) operations. The repeated work is: <em>re-copying elements that were already correctly placed, purely to keep &quot;front&quot; pinned at index 0.</em></p>
+<h3>5. Observation</h3>
+<pre><code class="language-text">Brute force (shift on every dequeue)
+     ↓
+Repeated work: re-copying every remaining element, every single dequeue
+     ↓
+Observation: &quot;front&quot; can be a moving pointer instead of a fixed index
+     ↓
+New snag: rear eventually runs past the array end, even though early slots are free again
+     ↓
+Data structure: circular array — wrap indices with % capacity
+     ↓
+Optimized solution: O(1) enqueue AND dequeue
+</code></pre>
+<h3>6. Optimal Approach</h3>
+<p>Keep <code>front</code>, <code>rear</code>, and <code>size</code> (size disambiguates &quot;empty&quot; from &quot;full,&quot; since both can otherwise look like <code>front == rear</code>).</p>
+<ul>
+<li>Initial: <code>front = 0</code>, <code>rear = -1</code>, <code>size = 0</code>.</li>
+<li><code>enqueue(x)</code>: <code>rear = (rear + 1) % capacity</code>; <code>arr[rear] = x</code>; <code>size++</code>.</li>
+<li><code>dequeue()</code>: read <code>arr[front]</code>; <code>front = (front + 1) % capacity</code>; <code>size--</code>.</li>
+</ul>
+<h3>7. Invariant</h3>
+<blockquote>
+<p><strong>Invariant:</strong> At all times, the <code>size</code> valid elements occupy the circular range starting at index <code>front</code> and proceeding forward (wrapping via <code>% capacity</code>) for <code>size</code> steps. <code>front</code> always points at the oldest element (if any); <code>rear</code> always points at the most recently added element (if any).</p>
+</blockquote>
+<h3>8. Dry Run (capacity = 3)</h3>
+<table>
+<thead>
+<tr>
+<th>op</th>
+<th>front,rear,size before</th>
+<th>operation</th>
+<th>front,rear,size after</th>
+<th>answer</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>enqueue(1)</code></td>
+<td>0,-1,0</td>
+<td><code>rear=0</code>, arr[0]=1</td>
+<td>0,0,1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>enqueue(2)</code></td>
+<td>0,0,1</td>
+<td><code>rear=1</code>, arr[1]=2</td>
+<td>0,1,2</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>enqueue(3)</code></td>
+<td>0,1,2</td>
+<td><code>rear=2</code>, arr[2]=3 (now full)</td>
+<td>0,2,3</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>dequeue()</code></td>
+<td>0,2,3</td>
+<td>read arr[0]=1, <code>front=1</code></td>
+<td>1,2,2</td>
+<td><strong>1</strong></td>
+</tr>
+<tr>
+<td><code>enqueue(4)</code></td>
+<td>1,2,2</td>
+<td><code>rear=(2+1)%3=0</code>, arr[0]=4 (overwrites the already-dequeued 1)</td>
+<td>1,0,3</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>dequeue()</code></td>
+<td>1,0,3</td>
+<td>read arr[1]=2, <code>front=2</code></td>
+<td>2,0,2</td>
+<td><strong>2</strong></td>
+</tr>
+<tr>
+<td><code>dequeue()</code></td>
+<td>2,0,2</td>
+<td>read arr[2]=3, <code>front=0</code></td>
+<td>0,0,1</td>
+<td><strong>3</strong></td>
+</tr>
+<tr>
+<td><code>dequeue()</code></td>
+<td>0,0,1</td>
+<td>read arr[0]=4, <code>front=1</code></td>
+<td>1,0,0</td>
+<td><strong>4</strong></td>
+</tr>
+</tbody></table>
+<p>Notice <code>rear</code> <strong>wraps around</strong> to index 0 at the <code>enqueue(4)</code> step, reusing the slot vacated by the dequeue of <code>1</code> — exactly the trick this problem is testing.</p>
+<h3>9. Why Does It Work?</h3>
+<p>The <code>% capacity</code> operation makes index arithmetic &quot;wrap&quot; once it passes the last valid index, so slots freed by earlier dequeues get reused automatically — no searching for free space required. The invariant guarantees that whenever <code>size &lt; capacity</code>, the slot <code>(rear + 1) % capacity</code> is <em>always</em> free, because it&#39;s exactly the slot that&#39;s <code>size</code> steps ahead of <code>front</code>, and everything from <code>front</code> for <code>size</code> steps is the only &quot;occupied&quot; region by definition.</p>
+<h3>10. Java Code</h3>
+<pre><code class="language-java">class CircularArrayQueue {
+    private int[] arr;
+    private int front, rear, size, capacity;
+
+    public CircularArrayQueue(int capacity) {
+        this.capacity = capacity;
+        this.arr = new int[capacity];
+        this.front = 0;
+        this.rear = -1;
+        this.size = 0;
+    }
+
+    public boolean isEmpty() { return size == 0; }
+    public boolean isFull()  { return size == capacity; }
+
+    public void enqueue(int x) {
+        if (isFull()) throw new RuntimeException(&quot;Queue full&quot;);
+        rear = (rear + 1) % capacity;  // wrap around
+        arr[rear] = x;
+        size++;
+    }
+
+    public int dequeue() {
+        if (isEmpty()) throw new RuntimeException(&quot;Queue empty&quot;);
+        int val = arr[front];
+        front = (front + 1) % capacity; // wrap around
+        size--;
+        return val;
+    }
+}
+</code></pre>
+<h3>11. Complexity</h3>
+<p><strong>Time:</strong> O(1) for every operation — one addition, one modulo, no traversal.
+<strong>Space:</strong> O(capacity), fixed.</p>
+<h3>12. Edge Cases</h3>
+<ul>
+<li>Empty dequeue/front. Full enqueue.</li>
+<li><code>front</code>/<code>rear</code> wraparound crossing the array boundary (the dry run above hits this deliberately).</li>
+<li>Capacity of 1.</li>
+</ul>
+<h3>13. Common Mistakes</h3>
+<ul>
+<li><strong>Using <code>front == rear</code> alone to distinguish empty from full</strong> — both states can produce this, which is exactly why a <code>size</code> counter (or an equivalent &quot;always leave one slot empty&quot; convention) is necessary.</li>
+<li><strong>Forgetting the modulo</strong> when advancing <code>front</code>/<code>rear</code> — they just run past the array end and crash.</li>
+<li><strong>Off-by-one in <code>isFull()</code></strong> — comparing against <code>capacity</code> incorrectly if <code>size</code> isn&#39;t tracked precisely.</li>
+<li>Assuming dequeue must be O(n) because of the naive version — no, that was purely a consequence of an implementation <em>choice</em> (pinning front at index 0), not a fundamental limitation of arrays.</li>
+</ul>
+<h3>14. Pattern to Remember</h3>
+<pre><code class="language-text">Problem clue:  FIFO using a fixed-size raw array
+Pattern:       Basic Queue Implementation (circular buffer)
+Data structure: array + front pointer + rear pointer + size counter
+Stores:        raw values
+Enqueue:       rear = (rear+1)%capacity; write; size++
+Dequeue:       read at front; front = (front+1)%capacity; size--
+Invariant:     the size valid elements occupy the circular range starting at front
+Key insight:   don&#39;t move the data — move the pointer, and let it wrap
+Time / Space:  O(1) per op / O(capacity)
+</code></pre>
+<p><strong>Memory trick:</strong> <em>&quot;Don&#39;t move the data, move the pointer — and let the pointer wrap around.&quot;</em></p>
+<h3>15. Interview Trigger</h3>
+<blockquote>
+<p>If asked for a queue backed by a raw array, I think: two ends means two pointers. I&#39;ll let them wrap with <code>% capacity</code> so I never shift data, and I&#39;ll track <code>size</code> explicitly so <code>front == rear</code> doesn&#39;t ambiguously mean both &quot;empty&quot; and &quot;full.&quot;</p>
+</blockquote>
+<hr>
+<h1>3. Implement Stack using Queue</h1>
+<h3>1. Problem Understanding</h3>
+<p>Build stack <code>push</code>/<code>pop</code>/<code>top</code> using <strong>only</strong> queue operations (<code>enqueue</code>/<code>dequeue</code>) as primitives — no array indexing, no direct access to the middle.</p>
+<ul>
+<li><strong>Input:</strong> sequence of push/pop/top calls.</li>
+<li><strong>Output:</strong> results of pop/top.</li>
+<li><strong>Constraint:</strong> internally, you may use one or two queues.</li>
+<li><strong>What makes this different:</strong> you&#39;re forced to build LIFO behavior on top of a primitive (queue) that natively does the <em>opposite</em> (FIFO). Somewhere, an order must get reversed.</li>
+</ul>
+<h3>2. How to Think About the Problem</h3>
+<p><strong>What should I notice first?</strong> <code>queue.poll()</code> always returns the <em>oldest</em> element. <code>stack.pop()</code> needs the <em>newest</em>. Direct conflict.</p>
+<p><strong>What would I try first?</strong> Pick ONE operation to make &quot;expensive&quot; (do reordering work there), so the other stays cheap and simple — this is a recurring theme in &quot;implement A using B&quot; problems.</p>
+<p><strong>What observation unlocks the trick?</strong> After enqueuing a new element to the back of a queue of size <code>k</code>, if you immediately dequeue-then-re-enqueue the <code>k - 1</code> elements that were sitting in front of it, the new element ends up at the <strong>front</strong>. From then on, <code>queue.peek()</code> gives the most-recently-pushed element — exactly what <code>stack.peek()</code>/<code>pop()</code> need.</p>
+<p><strong>Clue → Observation → Pattern → Data Structure → Algorithm:</strong>
+<code>need LIFO from a FIFO primitive</code> → <code>rotating the queue right after insertion moves the newest element to the front</code> → <code>Stack ⟷ Queue Conversion</code> → <code>single queue</code> → <code>enqueue, then rotate (size − 1) times</code>.</p>
+<h3>3. Pattern Recognition</h3>
+<p><strong>Problem clue:</strong> &quot;implement X using only Y&#39;s operations.&quot;
+<strong>Pattern:</strong> Stack ⟷ Queue Conversion.
+<strong>Why this pattern:</strong> you must simulate one ADT&#39;s ordering with the other&#39;s native primitives.
+<strong>Mental model:</strong> pick one operation to pay the reordering cost, so the other operation stays free.
+<strong>Similar problems:</strong> Problem 4 is the exact mirror image (Queue using Stack).
+<strong>Recognizing this elsewhere:</strong> any &quot;implement A using only B&#39;s operations&quot; question is really asking &quot;what invariant on B&#39;s internal arrangement fakes A&#39;s external behavior?&quot;</p>
+<h3>4. Brute Force</h3>
+<p>The naive idea: don&#39;t reorder on push at all. Instead, make <code>pop()</code> drain the <em>whole</em> queue to reach the last-inserted element, remember it, then rebuild the queue (minus that element) to restore order.</p>
+<pre><code class="language-java">// Naive: O(n) EVERY pop, plus bookkeeping to restore order
+int popNaive(Queue&lt;Integer&gt; q) {
+    int n = q.size();
+    int last = -1;
+    for (int i = 0; i &lt; n; i++) {
+        int val = q.poll();
+        if (i &lt; n - 1) q.offer(val); else last = val;
+    }
+    return last;
+}
+</code></pre>
+<p><strong>Why is this too slow?</strong> Every single <code>pop()</code> touches all <code>n</code> elements, even though only <em>one</em> of them (the last) is actually the answer — the other <code>n - 1</code> are moved purely to restore the queue to where it started.</p>
+<h3>5. Observation</h3>
+<p>Instead of paying this cost on <strong>every pop</strong>, pay a similar cost <strong>once, on every push</strong>, and get pop for free afterward: right after enqueueing the new element, rotate the <em>older</em> <code>size - 1</code> elements from front to back, one at a time. Since they were sitting in front of the new element, moving all of them behind it leaves the new element at the front.</p>
+<h3>6. Optimal Approach</h3>
+<p>Single queue.</p>
+<ul>
+<li><code>push(x)</code>: enqueue <code>x</code> (lands at the back); let <code>rotations = current size − 1</code> (how many elements were there <em>before</em> <code>x</code>); repeat <code>rotations</code> times: dequeue the front element and immediately re-enqueue it. After this, <code>x</code> sits at the front.</li>
+<li><code>pop()</code>: just dequeue — the front is guaranteed correct by the invariant.</li>
+<li><code>top()</code>: just peek at the front.</li>
+</ul>
+<h3>7. Invariant</h3>
+<blockquote>
+<p><strong>Invariant:</strong> After every completed <code>push()</code> call, the queue&#39;s front-to-back order is exactly the <em>reverse</em> of insertion order — <code>queue.peek()</code> always equals the most-recently-pushed, not-yet-popped element.</p>
+</blockquote>
+<h3>8. Dry Run</h3>
+<table>
+<thead>
+<tr>
+<th>op</th>
+<th>queue before</th>
+<th>operation</th>
+<th>queue after</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>push(1)</code></td>
+<td><code>[]</code></td>
+<td>enqueue 1, 0 rotations</td>
+<td><code>[1]</code></td>
+</tr>
+<tr>
+<td><code>push(2)</code></td>
+<td><code>[1]</code></td>
+<td>enqueue 2 → <code>[1,2]</code>, rotate 1 → move <code>1</code> to back</td>
+<td><code>[2,1]</code></td>
+</tr>
+<tr>
+<td><code>push(3)</code></td>
+<td><code>[2,1]</code></td>
+<td>enqueue 3 → <code>[2,1,3]</code>, rotate 2 → move <code>2</code>, then <code>1</code></td>
+<td><code>[3,2,1]</code></td>
+</tr>
+<tr>
+<td><code>pop()</code></td>
+<td><code>[3,2,1]</code></td>
+<td>dequeue front</td>
+<td><code>[2,1]</code> → returns <strong>3</strong></td>
+</tr>
+<tr>
+<td><code>pop()</code></td>
+<td><code>[2,1]</code></td>
+<td>dequeue front</td>
+<td><code>[1]</code> → returns <strong>2</strong></td>
+</tr>
+<tr>
+<td><code>push(5)</code></td>
+<td><code>[1]</code></td>
+<td>enqueue 5 → <code>[1,5]</code>, rotate 1 → move <code>1</code></td>
+<td><code>[5,1]</code></td>
+</tr>
+<tr>
+<td><code>top()</code></td>
+<td><code>[5,1]</code></td>
+<td>peek front</td>
+<td>returns <strong>5</strong></td>
+</tr>
+</tbody></table>
+<h3>9. Why Does It Work?</h3>
+<p>Rotating exactly <code>size − 1</code> elements after every push guarantees the newest element reaches the front, because that&#39;s precisely how many &quot;older&quot; elements existed ahead of it at that moment — no more, no less. Every push pays for its own reordering in full, so <code>pop</code>/<code>top</code> never need to do anything beyond a native O(1) queue operation.</p>
+<h3>10. Java Code</h3>
+<pre><code class="language-java">class StackUsingQueue {
+    private Deque&lt;Integer&gt; queue = new ArrayDeque&lt;&gt;(); // used purely as a FIFO here
+
+    public void push(int x) {
+        queue.offer(x);
+        int rotations = queue.size() - 1;
+        for (int i = 0; i &lt; rotations; i++) {
+            queue.offer(queue.poll()); // move one &quot;older&quot; element from front to back
+        }
+    }
+
+    public int pop() { return queue.poll(); }
+    public int top()  { return queue.peek(); }
+    public boolean isEmpty() { return queue.isEmpty(); }
+}
+</code></pre>
+<h3>11. Complexity</h3>
+<p><strong>Time:</strong> <code>push</code> is O(n) (up to <code>size − 1</code> rotations); <code>pop</code> and <code>top</code> are O(1). This is a deliberate trade-off, not a limitation — the reordering cost has to live <em>somewhere</em>, and this design puts it on push.
+<strong>Space:</strong> O(n) for the underlying queue holding all elements.</p>
+<h3>12. Edge Cases</h3>
+<ul>
+<li>Push/pop on an empty stack.</li>
+<li>Single-element stack.</li>
+<li>Many pushes then many pops interleaved (worth tracing by hand once to build confidence).</li>
+</ul>
+<h3>13. Common Mistakes</h3>
+<ul>
+<li><strong>Rotating the wrong number of times</strong> — using <code>size</code> instead of <code>size − 1</code> rotates the new element itself back to the rear, undoing the entire point.</li>
+<li>Forgetting this trades push&#39;s simplicity for pop&#39;s — some interviewers specifically want the <em>other</em> trade-off (two queues: O(1) push, O(n) pop by draining one queue into another to reach the bottom element). Know that alternative exists even if you lead with this one.</li>
+<li>Assuming <code>poll()</code> immediately followed by <code>offer()</code> is a single atomic step — it&#39;s two real operations, not free.</li>
+</ul>
+<h3>14. Pattern to Remember</h3>
+<pre><code class="language-text">Problem clue:  implement Stack using only Queue operations
+Pattern:       Stack ⟷ Queue Conversion
+Data structure: single queue
+Stores:        raw values, kept in reverse-insertion order
+Push:          enqueue, then rotate (size-1) older elements to the back
+Pop / Top:     plain dequeue / peek — free, by the push-time invariant
+Invariant:     queue front == most recently pushed, not-yet-popped element
+Key insight:   pick ONE op to pay the reordering cost; the other rides free
+Time:          push O(n), pop/top O(1)
+Space:         O(n)
+</code></pre>
+<p><strong>Memory trick:</strong> <em>&quot;Rotate right after you push — the newcomer muscles its way to the front.&quot;</em></p>
+<h3>15. Interview Trigger</h3>
+<blockquote>
+<p>If asked to implement a Stack using only Queue operations, I think: I need one ADT&#39;s data arranged internally to fake the other&#39;s order. I&#39;ll make <code>push()</code> do the reordering — enqueue the new value, then rotate every older element from front to back exactly <code>size − 1</code> times — so the queue&#39;s own front is always my most recent push.</p>
+</blockquote>
+<hr>
+<h1>4. Implement Queue using Stack</h1>
+<h3>1. Problem Understanding</h3>
+<p>Build queue <code>enqueue</code>/<code>dequeue</code>/<code>front</code> using <strong>only</strong> stack <code>push</code>/<code>pop</code> operations. The same &quot;wrong native order&quot; conflict as Problem 3, mirrored: a stack naturally gives LIFO, but we need FIFO.</p>
+<h3>2. How to Think About the Problem</h3>
+<p><strong>What should I notice first?</strong> This is <em>structurally the same shape</em> as Problem 3, direction reversed.</p>
+<p><strong>What would I try first?</strong> Same idea — pick one operation to be &quot;expensive,&quot; reorder there.</p>
+<p><strong>The twist here:</strong> with <strong>two stacks</strong>, reversing an order <em>twice</em> restores the original order — and this can be done far more cheaply than Problem 3&#39;s per-call rotation, because you only <em>need</em> to reverse when your &quot;ready to dequeue&quot; supply runs out, not on every single call.</p>
+<p><strong>Clue → Observation → Pattern → Data Structure → Algorithm:</strong>
+<code>need FIFO from LIFO primitives</code> → <code>reversing twice restores the original order</code> → <code>Queue via two Stacks</code> → <code>inStack (arrivals) + outStack (departures)</code> → <code>push cheaply onto inStack always; only when outStack is empty, pour ALL of inStack into outStack (this reverses once); dequeue from outStack (this reverses again, restoring FIFO order)</code>.</p>
+<h3>3. Pattern Recognition</h3>
+<p><strong>Problem clue:</strong> &quot;implement Queue using only Stack operations.&quot;
+<strong>Pattern:</strong> Stack ⟷ Queue Conversion (mirror of Problem 3).
+<strong>Why this pattern:</strong> same &quot;one ADT&#39;s ordering, faked using the other&#39;s primitives&quot; idea.
+<strong>Mental model:</strong> two stacks, reverse-then-reverse-again cancels out.
+<strong>Key contrast with Problem 3:</strong> there, the reordering cost is paid on <em>every single push</em>. Here, it&#39;s paid in occasional big batches — which is why this version is normally preferred: it&#39;s <strong>amortized</strong> O(1), not worst-case O(n) on every call.</p>
+<h3>4. Brute Force</h3>
+<p>Single-stack idea, same flavor as Problem 3&#39;s naive approach: to dequeue, pop everything into a temp stack to reach the bottom (oldest) element, then push everything back to restore order.</p>
+<pre><code class="language-java">// Naive: full reversal-and-restoration on EVERY dequeue
+int dequeueNaive(Deque&lt;Integer&gt; stack) {
+    Deque&lt;Integer&gt; temp = new ArrayDeque&lt;&gt;();
+    while (stack.size() &gt; 1) temp.push(stack.pop());
+    int frontVal = stack.pop();
+    while (!temp.isEmpty()) stack.push(temp.pop());
+    return frontVal;
+}
+</code></pre>
+<p><strong>Why is this too slow?</strong> Every dequeue call redoes a <em>full</em> reversal-and-restoration, even for elements that were already correctly sorted into place by an earlier dequeue moments before. That earlier work is thrown away and repeated from scratch, every time.</p>
+<h3>5. Observation</h3>
+<p>Don&#39;t restore the order after dequeuing — <strong>leave it reversed</strong> as long as it&#39;s still usable! It only stops being usable once you&#39;ve drained it completely and need fresh elements. So: only refill from the &quot;arrivals&quot; pile when the &quot;departures&quot; pile is <em>completely</em> empty. Each element then gets &quot;flipped&quot; from one pile to the other exactly once in its whole lifetime.</p>
+<h3>6. Optimal Approach</h3>
+<p>Two stacks: <code>inStack</code> (absorbs enqueues) and <code>outStack</code> (serves dequeues).</p>
+<ul>
+<li><code>enqueue(x)</code>: always just <code>inStack.push(x)</code> — O(1), no exceptions, ever.</li>
+<li><code>dequeue()</code>: if <code>outStack</code> is empty, pour <em>all</em> of <code>inStack</code> into <code>outStack</code> (pop from <code>inStack</code>, push to <code>outStack</code>, repeat until <code>inStack</code> is empty) — this reverses their order, so the oldest element (which was at the very bottom of <code>inStack</code>) ends up on <strong>top</strong> of <code>outStack</code>. Then <code>outStack.pop()</code>.</li>
+</ul>
+<h3>7. Invariant</h3>
+<blockquote>
+<p><strong>Invariant:</strong> At all times, <code>outStack</code> (top→bottom) holds the oldest still-pending elements in correct dequeue order, and <code>inStack</code> (top→bottom) holds the newer elements in reverse dequeue order. Every element lives in exactly one of the two stacks at any moment, and moves from <code>inStack</code> to <code>outStack</code> — reversing its position — exactly once in its entire lifetime.</p>
+</blockquote>
+<h3>8. Dry Run</h3>
+<table>
+<thead>
+<tr>
+<th>op</th>
+<th>inStack</th>
+<th>outStack</th>
+<th>operation</th>
+<th>answer</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>enqueue(1,2,3)</code></td>
+<td><code>[3,2,1]</code> (top=3)</td>
+<td><code>[]</code></td>
+<td>three pushes</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>dequeue()</code></td>
+<td><code>[3,2,1]</code> → <code>[]</code></td>
+<td><code>[]</code> → <code>[3,2,1]</code> (top=1)</td>
+<td>outStack empty → pour all of inStack, then pop</td>
+<td><strong>1</strong></td>
+</tr>
+<tr>
+<td>(state now)</td>
+<td><code>[]</code></td>
+<td><code>[3,2]</code> (top=2)</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>enqueue(4)</code></td>
+<td><code>[4]</code></td>
+<td><code>[3,2]</code></td>
+<td>push</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>dequeue()</code></td>
+<td><code>[4]</code></td>
+<td><code>[3,2]</code></td>
+<td>outStack not empty → just pop</td>
+<td><strong>2</strong></td>
+</tr>
+<tr>
+<td><code>dequeue()</code></td>
+<td><code>[4]</code></td>
+<td><code>[3]</code></td>
+<td>pop</td>
+<td><strong>3</strong></td>
+</tr>
+<tr>
+<td><code>dequeue()</code></td>
+<td><code>[4]</code> → <code>[]</code></td>
+<td><code>[]</code> → <code>[4]</code></td>
+<td>outStack empty → pour inStack (just <code>4</code>), then pop</td>
+<td><strong>4</strong></td>
+</tr>
+</tbody></table>
+<h3>9. Why Does It Work?</h3>
+<p>Reversing an order twice gives back the original order. <code>inStack</code> naturally reverses insertion order (most recent on top, as any stack does). Pouring it into <code>outStack</code> reverses it <em>again</em> — so <code>outStack</code> ends up in true FIFO order (oldest on top, ready to pop). As long as a pour only ever happens when <code>outStack</code> is completely empty, no element is ever mixed between &quot;generations,&quot; so every element passes through exactly this reverse-then-reverse-again journey and comes out correctly ordered.</p>
+<h3>10. Java Code</h3>
+<pre><code class="language-java">class QueueUsingStack {
+    private Deque&lt;Integer&gt; inStack = new ArrayDeque&lt;&gt;();
+    private Deque&lt;Integer&gt; outStack = new ArrayDeque&lt;&gt;();
+
+    public void enqueue(int x) {
+        inStack.push(x); // always cheap
+    }
+
+    public int dequeue() {
+        if (outStack.isEmpty()) {
+            // one-time &quot;flip&quot;: each element moves inStack -&gt; outStack exactly once
+            while (!inStack.isEmpty()) outStack.push(inStack.pop());
+        }
+        return outStack.pop();
+    }
+}
+</code></pre>
+<h3>11. Complexity</h3>
+<p><strong>Time:</strong> <code>enqueue</code> is always O(1). <code>dequeue</code> is <strong>amortized O(1)</strong> — a single call <em>can</em> cost O(n) (when it triggers a pour), but pouring moves each element from <code>inStack</code> to <code>outStack</code> exactly once, ever, no matter how many enqueue/dequeue calls happen overall. Across any sequence of <code>m</code> operations, total pouring work is bounded by the total number of elements ever enqueued (≤ <code>m</code>), so spread across <code>m</code> calls, the average cost per call is O(1). This is the same &quot;each element is touched a bounded number of times, total, across the whole run&quot; argument used for the monotonic stack in Part 1 — just applied to a different structure.
+<strong>Space:</strong> O(n) across both stacks combined.</p>
+<h3>12. Edge Cases</h3>
+<ul>
+<li>Dequeue on completely empty (both stacks empty).</li>
+<li>Dequeue immediately after a pour vs. while <code>outStack</code> still has leftovers.</li>
+<li>Alternating single enqueue/dequeue pairs — worth tracing once to see that most calls are O(1) but not literally every single one.</li>
+<li><code>front()</code>/<code>peek()</code> must also trigger a pour if needed, not just <code>dequeue()</code>.</li>
+</ul>
+<h3>13. Common Mistakes</h3>
+<ul>
+<li><strong>Pouring from <code>inStack</code> to <code>outStack</code> even when <code>outStack</code> is not empty</strong> — this interleaves old and new &quot;generations&quot; incorrectly and breaks the invariant permanently.</li>
+<li>Forgetting <code>front()</code> needs the same &quot;pour if empty&quot; check as <code>dequeue()</code>.</li>
+<li>Reporting worst-case O(1) instead of amortized O(1) — a good interviewer will ask &quot;what&#39;s the worst case for one single call?&quot; (answer: O(n)) and expects you to explain <em>why the average is still O(1)</em>.</li>
+</ul>
+<h3>14. Pattern to Remember</h3>
+<pre><code class="language-text">Problem clue:  implement Queue using only Stack operations
+Pattern:       Stack ⟷ Queue Conversion (mirror of Problem 3)
+Data structure: two stacks — inStack (arrivals), outStack (departures)
+Stores:        raw values
+Enqueue:       inStack.push(x) — always O(1)
+Dequeue:       if outStack empty, pour all of inStack into it; then outStack.pop()
+Invariant:     each element flips inStack -&gt; outStack exactly once, ever
+Key insight:   reverse twice = restore order; only reverse when you must
+Time:          enqueue O(1); dequeue amortized O(1), worst case O(n)
+Space:         O(n)
+</code></pre>
+<p><strong>Memory trick:</strong> <em>&quot;Two stacks, reverse twice — but only reverse when the well runs dry.&quot;</em></p>
+<h3>15. Interview Trigger</h3>
+<blockquote>
+<p>If asked to implement a Queue using only Stack operations, I think: two stacks, because reversing an order twice cancels out. <code>inStack</code> absorbs enqueues cheaply. <code>outStack</code> serves dequeues cheaply — and I only ever refill <code>outStack</code> from <code>inStack</code> when <code>outStack</code> is completely empty, which guarantees each element is &quot;flipped&quot; exactly once in its lifetime, giving amortized O(1).</p>
+</blockquote>
+<hr>
+<h1>5. Implement Stack using Linked List</h1>
+<h3>1. Problem Understanding</h3>
+<p>Same LIFO container as Problem 1, backed by a <strong>singly linked list</strong> instead of an array — no fixed capacity, grows/shrinks one node at a time.</p>
+<p><strong>Key difference from the array version:</strong> no resizing concerns and no capacity ceiling, but each element now carries pointer overhead (an object + a reference), and — crucially — a singly linked list is only cheap to modify at <em>one particular end</em>.</p>
+<h3>2. How to Think About the Problem</h3>
+<p><strong>What&#39;s cheap on a singly linked list?</strong> Inserting/removing at the <strong>head</strong> is O(1) — you just rewire one pointer. Inserting/removing at the <strong>tail</strong> would require walking the whole list to find the node <em>before</em> the tail (a singly linked list has no &quot;previous&quot; pointer), which is O(n) — unless you maintain a separate tail pointer, and even then, <em>removing</em> from the tail is still O(n), because after removing it you&#39;d need to find the <em>new</em> tail by walking from the head.</p>
+<p><strong>The key realization:</strong> a stack only ever needs <em>one</em> end — &quot;the most recent thing.&quot; Since a linked list&#39;s head is exactly &quot;whatever was most recently attached,&quot; the cheap end and the end we need are the <em>same</em> end. No cleverness required — just recognize it and use it directly.</p>
+<h3>3. Pattern Recognition</h3>
+<p><strong>Problem clue:</strong> implement a stack &quot;using a linked list.&quot;
+<strong>Pattern:</strong> Basic Stack Implementation (same pattern as Problem 1, different storage).
+<strong>Mental model:</strong> top = head, always, full stop.
+<strong>Similar problems:</strong> Problem 1 (identical external behavior); Problem 6 (Queue via Linked List) is the contrast — a queue is forced to touch <em>both</em> ends, needing head <strong>and</strong> tail pointers.</p>
+<h3>4. Brute Force</h3>
+<p>The genuine naive-but-wrong instinct here: treat the <strong>tail</strong> as the top instead (append new nodes at the end; &quot;pop&quot; removes from the end).</p>
+<pre><code class="language-java">// Naive: pop() has no way to find the new tail without walking the whole list
+int popFromTailNaive(Node head) {
+    if (head.next == null) { /* only element */ return head.data; }
+    Node cur = head;
+    while (cur.next.next != null) cur = cur.next; // walk to the SECOND-TO-LAST node
+    int val = cur.next.data;
+    cur.next = null;
+    return val;
+}
+</code></pre>
+<p><strong>Why is this too slow?</strong> A singly linked list has no <code>previous</code> pointer, so finding the node <em>just before</em> the tail (needed to detach the tail and correctly form the new tail) requires walking from the head every single time — O(n) per pop, even though push (append at tail, with a maintained tail pointer) could stay O(1).</p>
+<h3>5. Observation</h3>
+<p>The lesson here is the mirror image of Problem 2&#39;s: instead of a clever fix, recognize that the <em>cheap</em> end (head) already matches the end we actually need for LIFO (&quot;top&quot;). No wraparound trick, no auxiliary pointer — just use head directly as top.</p>
+<h3>6. Optimal Approach</h3>
+<p>Singly linked list with a <code>head</code> reference only — no tail pointer needed, because we never touch the tail.</p>
+<ul>
+<li><code>push(x)</code>: create a new node; <code>newNode.next = head</code>; <code>head = newNode</code>.</li>
+<li><code>pop()</code>: save <code>head.data</code>; <code>head = head.next</code>; return the saved value.</li>
+<li><code>peek()</code>: <code>head.data</code>. <code>isEmpty()</code>: <code>head == null</code>.</li>
+</ul>
+<h3>7. Invariant</h3>
+<blockquote>
+<p><strong>Invariant:</strong> <code>head</code> always points at the most-recently-pushed, not-yet-popped node, and following <code>.next</code> pointers from <code>head</code> visits the remaining stack contents in exact &quot;most recent first&quot; order.</p>
+</blockquote>
+<h3>8. Dry Run</h3>
+<table>
+<thead>
+<tr>
+<th>op</th>
+<th>list before</th>
+<th>operation</th>
+<th>list after</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>push(10)</code></td>
+<td><code>null</code></td>
+<td>new node, <code>next=null</code>, <code>head=</code>it</td>
+<td><code>10 → null</code></td>
+</tr>
+<tr>
+<td><code>push(20)</code></td>
+<td><code>10 → null</code></td>
+<td>new node, <code>next=</code>old head, <code>head=</code>it</td>
+<td><code>20 → 10 → null</code></td>
+</tr>
+<tr>
+<td><code>push(30)</code></td>
+<td><code>20→10→null</code></td>
+<td>same</td>
+<td><code>30 → 20 → 10 → null</code></td>
+</tr>
+<tr>
+<td><code>pop()</code></td>
+<td><code>30→20→10→null</code></td>
+<td>save 30, <code>head = head.next</code></td>
+<td><code>20 → 10 → null</code> → returns <strong>30</strong></td>
+</tr>
+<tr>
+<td><code>peek()</code></td>
+<td><code>20→10→null</code></td>
+<td>read <code>head.data</code></td>
+<td>unchanged → returns <strong>20</strong></td>
+</tr>
+</tbody></table>
+<h3>9. Why Does It Work?</h3>
+<p>A linked list&#39;s head is the one place where insertion/removal never requires knowing about, or touching, any <em>other</em> node — only <code>head</code> itself and the new/old node&#39;s <code>.next</code> are ever rewired. Since LIFO only ever needs &quot;the most recent thing,&quot; and <code>head</code> <em>is</em>, by construction, &quot;whatever was inserted most recently and hasn&#39;t been removed,&quot; the two line up perfectly with zero extra bookkeeping.</p>
+<h3>10. Java Code</h3>
+<pre><code class="language-java">class StackLinkedList {
+    private static class Node {
+        int data;
+        Node next;
+        Node(int data) { this.data = data; }
+    }
+
+    private Node head;
+
+    public boolean isEmpty() { return head == null; }
+
+    public void push(int x) {
+        Node newNode = new Node(x);
+        newNode.next = head;   // new node points to the OLD top
+        head = newNode;        // new node becomes the top
+    }
+
+    public int pop() {
+        if (isEmpty()) throw new RuntimeException(&quot;Stack Underflow&quot;);
+        int val = head.data;
+        head = head.next;      // old top is dropped
+        return val;
+    }
+
+    public int peek() {
+        if (isEmpty()) throw new RuntimeException(&quot;Stack is empty&quot;);
+        return head.data;
+    }
+}
+</code></pre>
+<h3>11. Complexity</h3>
+<p><strong>Time:</strong> O(1) for every operation — only <code>head</code> (and, for push, one new node&#39;s <code>.next</code>) is ever touched, never a traversal.
+<strong>Space:</strong> O(n) total across all elements, no pre-allocated capacity like the array version — grows/shrinks exactly one node per operation, but each node carries extra overhead (object header + pointer) versus the array version&#39;s bare <code>int</code>.</p>
+<h3>12. Edge Cases</h3>
+<ul>
+<li>Pop/peek on empty (<code>head == null</code> → guard, or you&#39;ll get a <code>NullPointerException</code>).</li>
+<li>Single element (push then pop returns cleanly to empty).</li>
+<li>Very long chains — no capacity ceiling like Problem 1, but real memory is still finite.</li>
+</ul>
+<h3>13. Common Mistakes</h3>
+<ul>
+<li><strong>Setting <code>head = newNode</code> <em>before</em> wiring <code>newNode.next = head</code></strong> — this loses the reference to the old head entirely, since you overwrote <code>head</code> before reading its old value into <code>newNode.next</code>. Order matters.</li>
+<li>Forgetting the <code>isEmpty()</code>/null check before dereferencing <code>head.data</code>.</li>
+<li>Trying to <em>also</em> maintain a <code>tail</code> pointer &quot;just in case&quot; — unnecessary for a stack, and a common instinct wrongly carried over from queue implementations (see Problem 6).</li>
+</ul>
+<h3>14. Pattern to Remember</h3>
+<pre><code class="language-text">Problem clue:  implement Stack using a linked list
+Pattern:       Basic Stack Implementation
+Data structure: singly linked list, head pointer only
+Stores:        raw values
+Push:          newNode.next = head; then head = newNode
+Pop:           save head.data; then head = head.next
+Invariant:     head = most recently pushed, not-yet-popped node
+Key insight:   top = head, always — the cheap end IS the end we need
+Time / Space:  O(1) per op / O(n), no capacity ceiling
+</code></pre>
+<p><strong>Memory trick:</strong> <em>&quot;Top = head. No tail, ever.&quot;</em></p>
+<h3>15. Interview Trigger</h3>
+<blockquote>
+<p>If asked for a stack using a linked list, I immediately think: top = head, nothing else needed. Push wires the new node&#39;s <code>next</code> to the current head <em>then</em> updates head; pop reads <code>head.data</code> <em>then</em> advances head to <code>head.next</code>. No tail pointer, no traversal, ever.</p>
+</blockquote>
+<hr>
+<h1>6. Implement Queue using Linked List</h1>
+<h3>1. Problem Understanding</h3>
+<p>FIFO container via linked list. Unlike Problem 5&#39;s stack (which only ever needs <code>head</code>), a queue&#39;s two ends genuinely do different jobs — insert at the back, remove from the front — so both must be tracked.</p>
+<h3>2. How to Think About the Problem</h3>
+<p><strong>What&#39;s cheap on a singly linked list?</strong> Removing from <strong>head</strong>: O(1), always. Inserting at <strong>tail</strong>: O(1) <em>if</em> you maintain a tail pointer (otherwise O(n), walking from head to find it every time). Removing from the tail: O(n), always (no <code>previous</code> pointer) — so we must never need to do that.</p>
+<p>Since FIFO removes from the front and adds at the back, and removal-from-front is the operation that&#39;s cheap &quot;for free,&quot; let <code>front = head</code> (the removal side), and make insertion cheap too by explicitly tracking <code>tail</code> (the insertion side) with its own pointer.</p>
+<h3>3. Pattern Recognition</h3>
+<p><strong>Problem clue:</strong> FIFO + &quot;using a linked list.&quot;
+<strong>Pattern:</strong> Basic Queue Implementation (same contract as Problem 2, different storage).
+<strong>Key structural contrast with Problem 5:</strong> a stack needs <em>one</em> pointer (<code>head</code>), because both its operations happen at the same end. A queue needs <em>two</em> pointers (<code>head</code> and <code>tail</code>), because its two operations happen at opposite ends.</p>
+<h3>4. Brute Force</h3>
+<p>Keep only a <code>head</code> pointer (no <code>tail</code>), and find the tail by walking from <code>head</code> every time you enqueue.</p>
+<pre><code class="language-java">// Naive: re-discovers the tail from scratch on every single enqueue
+void enqueueNaive(int x) {
+    Node newNode = new Node(x);
+    if (head == null) { head = newNode; return; }
+    Node cur = head;
+    while (cur.next != null) cur = cur.next; // O(n) walk to find the tail
+    cur.next = newNode;
+}
+</code></pre>
+<p><strong>Why is this too slow?</strong> You&#39;re re-discovering information (where the tail is) that you already knew a moment ago, right after the <em>previous</em> enqueue — and re-discovering it means walking further and further as the queue grows, for <em>every</em> single enqueue.</p>
+<h3>5. Observation</h3>
+<p>Just remember where the tail is instead of re-finding it: maintain a <code>tail</code> reference alongside <code>head</code>, and update it in O(1) on every enqueue — the new node <em>is</em> the new tail, by definition, the moment it&#39;s attached.</p>
+<h3>6. Optimal Approach</h3>
+<p><code>head</code> and <code>tail</code> pointers.</p>
+<ul>
+<li><code>enqueue(x)</code>: create <code>newNode</code>; if the queue is empty, <code>head = tail = newNode</code>; otherwise <code>tail.next = newNode</code>, then <code>tail = newNode</code>.</li>
+<li><code>dequeue()</code>: save <code>head.data</code>; <code>head = head.next</code>; <strong>if <code>head</code> becomes <code>null</code>, also set <code>tail = null</code></strong> — otherwise <code>tail</code> would dangle, pointing at a node that&#39;s no longer reachable from <code>head</code>.</li>
+</ul>
+<h3>7. Invariant</h3>
+<blockquote>
+<p><strong>Invariant:</strong> <code>head</code> always points to the oldest not-yet-dequeued node (the front); <code>tail</code> always points to the most-recently-enqueued node (the back); following <code>.next</code> from <code>head</code> reaches <code>tail</code> in exact FIFO order. When the queue is empty, <strong>both</strong> <code>head</code> and <code>tail</code> are <code>null</code>.</p>
+</blockquote>
+<h3>8. Dry Run</h3>
+<table>
+<thead>
+<tr>
+<th>op</th>
+<th>list before</th>
+<th>operation</th>
+<th>list after</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>enqueue(1)</code></td>
+<td>empty</td>
+<td><code>head = tail =</code> new node</td>
+<td><code>1</code> (head=tail)</td>
+</tr>
+<tr>
+<td><code>enqueue(2)</code></td>
+<td><code>1</code></td>
+<td><code>tail.next = 2</code>, <code>tail = 2</code></td>
+<td><code>1 → 2</code></td>
+</tr>
+<tr>
+<td><code>enqueue(3)</code></td>
+<td><code>1→2</code></td>
+<td><code>tail.next = 3</code>, <code>tail = 3</code></td>
+<td><code>1 → 2 → 3</code></td>
+</tr>
+<tr>
+<td><code>dequeue()</code></td>
+<td><code>1→2→3</code></td>
+<td>save 1, <code>head = head.next</code></td>
+<td><code>2 → 3</code> → returns <strong>1</strong></td>
+</tr>
+<tr>
+<td><code>dequeue()</code></td>
+<td><code>2→3</code></td>
+<td>save 2, <code>head = head.next</code></td>
+<td><code>3</code> (head=tail=3) → returns <strong>2</strong></td>
+</tr>
+<tr>
+<td><code>dequeue()</code></td>
+<td><code>3</code></td>
+<td>save 3, <code>head = head.next = null</code> → <strong>also <code>tail = null</code></strong></td>
+<td>empty → returns <strong>3</strong></td>
+</tr>
+</tbody></table>
+<h3>9. Why Does It Work?</h3>
+<p>Because <code>tail</code> is updated at the <em>exact</em> moment a new tail node is created (during enqueue itself), we never need to search for it later — the invariant guarantees correctness without ever re-deriving it. And because removal only ever happens at <code>head</code> (the one end that&#39;s naturally cheap to shrink from on a singly linked list), dequeue never needs a <code>previous</code> pointer.</p>
+<h3>10. Java Code</h3>
+<pre><code class="language-java">class QueueLinkedList {
+    private static class Node {
+        int data;
+        Node next;
+        Node(int data) { this.data = data; }
+    }
+
+    private Node head, tail; // front, back
+
+    public boolean isEmpty() { return head == null; }
+
+    public void enqueue(int x) {
+        Node newNode = new Node(x);
+        if (isEmpty()) {
+            head = tail = newNode;
+        } else {
+            tail.next = newNode;  // attach after the current tail
+            tail = newNode;       // new node becomes the tail
+        }
+    }
+
+    public int dequeue() {
+        if (isEmpty()) throw new RuntimeException(&quot;Queue Underflow&quot;);
+        int val = head.data;
+        head = head.next;
+        if (head == null) tail = null; // queue just became empty — clear tail too
+        return val;
+    }
+
+    public int front() {
+        if (isEmpty()) throw new RuntimeException(&quot;Queue is empty&quot;);
+        return head.data;
+    }
+}
+</code></pre>
+<h3>11. Complexity</h3>
+<p><strong>Time:</strong> O(1) for every operation, thanks to the maintained <code>tail</code> pointer.
+<strong>Space:</strong> O(n), no capacity ceiling (unlike Problem 2), with extra per-node pointer overhead.</p>
+<h3>12. Edge Cases</h3>
+<ul>
+<li>Dequeue down to exactly one element, then dequeue again — must correctly null out <code>tail</code> too.</li>
+<li>Enqueue on an empty queue — both <code>head</code> and <code>tail</code> must become the new node.</li>
+<li>Dequeue/front on empty.</li>
+</ul>
+<h3>13. Common Mistakes</h3>
+<ul>
+<li><strong>Forgetting to reset <code>tail = null</code> when the last element is dequeued.</strong> This is the classic bug: <code>tail</code> keeps pointing at a node that&#39;s no longer reachable from <code>head</code>, and the <em>next</em> enqueue silently attaches the new node to that orphaned node instead of extending the real list — so the new element becomes unreachable from <code>head</code> and effectively disappears.</li>
+<li>Confusing which pointer moves on which operation — <code>head</code> moves on dequeue, <code>tail</code> moves on enqueue, never the other way.</li>
+</ul>
+<h3>14. Pattern to Remember</h3>
+<pre><code class="language-text">Problem clue:  implement Queue using a linked list
+Pattern:       Basic Queue Implementation
+Data structure: singly linked list, head (front) + tail (back)
+Stores:        raw values
+Enqueue:       attach after tail, then tail = new node
+Dequeue:       read head.data, then head = head.next (and null tail if list is now empty)
+Invariant:     head = front (oldest), tail = back (newest); both null iff empty
+Key insight:   two ends touched -&gt; two pointers; head is the naturally cheap removal side
+Time / Space:  O(1) per op / O(n), no capacity ceiling
+</code></pre>
+<p><strong>Memory trick:</strong> <em>&quot;Two ends, two pointers — and don&#39;t forget to null the tail on the last dequeue.&quot;</em></p>
+<h3>15. Interview Trigger</h3>
+<blockquote>
+<p>If asked for a queue using a linked list, I think: one pointer per end — <code>head</code> for removal (the naturally cheap side of a singly linked list), <code>tail</code> for insertion (made cheap by tracking it explicitly). The one detail I make a point of not forgetting: when the last element is dequeued, both <code>head</code> <strong>and</strong> <code>tail</code> must become <code>null</code>.</p>
+</blockquote>
+<hr>
+<h1>7. Balanced Parentheses</h1>
+<h3>1. Problem Understanding</h3>
+<p>Given a string of brackets — possibly several types, <code>()</code>, <code>[]</code>, <code>{}</code> — determine whether every opening bracket has a matching closing bracket, in the correct nested order (not just equal <em>counts</em>).</p>
+<ul>
+<li><strong>Input:</strong> a string of bracket characters (sometimes mixed with other characters to ignore).</li>
+<li><strong>Output:</strong> boolean.</li>
+<li><strong>Important observation:</strong> &quot;correct order&quot; is the whole problem. <code>&quot;([)]&quot;</code> has equal counts of every bracket type but is <strong>not</strong> balanced, because the brackets cross instead of nesting.</li>
+</ul>
+<p>Example: <code>&quot;{[()]}&quot;</code> → <code>true</code>. <code>&quot;{[(])}&quot;</code> → <code>false</code>.</p>
+<h3>2. How to Think About the Problem</h3>
+<p><strong>What should I notice first?</strong> The word &quot;nested,&quot; or just visualizing brackets inside brackets.</p>
+<p><strong>What clue matters?</strong> When a <em>closing</em> bracket arrives, which opening bracket must it match? Answer: the most recently opened one that hasn&#39;t been closed yet — because valid brackets must nest, never cross.</p>
+<p><strong>What would I try first (before knowing the trick)?</strong> Count opens and closes of each type separately, and check the counts are equal.</p>
+<p><strong>Why is that wrong (not just slow)?</strong> It only checks <em>quantity</em>, never <em>order</em>. It happily accepts <code>&quot;([)]&quot;</code> as balanced, which is actually invalid. This isn&#39;t a speed problem — the brute-force idea can&#39;t even represent the concept of nesting, so no amount of optimizing it fixes it. A genuinely different data structure is needed: one that remembers <em>order</em>, not just counts.</p>
+<p><strong>What observation unlocks the real solution?</strong> &quot;The most recently opened, still-unclosed bracket&quot; is precisely what a stack&#39;s top gives you, automatically. Push every opener; when a closer arrives, it <em>must</em> match the top of the stack right now — if it doesn&#39;t, the string is unbalanced, immediately.</p>
+<h3>3. Pattern Recognition</h3>
+<p><strong>Problem clue:</strong> matching / nesting / open–close pairs.
+<strong>Pattern:</strong> Stack — Matching.
+<strong>Why this pattern:</strong> correct nesting means &quot;most recently opened, first closed&quot; — LIFO by definition.
+<strong>Mental model:</strong> the stack <em>is</em> your live record of &quot;still open, waiting to be closed.&quot;
+<strong>Similar problems:</strong> any &quot;valid X&quot; problem about nested structure — valid HTML/XML tags, path simplification, matching in a compiler/parser.
+<strong>Recognizing this elsewhere:</strong> whenever a problem says &quot;valid&quot; and gives you paired tokens (opening/closing, start/end, begin/end), think stack immediately.</p>
+<h3>4. Brute Force</h3>
+<p>The &quot;count only&quot; idea:</p>
+<pre><code class="language-java">// WRONG — counts only, ignores order entirely
+boolean countOnly(String s) {
+    int round = 0, square = 0, curly = 0;
+    for (char c : s.toCharArray()) {
+        if (c == &#39;(&#39;) round++;  else if (c == &#39;)&#39;) round--;
+        else if (c == &#39;[&#39;) square++; else if (c == &#39;]&#39;) square--;
+        else if (c == &#39;{&#39;) curly++;  else if (c == &#39;}&#39;) curly--;
+    }
+    return round == 0 &amp;&amp; square == 0 &amp;&amp; curly == 0;
+}
+</code></pre>
+<p><strong>Why is this wrong?</strong> It passes <code>&quot;([)]&quot;</code> as balanced (all three counters end at 0), which is actually invalid. This isn&#39;t fixable by optimizing — the approach fundamentally cannot represent &quot;order,&quot; only &quot;quantity.&quot;</p>
+<h3>5. Observation</h3>
+<p>An unclosed opening bracket&#39;s <em>identity</em> matters, and specifically, only the <strong>most recent</strong> unclosed one is allowed to match the next closer. That&#39;s a LIFO relationship — exactly what a stack tracks natively.</p>
+<h3>6. Optimal Approach</h3>
+<p>Push every opening bracket onto a stack. On a closing bracket: if the stack is empty, there&#39;s nothing for it to match — unbalanced. Otherwise pop the top and check it&#39;s the correct matching opener; if not, unbalanced. At the end, the stack must be completely empty (no leftover unclosed openers).</p>
+<h3>7. Invariant</h3>
+<blockquote>
+<p><strong>Invariant:</strong> While scanning left to right, the stack (bottom→top) always holds exactly the sequence of opening brackets seen so far that have <em>not yet</em> been matched by a closer, in the order they were opened — so the top is always the most recently opened, still-unresolved bracket.</p>
+</blockquote>
+<h3>8. Dry Run — <code>&quot;{[()]}&quot;</code></h3>
+<table>
+<thead>
+<tr>
+<th>i</th>
+<th>char</th>
+<th>stack before</th>
+<th>operation</th>
+<th>stack after</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td><code>{</code></td>
+<td><code>[]</code></td>
+<td>push</td>
+<td><code>[{]</code></td>
+</tr>
+<tr>
+<td>1</td>
+<td><code>[</code></td>
+<td><code>[{]</code></td>
+<td>push</td>
+<td><code>[{,[]</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>(</code></td>
+<td><code>[{,[]</code></td>
+<td>push</td>
+<td><code>[{,[,(]</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>)</code></td>
+<td><code>[{,[,(]</code></td>
+<td>pop <code>(</code>, matches <code>)</code> ✓</td>
+<td><code>[{,[]</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>]</code></td>
+<td><code>[{,[]</code></td>
+<td>pop <code>[</code>, matches <code>]</code> ✓</td>
+<td><code>[{]</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>}</code></td>
+<td><code>[{]</code></td>
+<td>pop <code>{</code>, matches <code>}</code> ✓</td>
+<td><code>[]</code></td>
+</tr>
+<tr>
+<td>end</td>
+<td>—</td>
+<td><code>[]</code></td>
+<td>stack empty → <strong>balanced</strong></td>
+<td>—</td>
+</tr>
+</tbody></table>
+<p>For <code>&quot;{[(])}&quot;</code>: at position <code>)</code>, the stack top is <code>[</code> (not <code>(</code>) — the check fails immediately (popped <code>[</code>, needed <code>(</code> for <code>)</code>) → return <code>false</code> right there, without scanning further.</p>
+<h3>9. Why Does It Work?</h3>
+<p>Valid brackets must nest, never cross — so the only opener a given closer is ever allowed to match is the innermost one still open. &quot;Innermost still open&quot; is mathematically identical to &quot;most recently pushed, not yet popped,&quot; which a stack gives you automatically, with zero extra bookkeeping. If a closer ever needs to reach past the top of the stack to find its match, that&#39;s precisely what &quot;not balanced&quot; means.</p>
+<h3>10. Java Code</h3>
+<pre><code class="language-java">boolean isBalanced(String s) {
+    Deque&lt;Character&gt; stack = new ArrayDeque&lt;&gt;();
+    for (char c : s.toCharArray()) {
+        if (c == &#39;(&#39; || c == &#39;[&#39; || c == &#39;{&#39;) {
+            stack.push(c);
+        } else if (c == &#39;)&#39; || c == &#39;]&#39; || c == &#39;}&#39;) {
+            if (stack.isEmpty()) return false;   // closer with nothing open
+            char open = stack.pop();              // unbox to primitive char — see Common Mistakes
+            if ((c == &#39;)&#39; &amp;&amp; open != &#39;(&#39;) ||
+                (c == &#39;]&#39; &amp;&amp; open != &#39;[&#39;) ||
+                (c == &#39;}&#39; &amp;&amp; open != &#39;{&#39;)) {
+                return false;                      // wrong type matched
+            }
+        }
+        // any other character is simply ignored
+    }
+    return stack.isEmpty();  // no leftover unclosed openers
+}
+</code></pre>
+<h3>11. Complexity</h3>
+<p><strong>Time:</strong> O(n) — every character is pushed at most once and popped at most once (a simpler version of the same &quot;bounded total touches&quot; argument used for the monotonic stack in Part 1).
+<strong>Space:</strong> O(n) worst case — e.g. a string of nothing but opening brackets pushes everything with nothing ever popped.</p>
+<h3>12. Edge Cases</h3>
+<ul>
+<li>Empty string → balanced, vacuously (stack starts and ends empty).</li>
+<li>Only openers, e.g. <code>&quot;(((&quot;</code> → stack non-empty at the end → <code>false</code>.</li>
+<li>Only closers, e.g. <code>&quot;)))&quot;</code> → first closer hits an empty stack → <code>false</code>.</li>
+<li>Single pair <code>&quot;()&quot;</code> → <code>true</code>.</li>
+<li>Mismatched types, e.g. <code>&quot;(]&quot;</code> → <code>false</code>.</li>
+<li>Other characters interleaved, e.g. <code>&quot;a(b)c&quot;</code> — decide whether to ignore them (usually yes, per problem statement).</li>
+</ul>
+<h3>13. Common Mistakes</h3>
+<ul>
+<li><strong>Comparing popped <code>Character</code> objects with <code>!=</code>.</strong> <code>Deque&lt;Character&gt;</code> stores boxed <code>Character</code>s; <code>!=</code> between two boxed objects compares <em>references</em>, not values. It happens to &quot;work&quot; for ASCII brackets only because Java&#39;s <code>Character</code> cache covers that range — but that&#39;s fragile, not correct reasoning. Unbox to a primitive <code>char</code> (as done above: <code>char open = stack.pop();</code>) before comparing.</li>
+<li>Forgetting the empty-stack check before popping on a closer — crashes on inputs like <code>&quot;)&quot;</code>.</li>
+<li>Forgetting the final <code>stack.isEmpty()</code> check — misses inputs like <code>&quot;(((&quot;</code> that never had a mismatched closer, just leftover openers.</li>
+<li>Building a fresh matching-pairs map inside the loop instead of outside it — works, just wasteful.</li>
+</ul>
+<h3>14. Pattern to Remember</h3>
+<pre><code class="language-text">Problem clue:  &quot;valid&quot;/&quot;balanced&quot; + paired opening/closing tokens
+Pattern:       Stack — Matching
+Data structure: stack of characters (openers)
+Stores:        opening brackets not yet closed
+Push:          on every opener
+Pop:           on every closer — must match the top, or it&#39;s invalid
+Invariant:     stack (bottom-&gt;top) = still-open brackets, in open order
+Key insight:   &quot;innermost still open&quot; IS &quot;top of stack&quot; — no bookkeeping needed
+Time / Space:  O(n) / O(n)
+</code></pre>
+<p><strong>Memory trick:</strong> <em>&quot;The closer must match whoever opened most recently — that&#39;s the stack&#39;s top, always.&quot;</em></p>
+<h3>15. Interview Trigger</h3>
+<blockquote>
+<p>The instant I see &quot;valid parentheses/brackets/tags,&quot; I think: I need to know what&#39;s still open, specifically the <em>most recent</em> still-open thing — that&#39;s a stack. Push openers. On a closer, it must match the top of the stack exactly, or it&#39;s invalid. At the end, nothing may be left unclosed.</p>
+</blockquote>
+<hr>
+<h1>8. Implement Min Stack</h1>
+<h3>1. Problem Understanding</h3>
+<p>Build a stack that supports <code>push</code>/<code>pop</code>/<code>top</code> <strong>and</strong> <code>getMin()</code>, all in true O(1) — not amortized, every single call, including <code>getMin()</code>.</p>
+<ul>
+<li><strong>Input:</strong> sequence of push/pop/getMin calls.</li>
+<li><strong>Output:</strong> results of pop/top/getMin.</li>
+<li><strong>Constraint:</strong> O(1) <code>getMin()</code> rules out &quot;just scan the stack for the minimum,&quot; which would be O(n).</li>
+<li><strong>What makes this different from earlier problems:</strong> we need to track something <em>derived</em> from the stack&#39;s contents (the running minimum), and that derived value must update correctly as elements come and go — including, specifically, when the current minimum itself gets popped.</li>
+</ul>
+<h3>2. How to Think About the Problem</h3>
+<p><strong>What should I notice first?</strong> &quot;O(1) <code>getMin</code>&quot; is the whole challenge. The tricky moment is: what&#39;s the new minimum <em>after</em> popping the element that currently holds the minimum?</p>
+<p><strong>What would I try first?</strong> A single <code>min</code> variable, updated on every push: <code>min = Math.min(min, x)</code>.</p>
+<p><strong>Why does that break?</strong> The moment that minimum value gets popped, there&#39;s no way to know what the &quot;second smallest so far&quot; was — that information was thrown away when we only kept a single number.</p>
+<p><strong>What observation unlocks the fix?</strong> Don&#39;t keep only <em>one</em> min value — keep the <strong>full history</strong> of &quot;what was the minimum at each point in time,&quot; synchronized with the main stack, so popping the main stack can always &quot;rewind&quot; the minimum to exactly what it correctly was one step earlier.</p>
+<h3>3. Pattern Recognition</h3>
+<p><strong>Problem clue:</strong> &quot;design a stack that also supports X in O(1),&quot; where X is some running aggregate (min, max, etc.).
+<strong>Pattern:</strong> Augmented Stack (an auxiliary stack tracks extra state).
+<strong>Why this pattern:</strong> any value derived from &quot;everything currently in the stack&quot; needs to update/rewind in perfect lockstep with push/pop — a second stack, pushed and popped at exactly the same moments as the first, does this automatically.
+<strong>Mental model:</strong> two stacks moving in lockstep — one holding the raw values, one holding &quot;the answer to <code>getMin()</code> at this exact depth.&quot;
+<strong>Similar problems:</strong> Max Stack (identical, mirrored). This &quot;shadow stack&quot; idea also shows up in variants of monotonic-stack problems that need to track more than one thing per entry.
+<strong>Recognizing this elsewhere:</strong> any time you need an O(1) running aggregate that must correctly &quot;undo&quot; itself on pop, think: a second, parallel stack.</p>
+<h3>4. Brute Force</h3>
+<p>A single <code>min</code> variable with no history:</p>
+<pre><code class="language-java">// WRONG — cannot recover the old minimum once the current one is popped
+class BrokenMinStack {
+    Deque&lt;Integer&gt; stack = new ArrayDeque&lt;&gt;();
+    int min = Integer.MAX_VALUE;
+    void push(int x) { stack.push(x); min = Math.min(min, x); }
+    int pop() { return stack.pop(); }   // min is never corrected here
+    int getMin() { return min; }         // stale after the true min is popped
+}
+</code></pre>
+<p><strong>Why is this wrong?</strong> <code>push(5)</code>, <code>push(2)</code>, <code>push(8)</code> → <code>min</code> correctly tracks down to <code>2</code>. <code>pop()</code> removes <code>8</code> — fine, <code>min</code> is still validly <code>2</code>. But <code>pop()</code> <em>again</em> removes <code>2</code> — the actual minimum — and <code>min</code> is never updated on pop, so <code>getMin()</code> keeps wrongly returning <code>2</code> even though only <code>5</code> remains. Fixing this by rescanning the whole stack on every pop would work, but costs O(n) per pop, violating the O(1) requirement.</p>
+<h3>5. Observation</h3>
+<p>The only way to know &quot;what was the minimum right before I pushed the element I&#39;m about to pop&quot; <em>without</em> rescanning is to have <strong>recorded it at push time.</strong> So record it — on <em>every</em> push, not just when a new minimum happens — by pushing the &quot;minimum so far&quot; onto a second, parallel stack. Popping the main stack then also pops the parallel stack, automatically rewinding the minimum to exactly what it was one push earlier.</p>
+<h3>6. Optimal Approach</h3>
+<p>Two stacks: <code>mainStack</code> (actual values) and <code>minStack</code> (running minimum at each depth).</p>
+<ul>
+<li><code>push(x)</code>: push <code>x</code> onto <code>mainStack</code>; push <code>min(x, minStack.isEmpty() ? x : minStack.peek())</code> onto <code>minStack</code>.</li>
+<li><code>pop()</code>: pop <strong>both</strong> stacks together — always in lockstep, no exceptions.</li>
+<li><code>getMin()</code>: <code>minStack.peek()</code> — O(1), no computation at read time; all the work already happened at push time.</li>
+</ul>
+<h3>7. Invariant</h3>
+<blockquote>
+<p><strong>Invariant:</strong> At every moment, for any depth <code>k</code>, <code>minStack</code>&#39;s value at depth <code>k</code> equals the true minimum of <code>mainStack</code>&#39;s bottom <code>k</code> elements. Both stacks always have exactly the same size, and always grow/shrink together.</p>
+</blockquote>
+<h3>8. Dry Run</h3>
+<table>
+<thead>
+<tr>
+<th>op</th>
+<th>mainStack</th>
+<th>minStack</th>
+<th>getMin()</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>push(5)</code></td>
+<td><code>[5]</code></td>
+<td><code>[5]</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>push(3)</code></td>
+<td><code>[5,3]</code></td>
+<td><code>[5,3]</code> (3 &lt; 5)</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>push(7)</code></td>
+<td><code>[5,3,7]</code></td>
+<td><code>[5,3,3]</code> (min(7,3)=3, unchanged)</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>push(2)</code></td>
+<td><code>[5,3,7,2]</code></td>
+<td><code>[5,3,3,2]</code></td>
+<td><strong>2</strong></td>
+</tr>
+<tr>
+<td><code>pop()</code></td>
+<td><code>[5,3,7]</code></td>
+<td><code>[5,3,3]</code></td>
+<td><strong>3</strong></td>
+</tr>
+<tr>
+<td><code>pop()</code></td>
+<td><code>[5,3]</code></td>
+<td><code>[5,3]</code></td>
+<td><strong>3</strong></td>
+</tr>
+</tbody></table>
+<h3>9. Why Does It Work?</h3>
+<p>Because <code>minStack</code> records the minimum-so-far at <strong>every</strong> depth — not just at the moments it changes — popping it in perfect lockstep with <code>mainStack</code> always exposes exactly the correct minimum for whatever elements remain. Nothing is ever &quot;forgotten,&quot; because nothing was thrown away; it was duplicated forward at every push instead.</p>
+<h3>10. Java Code</h3>
+<pre><code class="language-java">class MinStack {
+    private Deque&lt;Integer&gt; mainStack = new ArrayDeque&lt;&gt;();
+    private Deque&lt;Integer&gt; minStack = new ArrayDeque&lt;&gt;();
+
+    public void push(int x) {
+        mainStack.push(x);
+        // record the running minimum AT THIS DEPTH — every single push, not just on a new min
+        if (minStack.isEmpty() || x &lt;= minStack.peek()) {
+            minStack.push(x);
+        } else {
+            minStack.push(minStack.peek());
+        }
+    }
+
+    public void pop() {
+        mainStack.pop();
+        minStack.pop();   // ALWAYS pop both together — this is what &quot;rewinds&quot; the min
+    }
+
+    public int top()    { return mainStack.peek(); }
+    public int getMin() { return minStack.peek(); } // O(1) — no scanning, ever
+}
+</code></pre>
+<h3>11. Complexity</h3>
+<p><strong>Time:</strong> O(1) for every operation, including <code>getMin()</code> — that&#39;s the entire point of the problem.
+<strong>Space:</strong> O(n), roughly double a plain stack, since <code>minStack</code> duplicates one integer per element regardless of whether the minimum actually changed at that step. <em>(A further space-optimized version only pushes to <code>minStack</code> when a genuinely new minimum is set, using counts to handle ties — worth knowing it exists, but the two-stack version above is the standard, safest interview answer.)</em></p>
+<h3>12. Edge Cases</h3>
+<ul>
+<li><code>getMin()</code> on an empty stack — undefined; state your convention.</li>
+<li>Duplicate minimum values pushed multiple times (see Common Mistakes — this is where <code>&lt;=</code> vs <code>&lt;</code> matters).</li>
+<li>Popping down to empty and pushing again — both stacks must return to empty together.</li>
+<li>Single element.</li>
+</ul>
+<h3>13. Common Mistakes</h3>
+<ul>
+<li><strong>Using strict <code>&lt;</code> instead of <code>&lt;=</code></strong> when comparing <code>x</code> to <code>minStack.peek()</code>. If you push the <em>current</em> minimum value again (a duplicate) and use strict <code>&lt;</code>, you won&#39;t duplicate it onto <code>minStack</code> — and a later pop of <em>one</em> of those duplicate copies will incorrectly pop the recorded minimum away too early, even though another copy of that same value is still logically sitting in the stack.</li>
+<li><strong>Popping only one of the two stacks</strong> (or in the wrong order) — they must move in lockstep, always, or the invariant breaks permanently.</li>
+<li>Trying to save space by only pushing to <code>minStack</code> &quot;when the min changes,&quot; without also correctly handling pop for that scheme — it <em>can</em> be done, but needs extra bookkeeping; don&#39;t attempt it under interview pressure unless specifically asked to optimize further.</li>
+</ul>
+<h3>14. Pattern to Remember</h3>
+<pre><code class="language-text">Problem clue:  stack that also needs O(1) getMin/getMax
+Pattern:       Augmented Stack (auxiliary &quot;shadow&quot; stack)
+Data structure: mainStack (values) + minStack (running min at each depth)
+Stores:        minStack stores the min-so-far, recorded at EVERY push
+Push:          push x to main; push min(x, current min) to minStack
+Pop:           pop BOTH, always together
+Invariant:     minStack[k] = true min of mainStack&#39;s bottom k elements
+Key insight:   record history at push time so pop needs no recomputation
+Time / Space:  O(1) per op / O(n) (roughly double a plain stack)
+</code></pre>
+<p><strong>Memory trick:</strong> <em>&quot;A second stack, marching in lockstep, remembers the min at every depth — so popping can never forget it.&quot;</em></p>
+<h3>15. Interview Trigger</h3>
+<blockquote>
+<p>If asked for O(1) <code>getMin</code>/<code>getMax</code> alongside a normal stack, I immediately think: one stack isn&#39;t enough, because popping can &quot;un-happen&quot; the current best answer. I keep a second, parallel stack that records the running min at every depth — pushed in lockstep with every push (even when the min doesn&#39;t change), popped in lockstep with every pop — so <code>getMin()</code> is always just a peek, never a search.</p>
+</blockquote>
+<hr>
+<h2>Pattern Connections Recap (Problems 1–8)</h2>
+<ul>
+<li><strong>Problems 1 &amp; 5</strong> are the <em>same</em> pattern (Basic Stack) on two different backing stores — array (fixed capacity, no pointer overhead) vs. linked list (no capacity ceiling, pointer overhead per node).</li>
+<li><strong>Problems 2 &amp; 6</strong> are the <em>same</em> pattern (Basic Queue) similarly split — array needs the circular-buffer trick specifically <em>because</em> it&#39;s fixed-size; a linked list sidesteps that by just growing, but pays for it with a <code>tail</code> pointer a stack never needs.</li>
+<li><strong>Problems 3 &amp; 4</strong> are exact mirror images of each other (Stack ⟷ Queue Conversion): #3 pays its reordering cost on every <code>push</code>; #4 pays it in occasional amortized batches. Interviewers sometimes ask for the <em>other</em> trade-off on each — know both directions exist for both problems.</li>
+<li><strong>Problem 7</strong> is the first problem where the stack isn&#39;t just &quot;the container the problem describes&quot; — it&#39;s a <em>tool</em> you reach for because of a structural clue (nesting) in a differently-shaped problem.</li>
+<li><strong>Problem 8</strong> introduces the &quot;shadow stack&quot; idea (a second stack tracking derived state in lockstep) — you&#39;ll see this idea again in a lighter form once we reach monotonic-stack problems that need to track more than one thing per entry.</li>
+</ul>
+<hr>
+<p><strong>Next:</strong> <a href="04_problems_09to14_expression_conversions.md"><code>04_problems_09to14_expression_conversions.md</code></a> — the six infix/prefix/postfix conversions, which are really just two patterns wearing six costumes.</p>
+</div>
+    <script>
+        const vscode = acquireVsCodeApi();
+        function exportFile(format) { vscode.postMessage({ command: 'export', format: format }); }
+        mermaid.initialize({ startOnLoad: true, theme: 'default', securityLevel: 'loose' });
+        // Help Puppeteer know when we are done
+        window.addEventListener('load', () => {
+            mermaid.run().then(() => {
+                document.body.classList.add('mermaid-rendered');
+            });
+        });
+    </script>
+</body>
+</html>

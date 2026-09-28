@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>05_problems_15to18_monotonic_stack_core</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        :root {
+            --bg-color: var(--vscode-editor-background, #ffffff);
+            --text-color: var(--vscode-editor-foreground, #1a1a1b);
+            --heading-color: var(--vscode-editor-foreground, #0f172a);
+            --secondary-text: var(--vscode-descriptionForeground, #64748b);
+            --accent-color: var(--vscode-textLink-foreground, #3b82f6);
+            --code-bg: var(--vscode-textCodeBlock-background, rgba(241, 245, 249, 0.4));
+            --border-color: var(--vscode-widget-border, #e2e8f0);
+            --header-bg: var(--vscode-editor-background, #ffffff);
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            line-height: 1.75;
+            color: var(--text-color);
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 5rem 2rem 3rem;
+            background-color: var(--bg-color);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .export-header {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            padding: 0.75rem 2rem; background: var(--header-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: flex-end; gap: 0.75rem;
+            backdrop-filter: blur(8px); display: none;
+        }
+
+        .btn {
+            background: var(--accent-color); color: white; border: none;
+            padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.85rem;
+            font-weight: 500; cursor: pointer; transition: opacity 0.2s;
+            font-family: 'Outfit', sans-serif;
+        }
+        .btn:hover { opacity: 0.9; }
+
+        h1, h2, h3 { font-family: 'Outfit', sans-serif; color: var(--heading-color); font-weight: 700; margin-top: 2rem; }
+        h1 { font-size: 2.25rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; }
+        
+        pre { background: var(--code-bg); padding: 1.25rem; border-radius: 12px; border: 1px solid var(--border-color); overflow-x: auto; margin: 1.5rem 0; }
+        code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.9em; padding: 0.2rem 0.4rem; border-radius: 6px; background-color: var(--code-bg); }
+        
+        .mermaid { background: white; padding: 1rem; border-radius: 12px; margin: 1.5rem 0; display: flex; justify-content: center; border: 1px solid var(--border-color); }
+        svg { max-width: 100% !important; height: auto !important; }
+
+        @media print { .export-header { display: none; } body { padding: 0; } }
+    </style>
+</head>
+<body>
+    <div class="export-header">
+        <button class="btn" onclick="exportFile('html')">Export HTML</button>
+        <button class="btn" onclick="exportFile('pdf')">Export PDF</button>
+        <button class="btn" onclick="exportFile('docx')">Export DOCX</button>
+    </div>
+    <div class="content"><h1>Stack &amp; Queue Interview Guide — Part 3C: Problems 15–18 (Monotonic Stack Core)</h1>
+<p><strong>Guide map:</strong> <code>00_START_HERE.md</code> → <code>01_foundation...md</code> → <code>02_universal_thinking_framework.md</code> → <code>03_problems_01to08...md</code> → <code>04_problems_09to14...md</code> → <strong><code>05_problems_15to18...md</code></strong> (you are here) → (more coming)</p>
+<p>This is the family Part 1 called &quot;the single idea that unlocks roughly half the problems in this guide.&quot; If you haven&#39;t read Part 1 §3 (Monotonic Stack) recently, it&#39;s worth a re-read before this file — everything here is that idea, applied.</p>
+<hr>
+<h1>15. Next Greater Element</h1>
+<h3>1. Problem Understanding</h3>
+<p>For every element in an array, find the <strong>first</strong> element to its <strong>right</strong> that is strictly greater. If none exists, the answer is <code>-1</code>.</p>
+<ul>
+<li><strong>Input:</strong> an array of integers.</li>
+<li><strong>Output:</strong> an array of the same length — each slot holds the next-greater value, or <code>-1</code>.</li>
+<li><strong>Important observation:</strong> &quot;first&quot; (nearest), not &quot;maximum.&quot; We&#39;re not asking &quot;what&#39;s the biggest thing to the right&quot; — we&#39;re asking &quot;what&#39;s the <em>closest</em> thing to the right that beats me.&quot;</li>
+</ul>
+<p>Example: <code>[2, 1, 2, 4, 3, 1]</code> → <code>[4, 2, 4, -1, -1, -1]</code>.</p>
+<h3>2. How to Think About the Problem</h3>
+<p><strong>What should I notice first?</strong> The phrase &quot;next greater element&quot; is, almost word-for-word, the trigger phrase from Part 1&#39;s clue table.</p>
+<p><strong>What would I try first?</strong> For each index, scan rightward until something bigger turns up.</p>
+<p><strong>Why is that too slow?</strong> Because it throws away everything it learns after each individual search finishes. Consider <code>[2, 1, 2, 4, 3, 1]</code>: when we&#39;re resolving index 0, we walk past index 1 and index 2 to reach index 3 (value 4). Later, when we&#39;re <em>also</em> resolving index 1 and index 2 independently, we walk past some of the <em>same ground again</em>, rediscovering that index 3&#39;s <code>4</code> is what resolves them too — each search rebuilding knowledge a previous search already had.</p>
+<p><strong>What observation unlocks the better solution?</strong> This connects directly to the Part 2 framework question <em>&quot;can elements be eliminated permanently?&quot;</em> — yes: the moment an element is beaten by something bigger, it can be discarded <strong>forever</strong>. No future index will ever need to compare against it again, because whatever beat it is now a strictly better (bigger, and just as close or closer) candidate for anyone still searching. So: keep a running set of &quot;not yet beaten&quot; elements, and resolve as many of them as possible the instant a bigger value shows up — one single left-to-right pass.</p>
+<h3>3. Pattern Recognition</h3>
+<p><strong>Problem clue:</strong> &quot;next greater element.&quot;
+<strong>Pattern:</strong> Monotonic Stack (decreasing).
+<strong>Why this pattern:</strong> elements wait to be beaten by something bigger to their right; the moment they are, that bigger thing <em>is</em> their answer.
+<strong>Mental model:</strong> <em>&quot;the stack contains elements whose answer has NOT been found yet&quot;</em> — straight from Part 1.
+<strong>Similar problems:</strong> Problem 16 (circular version); Problem 17 (mirror image — next <em>smaller</em>, flip the comparison); Problem 27, Stock Span (same core idea, but &quot;previous&quot; instead of &quot;next,&quot; and reporting a <em>distance</em> instead of a <em>value</em>).</p>
+<h3>4. Brute Force</h3>
+<pre><code class="language-java">int[] nextGreaterBrute(int[] arr) {
+    int n = arr.length;
+    int[] result = new int[n];
+    for (int i = 0; i &lt; n; i++) {
+        result[i] = -1;
+        for (int j = i + 1; j &lt; n; j++) {
+            if (arr[j] &gt; arr[i]) { result[i] = arr[j]; break; }
+        }
+    }
+    return result;
+}
+</code></pre>
+<p><strong>Why is this too slow?</strong> On a strictly decreasing array like <code>[5,4,3,2,1]</code>, every single index&#39;s inner scan runs all the way to the end and finds nothing — <code>4 + 3 + 2 + 1 = O(n²)</code> wasted comparisons for an answer that&#39;s <code>-1</code> everywhere. Even on inputs that resolve quickly, the <em>fundamental</em> waste is structural: each index&#39;s search independently rediscovers information (which nearby elements are &quot;still in the running&quot; to be someone&#39;s answer) that an earlier or later search already touched.</p>
+<h3>5. Observation</h3>
+<pre><code class="language-text">Brute force (fresh scan per index)
+     ↓
+Repeated work: multiple indices independently rediscover that the SAME later
+               element is what resolves them, each redoing its own walk to get there
+     ↓
+Observation: once an element is beaten by something bigger, discard it forever —
+             no future index will ever need to compare against it again
+     ↓
+Data structure: decreasing monotonic stack (holds only &quot;not yet beaten&quot; candidates)
+     ↓
+Optimized solution: O(n), one pass, each element pushed once, popped at most once ever
+</code></pre>
+<h3>6. Optimal Approach</h3>
+<p>Scan left to right, keeping a stack of indices whose answer isn&#39;t known yet. For each new <code>arr[i]</code>: while the stack isn&#39;t empty and the value at its top is smaller than <code>arr[i]</code>, pop that index — its answer is <code>arr[i]</code>. Then push <code>i</code>. Whatever&#39;s left in the stack when the loop ends never found anything bigger, and stays <code>-1</code>.</p>
+<h3>7. Invariant</h3>
+<blockquote>
+<p><strong>Invariant:</strong> The stack (bottom→top) always holds indices with strictly decreasing values, and every index currently in the stack has not yet found an element greater than itself, among everything processed so far.</p>
+</blockquote>
+<h3>8. Dry Run — <code>[2, 1, 2, 4, 3, 1]</code></h3>
+<p><em>(This is the full formal walkthrough of the example first previewed in Part 1.)</em></p>
+<table>
+<thead>
+<tr>
+<th>i</th>
+<th>arr[i]</th>
+<th>stack before (values)</th>
+<th>operation</th>
+<th>stack after (values)</th>
+<th>newly resolved</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>2</td>
+<td><code>[]</code></td>
+<td>nothing to pop; push</td>
+<td><code>[2]</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>1</td>
+<td>1</td>
+<td><code>[2]</code></td>
+<td><code>2</code> not <code>&lt; 1</code>; push</td>
+<td><code>[2,1]</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>2</td>
+<td>2</td>
+<td><code>[2,1]</code></td>
+<td><code>1&lt;2</code> → pop, resolved; <code>2</code> not <code>&lt;2</code> (strict) → stop; push</td>
+<td><code>[2,2]</code></td>
+<td>idx1 → 2</td>
+</tr>
+<tr>
+<td>3</td>
+<td>4</td>
+<td><code>[2,2]</code></td>
+<td><code>2&lt;4</code> → pop, resolved; <code>2&lt;4</code> → pop, resolved; push</td>
+<td><code>[4]</code></td>
+<td>idx2 → 4, idx0 → 4</td>
+</tr>
+<tr>
+<td>4</td>
+<td>3</td>
+<td><code>[4]</code></td>
+<td><code>4</code> not <code>&lt;3</code>; push</td>
+<td><code>[4,3]</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>5</td>
+<td>1</td>
+<td><code>[4,3]</code></td>
+<td><code>3</code> not <code>&lt;1</code>; push</td>
+<td><code>[4,3,1]</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>end</td>
+<td>—</td>
+<td><code>[4,3,1]</code></td>
+<td>loop ends — leftovers get <code>-1</code></td>
+<td>—</td>
+<td>idx3,4,5 → -1</td>
+</tr>
+</tbody></table>
+<p>Result: <strong><code>[4, 2, 4, -1, -1, -1]</code></strong>.</p>
+<h3>9. Why Does It Work?</h3>
+<p>When index <code>k</code> gets popped upon reaching index <code>i</code>, <code>arr[i]</code> is guaranteed to be the <em>nearest</em> greater element for <code>k</code> — not just <em>a</em> greater one. Here&#39;s why: every index between <code>k</code> and <code>i</code> has already been fully processed by the time we reach <code>i</code>, and by the invariant, <code>k</code> is still sitting in the stack, meaning <em>none</em> of those in-between indices ever beat it (if one had, <code>k</code> would already have been popped by it, before <code>i</code> was even reached). So <code>arr[i]</code> really is the first thing to <code>k</code>&#39;s right that&#39;s bigger — nothing closer could possibly qualify. Indices that never get popped genuinely have no next-greater element: nothing in the rest of the array ever beat them, which the algorithm correctly reflects by leaving their initial <code>-1</code>.</p>
+<h3>10. Java Code</h3>
+<pre><code class="language-java">int[] nextGreaterElement(int[] arr) {
+    int n = arr.length;
+    int[] result = new int[n];
+    Arrays.fill(result, -1);
+    Deque&lt;Integer&gt; stack = new ArrayDeque&lt;&gt;(); // indices; values strictly decreasing, bottom -&gt; top
+
+    for (int i = 0; i &lt; n; i++) {
+        while (!stack.isEmpty() &amp;&amp; arr[stack.peek()] &lt; arr[i]) {
+            result[stack.pop()] = arr[i];
+        }
+        stack.push(i);
+    }
+    return result; // indices still in the stack never found a next greater -&gt; stay -1
+}
+</code></pre>
+<h3>11. Complexity</h3>
+<p><strong>Time:</strong> O(n). Every index is pushed exactly once (n pushes, total) and popped <strong>at most once, ever, across the entire run</strong> — not per iteration. Total work is O(n) + O(n) = O(n), the exact amortized argument from Part 1.
+<strong>Space:</strong> O(n) worst case — a strictly decreasing array never resolves anything, so the stack grows to hold all <code>n</code> indices.</p>
+<h3>12. Edge Cases</h3>
+<ul>
+<li>Empty array. Single element (always <code>-1</code>).</li>
+<li>Strictly increasing array — the stack rarely grows past size 1–2, since almost everything resolves almost immediately.</li>
+<li>Strictly decreasing array — worst-case space; nothing ever resolves, all answers are <code>-1</code>.</li>
+<li>Duplicate values (see Common Mistakes — must use strict <code>&lt;</code>).</li>
+<li>The last element always gets <code>-1</code> — there&#39;s nothing to its right at all.</li>
+</ul>
+<h3>13. Common Mistakes</h3>
+<ul>
+<li><strong>Using <code>&lt;=</code> instead of <code>&lt;</code> in the pop condition.</strong> For <code>[2, 2]</code>, the correct answer is <code>[-1, -1]</code> — neither <code>2</code> is <em>strictly</em> greater than the other. Using <code>&lt;=</code> would incorrectly pop index 0 when processing index 1 (since <code>2 &lt;= 2</code>), giving <code>result[0] = 2</code> — wrong.</li>
+<li><strong>Storing values instead of indices.</strong> Without the index, you don&#39;t know <em>which</em> original position to write the answer into — this breaks immediately with duplicate values, and is the wrong habit to build even when it happens to &quot;work&quot; on inputs with no duplicates.</li>
+<li>Forgetting to initialize <code>result</code> to <code>-1</code> before the loop — leftover stack entries need that default.</li>
+<li>Confusing &quot;next&quot; (look right, this problem) with &quot;previous&quot; (look left, Problem 27&#39;s Stock Span) — different scan directions, different information read from the stack.</li>
+</ul>
+<h3>14. Pattern to Remember</h3>
+<pre><code class="language-text">Problem clue:  next greater element to the right
+Pattern:       Monotonic Stack (decreasing)
+Data structure: stack of indices
+Stores:        indices whose next-greater answer isn&#39;t known yet
+Push:          every index, after all necessary pops
+Pop:           when arr[i] beats arr[stack.top()] — that index&#39;s answer is now arr[i]
+Invariant:     stack holds indices with strictly decreasing values -&gt; &quot;not yet beaten&quot;
+Key insight:   once beaten, discard forever — no future index ever needs it again
+Time / Space:  O(n) (each index pushed once, popped at most once, ever) / O(n) worst case
+</code></pre>
+<p><strong>Memory trick:</strong> <em>&quot;Push the newcomer — but first let it beat up everyone smaller still waiting in line.&quot;</em></p>
+<h3>15. Interview Trigger</h3>
+<blockquote>
+<p>The moment I see &quot;next greater element,&quot; I think: I need, for each position, the first bigger value to its right. I keep unresolved elements in a decreasing stack of indices. Every new element pops (resolves) everything smaller currently waiting, then joins the stack to wait for its own resolution.</p>
+</blockquote>
+<hr>
+<h1>16. Next Greater Element II (Circular Array)</h1>
+<h3>1. Problem Understanding</h3>
+<p>Same question as Problem 15, but the array is <strong>circular</strong> — after the last element, searching &quot;to the right&quot; wraps back around to the beginning, as if the array repeated itself.</p>
+<p>Example: <code>[1, 2, 1]</code> → for index 0 (<code>1</code>): index 1 (<code>2</code>) is greater → answer <code>2</code>. For index 1 (<code>2</code>): looking right, then wrapping — <code>1</code>, then <code>1</code> again — nothing beats <code>2</code> → answer <code>-1</code>. For index 2 (<code>1</code>): wraps to index 0 (<code>1</code>, not greater), then index 1 (<code>2</code>, greater!) → answer <code>2</code>. Result: <code>[2, -1, 2]</code>.</p>
+<h3>2. How to Think About the Problem</h3>
+<p><strong>What&#39;s different from Problem 15?</strong> The array wraps. <strong>What clue matters?</strong> &quot;Circular&quot; — think of the array as if it were written out <strong>twice in a row</strong>, and run ordinary Next Greater Element logic across that doubled view, but only <em>keep</em> answers for the first copy&#39;s positions (the &quot;real&quot; ones).</p>
+<p><strong>What would I try first?</strong> Literally concatenate <code>arr + arr</code> into a new array of size <code>2n</code> and run Problem 15&#39;s algorithm unchanged, keeping only the first <code>n</code> answers. This <em>works</em>, but allocates an unnecessary <code>O(n)</code> extra array.</p>
+<p><strong>What observation removes that waste?</strong> You don&#39;t need to materialize the doubled array at all — just let your loop counter run from <code>0</code> to <code>2n - 1</code>, and access the <em>real</em> underlying value via <code>arr[i % n]</code>. The modulo does the &quot;wrapping&quot; for you, for free, with zero extra memory.</p>
+<p><strong>Clue → Observation → Pattern → Data Structure → Algorithm:</strong>
+<code>array wraps</code> → <code>simulate two laps using i % n, no extra array needed</code> → <code>Circular Monotonic Stack</code> → <code>same stack as Problem 15</code> → <code>run the identical algorithm for 2n steps instead of n, reading via arr[i % n]</code>.</p>
+<h3>3. Pattern Recognition</h3>
+<p><strong>Problem clue:</strong> &quot;circular array&quot; + &quot;next greater.&quot;
+<strong>Pattern:</strong> Circular Monotonic Stack.
+<strong>Why this pattern:</strong> identical monotonic-stack logic to Problem 15 — it just needs to see &quot;one extra lap&quot; of the array, because an element near the end might have its true next-greater sitting near the beginning.
+<strong>Mental model:</strong> same &quot;stack = unresolved elements&quot; model; the loop just runs for <code>2n</code> steps using modulo to reuse the same underlying array.
+<strong>Similar problems:</strong> Problem 15, directly — this is ~90% identical code. This same &quot;double the loop, use <code>% n</code>&quot; trick generalizes to making <em>any</em> &quot;next X&quot; monotonic-stack problem circular.</p>
+<h3>4. Brute Force</h3>
+<pre><code class="language-java">int[] nextGreaterCircularBrute(int[] arr) {
+    int n = arr.length;
+    int[] result = new int[n];
+    for (int i = 0; i &lt; n; i++) {
+        result[i] = -1;
+        for (int k = 1; k &lt; n; k++) {          // check up to n-1 elements ahead, wrapping
+            int j = (i + k) % n;
+            if (arr[j] &gt; arr[i]) { result[i] = arr[j]; break; }
+        }
+    }
+    return result;
+}
+</code></pre>
+<p><strong>Why is this too slow?</strong> Exactly Problem 15&#39;s reasoning, except now the inner scan can wrap almost all the way around the array before giving up — still O(n²), for the same underlying reason: every index&#39;s search is thrown away and redone from scratch by the next index.</p>
+<h3>5. Observation</h3>
+<p>Same core insight as Problem 15 (once beaten, discard forever), <strong>plus</strong> the extra trick that makes circularity free: simulate &quot;the array happening twice in a row&quot; using <code>i % n</code>, so a single monotonic-stack pass naturally handles wraparound without doubling memory or writing fundamentally different logic.</p>
+<h3>6. Optimal Approach</h3>
+<p>Run the <em>same</em> algorithm as Problem 15, but let <code>i</code> range from <code>0</code> to <code>2n - 1</code>, always reading via <code>arr[i % n]</code>. <strong>Only push during the first lap</strong> (<code>i &lt; n</code>) — the second lap exists purely to give still-unresolved first-lap elements one more chance to find something bigger wrapping around; it doesn&#39;t correspond to any <em>new</em> position needing its own answer, so nothing new needs to be pushed.</p>
+<h3>7. Invariant</h3>
+<blockquote>
+<p><strong>Invariant:</strong> Identical to Problem 15&#39;s, with one addition: only genuine (first-lap) indices are ever pushed, so the stack never grows past <code>n</code> entries even though the loop runs for <code>2n</code> iterations. Any index still in the stack after the full <code>2n</code> iterations genuinely has no next-greater element anywhere in the circular array.</p>
+</blockquote>
+<h3>8. Dry Run — <code>[1, 2, 1]</code> (n = 3)</h3>
+<table>
+<thead>
+<tr>
+<th>i</th>
+<th>i % n</th>
+<th>value</th>
+<th>stack before</th>
+<th>operation</th>
+<th>stack after</th>
+<th>resolved</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0 (lap 1)</td>
+<td>0</td>
+<td>1</td>
+<td><code>[]</code></td>
+<td>push (i&lt;n)</td>
+<td><code>[0(1)]</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>1 (lap 1)</td>
+<td>1</td>
+<td>2</td>
+<td><code>[0(1)]</code></td>
+<td><code>1&lt;2</code>→pop, resolved; push</td>
+<td><code>[1(2)]</code></td>
+<td>idx0 → 2</td>
+</tr>
+<tr>
+<td>2 (lap 1)</td>
+<td>2</td>
+<td>1</td>
+<td><code>[1(2)]</code></td>
+<td><code>2</code> not <code>&lt;1</code>; push (i&lt;n)</td>
+<td><code>[1(2),2(1)]</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>3 (lap 2)</td>
+<td>0</td>
+<td>1</td>
+<td><code>[1(2),2(1)]</code></td>
+<td><code>1</code> not <code>&lt;1</code>; i≥n → don&#39;t push</td>
+<td><code>[1(2),2(1)]</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>4 (lap 2)</td>
+<td>1</td>
+<td>2</td>
+<td><code>[1(2),2(1)]</code></td>
+<td><code>1&lt;2</code>→pop, resolved; <code>2</code> not <code>&lt;2</code>; i≥n → don&#39;t push</td>
+<td><code>[1(2)]</code></td>
+<td>idx2 → 2</td>
+</tr>
+<tr>
+<td>5 (lap 2)</td>
+<td>2</td>
+<td>1</td>
+<td><code>[1(2)]</code></td>
+<td><code>2</code> not <code>&lt;1</code>; i≥n → don&#39;t push</td>
+<td><code>[1(2)]</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>end</td>
+<td>—</td>
+<td>—</td>
+<td><code>[1(2)]</code></td>
+<td>leftover → -1</td>
+<td>—</td>
+<td>idx1 → -1</td>
+</tr>
+</tbody></table>
+<p>Result: <strong><code>[2, -1, 2]</code></strong> ✓.</p>
+<h3>9. Why Does It Work?</h3>
+<p>The second lap doesn&#39;t need to push anything new because every <em>position</em> in the array already got its one authoritative push during the first lap — the second lap&#39;s only job is to let elements still stuck in the stack (i.e., still unresolved after seeing the whole array once) check against the <em>beginning</em> of the array too, exactly simulating &quot;what if the array kept going instead of stopping.&quot; Since we never push the same position twice, the stack&#39;s total size is bounded by <code>n</code>, and the correctness argument from Problem 15 (nearest-beater reasoning) carries over unchanged — the only difference is that &quot;to the right&quot; now includes wrapped-around territory.</p>
+<h3>10. Java Code</h3>
+<pre><code class="language-java">int[] nextGreaterElementsCircular(int[] arr) {
+    int n = arr.length;
+    int[] result = new int[n];
+    Arrays.fill(result, -1);
+    Deque&lt;Integer&gt; stack = new ArrayDeque&lt;&gt;();
+
+    for (int i = 0; i &lt; 2 * n; i++) {
+        int idx = i % n;
+        while (!stack.isEmpty() &amp;&amp; arr[stack.peek()] &lt; arr[idx]) {
+            result[stack.pop()] = arr[idx];
+        }
+        if (i &lt; n) stack.push(idx); // only push each real position once, during lap 1
+    }
+    return result;
+}
+</code></pre>
+<h3>11. Complexity</h3>
+<p><strong>Time:</strong> O(n) — the loop runs <code>2n</code> times (still O(n)), and the push/pop bound is unchanged from Problem 15 (each of the <code>n</code> real indices is still pushed at most once and popped at most once, ever).
+<strong>Space:</strong> O(n).</p>
+<h3>12. Edge Cases</h3>
+<ul>
+<li>All elements equal (every answer is <code>-1</code> — nothing is <em>strictly</em> greater anywhere, even wrapping).</li>
+<li>Single element (<code>-1</code>, trivially — nothing to its right, wrapped or not).</li>
+<li>Strictly decreasing then the max at the very end wrapping to resolve everything (like <code>[5,4,3,2,1]</code> → <code>[-1,5,5,5,5]</code> — the maximum, sitting at the <em>end</em>, becomes everyone&#39;s answer once the second lap reaches it).</li>
+<li>Array where the maximum sits at the very end — worth tracing by hand, since it&#39;s the case that most directly exercises the wraparound.</li>
+</ul>
+<h3>13. Common Mistakes</h3>
+<ul>
+<li><strong>Pushing on every iteration of both laps</strong> (instead of only during <code>i &lt; n</code>) — this doesn&#39;t necessarily break correctness by itself (duplicate pushes of an already-resolved index just get ignored since that index is no longer &quot;the&quot; authoritative one in some implementations), but it&#39;s wasted work and, depending on exactly how it&#39;s implemented, an easy way to introduce a subtle bug (e.g. double-writing a result). Simplest and safest: push only once per real index, during lap 1.</li>
+<li><strong>Looping only <code>n</code> times instead of <code>2n</code></strong> — this is just Problem 15 with extra steps; it never actually looks at the wrapped-around portion, silently producing the <em>non-circular</em> answer instead.</li>
+<li>Forgetting that <code>arr[stack.peek()]</code> must be read via the <strong>stored index</strong>, not <code>arr[idx]</code> a second time by mistake — the stored index refers to the <em>original</em> first-lap position, which is what needs its answer written.</li>
+</ul>
+<h3>14. Pattern to Remember</h3>
+<pre><code class="language-text">Problem clue:  circular array + next greater
+Pattern:       Circular Monotonic Stack
+Data structure: same stack as Problem 15 (indices)
+Loop range:    0 to 2n-1, always read via arr[i % n]
+Push:          only real (first-lap, i&lt;n) indices, once each
+Pop:           identical condition/meaning to Problem 15
+Invariant:     same as Problem 15 + &quot;only real indices ever enter the stack&quot;
+Key insight:   simulate a second lap with i % n — no extra array needed
+Time / Space:  O(n) / O(n)
+</code></pre>
+<p><strong>Memory trick:</strong> <em>&quot;Walk the array twice with <code>% n</code> — but only introduce each real element to the stack once.&quot;</em></p>
+<h3>15. Interview Trigger</h3>
+<blockquote>
+<p>The instant I see &quot;circular&quot; attached to a next-greater/next-smaller question, I think: Problem 15&#39;s algorithm, unchanged, just run for <code>2n</code> iterations instead of <code>n</code>, reading through <code>arr[i % n]</code> — and I only push a given real index once, during the first lap, since the second lap exists purely to give leftovers a chance to wrap around, not to introduce new positions.</p>
+</blockquote>
+<hr>
+<h1>17. Next Smaller Element</h1>
+<h3>1. Problem Understanding</h3>
+<p>For every element, find the first element to its <strong>right</strong> that is strictly <strong>smaller</strong>. <code>-1</code> if none exists.</p>
+<p>Example: <code>[4, 5, 2, 10, 8]</code> → <code>[2, 2, -1, 8, -1]</code>.</p>
+<h3>2. How to Think About the Problem</h3>
+<p>This is Problem 15 with every &quot;greater&quot; swapped for &quot;smaller.&quot; <strong>Nothing else changes conceptually</strong> — it&#39;s worth deriving once explicitly so the mirror-image relationship is concrete rather than just asserted.</p>
+<p><strong>Clue → Observation → Pattern → Data Structure → Algorithm:</strong>
+<code>next SMALLER element to the right</code> → <code>elements now wait to be beaten by something SMALLER</code> → <code>Monotonic Stack (increasing)</code> → <code>stack of indices, values increasing bottom→top</code> → <code>pop while the top is bigger than the current element</code>.</p>
+<p><strong>Why does the stack direction flip?</strong> In Problem 15, the stack held elements &quot;not yet beaten by something bigger&quot; — which meant everything in the stack, read bottom to top, had to be in <em>decreasing</em> order (otherwise a smaller one sitting above a bigger one would already have been beaten by the bigger one below it, contradiction). Here, the stack holds elements &quot;not yet beaten by something smaller&quot; — so by the identical logic, mirrored, it must be <em>increasing</em> bottom to top.</p>
+<h3>3. Pattern Recognition</h3>
+<p><strong>Problem clue:</strong> &quot;next smaller element.&quot;
+<strong>Pattern:</strong> Monotonic Stack (increasing) — the direct mirror of Problem 15.
+<strong>Mental model:</strong> same as Problem 15, &quot;answer not found yet,&quot; with every comparison flipped.
+<strong>Similar problems:</strong> Problem 15 (mirror); this exact &quot;increasing stack&quot; also appears inside Problem 24 (Largest Rectangle in Histogram) and Problem 20 (Sum of Subarray Minimums) — both lean on &quot;next smaller&quot; / &quot;previous smaller&quot; as a sub-step.</p>
+<h3>4. Brute Force</h3>
+<pre><code class="language-java">int[] nextSmallerBrute(int[] arr) {
+    int n = arr.length;
+    int[] result = new int[n];
+    for (int i = 0; i &lt; n; i++) {
+        result[i] = -1;
+        for (int j = i + 1; j &lt; n; j++) {
+            if (arr[j] &lt; arr[i]) { result[i] = arr[j]; break; }
+        }
+    }
+    return result;
+}
+</code></pre>
+<p><strong>Why is this too slow?</strong> Identical reasoning to Problem 15, mirrored: a strictly increasing array forces every inner scan to run to completion and find nothing, giving O(n²).</p>
+<h3>5. Observation</h3>
+<p>Same as Problem 15&#39;s observation, mirrored: once an element is beaten by something <em>smaller</em>, it can never be anyone&#39;s &quot;next smaller&quot; again, since whatever beat it is now a strictly better (smaller, and just as close or closer) candidate.</p>
+<h3>6. Optimal Approach</h3>
+<p>Scan left to right with an increasing stack of indices. For each <code>arr[i]</code>: while the stack isn&#39;t empty and the top&#39;s value is <em>bigger</em> than <code>arr[i]</code>, pop — that index&#39;s answer is <code>arr[i]</code>. Then push <code>i</code>.</p>
+<h3>7. Invariant</h3>
+<blockquote>
+<p><strong>Invariant:</strong> The stack (bottom→top) always holds indices with strictly increasing values, and every index in it has not yet found an element smaller than itself, among everything processed so far.</p>
+</blockquote>
+<h3>8. Dry Run — <code>[4, 5, 2, 10, 8]</code></h3>
+<table>
+<thead>
+<tr>
+<th>i</th>
+<th>arr[i]</th>
+<th>stack before (values)</th>
+<th>operation</th>
+<th>stack after (values)</th>
+<th>resolved</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>4</td>
+<td><code>[]</code></td>
+<td>push</td>
+<td><code>[4]</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>1</td>
+<td>5</td>
+<td><code>[4]</code></td>
+<td><code>4</code> not <code>&gt;5</code>; push</td>
+<td><code>[4,5]</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>2</td>
+<td>2</td>
+<td><code>[4,5]</code></td>
+<td><code>5&gt;2</code>→pop, resolved; <code>4&gt;2</code>→pop, resolved; push</td>
+<td><code>[2]</code></td>
+<td>idx1→2, idx0→2</td>
+</tr>
+<tr>
+<td>3</td>
+<td>10</td>
+<td><code>[2]</code></td>
+<td><code>2</code> not <code>&gt;10</code>; push</td>
+<td><code>[2,10]</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>4</td>
+<td>8</td>
+<td><code>[2,10]</code></td>
+<td><code>10&gt;8</code>→pop, resolved; <code>2</code> not <code>&gt;8</code>; push</td>
+<td><code>[2,8]</code></td>
+<td>idx3→8</td>
+</tr>
+<tr>
+<td>end</td>
+<td>—</td>
+<td><code>[2,8]</code></td>
+<td>leftovers → -1</td>
+<td>—</td>
+<td>idx2,4 → -1</td>
+</tr>
+</tbody></table>
+<p>Result: <strong><code>[2, 2, -1, 8, -1]</code></strong> ✓.</p>
+<h3>9. Why Does It Work?</h3>
+<p>Exactly Problem 15&#39;s correctness argument, mirrored: when index <code>k</code> gets popped by index <code>i</code>, every index strictly between them has already been fully processed and, by the invariant, none of them beat <code>k</code> (or it would already have been popped by then) — so <code>arr[i]</code> is provably the <em>nearest</em> smaller element, not just <em>a</em> smaller one.</p>
+<h3>10. Java Code</h3>
+<pre><code class="language-java">int[] nextSmallerElement(int[] arr) {
+    int n = arr.length;
+    int[] result = new int[n];
+    Arrays.fill(result, -1);
+    Deque&lt;Integer&gt; stack = new ArrayDeque&lt;&gt;(); // indices; values strictly increasing, bottom -&gt; top
+
+    for (int i = 0; i &lt; n; i++) {
+        while (!stack.isEmpty() &amp;&amp; arr[stack.peek()] &gt; arr[i]) {
+            result[stack.pop()] = arr[i];
+        }
+        stack.push(i);
+    }
+    return result;
+}
+</code></pre>
+<h3>11. Complexity</h3>
+<p><strong>Time:</strong> O(n), identical amortized argument to Problem 15. <strong>Space:</strong> O(n) worst case (strictly increasing input).</p>
+<h3>12. Edge Cases</h3>
+<p>Mirror of Problem 15&#39;s: strictly decreasing input resolves almost immediately; strictly increasing input is the worst case (nothing resolves, <code>O(n)</code> space); duplicates need strict <code>&gt;</code> for the same reason Problem 15 needed strict <code>&lt;</code>.</p>
+<h3>13. Common Mistakes</h3>
+<ul>
+<li><strong>Using <code>&gt;=</code> instead of <code>&gt;</code></strong> — same duplicate-handling trap as Problem 15, mirrored.</li>
+<li><strong>Copy-pasting Problem 15&#39;s code and only flipping the comparison operator, but forgetting the stack&#39;s <em>storage order</em> concept also flips</strong> (decreasing → increasing) — the code change is genuinely just the one operator, but make sure you can <em>say why</em> out loud, not just pattern-match the edit.</li>
+<li>Mixing up &quot;next smaller&quot; with &quot;previous smaller&quot; (different scan direction — see the general Previous-vs-Next distinction from Part 1).</li>
+</ul>
+<h3>14. Pattern to Remember</h3>
+<pre><code class="language-text">Problem clue:  next smaller element to the right
+Pattern:       Monotonic Stack (increasing) — mirror of Problem 15
+Data structure: stack of indices
+Stores:        indices whose next-smaller answer isn&#39;t known yet
+Pop:           when arr[i] is SMALLER than arr[stack.top()]
+Invariant:     stack holds indices with strictly increasing values
+Key insight:   identical to Problem 15, every comparison flipped
+Time / Space:  O(n) / O(n) worst case
+</code></pre>
+<p><strong>Memory trick:</strong> <em>&quot;Problem 15&#39;s evil twin — same stack, flip every <code>&lt;</code> to <code>&gt;</code>.&quot;</em></p>
+<h3>15. Interview Trigger</h3>
+<blockquote>
+<p>&quot;Next smaller element&quot; is Problem 15 with the comparison flipped: I keep an <em>increasing</em> stack of indices, popping whenever the current element is smaller than what&#39;s waiting — because once beaten by something smaller, an element can never be anyone&#39;s answer again.</p>
+</blockquote>
+<hr>
+<h1>18. Number of Greater Elements to the Right</h1>
+<h3>1. Problem Understanding</h3>
+<p>For every element, count <strong>how many</strong> elements to its right are strictly greater than it — not just find the <em>nearest</em> one, count <strong>all</strong> of them.</p>
+<ul>
+<li><strong>Input:</strong> array of integers.</li>
+<li><strong>Output:</strong> array of the same length, each slot holding a count.</li>
+</ul>
+<p>Example: <code>[5, 2, 6, 1]</code> → <code>[1, 1, 0, 0]</code> (5 has just <code>6</code> beating it; 2 has just <code>6</code>; 6 has nothing; 1 has nothing).</p>
+<p><strong>This problem is deliberately placed here, next to the &quot;next greater&quot; family, to make an important point: it looks like it belongs to the same family, but it doesn&#39;t quite.</strong></p>
+<h3>2. How to Think About the Problem</h3>
+<p><strong>What should I notice first?</strong> This is <em>not</em> asking &quot;what&#39;s the nearest bigger element&quot; — it&#39;s asking for a <strong>count of every</strong> bigger element to the right. That&#39;s a meaningfully different question.</p>
+<p><strong>Would a monotonic stack solve this directly?</strong> Try it: a monotonic stack, as used in Problems 15–17, resolves each element <strong>once</strong>, the instant it&#39;s beaten, and then discards it. That&#39;s exactly right when you only need the <em>first</em> beater — but here we need to know about <strong>every</strong> beater, and a stack-based element is popped (and forgotten) the moment the <em>first</em> one arrives. The information &quot;how many more things after this one are <em>also</em> bigger&quot; isn&#39;t something the monotonic stack invariant tracks at all.</p>
+<p><strong>So what does work?</strong> This becomes a <strong>counting</strong> problem: &quot;as I scan, how many values already seen are greater than the current one?&quot; That&#39;s the classic shape of &quot;count of smaller/greater elements after each element&quot; — solved with a <strong>Fenwick tree (Binary Indexed Tree, BIT)</strong> over coordinate-compressed values, processing the array <strong>right to left</strong> and asking, for each element, &quot;how many values inserted so far (i.e., to my right) are greater than me?&quot; <em>before</em> inserting the current value.</p>
+<p><strong>Clue → Observation → Pattern → Data Structure → Algorithm:</strong>
+<code>count of ALL greater elements, not just nearest</code> → <code>a monotonic stack only ever remembers the nearest unresolved candidate — it can&#39;t count</code> → <code>Counting problem, not a &quot;next X&quot; problem</code> → <code>Fenwick Tree (BIT) with coordinate compression</code> → <code>scan right to left; for each value, query &quot;how many already-inserted values are strictly greater,&quot; then insert</code>.</p>
+<h3>3. Pattern Recognition</h3>
+<p><strong>Problem clue:</strong> &quot;number/count of greater (or smaller) elements to the right/left,&quot; for every element.
+<strong>Pattern:</strong> <strong>Not</strong> a monotonic-stack pattern — a Fenwick Tree (BIT) counting pattern. Included in this guide specifically to mark the <em>boundary</em> of where monotonic stack stops applying.
+<strong>Why a stack fails here:</strong> a stack answers &quot;what/where is the nearest one,&quot; by permanently discarding elements once they&#39;re beaten. Counting needs to know about <em>every</em> beater, not just the first — information a stack throws away by design.
+<strong>Mental model:</strong> process right to left; a Fenwick tree lets you ask &quot;how many numbers smaller-or-equal to X have I seen so far&quot; in O(log n), so &quot;how many are greater&quot; is just <code>(total seen) − (that answer)</code>.
+<strong>Similar problems:</strong> LeetCode&#39;s &quot;Count of Smaller Numbers After Self&quot; is the mirror (flip the comparison, same technique). Not closely related to Problems 15–17 despite the surface-level similar wording — that&#39;s exactly the trap this problem is here to teach you to notice.
+<strong>Recognizing this elsewhere:</strong> if a problem says &quot;count of ___ elements&quot; (plural, an aggregate) rather than &quot;the next/previous ___ element&quot; (singular, a nearest match), that&#39;s your signal this is a counting/BIT problem, not a monotonic-stack one.</p>
+<h3>4. Brute Force</h3>
+<pre><code class="language-java">int[] countGreaterToRightBrute(int[] arr) {
+    int n = arr.length;
+    int[] result = new int[n];
+    for (int i = 0; i &lt; n; i++) {
+        int count = 0;
+        for (int j = i + 1; j &lt; n; j++) {
+            if (arr[j] &gt; arr[i]) count++;
+        }
+        result[i] = count;
+    }
+    return result;
+}
+</code></pre>
+<p><strong>Why is this too slow?</strong> For every one of the <code>n</code> elements, we scan all remaining elements to its right — classic O(n²), and unlike Problems 15–17, there&#39;s no &quot;discard forever&quot; shortcut available here, because we&#39;re not looking for a nearest match to stop at — we deliberately need to examine <em>every</em> remaining element to get an accurate count. The repeated work isn&#39;t &quot;redundant scanning we could skip&quot; so much as &quot;the same underlying question — how does this value compare against a large, slowly-shrinking pool — asked freshly, one comparison at a time, for every single pair.&quot;</p>
+<h3>5. Observation</h3>
+<p>The real question buried in &quot;how many elements already seen are greater than X&quot; is a <strong>counting-by-value-range</strong> question, and that&#39;s exactly what a Fenwick tree is built for: it lets you maintain a frequency table over values (compressed to ranks, since raw values might be large or sparse) and answer &quot;how many inserted values are ≤ some threshold&quot; in O(log n), instead of O(n) per query.</p>
+<pre><code class="language-text">Brute force (recount from scratch for every element)
+     ↓
+Repeated work: re-scanning largely-overlapping suffixes of the array, over and over
+     ↓
+Observation: this is a running &quot;how many seen so far are greater than X&quot; question —
+             exactly what a frequency-counting structure answers fast
+     ↓
+Data structure: Fenwick Tree (BIT) over coordinate-compressed values
+     ↓
+Optimized solution: O(n log n), one right-to-left pass
+</code></pre>
+<h3>6. Optimal Approach</h3>
+<ol>
+<li><strong>Coordinate-compress</strong> the array&#39;s values: sort the distinct values, and assign each one a rank (<code>1</code> = smallest, <code>2</code> = next, …).</li>
+<li>Build a Fenwick tree sized to the number of distinct values, supporting: <code>update(rank, +1)</code> (record one more occurrence of this value) and <code>query(rank)</code> (count of all inserted values with rank ≤ this one, i.e., <strong>≤</strong> the given value).</li>
+<li>Scan the array <strong>right to left</strong>, keeping a running <code>totalInserted</code> count. For each <code>arr[i]</code>: <code>countGreater = totalInserted − query(rank(arr[i]))</code> (everything inserted so far, minus everything that was ≤ <code>arr[i]</code>, leaves exactly what&#39;s <em>strictly</em> greater); this is <code>result[i]</code>. Then insert <code>arr[i]</code> into the tree and increment <code>totalInserted</code>.</li>
+</ol>
+<h3>7. Invariant</h3>
+<blockquote>
+<p><strong>Invariant:</strong> At the moment <code>arr[i]</code> is processed, the Fenwick tree contains exactly the frequency counts of every element with index <code>&gt; i</code> (i.e., everything to <code>arr[i]</code>&#39;s right that&#39;s already been processed, since we&#39;re moving right to left) — no more, no less.</p>
+</blockquote>
+<h3>8. Dry Run — <code>[5, 2, 6, 1]</code></h3>
+<p>Distinct sorted values: <code>1, 2, 5, 6</code> → ranks <code>1→1, 2→2, 5→3, 6→4</code>.</p>
+<table>
+<thead>
+<tr>
+<th>i (right→left)</th>
+<th>value</th>
+<th>rank</th>
+<th>query(rank) (≤ this value, so far)</th>
+<th>totalInserted so far</th>
+<th>result[i] = total − query</th>
+<th>after: insert</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>3</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td><strong>0</strong></td>
+<td>rank 1 (+1)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>6</td>
+<td>4</td>
+<td>1 <em>(the <code>1</code> already inserted)</em></td>
+<td>1</td>
+<td><strong>0</strong></td>
+<td>rank 4 (+1)</td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>2</td>
+<td>1 <em>(the <code>1</code>, rank 1 ≤ 2)</em></td>
+<td>2</td>
+<td><strong>1</strong></td>
+<td>rank 2 (+1)</td>
+</tr>
+<tr>
+<td>0</td>
+<td>5</td>
+<td>3</td>
+<td>2 <em>(the <code>1</code> and <code>2</code>, both ≤ 5)</em></td>
+<td>3</td>
+<td><strong>1</strong></td>
+<td>rank 3 (+1)</td>
+</tr>
+</tbody></table>
+<p>Result: <strong><code>[1, 1, 0, 0]</code></strong> ✓.</p>
+<h3>9. Why Does It Work?</h3>
+<p>Because we insert elements right to left, at the moment we query for <code>arr[i]</code>, the tree contains <em>exactly</em> — no more, no less — the elements to <code>arr[i]</code>&#39;s right (the invariant above). <code>query(rank(arr[i]))</code> counts everything inserted so far with value ≤ <code>arr[i]</code> — which, subtracted from the total inserted, leaves precisely the count of elements strictly greater. Coordinate compression doesn&#39;t lose any comparison information — it only needs to preserve <em>relative order</em>, which sorting-then-ranking does exactly, so all comparisons (<code>≤</code>, <code>&gt;</code>) come out identical to using the raw values.</p>
+<h3>10. Java Code</h3>
+<pre><code class="language-java">class BIT { // Fenwick Tree — 1-indexed
+    int[] tree;
+    int n;
+    BIT(int n) { this.n = n; tree = new int[n + 1]; }
+    void update(int i, int delta) { for (; i &lt;= n; i += i &amp; (-i)) tree[i] += delta; }
+    int query(int i) { int sum = 0; for (; i &gt; 0; i -= i &amp; (-i)) sum += tree[i]; return sum; } // prefix sum [1..i]
+}
+
+int[] countGreaterToRight(int[] arr) {
+    int n = arr.length;
+    int[] sorted = arr.clone();
+    Arrays.sort(sorted);
+    int m = 0;
+    int[] distinct = new int[n];
+    for (int i = 0; i &lt; n; i++) {
+        if (i == 0 || sorted[i] != sorted[i - 1]) distinct[m++] = sorted[i];
+    }
+    Map&lt;Integer, Integer&gt; rank = new HashMap&lt;&gt;();
+    for (int i = 0; i &lt; m; i++) rank.put(distinct[i], i + 1); // 1-indexed rank
+
+    BIT bit = new BIT(m);
+    int[] result = new int[n];
+    int totalInserted = 0;
+    for (int i = n - 1; i &gt;= 0; i--) {
+        int r = rank.get(arr[i]);
+        int countLessOrEqual = bit.query(r);
+        result[i] = totalInserted - countLessOrEqual;
+        bit.update(r, 1);
+        totalInserted++;
+    }
+    return result;
+}
+</code></pre>
+<h3>11. Complexity</h3>
+<p><strong>Time:</strong> O(n log n) — sorting for coordinate compression is O(n log n); the right-to-left scan does one <code>query</code> and one <code>update</code> per element, each O(log n), for O(n log n) total.
+<strong>Space:</strong> O(n) for the Fenwick tree, rank map, and result array.</p>
+<h3>12. Edge Cases</h3>
+<ul>
+<li>All elements equal — every count is <code>0</code> (nothing is <em>strictly</em> greater than an equal value).</li>
+<li>Strictly increasing input — <code>result[i]</code> counts down <code>n-1, n-2, ..., 1, 0</code>.</li>
+<li>Strictly decreasing input — every count is <code>0</code>.</li>
+<li>Single element — <code>[0]</code>.</li>
+<li>Large value ranges with few distinct values — coordinate compression handles this gracefully (the tree is sized to <em>distinct</em> values, not the raw value range).</li>
+</ul>
+<h3>13. Common Mistakes</h3>
+<ul>
+<li><strong>Reaching for a monotonic stack out of habit</strong>, because the problem sits next to &quot;next greater&quot; family problems and shares vocabulary — the stack silently gives you <em>whether</em> something is beaten and by what, never <em>how many times</em>. If you find yourself trying to make a stack &quot;remember a count,&quot; that&#39;s the signal you&#39;re forcing the wrong tool onto this problem.</li>
+<li><strong>Using <code>query(rank − 1)</code> instead of <code>query(rank)</code></strong> when trying to count strictly-greater elements directly (rather than the total-minus-≤ approach shown here) — off-by-one errors here are common; the total-minus-≤-count framing above sidesteps this by always computing a clean &quot;≤&quot; prefix sum and subtracting.</li>
+<li>Forgetting coordinate compression entirely and sizing the Fenwick tree to the raw value range — wastes memory, and breaks entirely if values can be negative or very large (BIT indices must be positive).</li>
+<li>Off-by-one in the BIT&#39;s own <code>update</code>/<code>query</code> loops (<code>i &amp; (-i)</code> bit-manipulation) — copy the template exactly rather than trying to rederive it under pressure.</li>
+</ul>
+<h3>14. Pattern to Remember</h3>
+<pre><code class="language-text">Problem clue:  COUNT of greater/smaller elements to the right/left (plural, aggregate)
+Pattern:       Fenwick Tree (BIT) + coordinate compression — NOT monotonic stack
+Data structure: BIT sized to the number of distinct values
+Stores:        running frequency counts of values seen so far
+Scan direction: right to left (so &quot;seen so far&quot; = &quot;to my right&quot;)
+Per element:   result = totalInserted - query(rank(value)); then insert
+Invariant:     at each step, the BIT holds exactly the frequencies of elements to the right
+Key insight:   monotonic stack answers &quot;nearest match&quot;; this needs &quot;count of ALL matches&quot; —
+               different questions, different tools
+Time / Space:  O(n log n) / O(n)
+</code></pre>
+<p><strong>Memory trick:</strong> <em>&quot;Next X is a stack question. Count of X is a Fenwick-tree question. Don&#39;t let similar wording fool you.&quot;</em></p>
+<h3>15. Interview Trigger</h3>
+<blockquote>
+<p>If a problem asks for a <strong>count</strong> of greater/smaller elements (not the nearest one), I immediately flag that a monotonic stack is the wrong tool — it discards elements after their first match, which throws away exactly the information counting needs. I reach for a Fenwick tree over coordinate-compressed values instead, scanning in the direction that makes &quot;already inserted&quot; mean &quot;already seen on the relevant side.&quot;</p>
+</blockquote>
+<hr>
+<h2>Pattern Connections Recap (Problems 15–18)</h2>
+<ul>
+<li><strong>Problems 15 and 17</strong> are exact mirror images — same algorithm, every comparison flipped, same correctness argument. If you can derive one from scratch, you can derive the other by symmetry alone.</li>
+<li><strong>Problem 16</strong> is Problem 15 with one added trick (simulate a second lap via <code>i % n</code>) bolted on — not a new pattern, an extension of the same one.</li>
+<li><strong>Problem 18</strong> is deliberately the odd one out: it <em>looks</em> like it belongs to this family (same vocabulary — &quot;greater,&quot; &quot;to the right&quot;) but needs a genuinely different tool, because it asks a genuinely different question (count vs. nearest). Recognizing <em>this</em> distinction — not just recognizing monotonic stack — is exactly the kind of judgment the Part 2 framework&#39;s question 5 (&quot;Am I looking for previous/next greater/smaller?&quot;) is meant to sharpen: the word &quot;next&quot; or &quot;previous&quot; in the problem statement is what earns the stack; the word &quot;count&quot; or &quot;number of&quot; should make you pause.</li>
+</ul>
+<hr>
+<p><strong>Next:</strong> <a href="06_problems_19to23_boundary_and_contribution.md"><code>06_problems_19to23_boundary_and_contribution.md</code></a> — Trapping Rain Water, Sum of Subarray Minimums/Ranges, Asteroid Collision, and Remove K Digits: monotonic stack applied to boundaries, contributions, simulation, and greedy construction.</p>
+</div>
+    <script>
+        const vscode = acquireVsCodeApi();
+        function exportFile(format) { vscode.postMessage({ command: 'export', format: format }); }
+        mermaid.initialize({ startOnLoad: true, theme: 'default', securityLevel: 'loose' });
+        // Help Puppeteer know when we are done
+        window.addEventListener('load', () => {
+            mermaid.run().then(() => {
+                document.body.classList.add('mermaid-rendered');
+            });
+        });
+    </script>
+</body>
+</html>

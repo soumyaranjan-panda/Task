@@ -1,0 +1,1965 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sliding Window &amp; Two Pointers — DSA Notes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f6fb;
+    --bg-grad1: rgba(99, 102, 241, .16);
+    --bg-grad2: rgba(168, 85, 247, .13);
+    --card: #ffffff;
+    --card-soft: #f1f3f9;
+    --border: #e6e8f1;
+    --border-strong: #d8dce8;
+    --text: #191f2e;
+    --muted: #5c6578;
+    --accent: #6366f1;
+    --accent-2: #8b5cf6;
+    --on-accent: #ffffff;
+    --med-bg: rgba(245, 158, 11, .15);
+    --med-fg: #b45309;
+    --hard-bg: rgba(244, 63, 94, .13);
+    --hard-fg: #e11d48;
+    --ok-bg: rgba(16, 185, 129, .13);
+    --ok-fg: #059669;
+    --code: #0f172a;
+    --code-text: #dbe4f2;
+    --code-muted: #7c89a3;
+    --shadow: 0 1px 2px rgba(16, 24, 40, .05), 0 10px 28px -14px rgba(16, 24, 40, .20);
+    --ring: rgba(99, 102, 241, .22);
+  }
+  [data-theme="dark"] {
+    --bg: #0a0f1e;
+    --bg-grad1: rgba(99, 102, 241, .14);
+    --bg-grad2: rgba(139, 92, 246, .12);
+    --card: #0f1626;
+    --card-soft: #17213a;
+    --border: #1e2942;
+    --border-strong: #2b3855;
+    --text: #e8ecf6;
+    --muted: #93a0ba;
+    --accent: #818cf8;
+    --accent-2: #a78bfa;
+    --on-accent: #0b0f1c;
+    --med-bg: rgba(251, 191, 36, .14);
+    --med-fg: #fbbf24;
+    --hard-bg: rgba(251, 113, 133, .13);
+    --hard-fg: #fb7185;
+    --ok-bg: rgba(52, 211, 153, .13);
+    --ok-fg: #34d399;
+    --code: #0b1120;
+    --code-text: #d7e0f0;
+    --code-muted: #7f8ba6;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 14px 34px -18px rgba(0, 0, 0, .65);
+    --ring: rgba(129, 140, 248, .30);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    position: relative;
+  }
+  body::before, body::after {
+    content: "";
+    position: fixed;
+    z-index: 0;
+    pointer-events: none;
+    border-radius: 50%;
+    filter: blur(60px);
+  }
+  body::before {
+    width: 620px; height: 620px;
+    top: -220px; right: -160px;
+    background: radial-gradient(circle, var(--bg-grad1), transparent 65%);
+  }
+  body::after {
+    width: 560px; height: 560px;
+    bottom: -240px; left: -180px;
+    background: radial-gradient(circle, var(--bg-grad2), transparent 65%);
+  }
+  main, .topbar { position: relative; z-index: 1; }
+
+  /* ---------- Top bar ---------- */
+  .topbar {
+    position: sticky; top: 0; z-index: 5;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px;
+    padding: 12px clamp(16px, 4vw, 28px);
+    background: color-mix(in srgb, var(--bg) 78%, transparent);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+  }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 14px; }
+  .brand svg { color: var(--accent); }
+  .brand small { color: var(--muted); font-weight: 600; }
+  .top-actions { display: flex; align-items: center; gap: 10px; }
+  .solved-chip {
+    font: 600 12px/1; color: var(--muted);
+    padding: 8px 12px; border: 1px solid var(--border);
+    border-radius: 999px; background: var(--card);
+  }
+  .solved-chip b { color: var(--accent); }
+  .icon-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 38px; height: 38px; cursor: pointer;
+    border: 1px solid var(--border); border-radius: 12px;
+    background: var(--card); color: var(--muted);
+    transition: .15s;
+  }
+  .icon-btn:hover { color: var(--accent); border-color: var(--accent); transform: translateY(-1px); }
+  .theme-btn .sun { display: block; }
+  .theme-btn .moon { display: none; }
+  [data-theme="dark"] .theme-btn .sun { display: none; }
+  [data-theme="dark"] .theme-btn .moon { display: block; }
+
+  /* ---------- Layout ---------- */
+  main { max-width: 980px; margin: 0 auto; padding: 40px clamp(16px, 4vw, 28px) 90px; }
+
+  /* ---------- Hero ---------- */
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font: 600 12px/1; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--accent); padding: 7px 12px;
+    background: var(--card); border: 1px solid var(--border); border-radius: 999px;
+  }
+  .hero h1 {
+    font-size: clamp(30px, 5vw, 46px);
+    line-height: 1.12; margin: 18px 0 12px; font-weight: 800; letter-spacing: -.02em;
+  }
+  .hero h1 .grad {
+    background: linear-gradient(92deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .hero .sub { color: var(--muted); max-width: 640px; font-size: 16px; }
+  .hero-stats {
+    display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px;
+  }
+  .stat {
+    min-width: 110px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 14px 18px;
+    box-shadow: var(--shadow);
+  }
+  .stat .k { font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
+  .stat .l { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+
+  /* ---------- Progress ---------- */
+  .progress-card {
+    margin-top: 34px;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 8%, var(--card)), color-mix(in srgb, var(--accent-2) 8%, var(--card)));
+    border: 1px solid var(--border); border-radius: 22px;
+    padding: clamp(18px, 4vw, 28px);
+    box-shadow: var(--shadow);
+  }
+  .progress-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .progress-top .hl { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+  .big { font-size: 44px; font-weight: 800; letter-spacing: -.03em; }
+  .big small { font-size: 18px; color: var(--muted); font-weight: 700; }
+  .progress-track {
+    margin-top: 18px; height: 14px; border-radius: 999px;
+    background: color-mix(in srgb, var(--text) 8%, transparent);
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; width: 0%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    transition: width .5s cubic-bezier(.4, 0, .2, 1);
+  }
+  .progress-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+  .meta-item {
+    font: 600 12.5px/1; color: var(--muted);
+    padding: 8px 13px; border-radius: 999px;
+    background: var(--card); border: 1px solid var(--border);
+  }
+  .meta-item b { color: var(--text); }
+  .meta-item.ok { background: var(--ok-bg); border-color: transparent; }
+  .meta-item.ok b { color: var(--ok-fg); }
+
+  /* ---------- Section heads ---------- */
+  .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 54px 0 18px; }
+  .section-head h2 { margin: 0; font-size: 21px; letter-spacing: -.01em; }
+  .section-head .tag { font-size: 12.5px; color: var(--muted); font-weight: 600; }
+
+  /* ---------- Patterns ---------- */
+  .patterns-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .pattern-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 18px; padding: 18px 20px;
+    display: flex; flex-direction: column; gap: 8px;
+    box-shadow: var(--shadow);
+  }
+  .pattern-card .p-head { display: flex; align-items: center; gap: 10px; }
+  .p-num {
+    width: 30px; height: 30px; flex: none;
+    display: inline-flex; align-items: center; justify-content: center;
+    font: 700 13px/1;
+    color: var(--on-accent);
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    border-radius: 9px;
+  }
+  .pattern-card h3 { margin: 0; font-size: 15px; }
+  .pattern-card p { margin: 0; color: var(--muted); font-size: 13.5px; }
+  .pattern-card .for { font-size: 12.5px; font-weight: 600; color: var(--accent); }
+  .mini-code { margin-top: 6px; }
+
+  .hints {
+    margin-top: 16px; border-radius: 18px;
+    border: 1px dashed var(--border-strong);
+    background: var(--card-soft);
+    padding: 16px 20px; font-size: 13.5px; color: var(--muted);
+  }
+  .hints b { color: var(--text); }
+
+  /* ---------- Filters ---------- */
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; }
+  .filter-btn {
+    font: 600 12.5px/1; cursor: pointer;
+    padding: 9px 15px; border-radius: 999px;
+    border: 1px solid var(--border); background: var(--card); color: var(--muted);
+    transition: .15s;
+  }
+  .filter-btn:hover { color: var(--text); border-color: var(--border-strong); }
+  .filter-btn.active {
+    color: var(--on-accent); border-color: transparent;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  }
+
+  /* ---------- Cards ---------- */
+  .card {
+    margin: 12px 0;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 20px; overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .card.solved { border-color: color-mix(in srgb, var(--ok-fg) 40%, var(--border)); }
+  .card.solved .card-title, .card.solved .num { color: var(--muted); }
+  .card.solved .card-title .strike { text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--ok-fg) 60%, transparent); }
+  .card.open { box-shadow: var(--shadow), 0 0 0 3px var(--ring); }
+
+  .card-head {
+    display: flex; align-items: center; gap: 14px;
+    padding: 16px clamp(14px, 3vw, 22px);
+    cursor: pointer; user-select: none;
+  }
+  .card-head:hover { background: color-mix(in srgb, var(--text) 2.5%, transparent); }
+
+  .tic { position: relative; width: 26px; height: 26px; flex: none; display: block; }
+  .tic input { position: absolute; inset: 0; opacity: 0; cursor: pointer; margin: 0; }
+  .tic .box {
+    position: absolute; inset: 0;
+    border: 2px solid var(--border-strong); border-radius: 8px;
+    background: var(--card); transition: .18s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .tic .box svg { width: 14px; height: 14px; color: #fff; opacity: 0; transform: scale(.5); transition: .18s; }
+  .tic input:checked + .box {
+    background: linear-gradient(135deg, var(--ok-fg), var(--accent-2));
+    border-color: transparent;
+    box-shadow: 0 4px 12px -4px var(--ok-fg);
+  }
+  .tic input:checked + .box svg { opacity: 1; transform: scale(1); }
+  .tic input:focus-visible + .box { box-shadow: 0 0 0 3px var(--ring); }
+
+  .num {
+    flex: none; width: 34px; height: 34px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font: 700 13px/1; color: var(--text);
+    background: var(--card-soft); border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  .card-title { margin: 0; font-size: 15.5px; font-weight: 700; flex: 1; min-width: 150px; letter-spacing: -.01em; }
+
+  .badge-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; flex: none; }
+  .badge { font: 600 11px/1; padding: 6px 10px; border-radius: 999px; white-space: nowrap; }
+  .badge.med { background: var(--med-bg); color: var(--med-fg); }
+  .badge.hard { background: var(--hard-bg); color: var(--hard-fg); }
+  .badge.tuf { background: var(--card-soft); color: var(--muted); border: 1px dashed var(--border-strong); }
+
+  .links { display: flex; align-items: center; gap: 6px; flex: none; }
+  .links a {
+    display: inline-flex; align-items: center; gap: 5px;
+    font: 600 11.5px/1; text-decoration: none;
+    color: var(--accent); padding: 6px 10px;
+    border: 1px solid var(--border); border-radius: 999px;
+    background: var(--card); transition: .15s;
+  }
+  .links a:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--card)); }
+  .links a svg { width: 11px; height: 11px; }
+
+  .chev { flex: none; width: 22px; height: 22px; color: var(--muted); transition: transform .3s; }
+  .card.open .chev { transform: rotate(180deg); color: var(--accent); }
+
+  .acc { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .38s cubic-bezier(.4, 0, .2, 1); }
+  .acc-inner { overflow: hidden; min-height: 0; }
+  .card.open .acc { grid-template-rows: 1fr; }
+  .acc-body {
+    padding: 4px clamp(14px, 3vw, 22px) 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* ---------- Notes ---------- */
+  .notes { padding-top: 18px; }
+  .idea { color: var(--muted); font-size: 14px; margin: 0 0 12px; }
+  .idea b { color: var(--text); }
+  .steps { margin: 0 0 16px; padding-left: 20px; color: var(--text); font-size: 13.5px; }
+  .steps li { margin: 5px 0; }
+  .steps li::marker { color: var(--accent); }
+  .chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; }
+  .chip {
+    font: 600 11.5px/1; padding: 6px 11px; border-radius: 999px;
+    background: color-mix(in srgb, var(--accent) 10%, var(--card));
+    color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+  }
+  .complexity { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 4px; }
+  .cx {
+    display: inline-flex; align-items: center; gap: 7px;
+    font: 600 12.5px/1; padding: 8px 12px; border-radius: 12px;
+    background: var(--card-soft); border: 1px solid var(--border); color: var(--text);
+  }
+  .cx .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent-2); }
+  .cx:nth-child(2) .dot { background: var(--accent); }
+
+  /* ---------- Code ---------- */
+  .code-tabs { margin-top: 16px; border-radius: 16px; overflow: hidden; border: 1px solid var(--border); }
+  .code-tabs .tabs {
+    display: flex; align-items: center; gap: 2px;
+    padding: 8px 10px;
+    background: color-mix(in srgb, var(--text) 4%, var(--card));
+    border-bottom: 1px solid var(--border);
+  }
+  .code-tabs .tab {
+    font: 600 12px/1; cursor: pointer;
+    padding: 7px 14px; border-radius: 9px;
+    border: none; background: transparent; color: var(--muted);
+    transition: .15s;
+  }
+  .code-tabs .tab:hover { color: var(--text); }
+  .code-tabs .tab.active { background: var(--card); color: var(--accent); box-shadow: var(--shadow); }
+  .code-tabs .tab { order: 2; }
+  .code-tabs .tab[data-lang="java"] { order: 1; }
+  .code-tabs .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 7px; vertical-align: 0; }
+  .code-tabs .tab[data-lang="cpp"] .dot { background: #f59e0b; }
+  .code-tabs .tab[data-lang="java"] .dot { background: #ef4444; }
+  .code-tabs .tab[data-lang="python"] .dot { background: #22c55e; }
+  .code-tabs .tab-panel { display: none; position: relative; background: var(--code); }
+  .code-tabs .tab-panel.active { display: block; }
+  .code-tabs .tab-panel pre {
+    margin: 0; padding: 18px 18px 20px;
+    overflow-x: auto;
+    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12.8px; line-height: 1.65;
+    color: var(--code-text);
+    tab-size: 4;
+  }
+  .copy-btn {
+    position: absolute; top: 10px; right: 10px;
+    display: inline-flex; align-items: center; gap: 6px;
+    font: 600 11px/1; cursor: pointer;
+    padding: 7px 11px; border-radius: 8px;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.06); color: #b6c2d9;
+    transition: .15s;
+  }
+  .copy-btn:hover { color: #fff; background: rgba(255,255,255,.12); }
+  .copy-btn.ok { color: #34d399; border-color: rgba(52,211,153,.5); }
+  .copy-btn svg { width: 12px; height: 12px; }
+
+  /* mini code (patterns) */
+  .mini-code .code-tabs { border: 1px solid var(--border); }
+  .mini-code .tab-panel pre { font-size: 12.3px; }
+
+  code .kw { color: #c4b5fd; font-weight: 500; }
+  code .st { color: #86efac; }
+  code .cm { color: var(--code-muted); font-style: italic; }
+  code .nm { color: #fbbf24; }
+  code .pp { color: #f9a8d4; }
+
+  footer {
+    max-width: 980px; margin: 26px auto 0; padding: 0 clamp(16px, 4vw, 28px) 56px;
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;
+    color: var(--muted); font-size: 12.5px;
+  }
+  .reset-btn {
+    font: 600 12px/1; cursor: pointer;
+    padding: 9px 14px; border-radius: 999px;
+    border: 1px solid var(--border); background: var(--card); color: var(--muted);
+    transition: .15s;
+  }
+  .reset-btn:hover { color: var(--hard-fg); border-color: var(--hard-fg); }
+
+  /* ---------- Interview Guide ---------- */
+  .guide-map {
+    margin-bottom: 16px; border-radius: 16px;
+    border: 1px dashed var(--border-strong);
+    background: var(--card-soft);
+    padding: 14px 18px; font-size: 12.5px; color: var(--muted);
+    line-height: 1.7;
+    font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  }
+  .guide-map b { color: var(--accent); }
+  .guide-part { margin-top: 16px; }
+  .guide-part h3 { font-size: 16px; }
+  .g-note { color: var(--muted); font-size: 13.5px; }
+  .g-body { padding-bottom: 8px; }
+  .g-body p { margin: 8px 0; font-size: 14px; line-height: 1.7; }
+  .g-body b { color: var(--text); }
+  .g-h3 {
+    font-size: 16px; letter-spacing: -.01em;
+    margin: 30px 0 10px; padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .g-h3.first { margin-top: 6px; padding-top: 0; border-top: none; }
+  .g-h4 { font-size: 13.5px; margin: 16px 0 6px; color: var(--accent); }
+  .g-ul { margin: 6px 0 12px; padding-left: 20px; }
+  .g-ul li { margin: 5px 0; font-size: 13.5px; }
+  .g-body code {
+    font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+    font-size: 12.3px;
+    background: var(--card-soft);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    padding: 1px 6px; border-radius: 6px;
+    white-space: nowrap;
+  }
+  .g-table { width: 100%; border-collapse: collapse; margin: 12px 0 16px; font-size: 12.8px; }
+  .g-table caption { text-align: left; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  .g-table th {
+    text-align: left; font-weight: 600; color: var(--accent);
+    background: var(--card-soft); padding: 8px 10px;
+    border: 1px solid var(--border);
+  }
+  .g-table td { padding: 8px 10px; border: 1px solid var(--border); vertical-align: top; }
+  .g-table td code { white-space: normal; }
+  .g-mono {
+    margin: 10px 0 14px; padding: 14px 16px;
+    font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+    font-size: 12.4px; line-height: 1.7;
+    background: var(--code); color: var(--code-text);
+    border-radius: 14px; border: 1px solid var(--border);
+    overflow-x: auto; white-space: pre;
+  }
+  .g-card { margin: 18px 0; border-radius: 18px; overflow: hidden; }
+  .g-card .card-head { padding: 12px 16px; }
+  .g-card h4 { margin: 0; font-size: 14.5px; flex: 1; }
+  .g-code-label {
+    font: 600 11px/1; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--muted); margin: 18px 0 8px;
+  }
+  .g-recap {
+    margin-top: 26px; border-radius: 16px;
+    border: 1px solid var(--border);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 8%, var(--card)), color-mix(in srgb, var(--accent-2) 8%, var(--card)));
+    padding: 16px 20px;
+  }
+  .g-recap h3 { margin: 0 0 8px; font-size: 15px; }
+  .g-recap ul { margin: 0; padding-left: 20px; }
+  .g-recap li { margin: 6px 0; font-size: 13.5px; }
+
+  @media (max-width: 860px) {
+    .patterns-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 620px) {
+    .card-head { flex-wrap: wrap; }
+    .card-title { order: 3; flex-basis: 100%; }
+    .badge-row { margin-left: auto; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="7" y1="15" x2="10" y2="15"/></svg>
+    <span>Sliding Window Notes <small>· A2Z Topic 10</small></span>
+  </div>
+  <div class="top-actions">
+    <span class="solved-chip">Solved <b id="solvedCount">0</b>/12</span>
+    <button class="icon-btn theme-btn" id="themeBtn" title="Toggle theme" aria-label="Toggle theme">
+      <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.9" y1="4.9" x2="6.3" y2="6.3"/><line x1="17.7" y1="17.7" x2="19.1" y2="19.1"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.9" y1="19.1" x2="6.3" y2="17.7"/><line x1="17.7" y1="6.3" x2="19.1" y2="4.9"/></svg>
+      <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+  </div>
+</div>
+
+<main>
+
+  <section class="hero">
+    <span class="eyebrow">Striver A2Z · Step 10</span>
+    <h1>Sliding Window &amp; <span class="grad">Two Pointers</span></h1>
+    <p class="sub">All 12 problems from the A2Z sheet, with the underlying pattern for each, working code in C++ / Java / Python, and complexity notes. Tick a problem to track your progress — it saves automatically in your browser.</p>
+    <div class="hero-stats">
+      <div class="stat"><div class="k">12</div><div class="l">Problems</div></div>
+      <div class="stat"><div class="k">8</div><div class="l">Medium</div></div>
+      <div class="stat"><div class="k">4</div><div class="l">Hard</div></div>
+      <div class="stat"><div class="k">4</div><div class="l">Patterns</div></div>
+    </div>
+  </section>
+
+  <section class="progress-card">
+    <div class="progress-top">
+      <div>
+        <div class="hl">Your progress</div>
+        <div class="big"><span id="pct">0</span><small>%</small></div>
+      </div>
+      <div class="progress-track" style="width: min(300px, 60%);">
+        <div class="progress-fill" id="progressBar"></div>
+      </div>
+    </div>
+    <div class="progress-meta">
+      <span class="meta-item">Total <b>12</b></span>
+      <span class="meta-item ok">Solved <b id="solvedCount2">0</b></span>
+      <span class="meta-item">Remaining <b id="remainCount">12</b></span>
+      <span class="meta-item">Saved locally in this browser</span>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>The 4 patterns behind all 12 problems</h2>
+      <span class="tag">Read this before the problems</span>
+    </div>
+    <div class="patterns-grid">
+
+      <div class="pattern-card">
+        <div class="p-head"><span class="p-num">A</span><h3>Variable-size window</h3></div>
+        <p>Expand the right pointer into the window; while the window breaks the rule, shrink from the left. For "longest valid window", the answer is <b>max(r − l + 1)</b>.</p>
+        <div class="mini-code">
+          <div class="code-tabs">
+            <div class="tabs">
+              <button class="tab" data-lang="cpp"><span class="dot"></span>C++</button>
+              <button class="tab" data-lang="java"><span class="dot"></span>Java</button>
+              <button class="tab" data-lang="python"><span class="dot"></span>Python</button>
+            </div>
+            <div class="tab-panel"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="cpp">int l = 0, ans = 0;
+for (int r = 0; r &lt; n; ++r) {
+    addToWindow(nums[r]);              // grow window
+    while (windowIsInvalid()) {        // shrink until valid again
+        removeFromWindow(nums[l++]);
+    }
+    ans = max(ans, r - l + 1);         // [l..r] is a valid window
+}
+</code></pre></div>
+            <div class="tab-panel"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="java">int l = 0, ans = 0;
+for (int r = 0; r &lt; n; ++r) {
+    addToWindow(nums[r]);              // grow window
+    while (windowIsInvalid()) {        // shrink until valid again
+        removeFromWindow(nums[l++]);
+    }
+    ans = Math.max(ans, r - l + 1);    // [l..r] is a valid window
+}
+</code></pre></div>
+            <div class="tab-panel"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="python">l = ans = 0
+for r in range(n):
+    add_to_window(nums[r])             # grow window
+    while window_is_invalid():         # shrink until valid again
+        remove_from_window(nums[l])
+        l += 1
+    ans = max(ans, r - l + 1)          # [l..r] is a valid window
+</code></pre></div>
+          </div>
+        </div>
+        <span class="for">Problems 1, 2, 3, 4, 9</span>
+      </div>
+
+      <div class="pattern-card">
+        <div class="p-head"><span class="p-num">C</span><h3>atMost(k) − atMost(k−1)</h3></div>
+        <p>To count subarrays with <b>exactly</b> k of something, count those with <b>at most</b> k and subtract those with <b>at most</b> k−1. Turns the same-looking counting problems into one easy slide.</p>
+        <div class="mini-code">
+          <div class="code-tabs">
+            <div class="tabs">
+              <button class="tab" data-lang="cpp"><span class="dot"></span>C++</button>
+              <button class="tab" data-lang="java"><span class="dot"></span>Java</button>
+              <button class="tab" data-lang="python"><span class="dot"></span>Python</button>
+            </div>
+            <div class="tab-panel"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="cpp">int atMost(int k) {
+    int l = 0, ans = 0, have = 0;
+    for (int r = 0; r &lt; n; ++r) {
+        addToWindow(nums[r]);
+        while (have &gt; k) removeFromWindow(nums[l++]);
+        ans += r - l + 1;              // all subarrays ending at r
+    }
+    return ans;                        // count of windows with &lt;= k
+}
+// exact answer = atMost(k) - atMost(k - 1)
+</code></pre></div>
+            <div class="tab-panel"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="java">int atMost(int k) {
+    int l = 0, ans = 0, have = 0;
+    for (int r = 0; r &lt; n; ++r) {
+        addToWindow(nums[r]);
+        while (have &gt; k) removeFromWindow(nums[l++]);
+        ans += r - l + 1;              // all subarrays ending at r
+    }
+    return ans;                        // count of windows with &lt;= k
+}
+// exact answer = atMost(k) - atMost(k - 1)
+</code></pre></div>
+            <div class="tab-panel"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="python">def at_most(k):
+    l = ans = have = 0
+    for r in range(n):
+        add_to_window(nums[r])
+        while have &gt; k:
+            remove_from_window(nums[l])
+            l += 1
+        ans += r - l + 1               # all subarrays ending at r
+    return ans                         # count of windows with &lt;= k
+# exact answer = at_most(k) - at_most(k - 1)
+</code></pre></div>
+          </div>
+        </div>
+        <span class="for">Problems 5, 6, 10</span>
+      </div>
+
+      <div class="pattern-card">
+        <div class="p-head"><span class="p-num">B</span><h3>Fixed window — the complement trick</h3></div>
+        <p>Taking k cards from both ends is the same as dropping one contiguous middle block of size <b>n − k</b>. Sweep that fixed-size window and track its minimum — answer = total − min.</p>
+        <span class="for">Problem 8</span>
+      </div>
+
+      <div class="pattern-card">
+        <div class="p-head"><span class="p-num">D</span><h3>Satisfied-window (minimum window)</h3></div>
+        <p>Expand the right pointer until every required element is covered (<b>missing == 0</b>), record the window, then shrink the left pointer while it stays covered. Track the smallest window seen.</p>
+        <span class="for">Problems 11, 12</span>
+      </div>
+
+    </div>
+
+    <div class="hints">
+      <b>When to reach for sliding window:</b> the problem talks about a <b>substring / subarray</b>, asks for the <b>longest / shortest / number of</b> them, and the constraint is a cap like <b>at most k</b>, <b>distinct characters</b>, or a fixed character set. If it's "number of subarrays satisfying exactly X", add the atMost(k) trick. If it's "minimum substring containing some character set", it's the satisfied-window pattern. Nothing here needs O(n²) — that's the whole point.
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Problems</h2>
+      <div class="filters">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="medium">Medium</button>
+        <button class="filter-btn" data-filter="hard">Hard</button>
+        <button class="filter-btn" data-filter="solved">Solved</button>
+      </div>
+    </div>
+
+    <div class="problems" id="problems">
+
+      <!-- 01 -->
+      <article class="card" data-diff="medium">
+        <header class="card-head" role="button" tabindex="0" aria-expanded="false">
+          <label class="tic"><input type="checkbox" value="p01"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></label>
+          <span class="num">01</span>
+          <h3 class="card-title"><span class="strike">Longest Substring Without Repeating Characters</span></h3>
+          <div class="badge-row">
+            <span class="badge med">Medium</span>
+            <span class="chip">Pattern A</span>
+          </div>
+          <div class="links">
+            <a href="https://takeuforward.org/data-structure/length-of-longest-substring-without-any-repeating-character/" target="_blank" rel="noopener">TUF · Article <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+          </div>
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </header>
+        <div class="acc"><div class="acc-inner"><div class="acc-body">
+          <div class="notes">
+            <p class="idea"><b>The idea:</b> keep a window with all unique characters. The moment a character repeats inside the window, jump the left edge just past its previous occurrence.</p>
+            <ul class="steps">
+              <li>Store the <b>last index</b> of every character as you scan.</li>
+              <li>For each <b>right</b>, if <code>s[right]</code> was last seen at index <b>p ≥ left</b>, set <b>left = p + 1</b>.</li>
+              <li>Window is valid, so record <b>right − left + 1</b> and keep the max.</li>
+              <li>Works because the window only ever holds unique characters — no shrink loop needed.</li>
+            </ul>
+          </div>
+          <div class="complexity">
+            <span class="cx"><span class="dot"></span>Time · O(n)</span>
+            <span class="cx"><span class="dot"></span>Space · O(1) — 128-sized array</span>
+          </div>
+          <div class="code-tabs">
+            <div class="tabs">
+              <button class="tab active" data-lang="cpp"><span class="dot"></span>C++</button>
+              <button class="tab" data-lang="java"><span class="dot"></span>Java</button>
+              <button class="tab" data-lang="python"><span class="dot"></span>Python</button>
+            </div>
+            <div class="tab-panel active"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="cpp">class Solution {
+public:
+    int lengthOfLongestSubstring(string s) {
+        vector&lt;int&gt; last(128, -1);
+        int l = 0, best = 0;
+        for (int r = 0; r &lt; s.size(); ++r) {
+            if (last[s[r]] &gt;= l) l = last[s[r]] + 1;   // jump past the repeat
+            last[s[r]] = r;                             // remember this position
+            best = max(best, r - l + 1);
+        }
+        return best;
+    }
+};
+</code></pre></div>
+            <div class="tab-panel"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="java">import java.util.*;
+
+class Solution {
+    public int lengthOfLongestSubstring(String s) {
+        int[] last = new int[128];
+        Arrays.fill(last, -1);
+        int l = 0, best = 0;
+        for (int r = 0; r &lt; s.length(); r++) {
+            char c = s.charAt(r);
+            if (last[c] &gt;= l) l = last[c] + 1;
+            last[c] = r;
+            best = Math.max(best, r - l + 1);
+        }
+        return best;
+    }
+}
+</code></pre></div>
+            <div class="tab-panel"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="python">class Solution:
+    def lengthOfLongestSubstring(self, s: str) -> int:
+        last = {}
+        l = best = 0
+        for r, ch in enumerate(s):
+            if last.get(ch, -1) &gt;= l:
+                l = last[ch] + 1
+            last[ch] = r
+            best = max(best, r - l + 1)
+        return best
+</code></pre></div>
+          </div>
+        </div></div></div>
+      </article>
+
+      <!-- 02 -->
+      <article class="card" data-diff="medium">
+        <header class="card-head" role="button" tabindex="0" aria-expanded="false">
+          <label class="tic"><input type="checkbox" value="p02"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></label>
+          <span class="num">02</span>
+          <h3 class="card-title"><span class="strike">Max Consecutive Ones III</span></h3>
+          <div class="badge-row">
+            <span class="badge med">Medium</span>
+            <span class="chip">Pattern A</span>
+          </div>
+          <div class="links">
+            <a href="https://takeuforward.org/data-structure/max-consecutive-ones-iii/" target="_blank" rel="noopener">TUF · Article <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+          </div>
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </header>
+        <div class="acc"><div class="acc-inner"><div class="acc-body">
+          <div class="notes">
+            <p class="idea"><b>The idea:</b> a valid window contains at most <b>k zeroes</b> (those get flipped). Count the zeroes inside the window and shrink while the count exceeds k. It's "longest subarray with at most k zeroes".</p>
+            <ul class="steps">
+              <li>Expand <b>right</b>; if the new element is <b>0</b>, increment <b>zeros</b>.</li>
+              <li>While <b>zeros &gt; k</b>: if the element leaving at <b>left</b> is a 0, decrement; move <b>left</b>.</li>
+              <li>Record <b>max(right − left + 1)</b> at each step.</li>
+            </ul>
+          </div>
+          <div class="complexity">
+            <span class="cx"><span class="dot"></span>Time · O(n)</span>
+            <span class="cx"><span class="dot"></span>Space · O(1)</span>
+          </div>
+          <div class="code-tabs">
+            <div class="tabs">
+              <button class="tab active" data-lang="cpp"><span class="dot"></span>C++</button>
+              <button class="tab" data-lang="java"><span class="dot"></span>Java</button>
+              <button class="tab" data-lang="python"><span class="dot"></span>Python</button>
+            </div>
+            <div class="tab-panel active"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="cpp">class Solution {
+public:
+    int longestOnes(vector&lt;int&gt;&amp; nums, int k) {
+        int l = 0, zeros = 0, best = 0;
+        for (int r = 0; r &lt; nums.size(); ++r) {
+            if (nums[r] == 0) ++zeros;
+            while (zeros &gt; k) {              // too many flips needed
+                if (nums[l++] == 0) --zeros;
+            }
+            best = max(best, r - l + 1);
+        }
+        return best;
+    }
+};
+</code></pre></div>
+            <div class="tab-panel"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="java">class Solution {
+    public int longestOnes(int[] nums, int k) {
+        int l = 0, zeros = 0, best = 0;
+        for (int r = 0; r &lt; nums.length; r++) {
+            if (nums[r] == 0) zeros++;
+            while (zeros &gt; k) {
+                if (nums[l] == 0) zeros--;
+                l++;
+            }
+            best = Math.max(best, r - l + 1);
+        }
+        return best;
+    }
+}
+</code></pre></div>
+            <div class="tab-panel"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="python">from typing import List
+
+class Solution:
+    def longestOnes(self, nums: List[int], k: int) -> int:
+        l = zeros = best = 0
+        for r in range(len(nums)):
+            if nums[r] == 0:
+                zeros += 1
+            while zeros &gt; k:
+                if nums[l] == 0:
+                    zeros -= 1
+                l += 1
+            best = max(best, r - l + 1)
+        return best
+</code></pre></div>
+          </div>
+        </div></div></div>
+      </article>
+
+      <!-- 03 -->
+      <article class="card" data-diff="medium">
+        <header class="card-head" role="button" tabindex="0" aria-expanded="false">
+          <label class="tic"><input type="checkbox" value="p03"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></label>
+          <span class="num">03</span>
+          <h3 class="card-title"><span class="strike">Fruit Into Baskets</span></h3>
+          <div class="badge-row">
+            <span class="badge med">Medium</span>
+            <span class="chip">Pattern A · K=2</span>
+          </div>
+          <div class="links">
+            <a href="https://takeuforward.org/data-structure/fruit-into-baskets/" target="_blank" rel="noopener">TUF · Article <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+          </div>
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </header>
+        <div class="acc"><div class="acc-inner"><div class="acc-body">
+          <div class="notes">
+            <p class="idea"><b>The idea:</b> two baskets mean the window may hold at most <b>2 distinct fruit types</b>. Count each type; when more than 2 types appear, shrink the left edge until one type is fully removed.</p>
+            <ul class="steps">
+              <li>Maintain a frequency map of the window.</li>
+              <li>Add <b>fruits[right]</b>; while <b>map.size() &gt; 2</b>, drop <b>fruits[left++]</b> (erase the type if its count hits 0).</li>
+              <li>Track <b>max(right − left + 1)</b>.</li>
+              <li>This is exactly "Longest Substring with At Most K Distinct" with K = 2.</li>
+            </ul>
+          </div>
+          <div class="complexity">
+            <span class="cx"><span class="dot"></span>Time · O(n)</span>
+            <span class="cx"><span class="dot"></span>Space · O(1) — at most 3 keys</span>
+          </div>
+          <div class="code-tabs">
+            <div class="tabs">
+              <button class="tab active" data-lang="cpp"><span class="dot"></span>C++</button>
+              <button class="tab" data-lang="java"><span class="dot"></span>Java</button>
+              <button class="tab" data-lang="python"><span class="dot"></span>Python</button>
+            </div>
+            <div class="tab-panel active"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="cpp">class Solution {
+public:
+    int totalFruit(vector&lt;int&gt;&amp; fruits) {
+        unordered_map&lt;int, int&gt; cnt;
+        int l = 0, best = 0;
+        for (int r = 0; r &lt; fruits.size(); ++r) {
+            ++cnt[fruits[r]];
+            while (cnt.size() &gt; 2) {             // two baskets only
+                if (--cnt[fruits[l]] == 0) cnt.erase(fruits[l]);
+                ++l;
+            }
+            best = max(best, r - l + 1);
+        }
+        return best;
+    }
+};
+</code></pre></div>
+            <div class="tab-panel"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="java">import java.util.*;
+
+class Solution {
+    public int totalFruit(int[] fruits) {
+        Map&lt;Integer, Integer&gt; cnt = new HashMap&lt;&gt;();
+        int l = 0, best = 0;
+        for (int r = 0; r &lt; fruits.length; r++) {
+            cnt.merge(fruits[r], 1, Integer::sum);
+            while (cnt.size() &gt; 2) {
+                if (cnt.merge(fruits[l], -1, Integer::sum) == 0)
+                    cnt.remove(fruits[l]);
+                l++;
+            }
+            best = Math.max(best, r - l + 1);
+        }
+        return best;
+    }
+}
+</code></pre></div>
+            <div class="tab-panel"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="python">from typing import List
+
+class Solution:
+    def totalFruit(self, fruits: List[int]) -> int:
+        cnt = {}
+        l = best = 0
+        for r, f in enumerate(fruits):
+            cnt[f] = cnt.get(f, 0) + 1
+            while len(cnt) &gt; 2:
+                cnt[fruits[l]] -= 1
+                if cnt[fruits[l]] == 0:
+                    del cnt[fruits[l]]
+                l += 1
+            best = max(best, r - l + 1)
+        return best
+</code></pre></div>
+          </div>
+        </div></div></div>
+      </article>
+
+      <!-- 04 -->
+      <article class="card" data-diff="medium">
+        <header class="card-head" role="button" tabindex="0" aria-expanded="false">
+          <label class="tic"><input type="checkbox" value="p04"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></label>
+          <span class="num">04</span>
+          <h3 class="card-title"><span class="strike">Longest Repeating Character Replacement</span></h3>
+          <div class="badge-row">
+            <span class="badge med">Medium</span>
+            <span class="badge tuf">TUF marks Hard</span>
+            <span class="chip">Pattern A</span>
+          </div>
+          <div class="links">
+            <a href="https://takeuforward.org/data-structure/longest-repeating-character-replacement/" target="_blank" rel="noopener">TUF · Article <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+          </div>
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </header>
+        <div class="acc"><div class="acc-inner"><div class="acc-body">
+          <div class="notes">
+            <p class="idea"><b>The idea:</b> a window can be made uniform with ≤ k replacements iff <b>window length − max frequency ≤ k</b>. Shrink otherwise.</p>
+            <ul class="steps">
+              <li>Count letter frequencies inside the window; track <b>maxCount</b> = most frequent letter.</li>
+              <li>If <b>(r − l + 1) − maxCount &gt; k</b>, the other letters can't be replaced into the majority — shrink.</li>
+              <li>Key insight: <b>maxCount never needs to decrease</b> — the window only ever grows when it would remain valid, so keeping the global max is correct and gives O(n).</li>
+            </ul>
+          </div>
+          <div class="complexity">
+            <span class="cx"><span class="dot"></span>Time · O(n)</span>
+            <span class="cx"><span class="dot"></span>Space · O(1) — 26 counts</span>
+          </div>
+          <div class="code-tabs">
+            <div class="tabs">
+              <button class="tab active" data-lang="cpp"><span class="dot"></span>C++</button>
+              <button class="tab" data-lang="java"><span class="dot"></span>Java</button>
+              <button class="tab" data-lang="python"><span class="dot"></span>Python</button>
+            </div>
+            <div class="tab-panel active"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="cpp">class Solution {
+public:
+    int characterReplacement(string s, int k) {
+        vector&lt;int&gt; cnt(26, 0);
+        int l = 0, maxCount = 0, best = 0;
+        for (int r = 0; r &lt; s.size(); ++r) {
+            maxCount = max(maxCount, ++cnt[s[r] - 'A']);
+            if (r - l + 1 - maxCount &gt; k) {    // more than k "other" letters
+                --cnt[s[l] - 'A'];
+                ++l;
+            }
+            best = max(best, r - l + 1);
+        }
+        return best;
+    }
+};
+</code></pre></div>
+            <div class="tab-panel"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="java">class Solution {
+    public int characterReplacement(String s, int k) {
+        int[] cnt = new int[26];
+        int l = 0, maxCount = 0, best = 0;
+        for (int r = 0; r &lt; s.length(); r++) {
+            maxCount = Math.max(maxCount, ++cnt[s.charAt(r) - 'A']);
+            if (r - l + 1 - maxCount &gt; k) {
+                cnt[s.charAt(l) - 'A']--;
+                l++;
+            }
+            best = Math.max(best, r - l + 1);
+        }
+        return best;
+    }
+}
+</code></pre></div>
+            <div class="tab-panel"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="python">from collections import Counter
+
+class Solution:
+    def characterReplacement(self, s: str, k: int) -> int:
+        cnt = Counter()
+        l = maxCount = best = 0
+        for r, ch in enumerate(s):
+            cnt[ch] += 1
+            maxCount = max(maxCount, cnt[ch])
+            if r - l + 1 - maxCount &gt; k:
+                cnt[s[l]] -= 1
+                l += 1
+            best = max(best, r - l + 1)
+        return best
+</code></pre></div>
+          </div>
+        </div></div></div>
+      </article>
+
+      <!-- 05 -->
+      <article class="card" data-diff="medium">
+        <header class="card-head" role="button" tabindex="0" aria-expanded="false">
+          <label class="tic"><input type="checkbox" value="p05"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></label>
+          <span class="num">05</span>
+          <h3 class="card-title"><span class="strike">Binary Subarrays With Sum</span></h3>
+          <div class="badge-row">
+            <span class="badge med">Medium</span>
+            <span class="badge tuf">TUF marks Hard</span>
+            <span class="chip">Pattern C</span>
+          </div>
+          <div class="links">
+            <a href="https://takeuforward.org/data-structure/binary-subarray-with-sum/" target="_blank" rel="noopener">TUF · Article <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+          </div>
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </header>
+        <div class="acc"><div class="acc-inner"><div class="acc-body">
+          <div class="notes">
+            <p class="idea"><b>The idea:</b> count of subarrays with <b>exactly</b> sum = goal is <b>atMost(goal) − atMost(goal − 1)</b>. The <code>atMost</code> helper is a plain slide that works because all values are non-negative.</p>
+            <ul class="steps">
+              <li><code>atMost(goal)</code>: add the right element; while <b>sum &gt; goal</b>, subtract the left and advance <b>l</b>.</li>
+              <li>Every window <b>[l..r]</b> then has sum ≤ goal → contributes <b>r − l + 1</b> subarrays.</li>
+              <li>Answer = <code>atMost(goal) − atMost(goal − 1)</code> (guard <code>goal − 1 &lt; 0</code>).</li>
+              <li>Alternative for the same O(n): prefix sums + hashmap.</li>
+            </ul>
+          </div>
+          <div class="complexity">
+            <span class="cx"><span class="dot"></span>Time · O(n)</span>
+            <span class="cx"><span class="dot"></span>Space · O(1)</span>
+          </div>
+          <div class="code-tabs">
+            <div class="tabs">
+              <button class="tab active" data-lang="cpp"><span class="dot"></span>C++</button>
+              <button class="tab" data-lang="java"><span class="dot"></span>Java</button>
+              <button class="tab" data-lang="python"><span class="dot"></span>Python</button>
+            </div>
+            <div class="tab-panel active"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="cpp">class Solution {
+public:
+    int numSubarraysWithSum(vector&lt;int&gt;&amp; nums, int goal) {
+        return atMost(nums, goal) - atMost(nums, goal - 1);
+    }
+private:
+    int atMost(vector&lt;int&gt;&amp; nums, int goal) {
+        if (goal &lt; 0) return 0;
+        int l = 0, sum = 0, ans = 0;
+        for (int r = 0; r &lt; nums.size(); ++r) {
+            sum += nums[r];
+            while (sum &gt; goal) sum -= nums[l++];
+            ans += r - l + 1;
+        }
+        return ans;
+    }
+};
+</code></pre></div>
+            <div class="tab-panel"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="java">class Solution {
+    public int numSubarraysWithSum(int[] nums, int goal) {
+        return atMost(nums, goal) - atMost(nums, goal - 1);
+    }
+    private int atMost(int[] nums, int goal) {
+        if (goal &lt; 0) return 0;
+        int l = 0, sum = 0, ans = 0;
+        for (int r = 0; r &lt; nums.length; r++) {
+            sum += nums[r];
+            while (sum &gt; goal) sum -= nums[l++];
+            ans += r - l + 1;
+        }
+        return ans;
+    }
+}
+</code></pre></div>
+            <div class="tab-panel"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="python">from typing import List
+
+class Solution:
+    def numSubarraysWithSum(self, nums: List[int], goal: int) -> int:
+        return self.atMost(nums, goal) - self.atMost(nums, goal - 1)
+
+    def atMost(self, nums: List[int], goal: int) -> int:
+        if goal &lt; 0:
+            return 0
+        l = ans = total = 0
+        for r in range(len(nums)):
+            total += nums[r]
+            while total &gt; goal:
+                total -= nums[l]
+                l += 1
+            ans += r - l + 1
+        return ans
+</code></pre></div>
+          </div>
+        </div></div></div>
+      </article>
+
+      <!-- 06 -->
+      <article class="card" data-diff="medium">
+        <header class="card-head" role="button" tabindex="0" aria-expanded="false">
+          <label class="tic"><input type="checkbox" value="p06"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></label>
+          <span class="num">06</span>
+          <h3 class="card-title"><span class="strike">Count Number of Nice Subarrays</span></h3>
+          <div class="badge-row">
+            <span class="badge med">Medium</span>
+            <span class="badge tuf">TUF marks Hard</span>
+            <span class="chip">Pattern C · 0/1 trick</span>
+          </div>
+          <div class="links">
+            <a href="https://takeuforward.org/data-structure/count-number-of-nice-subarrays/" target="_blank" rel="noopener">TUF · Article <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+          </div>
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </header>
+        <div class="acc"><div class="acc-inner"><div class="acc-body">
+          <div class="notes">
+            <p class="idea"><b>The idea:</b> replace each element with <b>1 if odd, 0 if even</b>. This becomes literally "Binary Subarrays With Sum" with <b>goal = k</b> — reuse the same atMost trick.</p>
+            <ul class="steps">
+              <li>Count "odd so far" in the window; <code>atMost(k)</code> counts subarrays with ≤ k odds.</li>
+              <li>While <b>odd &gt; k</b>, advance the left edge, dropping the exiting element's parity.</li>
+              <li>Add <b>r − l + 1</b> each step; answer = atMost(k) − atMost(k−1).</li>
+              <li>Nice shortcut: the same helper also solves LC 930 and LC 992.</li>
+            </ul>
+          </div>
+          <div class="complexity">
+            <span class="cx"><span class="dot"></span>Time · O(n)</span>
+            <span class="cx"><span class="dot"></span>Space · O(1)</span>
+          </div>
+          <div class="code-tabs">
+            <div class="tabs">
+              <button class="tab active" data-lang="cpp"><span class="dot"></span>C++</button>
+              <button class="tab" data-lang="java"><span class="dot"></span>Java</button>
+              <button class="tab" data-lang="python"><span class="dot"></span>Python</button>
+            </div>
+            <div class="tab-panel active"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="cpp">class Solution {
+public:
+    int numberOfSubarrays(vector&lt;int&gt;&amp; nums, int k) {
+        return atMost(nums, k) - atMost(nums, k - 1);
+    }
+private:
+    int atMost(vector&lt;int&gt;&amp; nums, int k) {
+        int l = 0, odd = 0, ans = 0;
+        for (int r = 0; r &lt; nums.size(); ++r) {
+            odd += nums[r] &amp; 1;             // 1 if odd, 0 if even
+            while (odd &gt; k) odd -= nums[l++] &amp; 1;
+            ans += r - l + 1;
+        }
+        return ans;
+    }
+};
+</code></pre></div>
+            <div class="tab-panel"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="java">class Solution {
+    public int numberOfSubarrays(int[] nums, int k) {
+        return atMost(nums, k) - atMost(nums, k - 1);
+    }
+    private int atMost(int[] nums, int k) {
+        int l = 0, odd = 0, ans = 0;
+        for (int r = 0; r &lt; nums.length; r++) {
+            odd += nums[r] &amp; 1;
+            while (odd &gt; k) odd -= nums[l++] &amp; 1;
+            ans += r - l + 1;
+        }
+        return ans;
+    }
+}
+</code></pre></div>
+            <div class="tab-panel"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="python">from typing import List
+
+class Solution:
+    def numberOfSubarrays(self, nums: List[int], k: int) -> int:
+        return self.atMost(nums, k) - self.atMost(nums, k - 1)
+
+    def atMost(self, nums: List[int], k: int) -> int:
+        l = odd = ans = 0
+        for r in range(len(nums)):
+            odd += nums[r] % 2
+            while odd &gt; k:
+                odd -= nums[l] % 2
+                l += 1
+            ans += r - l + 1
+        return ans
+</code></pre></div>
+          </div>
+        </div></div></div>
+      </article>
+
+      <!-- 07 -->
+      <article class="card" data-diff="medium">
+        <header class="card-head" role="button" tabindex="0" aria-expanded="false">
+          <label class="tic"><input type="checkbox" value="p07"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></label>
+          <span class="num">07</span>
+          <h3 class="card-title"><span class="strike">Number of Substrings Containing All Three Characters</span></h3>
+          <div class="badge-row">
+            <span class="badge med">Medium</span>
+            <span class="badge tuf">TUF marks Hard</span>
+            <span class="chip">Pattern A · count extensions</span>
+          </div>
+          <div class="links">
+            <a href="https://takeuforward.org/data-structure/number-of-substring-containing-all-three-characters/" target="_blank" rel="noopener">TUF · Article <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+          </div>
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </header>
+        <div class="acc"><div class="acc-inner"><div class="acc-body">
+          <div class="notes">
+            <p class="idea"><b>The idea:</b> once window <b>[l..r]</b> contains all of a, b, c, any substring starting even earlier and ending at r is also valid — so add the left count in bulk.</p>
+            <ul class="steps">
+              <li>Expand <b>r</b>, counting letters in the window.</li>
+              <li>While all three counts are positive, shrink <b>l</b> (the small window stays "barely valid").</li>
+              <li>Each step adds <b>l</b> valid substrings ending at r (starting positions 0..l−1).</li>
+              <li>O(n) — a single pass, no nested loops.</li>
+            </ul>
+          </div>
+          <div class="complexity">
+            <span class="cx"><span class="dot"></span>Time · O(n)</span>
+            <span class="cx"><span class="dot"></span>Space · O(1) — 3 counters</span>
+          </div>
+          <div class="code-tabs">
+            <div class="tabs">
+              <button class="tab active" data-lang="cpp"><span class="dot"></span>C++</button>
+              <button class="tab" data-lang="java"><span class="dot"></span>Java</button>
+              <button class="tab" data-lang="python"><span class="dot"></span>Python</button>
+            </div>
+            <div class="tab-panel active"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="cpp">class Solution {
+public:
+    int numberOfSubstrings(string s) {
+        int cnt[3] = {0}, l = 0, ans = 0;
+        for (int r = 0; r &lt; s.size(); ++r) {
+            ++cnt[s[r] - 'a'];
+            while (cnt[0] &amp;&amp; cnt[1] &amp;&amp; cnt[2]) {   // all three present
+                --cnt[s[l] - 'a'];
+                ++l;
+            }
+            ans += l;                       // substrings [0..l-1]..r are valid
+        }
+        return ans;
+    }
+};
+</code></pre></div>
+            <div class="tab-panel"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="java">class Solution {
+    public int numberOfSubstrings(String s) {
+        int[] cnt = new int[3];
+        int l = 0, ans = 0;
+        for (int r = 0; r &lt; s.length(); r++) {
+            cnt[s.charAt(r) - 'a']++;
+            while (cnt[0] &gt; 0 &amp;&amp; cnt[1] &gt; 0 &amp;&amp; cnt[2] &gt; 0) {
+                cnt[s.charAt(l) - 'a']--;
+                l++;
+            }
+            ans += l;
+        }
+        return ans;
+    }
+}
+</code></pre></div>
+            <div class="tab-panel"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="python">class Solution:
+    def numberOfSubstrings(self, s: str) -> int:
+        cnt = [0, 0, 0]
+        l = ans = 0
+        for r, ch in enumerate(s):
+            cnt[(ord(ch) - ord('a')) % 3] += 1          # a,b,c -> 0,1,2
+            while cnt[0] &gt; 0 and cnt[1] &gt; 0 and cnt[2] &gt; 0:
+                cnt[(ord(s[l]) - ord('a')) % 3] -= 1
+                l += 1
+            ans += l
+        return ans
+</code></pre></div>
+          </div>
+        </div></div></div>
+      </article>
+
+      <!-- 08 -->
+      <article class="card" data-diff="medium">
+        <header class="card-head" role="button" tabindex="0" aria-expanded="false">
+          <label class="tic"><input type="checkbox" value="p08"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></label>
+          <span class="num">08</span>
+          <h3 class="card-title"><span class="strike">Maximum Points You Can Obtain from Cards</span></h3>
+          <div class="badge-row">
+            <span class="badge med">Medium</span>
+            <span class="chip">Pattern B</span>
+          </div>
+          <div class="links">
+            <a href="https://takeuforward.org/data-structure/maximum-point-you-can-obtain-from-cards/" target="_blank" rel="noopener">TUF · Article <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+          </div>
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </header>
+        <div class="acc"><div class="acc-inner"><div class="acc-body">
+          <div class="notes">
+            <p class="idea"><b>The idea:</b> taking k cards from the ends ⇔ you skip a contiguous block of size <b>n − k</b> in the middle. Minimize that middle block over a fixed-size window.</p>
+            <ul class="steps">
+              <li>Let <b>keep = n − k</b> — the cards you skip.</li>
+              <li>Slide a fixed window of length <b>keep</b>, tracking its running sum.</li>
+              <li>Remember the <b>minimum</b> middle sum; the answer is <b>total − minMiddle</b>.</li>
+              <li>Alternative two-pointer: take all k from the left, then repeatedly trade a left card for the next right card.</li>
+            </ul>
+          </div>
+          <div class="complexity">
+            <span class="cx"><span class="dot"></span>Time · O(n)</span>
+            <span class="cx"><span class="dot"></span>Space · O(1)</span>
+          </div>
+          <div class="code-tabs">
+            <div class="tabs">
+              <button class="tab active" data-lang="cpp"><span class="dot"></span>C++</button>
+              <button class="tab" data-lang="java"><span class="dot"></span>Java</button>
+              <button class="tab" data-lang="python"><span class="dot"></span>Python</button>
+            </div>
+            <div class="tab-panel active"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="cpp">class Solution {
+public:
+    int maxScore(vector&lt;int&gt;&amp; cardPoints, int k) {
+        int n = cardPoints.size(), keep = n - k;
+        int total = 0, window = 0, minWindow = INT_MAX;
+        for (int r = 0; r &lt; n; ++r) {
+            total += cardPoints[r];
+            window += cardPoints[r];
+            if (r &gt;= keep) window -= cardPoints[r - keep];
+            if (r &gt;= keep - 1) minWindow = min(minWindow, window);
+        }
+        return total - minWindow;      // drop the cheapest middle block
+    }
+};
+</code></pre></div>
+            <div class="tab-panel"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="java">class Solution {
+    public int maxScore(int[] cardPoints, int k) {
+        int n = cardPoints.length, keep = n - k;
+        int total = 0, window = 0, minWindow = Integer.MAX_VALUE;
+        for (int r = 0; r &lt; n; r++) {
+            total += cardPoints[r];
+            window += cardPoints[r];
+            if (r &gt;= keep) window -= cardPoints[r - keep];
+            if (r &gt;= keep - 1) minWindow = Math.min(minWindow, window);
+        }
+        return total - minWindow;
+    }
+}
+</code></pre></div>
+            <div class="tab-panel"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="python">from typing import List
+
+class Solution:
+    def maxScore(self, cardPoints: List[int], k: int) -> int:
+        n = len(cardPoints)
+        keep = n - k                    # middle cards we must skip
+        total = sum(cardPoints)
+        window = 0
+        min_window = total
+        for r in range(n):
+            window += cardPoints[r]
+            if r &gt;= keep:
+                window -= cardPoints[r - keep]
+            if r &gt;= keep - 1:
+                min_window = min(min_window, window)
+        return total - min_window
+</code></pre></div>
+          </div>
+        </div></div></div>
+      </article>
+
+      <!-- 09 -->
+      <article class="card" data-diff="hard">
+        <header class="card-head" role="button" tabindex="0" aria-expanded="false">
+          <label class="tic"><input type="checkbox" value="p09"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></label>
+          <span class="num">09</span>
+          <h3 class="card-title"><span class="strike">Longest Substring with At Most K Distinct Characters</span></h3>
+          <div class="badge-row">
+            <span class="badge hard">Hard</span>
+            <span class="chip">Pattern A</span>
+          </div>
+          <div class="links">
+            <a href="https://takeuforward.org/data-structure/longest-substring-with-at-most-k-distinct-characters/" target="_blank" rel="noopener">TUF · Article <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+          </div>
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </header>
+        <div class="acc"><div class="acc-inner"><div class="acc-body">
+          <div class="notes">
+            <p class="idea"><b>The idea:</b> the generalized Fruit Into Baskets — the window may hold <b>at most k distinct</b> characters. Count frequencies, shrink while the distinct count exceeds k.</p>
+            <ul class="steps">
+              <li>Add <b>s[right]</b> and update its frequency.</li>
+              <li>While the number of distinct characters is <b>&gt; k</b>, drop <b>s[left++]</b> (erase when count reaches 0).</li>
+              <li>Track <b>max(right − left + 1)</b>.</li>
+              <li>Setting k = 0 gives the trivial single-letter case for free; k = 2 is LC 904.</li>
+            </ul>
+          </div>
+          <div class="complexity">
+            <span class="cx"><span class="dot"></span>Time · O(n)</span>
+            <span class="cx"><span class="dot"></span>Space · O(k)</span>
+          </div>
+          <div class="code-tabs">
+            <div class="tabs">
+              <button class="tab active" data-lang="cpp"><span class="dot"></span>C++</button>
+              <button class="tab" data-lang="java"><span class="dot"></span>Java</button>
+              <button class="tab" data-lang="python"><span class="dot"></span>Python</button>
+            </div>
+            <div class="tab-panel active"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="cpp">class Solution {
+public:
+    int lengthOfLongestSubstringKDistinct(string s, int k) {
+        unordered_map&lt;char, int&gt; cnt;
+        int l = 0, best = 0;
+        for (int r = 0; r &lt; s.size(); ++r) {
+            ++cnt[s[r]];
+            while (cnt.size() &gt; k) {
+                if (--cnt[s[l]] == 0) cnt.erase(s[l]);
+                ++l;
+            }
+            best = max(best, r - l + 1);
+        }
+        return best;
+    }
+};
+</code></pre></div>
+            <div class="tab-panel"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="java">import java.util.*;
+
+class Solution {
+    public int lengthOfLongestSubstringKDistinct(String s, int k) {
+        Map&lt;Character, Integer&gt; cnt = new HashMap&lt;&gt;();
+        int l = 0, best = 0;
+        for (int r = 0; r &lt; s.length(); r++) {
+            cnt.merge(s.charAt(r), 1, Integer::sum);
+            while (cnt.size() &gt; k) {
+                char c = s.charAt(l);
+                if (cnt.merge(c, -1, Integer::sum) == 0) cnt.remove(c);
+                l++;
+            }
+            best = Math.max(best, r - l + 1);
+        }
+        return best;
+    }
+}
+</code></pre></div>
+            <div class="tab-panel"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="python">class Solution:
+    def lengthOfLongestSubstringKDistinct(self, s: str, k: int) -> int:
+        cnt = {}
+        l = best = 0
+        for r, ch in enumerate(s):
+            cnt[ch] = cnt.get(ch, 0) + 1
+            while len(cnt) &gt; k:
+                cnt[s[l]] -= 1
+                if cnt[s[l]] == 0:
+                    del cnt[s[l]]
+                l += 1
+            best = max(best, r - l + 1)
+        return best
+</code></pre></div>
+          </div>
+        </div></div></div>
+      </article>
+
+      <!-- 10 -->
+      <article class="card" data-diff="hard">
+        <header class="card-head" role="button" tabindex="0" aria-expanded="false">
+          <label class="tic"><input type="checkbox" value="p10"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></label>
+          <span class="num">10</span>
+          <h3 class="card-title"><span class="strike">Subarrays with K Different Integers</span></h3>
+          <div class="badge-row">
+            <span class="badge hard">Hard</span>
+            <span class="badge tuf">TUF marks Medium</span>
+            <span class="chip">Pattern C · distinct</span>
+          </div>
+          <div class="links">
+            <a href="https://takeuforward.org/data-structure/subarray-with-k-different-integers/" target="_blank" rel="noopener">TUF · Article <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+          </div>
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </header>
+        <div class="acc"><div class="acc-inner"><div class="acc-body">
+          <div class="notes">
+            <p class="idea"><b>The idea:</b> "exactly k distinct" → <b>atMost(k) − atMost(k−1)</b>, where atMost slides windows with ≤ k distinct elements.</p>
+            <ul class="steps">
+              <li><code>atMost(k)</code>: maintain frequencies; while distinct count &gt; k, drop <b>nums[left++]</b>.</li>
+              <li>Every valid window ending at r adds <b>r − l + 1</b>.</li>
+              <li>Answer = <code>atMost(k) − atMost(k − 1)</code>.</li>
+              <li>It's LC-Hard only because of the exact-count wording; the trick makes it a copy of LC 930 / 1248.</li>
+            </ul>
+          </div>
+          <div class="complexity">
+            <span class="cx"><span class="dot"></span>Time · O(n)</span>
+            <span class="cx"><span class="dot"></span>Space · O(k)</span>
+          </div>
+          <div class="code-tabs">
+            <div class="tabs">
+              <button class="tab active" data-lang="cpp"><span class="dot"></span>C++</button>
+              <button class="tab" data-lang="java"><span class="dot"></span>Java</button>
+              <button class="tab" data-lang="python"><span class="dot"></span>Python</button>
+            </div>
+            <div class="tab-panel active"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="cpp">class Solution {
+public:
+    int subarraysWithKDistinct(vector&lt;int&gt;&amp; nums, int k) {
+        return atMost(nums, k) - atMost(nums, k - 1);
+    }
+private:
+    int atMost(vector&lt;int&gt;&amp; nums, int k) {
+        unordered_map&lt;int, int&gt; cnt;
+        int l = 0, ans = 0;
+        for (int r = 0; r &lt; nums.size(); ++r) {
+            ++cnt[nums[r]];
+            while (cnt.size() &gt; k) {
+                if (--cnt[nums[l]] == 0) cnt.erase(nums[l]);
+                ++l;
+            }
+            ans += r - l + 1;
+        }
+        return ans;
+    }
+};
+</code></pre></div>
+            <div class="tab-panel"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="java">import java.util.*;
+
+class Solution {
+    public int subarraysWithKDistinct(int[] nums, int k) {
+        return atMost(nums, k) - atMost(nums, k - 1);
+    }
+    private int atMost(int[] nums, int k) {
+        Map&lt;Integer, Integer&gt; cnt = new HashMap&lt;&gt;();
+        int l = 0, ans = 0;
+        for (int r = 0; r &lt; nums.length; r++) {
+            cnt.merge(nums[r], 1, Integer::sum);
+            while (cnt.size() &gt; k) {
+                if (cnt.merge(nums[l], -1, Integer::sum) == 0) cnt.remove(nums[l]);
+                l++;
+            }
+            ans += r - l + 1;
+        }
+        return ans;
+    }
+}
+</code></pre></div>
+            <div class="tab-panel"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="python">from typing import List
+
+class Solution:
+    def subarraysWithKDistinct(self, nums: List[int], k: int) -> int:
+        return self.atMost(nums, k) - self.atMost(nums, k - 1)
+
+    def atMost(self, nums: List[int], k: int) -> int:
+        cnt = {}
+        l = ans = 0
+        for r, v in enumerate(nums):
+            cnt[v] = cnt.get(v, 0) + 1
+            while len(cnt) &gt; k:
+                cnt[nums[l]] -= 1
+                if cnt[nums[l]] == 0:
+                    del cnt[nums[l]]
+                l += 1
+            ans += r - l + 1
+        return ans
+</code></pre></div>
+          </div>
+        </div></div></div>
+      </article>
+
+      <!-- 11 -->
+      <article class="card" data-diff="hard">
+        <header class="card-head" role="button" tabindex="0" aria-expanded="false">
+          <label class="tic"><input type="checkbox" value="p11"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></label>
+          <span class="num">11</span>
+          <h3 class="card-title"><span class="strike">Minimum Window Substring</span></h3>
+          <div class="badge-row">
+            <span class="badge hard">Hard</span>
+            <span class="chip">Pattern D</span>
+          </div>
+          <div class="links">
+            <a href="https://leetcode.com/problems/minimum-window-substring/" target="_blank" rel="noopener">LC 76 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+          </div>
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </header>
+        <div class="acc"><div class="acc-inner"><div class="acc-body">
+          <div class="notes">
+            <p class="idea"><b>The idea:</b> the canonical "satisfied-window" problem. Track how many characters of t are still missing; expand until missing = 0, then shrink while it stays covered, keeping the smallest window.</p>
+            <ul class="steps">
+              <li>Count each char of t into <b>need[]</b>; set <b>missing = len(t)</b>.</li>
+              <li>Expand <b>r</b>: if <b>need[s[r]] &gt; 0</b>, this char was required, so <b>--missing</b>; always <b>--need[s[r]]</b> (may go negative for surplus chars).</li>
+              <li>While <b>missing == 0</b>: update best window, then <b>++need[s[l]]</b> and shrink — if that char becomes required again, <b>++missing</b>.</li>
+              <li>Result: O(n + m); the two-pointer never resets.</li>
+            </ul>
+          </div>
+          <div class="complexity">
+            <span class="cx"><span class="dot"></span>Time · O(n + m)</span>
+            <span class="cx"><span class="dot"></span>Space · O(m) — m = |t|</span>
+          </div>
+          <div class="code-tabs">
+            <div class="tabs">
+              <button class="tab active" data-lang="cpp"><span class="dot"></span>C++</button>
+              <button class="tab" data-lang="java"><span class="dot"></span>Java</button>
+              <button class="tab" data-lang="python"><span class="dot"></span>Python</button>
+            </div>
+            <div class="tab-panel active"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="cpp">class Solution {
+public:
+    string minWindow(string s, string t) {
+        int need[128] = {}, missing = t.size(), best = INT_MAX, start = 0;
+        for (char c : t) ++need[c];
+        for (int l = 0, r = 0; r &lt; s.size(); ++r) {
+            if (need[s[r]] &gt; 0) --missing;    // this char was required
+            --need[s[r]];
+            while (missing == 0) {
+                if (r - l + 1 &lt; best) { best = r - l + 1; start = l; }
+                ++need[s[l]];
+                if (need[s[l]] &gt; 0) ++missing; // char now required again
+                ++l;
+            }
+        }
+        return best == INT_MAX ? "" : s.substr(start, best);
+    }
+};
+</code></pre></div>
+            <div class="tab-panel"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="java">class Solution {
+    public String minWindow(String s, String t) {
+        int[] need = new int[128];
+        int missing = t.length(), best = Integer.MAX_VALUE, start = 0;
+        for (char c : t.toCharArray()) need[c]++;
+        for (int l = 0, r = 0; r &lt; s.length(); r++) {
+            if (need[s.charAt(r)] &gt; 0) missing--;
+            need[s.charAt(r)]--;
+            while (missing == 0) {
+                if (r - l + 1 &lt; best) { best = r - l + 1; start = l; }
+                need[s.charAt(l)]++;
+                if (need[s.charAt(l)] &gt; 0) missing++;
+                l++;
+            }
+        }
+        return best == Integer.MAX_VALUE ? "" : s.substring(start, start + best);
+    }
+}
+</code></pre></div>
+            <div class="tab-panel"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="python">from collections import Counter
+
+class Solution:
+    def minWindow(self, s: str, t: str) -> str:
+        need = Counter(t)
+        missing = len(t)
+        best = float("inf")
+        start = l = 0
+        for r, ch in enumerate(s):
+            if need[ch] &gt; 0:
+                missing -= 1
+            need[ch] -= 1
+            while missing == 0:
+                if r - l + 1 &lt; best:
+                    best = r - l + 1
+                    start = l
+                need[s[l]] += 1
+                if need[s[l]] &gt; 0:
+                    missing += 1
+                l += 1
+        return "" if best == float("inf") else s[start:start + best]
+</code></pre></div>
+          </div>
+        </div></div></div>
+      </article>
+
+      <!-- 12 -->
+      <article class="card" data-diff="hard">
+        <header class="card-head" role="button" tabindex="0" aria-expanded="false">
+          <label class="tic"><input type="checkbox" value="p12"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></label>
+          <span class="num">12</span>
+          <h3 class="card-title"><span class="strike">Minimum Window Subsequence</span></h3>
+          <div class="badge-row">
+            <span class="badge hard">Hard</span>
+            <span class="chip">Pattern D · subsequence</span>
+          </div>
+          <div class="links">
+            <a href="https://leetcode.com/problems/minimum-window-subsequence/" target="_blank" rel="noopener">LC 727 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+          </div>
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </header>
+        <div class="acc"><div class="acc-inner"><div class="acc-body">
+          <div class="notes">
+            <p class="idea"><b>The idea:</b> unlike the substring version, t must appear as a <b>subsequence</b> within the window. For each candidate start, greedily expand right until t is fully matched, then walk the left edge back to the tightest start.</p>
+            <ul class="steps">
+              <li>Only positions where <b>s[i] == t[0]</b> can begin a window.</li>
+              <li>Scan <b>j</b> forward, matching chars of t in order; if you reach the end of t, the window ends at <b>j − 1</b>.</li>
+              <li>Now walk <b>end</b> leftwards, matching t from its last char back to t[0]; the window becomes <b>[end+1 .. j−1]</b>.</li>
+              <li>Keep the smallest such window. Worst case O(n·m) (n = |s|, m = |t|), space O(1).</li>
+            </ul>
+          </div>
+          <div class="complexity">
+            <span class="cx"><span class="dot"></span>Time · O(n·m) worst case</span>
+            <span class="cx"><span class="dot"></span>Space · O(1)</span>
+          </div>
+          <div class="code-tabs">
+            <div class="tabs">
+              <button class="tab active" data-lang="cpp"><span class="dot"></span>C++</button>
+              <button class="tab" data-lang="java"><span class="dot"></span>Java</button>
+              <button class="tab" data-lang="python"><span class="dot"></span>Python</button>
+            </div>
+            <div class="tab-panel active"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="cpp">class Solution {
+public:
+    string minWindow(string s, string t) {
+        int n = s.size(), m = t.size();
+        string best;
+        for (int i = 0; i &lt; n; ++i) {
+            if (s[i] != t[0]) continue;         // window must start on t[0]
+            int j = i, k = 0;
+            while (j &lt; n &amp;&amp; k &lt; m) {           // expand right to cover t
+                if (s[j] == t[k]) ++k;
+                ++j;
+            }
+            if (k &lt; m) break;                   // t can't be matched anymore
+            int end = j - 1;
+            k = m - 1;
+            while (k &gt;= 0) {                    // walk left to tiny minimal
+                if (s[end] == t[k]) --k;
+                --end;
+            }
+            int len = j - end - 1;              // window is [end+1 .. j-1]
+            if (best.empty() || len &lt; (int)best.size()) best = s.substr(end + 1, len);
+        }
+        return best;
+    }
+};
+</code></pre></div>
+            <div class="tab-panel"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="java">class Solution {
+    public String minWindow(String s, String t) {
+        String best = "";
+        for (int i = 0; i &lt; s.length(); i++) {
+            if (s.charAt(i) != t.charAt(0)) continue;
+            int j = i, k = 0;
+            while (j &lt; s.length() &amp;&amp; k &lt; t.length()) {
+                if (s.charAt(j) == t.charAt(k)) k++;
+                j++;
+            }
+            if (k &lt; t.length()) break;
+            int end = j - 1;
+            k = t.length() - 1;
+            while (k &gt;= 0) {
+                if (s.charAt(end) == t.charAt(k)) k--;
+                end--;
+            }
+            String cand = s.substring(end + 1, j);
+            if (best.isEmpty() || cand.length() &lt; best.length()) best = cand;
+        }
+        return best;
+    }
+}
+</code></pre></div>
+            <div class="tab-panel"><button class="copy-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button><pre><code data-lang="python">class Solution:
+    def minWindow(self, s: str, t: str) -> str:
+        best = ""
+        for i, ch in enumerate(s):
+            if ch != t[0]:
+                continue
+            j = k = 0           # j expands over s, k over t
+            j = i
+            while j &lt; len(s) and k &lt; len(t):
+                if s[j] == t[k]:
+                    k += 1
+                j += 1
+            if k &lt; len(t):
+                break
+            end = j - 1         # right edge of the candidate window
+            k = len(t) - 1
+            while k &gt;= 0:
+                if s[end] == t[k]:
+                    k -= 1
+                end -= 1
+            cand = s[end + 1:j]
+            if best == "" or len(cand) &lt; len(best):
+                best = cand
+        return best
+</code></pre></div>
+          </div>
+        </div></div></div>
+      </article>
+
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <span>Sliding Window &amp; Two Pointers — notes built for the Striver A2Z sheet.</span>
+  <button class="reset-btn" id="resetBtn">Reset progress</button>
+</footer>
+
+<script>
+(function () {
+  var THEME_KEY = "swtp-theme";
+  var STATE_KEY = "swtp-solved";
+
+  function esc(s) {
+    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  /* ---------- syntax highlighting ---------- */
+  var cCls = ["pp", "cm", "cm", "st", "st", "nm", "kw"];
+  var cRe = /(#[^\n]*)|(\/\*[\s\S]*?\*\/)|(\/\/[^\n]*)|("(?:[^"\\]|\\.)*")|('(?:[^'\\]|\\.)*')|(\b\d+(?:\.\d+)?\b)|\b(?:auto|bool|break|case|char|class|const|continue|default|do|double|else|false|float|for|if|int|long|new|nullptr|private|public|return|short|signed|size_t|static|string|struct|switch|true|typedef|typename|unsigned|using|vector|void|while|unordered_map|unordered_set)\b/g;
+
+  var pCls = ["cm", "st", "st", "nm", "kw"];
+  var pRe = /(#[^\n]*)|("(?:[^"\\]|\\.)*")|('(?:[^'\\]|\\.)*')|(\b\d+(?:\.\d+)?\b)|\b(?:and|as|break|class|continue|def|del|elif|else|except|False|for|from|if|import|in|is|lambda|None|not|or|pass|return|self|True|while|with)\b/g;
+
+  function hlC(s) {
+    return s.replace(cRe, function (m, a, b, c, d, e, f, g) {
+      var idx = 0;
+      if (a !== undefined) idx = 0; else if (b !== undefined) idx = 1;
+      else if (c !== undefined) idx = 2; else if (d !== undefined) idx = 3;
+      else if (e !== undefined) idx = 4; else if (f !== undefined) idx = 5;
+      else idx = 6;
+      return '<span class="' + cCls[idx] + '">' + m + '</span>';
+    });
+  }
+  function hlPy(s) {
+    return s.replace(pRe, function (m, a, b, c, d, e) {
+      var idx = 0;
+      if (a !== undefined) idx = 0; else if (b !== undefined) idx = 1;
+      else if (c !== undefined) idx = 2; else if (d !== undefined) idx = 3;
+      else idx = 4;
+      return '<span class="' + pCls[idx] + '">' + m + '</span>';
+    });
+  }
+  function paint() {
+    document.querySelectorAll(".code-tabs code").forEach(function (code) {
+      var raw = esc(code.textContent).replace(/^\n|\n$/g, "");
+      code.innerHTML = code.dataset.lang === "python" ? hlPy(raw) : hlC(raw);
+    });
+  }
+
+  /* ---------- theme ---------- */
+  function applyTheme(t) {
+    document.documentElement.setAttribute("data-theme", t);
+    try { localStorage.setItem(THEME_KEY, t); } catch (e) {}
+  }
+  document.getElementById("themeBtn").addEventListener("click", function () {
+    var cur = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+    applyTheme(cur);
+  });
+  (function initTheme() {
+    var t = "light";
+    try { t = localStorage.getItem(THEME_KEY) || "light"; } catch (e) {}
+    applyTheme(t);
+  })();
+
+  /* ---------- progress ---------- */
+  var bar = document.getElementById("progressBar");
+  var pctEl = document.getElementById("pct");
+  var solvedEl = document.getElementById("solvedCount");
+  var solvedEl2 = document.getElementById("solvedCount2");
+  var remainEl = document.getElementById("remainCount");
+
+  function refresh() {
+    var cards = Array.prototype.slice.call(document.querySelectorAll(".card"));
+    var total = cards.length;
+    var solved = cards.filter(function (c) { return c.classList.contains("solved"); }).length;
+    var pct = total ? Math.round(solved / total * 100) : 0;
+    bar.style.width = pct + "%";
+    pctEl.textContent = pct;
+    solvedEl.textContent = solved;
+    solvedEl2.textContent = solved;
+    remainEl.textContent = total - solved;
+  }
+  function save() {
+    var ids = Array.prototype.slice.call(document.querySelectorAll(".tl-check input:checked"))
+      .map(function (i) { return i.value; });
+    try { localStorage.setItem(STATE_KEY, JSON.stringify(ids)); } catch (e) {}
+  }
+  function load() {
+    try {
+      var ids = JSON.parse(localStorage.getItem(STATE_KEY) || "[]");
+      ids.forEach(function (id) {
+        var cb = document.querySelector('.tl-check input[value="' + id + '"]');
+        if (cb) { cb.checked = true; cb.closest(".card").classList.add("solved"); }
+      });
+    } catch (e) {}
+    refresh();
+  }
+
+  /* ---------- cards ---------- */
+  document.querySelectorAll(".card").forEach(function (card) {
+    var head = card.querySelector(".card-head");
+    var cb = card.querySelector(".tic input");
+    head.addEventListener("click", function (e) {
+      if (e.target.closest(".tic") || e.target.closest("a")) return;
+      var open = card.classList.toggle("open");
+      head.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+    cb.addEventListener("change", function () {
+      card.classList.toggle("solved", cb.checked);
+      save();
+      refresh();
+    });
+  });
+  document.querySelectorAll(".card-head a").forEach(function (a) {
+    a.addEventListener("click", function (e) { e.stopPropagation(); });
+  });
+  document.querySelectorAll(".card-head").forEach(function (h) {
+    h.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); h.click(); }
+    });
+  });
+
+  /* ---------- code tabs ---------- */
+  var LANG_KEY = "swtp-code-lang";
+  function codeLang() {
+    try { return localStorage.getItem(LANG_KEY) || "java"; } catch (e) { return "java"; }
+  }
+  function setCodeLang(l) {
+    try { localStorage.setItem(LANG_KEY, l); } catch (e) {}
+  }
+  function activateLang(tabs, lang) {
+    var btns = tabs.querySelectorAll(".tab");
+    var panels = tabs.querySelectorAll(".tab-panel");
+    var idx = 0;
+    btns.forEach(function (b, i) { if (b.dataset.lang === lang) idx = i; });
+    btns.forEach(function (x) { x.classList.toggle("active", x === btns[idx]); });
+    panels.forEach(function (p, j) { p.classList.toggle("active", j === idx); });
+  }
+  document.querySelectorAll(".code-tabs").forEach(function (tabs) {
+    var btns = tabs.querySelectorAll(".tab");
+    var panels = tabs.querySelectorAll(".tab-panel");
+    activateLang(tabs, codeLang());
+    btns.forEach(function (b, i) {
+      b.addEventListener("click", function () {
+        btns.forEach(function (x) { x.classList.remove("active"); });
+        b.classList.add("active");
+        panels.forEach(function (p, j) { p.classList.toggle("active", j === i); });
+        setCodeLang(b.dataset.lang);
+      });
+    });
+  });
+
+  /* ---------- copy ---------- */
+  document.querySelectorAll(".copy-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var code = btn.closest(".tab-panel").querySelector("code");
+      var text = code.textContent;
+      var ok = function () {
+        var before = btn.innerHTML;
+        btn.textContent = "Copied";
+        btn.classList.add("ok");
+        setTimeout(function () { btn.innerHTML = before; btn.classList.remove("ok"); }, 1200);
+      };
+      function fallback() {
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand("copy"); ok(); } catch (e) {}
+        ta.remove();
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(ok, fallback);
+      } else {
+        fallback();
+      }
+    });
+  });
+
+  /* ---------- filters ---------- */
+  var filterBtns = document.querySelectorAll(".filter-btn");
+  filterBtns.forEach(function (b) {
+    b.addEventListener("click", function () {
+      filterBtns.forEach(function (x) { x.classList.remove("active"); });
+      b.classList.add("active");
+      var f = b.dataset.filter;
+      document.querySelectorAll(".card").forEach(function (c) {
+        var show = f === "all" ? true
+          : f === "solved" ? c.classList.contains("solved")
+          : c.dataset.diff === f;
+        c.style.display = show ? "" : "none";
+      });
+    });
+  });
+
+  /* ---------- reset ---------- */
+  document.getElementById("resetBtn").addEventListener("click", function () {
+    try { localStorage.removeItem(STATE_KEY); } catch (e) {}
+    document.querySelectorAll(".tic input").forEach(function (cb) { cb.checked = false; });
+    document.querySelectorAll(".card").forEach(function (c) { c.classList.remove("solved"); });
+    refresh();
+  });
+
+  paint();
+  load();
+})();
+</script>
+</body>
+</html>

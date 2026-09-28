@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>04_problems_09to14_expression_conversions</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        :root {
+            --bg-color: var(--vscode-editor-background, #ffffff);
+            --text-color: var(--vscode-editor-foreground, #1a1a1b);
+            --heading-color: var(--vscode-editor-foreground, #0f172a);
+            --secondary-text: var(--vscode-descriptionForeground, #64748b);
+            --accent-color: var(--vscode-textLink-foreground, #3b82f6);
+            --code-bg: var(--vscode-textCodeBlock-background, rgba(241, 245, 249, 0.4));
+            --border-color: var(--vscode-widget-border, #e2e8f0);
+            --header-bg: var(--vscode-editor-background, #ffffff);
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            line-height: 1.75;
+            color: var(--text-color);
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 5rem 2rem 3rem;
+            background-color: var(--bg-color);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .export-header {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            padding: 0.75rem 2rem; background: var(--header-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: flex-end; gap: 0.75rem;
+            backdrop-filter: blur(8px); display: none;
+        }
+
+        .btn {
+            background: var(--accent-color); color: white; border: none;
+            padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.85rem;
+            font-weight: 500; cursor: pointer; transition: opacity 0.2s;
+            font-family: 'Outfit', sans-serif;
+        }
+        .btn:hover { opacity: 0.9; }
+
+        h1, h2, h3 { font-family: 'Outfit', sans-serif; color: var(--heading-color); font-weight: 700; margin-top: 2rem; }
+        h1 { font-size: 2.25rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; }
+        
+        pre { background: var(--code-bg); padding: 1.25rem; border-radius: 12px; border: 1px solid var(--border-color); overflow-x: auto; margin: 1.5rem 0; }
+        code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.9em; padding: 0.2rem 0.4rem; border-radius: 6px; background-color: var(--code-bg); }
+        
+        .mermaid { background: white; padding: 1rem; border-radius: 12px; margin: 1.5rem 0; display: flex; justify-content: center; border: 1px solid var(--border-color); }
+        svg { max-width: 100% !important; height: auto !important; }
+
+        @media print { .export-header { display: none; } body { padding: 0; } }
+    </style>
+</head>
+<body>
+    <div class="export-header">
+        <button class="btn" onclick="exportFile('html')">Export HTML</button>
+        <button class="btn" onclick="exportFile('pdf')">Export PDF</button>
+        <button class="btn" onclick="exportFile('docx')">Export DOCX</button>
+    </div>
+    <div class="content"><h1>Stack &amp; Queue Interview Guide — Part 3B: Problems 9–14 (Expression Conversions)</h1>
+<p><strong>Guide map:</strong> <code>00_START_HERE.md</code> → <code>01_foundation...md</code> → <code>02_universal_thinking_framework.md</code> → <code>03_problems_01to08...md</code> → <strong><code>04_problems_09to14...md</code></strong> (you are here) → (more coming)</p>
+<p>These six problems look like six separate things to memorize. They&#39;re actually <strong>two algorithm skeletons</strong>, each reused three times:</p>
+<ul>
+<li><strong>Skeleton A</strong> (Problems 10 &amp; 11): scan a <strong>prefix</strong> expression <strong>right → left</strong>, push operands, and on an operator pop <strong>first = left operand, second = right operand</strong>.</li>
+<li><strong>Skeleton B</strong> (Problems 12 &amp; 13): scan a <strong>postfix</strong> expression <strong>left → right</strong>, push operands, and on an operator pop <strong>first = right operand, second = left operand</strong>.</li>
+<li><strong>Problem 9</strong> (Infix→Postfix) stands alone as the foundation — it&#39;s the one that actually reasons about precedence live, character by character.</li>
+<li><strong>Problem 14</strong> (Infix→Prefix) reuses Problem 9&#39;s machinery wrapped in a reversal trick, with one crucial modification.</li>
+</ul>
+<p>Read them in this order — each one leans on the last.</p>
+<hr>
+<h1>9. Infix to Postfix Conversion</h1>
+<h3>1. Problem Understanding</h3>
+<p>Convert an infix expression (operators <em>between</em> operands, e.g. <code>&quot;A+B*C&quot;</code>) into postfix (operators <em>after</em> their operands, e.g. <code>&quot;ABC*+&quot;</code>), respecting operator precedence, associativity, and parentheses.</p>
+<ul>
+<li><strong>Input:</strong> a string of single-letter operands, operators <code>+ - * / ^</code>, and parentheses.</li>
+<li><strong>Output:</strong> the postfix string.</li>
+<li><strong>Precedence:</strong> <code>^</code> highest, then <code>* /</code>, then <code>+ -</code>. <code>^</code> is right-associative; the rest are left-associative.</li>
+<li><strong>Important observation:</strong> an operand&#39;s position in the output never has to wait for anything — the moment you see it, it&#39;s done, write it out. An <strong>operator</strong>, though, can&#39;t be written out immediately: whether it fires <em>now</em> or <em>later</em> depends on operators you haven&#39;t seen yet. That &quot;must wait to see what comes next&quot; is the whole problem.</li>
+</ul>
+<p>Example: <code>&quot;A+B*C&quot;</code> → <code>&quot;ABC*+&quot;</code> (multiplication binds tighter, so <code>C</code> waits for <code>B</code>, <code>*</code> fires, and <code>+</code> — lowest precedence — fires last).</p>
+<h3>2. How to Think About the Problem</h3>
+<p><strong>What should I notice first?</strong> Operands can go straight to the output. Operators cannot — an operator can only be safely written out once we&#39;re sure no higher-or-equal-precedence operator is about to &quot;cut in line&quot; ahead of it.</p>
+<p><strong>Clue → Observation → Pattern → Data Structure → Algorithm:</strong>
+<code>operators must wait, operands don&#39;t</code> → <code>&quot;waiting, to be resolved later&quot; is the monotonic-stack mental model from Part 1</code> → <code>Expression Conversion</code> → <code>a stack of pending operators</code> → <code>push an operator; before pushing, pop out (to the output) any waiting operator whose precedence means it must apply first</code>.</p>
+<p><strong>What would a human do without knowing the stack trick?</strong> Repeatedly scan for whichever operator should logically apply <em>first</em> (highest precedence, respecting brackets and associativity), mentally &quot;do&quot; that operation, replace it with a placeholder, and rescan from the top. That&#39;s a completely valid way to get the right answer by hand — and it&#39;s exactly the brute force below.</p>
+<h3>3. Pattern Recognition</h3>
+<p><strong>Problem clue:</strong> convert between notations, involving operator precedence.
+<strong>Pattern:</strong> Expression Conversion (precedence-driven deferral).
+<strong>Why this pattern:</strong> an operator&#39;s correct output position depends on information that hasn&#39;t arrived yet — the &quot;unresolved elements held until something resolves them&quot; signal from Part 1.
+<strong>Mental model:</strong> the stack holds operators that are &quot;still waiting to see if something more urgent shows up.&quot;
+<strong>Similar problems:</strong> Problem 14 (Infix→Prefix) reuses this exact precedence logic with a twist — see there.</p>
+<h3>4. Brute Force</h3>
+<p>The &quot;repeatedly resolve the most urgent operator, then rescan&quot; idea, sketched here without parentheses handling for clarity:</p>
+<pre><code class="language-java">// Naive: repeatedly find the single most-urgent operator by rescanning everything, resolve it, repeat.
+// (Parentheses omitted here for clarity — supporting them adds yet more repeated scanning, not less.)
+String infixToPostfixNaive(List&lt;String&gt; tokens) {
+    while (tokens.size() &gt; 1) {
+        int bestIdx = -1, bestPrec = -1;
+        for (int i = 0; i &lt; tokens.size(); i++) {           // &lt;-- full rescan, every round
+            if (isOperator(tokens.get(i))) {
+                int p = precedence(tokens.get(i).charAt(0));
+                if (p &gt; bestPrec) { bestPrec = p; bestIdx = i; }
+            }
+        }
+        String merged = tokens.get(bestIdx - 1) + tokens.get(bestIdx + 1) + tokens.get(bestIdx);
+        tokens.set(bestIdx - 1, merged);
+        tokens.remove(bestIdx + 1);
+        tokens.remove(bestIdx);
+    }
+    return tokens.get(0);
+}
+</code></pre>
+<p><strong>Why is this too slow?</strong> Every single resolution re-scans the <strong>entire</strong> remaining token list from the start, just to find the one operator that&#39;s ready to fire — even though almost none of that list changed since the previous scan. With up to <code>n</code> operators to resolve, each needing an O(n) scan to locate, that&#39;s O(n²) total — for information (precedence relationships) that a stack could have kept sorted incrementally the whole time.</p>
+<h3>5. Observation</h3>
+<pre><code class="language-text">Brute force (rescan the whole expression to find the next operator to resolve)
+     ↓
+Repeated work: re-scanning tokens that haven&#39;t changed since the last pass
+     ↓
+Observation: only the MOST RECENT waiting operator can ever be &quot;cut in line&quot; by a new one —
+             everything before it was already correctly ordered relative to each other
+     ↓
+Data structure: a stack of pending operators (LIFO — the most recent waiting operator is
+                 exactly the one that needs to be checked against each newcomer)
+     ↓
+Optimized solution: one left-to-right pass, O(n)
+</code></pre>
+<h3>6. Optimal Approach</h3>
+<p>Scan left to right. Operand → straight to output. <code>(</code> → push. <code>)</code> → pop to output until <code>(</code> is found, then discard the <code>(</code>. Operator <code>c</code> → <strong>while</strong> the stack&#39;s top is an operator with precedence strictly greater than <code>c</code>, <strong>or</strong> equal precedence <em>and</em> <code>c</code> is left-associative, pop it to output; then push <code>c</code>.</p>
+<p>The equal-precedence rule is precedence&#39;s version of the LIFO &quot;who resolves first&quot; question: for <code>A-B-C</code> (left-associative), the first <code>-</code> must fire before the second one is even placed, so equal precedence pops. For <code>A^B^C</code> (right-associative), the first <code>^</code> must <strong>wait</strong> for the second one to be placed first, so equal precedence does <strong>not</strong> pop.</p>
+<h3>7. Invariant</h3>
+<blockquote>
+<p><strong>Invariant:</strong> At every point in the scan, the stack (bottom→top) holds exactly the operators seen so far that have <strong>not yet</strong> been proven safe to output — each one is strictly lower precedence (or equal-and-right-associative) than everything below it, and every operand already output belongs entirely to operators that have already fired or are still validly waiting.</p>
+</blockquote>
+<h3>8. Dry Run — <code>&quot;A+B*(C-D)&quot;</code></h3>
+<table>
+<thead>
+<tr>
+<th>i</th>
+<th>token</th>
+<th>stack before</th>
+<th>operation</th>
+<th>stack after</th>
+<th>output so far</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td><code>A</code></td>
+<td><code>[]</code></td>
+<td>→ output</td>
+<td><code>[]</code></td>
+<td><code>A</code></td>
+</tr>
+<tr>
+<td>1</td>
+<td><code>+</code></td>
+<td><code>[]</code></td>
+<td>push (nothing to compare)</td>
+<td><code>[+]</code></td>
+<td><code>A</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>B</code></td>
+<td><code>[+]</code></td>
+<td>→ output</td>
+<td><code>[+]</code></td>
+<td><code>AB</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>*</code></td>
+<td><code>[+]</code></td>
+<td>prec(+)=1 &lt; prec(*)=2 → don&#39;t pop; push</td>
+<td><code>[+,*]</code></td>
+<td><code>AB</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>(</code></td>
+<td><code>[+,*]</code></td>
+<td>push (always)</td>
+<td><code>[+,*,(]</code></td>
+<td><code>AB</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>C</code></td>
+<td><code>[+,*,(]</code></td>
+<td>→ output</td>
+<td><code>[+,*,(]</code></td>
+<td><code>ABC</code></td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>-</code></td>
+<td><code>[+,*,(]</code></td>
+<td>top is <code>(</code> → stop condition, push</td>
+<td><code>[+,*,(,-]</code></td>
+<td><code>ABC</code></td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>D</code></td>
+<td><code>[+,*,(,-]</code></td>
+<td>→ output</td>
+<td><code>[+,*,(,-]</code></td>
+<td><code>ABCD</code></td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>)</code></td>
+<td><code>[+,*,(,-]</code></td>
+<td>pop to output until <code>(</code>: pop <code>-</code> → output; pop &amp; discard <code>(</code></td>
+<td><code>[+,*]</code></td>
+<td><code>ABCD-</code></td>
+</tr>
+<tr>
+<td>end</td>
+<td>—</td>
+<td><code>[+,*]</code></td>
+<td>pop everything left: <code>*</code> then <code>+</code></td>
+<td><code>[]</code></td>
+<td><code>ABCD-*+</code></td>
+</tr>
+</tbody></table>
+<p>Result: <strong><code>ABCD-*+</code></strong> — matching <code>A + (B*(C-D))</code>. <em>(Verified separately against the classic textbook example <code>&quot;A+B*(C^D-E)^(F+G*H)-I&quot;</code> → <code>&quot;ABCD^E-FGH*+^*+I-&quot;</code>, including the right-associative <code>^</code> case.)</em></p>
+<h3>9. Why Does It Work?</h3>
+<p>Any operator sitting in the stack has, by the invariant, already been checked against every operator that arrived after it and survived — meaning nothing has proven it <em>needs</em> to fire yet. The moment a new operator arrives that a waiting one truly cannot outrank (or, for equal precedence, cannot even tie against, due to associativity), that waiting operator&#39;s fate is sealed: nothing later can un-decide it, because operator precedence only depends on what&#39;s immediately being compared, not on anything further away. So popping it <em>right now</em> — writing it to the output — is always safe and never needs to be undone.</p>
+<h3>10. Java Code</h3>
+<pre><code class="language-java">int precedence(char op) {
+    if (op == &#39;^&#39;) return 3;
+    if (op == &#39;*&#39; || op == &#39;/&#39;) return 2;
+    if (op == &#39;+&#39; || op == &#39;-&#39;) return 1;
+    return -1;
+}
+boolean isRightAssociative(char op) { return op == &#39;^&#39;; }
+
+String infixToPostfix(String s) {
+    StringBuilder output = new StringBuilder();
+    Deque&lt;Character&gt; stack = new ArrayDeque&lt;&gt;();
+
+    for (char c : s.toCharArray()) {
+        if (Character.isLetterOrDigit(c)) {
+            output.append(c);
+        } else if (c == &#39;(&#39;) {
+            stack.push(c);
+        } else if (c == &#39;)&#39;) {
+            while (!stack.isEmpty() &amp;&amp; stack.peek() != &#39;(&#39;) output.append(stack.pop());
+            stack.pop(); // discard the &#39;(&#39;
+        } else { // operator
+            while (!stack.isEmpty() &amp;&amp; stack.peek() != &#39;(&#39; &amp;&amp;
+                   (precedence(stack.peek()) &gt; precedence(c) ||
+                    (precedence(stack.peek()) == precedence(c) &amp;&amp; !isRightAssociative(c)))) {
+                output.append(stack.pop());
+            }
+            stack.push(c);
+        }
+    }
+    while (!stack.isEmpty()) output.append(stack.pop());
+    return output.toString();
+}
+</code></pre>
+<h3>11. Complexity</h3>
+<p><strong>Time:</strong> O(n) — every character is pushed at most once and popped at most once; the same bounded-total-touches argument as the monotonic stack.
+<strong>Space:</strong> O(n) worst case (e.g. deeply nested parentheses, or a long chain of increasing-precedence operators).</p>
+<h3>12. Edge Cases</h3>
+<ul>
+<li>Single operand, no operators.</li>
+<li>All same precedence, e.g. <code>&quot;A-B-C-D&quot;</code> (tests left-associativity).</li>
+<li>Right-associative chain, e.g. <code>&quot;A^B^C&quot;</code>.</li>
+<li>Fully parenthesized input, and unnecessary/redundant parentheses.</li>
+<li>Deeply nested parentheses.</li>
+</ul>
+<h3>13. Common Mistakes</h3>
+<ul>
+<li><strong>Using <code>&gt;</code> instead of <code>&gt;=</code> (with the associativity check) at the equal-precedence boundary</strong> — gets <code>A-B-C</code> or <code>A^B^C</code> backwards.</li>
+<li><strong>Forgetting the right-associativity exception for <code>^</code></strong> — treating it like every other operator silently breaks any expression with two or more <code>^</code> in a row.</li>
+<li>Popping past a <code>(</code> boundary — the stack&#39;s <code>(</code> must act as a hard stop for both operator comparisons and the closing-paren flush.</li>
+<li>Forgetting to discard the <code>(</code> itself after flushing to it on <code>)</code>.</li>
+</ul>
+<h3>14. Pattern to Remember</h3>
+<pre><code class="language-text">Problem clue:  infix expression -&gt; postfix, with precedence &amp; parens
+Pattern:       Expression Conversion (precedence-driven deferral)
+Data structure: stack of pending operators
+Stores:        operators not yet proven safe to output
+Push:          after popping everything of &gt;= precedence (mind associativity)
+Pop:           when a new operator/closing-paren proves a waiting one must fire now
+Invariant:     stack holds operators in strictly decreasing &quot;must-wait&quot; order
+Key insight:   operands never wait; operators wait until precedence resolves them
+Time / Space:  O(n) / O(n)
+</code></pre>
+<p><strong>Memory trick:</strong> <em>&quot;Operands go straight through. Operators wait in line until someone more urgent shows up — or until it&#39;s finally their turn.&quot;</em></p>
+<h3>15. Interview Trigger</h3>
+<blockquote>
+<p>If asked to convert infix to postfix, I think: operands are free, operators must be deferred. I keep a stack of pending operators; before pushing a new one, I pop out anything already waiting that this new operator can&#39;t out-rank (watching precedence <em>and</em> associativity, especially for <code>^</code>), because parentheses form hard walls I never pop across.</p>
+</blockquote>
+<hr>
+<h1>10. Prefix to Infix Conversion</h1>
+<h3>1. Problem Understanding</h3>
+<p>Convert a prefix expression (operator <em>before</em> its operands, e.g. <code>&quot;*+AB-CD&quot;</code>) into fully-parenthesized infix (e.g. <code>&quot;((A+B)*(C-D))&quot;</code>).</p>
+<p><strong>What&#39;s different here:</strong> unlike Problem 9, there&#39;s no precedence reasoning to do at all — prefix notation already fully encodes structure via <em>position</em>. The only job is reconstruction, not decision-making.</p>
+<h3>2. How to Think About the Problem</h3>
+<p><strong>What should I notice first?</strong> In prefix, an operator comes <em>before</em> its two operands. That means by the time you&#39;ve read an operator (scanning left to right), you <em>haven&#39;t</em> seen its operands yet — awkward. But scan <strong>right to left</strong> instead, and by the time you reach an operator, both of its operands have already been read and are sitting ready and waiting.</p>
+<p><strong>Clue → Observation → Pattern → Data Structure → Algorithm:</strong>
+<code>operator comes before its operands</code> → <code>scanning backwards makes the operands already available</code> → <code>right-to-left reconstruction</code> → <code>stack of built-up sub-expressions</code> → <code>push operands; on an operator, pop twice and combine</code>.</p>
+<p><strong>Which pop is which operand?</strong> Scanning right to left, the operand closer to the operator in the original string is read <em>first</em> (it&#39;s more to the right) — but in <code>&quot;op A B&quot;</code>, <code>A</code> is the <em>left</em> operand and <code>B</code> is the <em>right</em> operand, and <code>A</code> appears before <code>B</code>, meaning <code>A</code> is read <em>after</em> <code>B</code> in a right-to-left scan. So <code>A</code> (left) is pushed <em>last</em>, ending up on <em>top</em> — meaning <strong>the first thing popped is the left operand, the second is the right operand.</strong></p>
+<h3>3. Pattern Recognition</h3>
+<p><strong>Problem clue:</strong> convert <em>from</em> prefix notation.
+<strong>Pattern:</strong> Skeleton A — right-to-left prefix reconstruction.
+<strong>Why this pattern:</strong> reversing the scan direction makes both operands of any operator already available the moment you need them.
+<strong>Mental model:</strong> the stack holds &quot;sub-expressions already fully built,&quot; waiting to be combined into bigger ones.
+<strong>Similar problems:</strong> Problem 11 (Prefix→Postfix) uses the <em>identical</em> scan and pop order — only the final string-combining step differs.
+<strong>Recognizing this elsewhere:</strong> any time a token&#39;s &quot;arguments&quot; appear <em>after</em> it in the input, reverse the scan direction to make them appear &quot;before&quot; it instead.</p>
+<h3>4. Brute Force</h3>
+<p>The natural first idea most people reach for is <strong>recursive parsing with a shared index</strong>: &quot;the current token is an operator or an operand; if it&#39;s an operator, recursively parse the next sub-expression for the left operand, then recursively parse the one after that for the right operand.&quot;</p>
+<pre><code class="language-java">int idx = 0; // shared position, moves forward through the tokens
+String parsePrefix(String[] tokens) {
+    String token = tokens[idx++];
+    if (isOperator(token.charAt(0))) {
+        String left = parsePrefix(tokens);
+        String right = parsePrefix(tokens);
+        return &quot;(&quot; + left + token + right + &quot;)&quot;;
+    }
+    return token; // operand
+}
+</code></pre>
+<p>This is <strong>also O(n)</strong> — it&#39;s not &quot;too slow&quot; in the Big-O sense. The reason interviews still prefer the explicit right-to-left stack version: recursion depth grows with expression depth (risking stack-overflow on very deeply nested/long expressions), and — the more important reason for <em>this guide</em> — the recursive call stack <strong>is</strong> an implicit stack. Writing it explicitly as a <code>Deque</code> makes visible exactly what&#39;s really happening, which is the whole point of building pattern recognition rather than relying on the language&#39;s call stack to hide it from you.</p>
+<h3>5. Observation</h3>
+<p>Once you scan <strong>right to left</strong> instead of left to right, every operand is available <em>before</em> its operator is reached, because prefix&#39;s &quot;operator first&quot; ordering becomes &quot;operator last&quot; when read backwards. No recursion, no shared index — just push operands, and combine on operators.</p>
+<h3>6. Optimal Approach</h3>
+<p>Scan right to left. Operand → push (as a string). Operator → pop twice: first pop = left operand, second pop = right operand; push <code>&quot;(&quot; + left + operator + right + &quot;)&quot;</code>.</p>
+<h3>7. Invariant</h3>
+<blockquote>
+<p><strong>Invariant:</strong> At every point in the right-to-left scan, the stack (bottom→top) holds fully-formed infix sub-expressions for every prefix &quot;chunk&quot; fully consumed so far, in an order such that the top is always the most recently completed piece — exactly what the <em>next</em> operator (further left) needs as one of its two operands.</p>
+</blockquote>
+<h3>8. Dry Run — <code>&quot;*+AB-CD&quot;</code></h3>
+<table>
+<thead>
+<tr>
+<th>i (right→left)</th>
+<th>token</th>
+<th>stack before</th>
+<th>operation</th>
+<th>stack after</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>D</code></td>
+<td>operand</td>
+<td><code>[]</code></td>
+<td>push</td>
+<td><code>[D]</code></td>
+</tr>
+<tr>
+<td><code>C</code></td>
+<td>operand</td>
+<td><code>[D]</code></td>
+<td>push</td>
+<td><code>[D,C]</code></td>
+</tr>
+<tr>
+<td><code>-</code></td>
+<td>operator</td>
+<td><code>[D,C]</code></td>
+<td>pop <code>C</code>(left), pop <code>D</code>(right) → <code>&quot;(C-D)&quot;</code></td>
+<td><code>[(C-D)]</code></td>
+</tr>
+<tr>
+<td><code>B</code></td>
+<td>operand</td>
+<td><code>[(C-D)]</code></td>
+<td>push</td>
+<td><code>[(C-D),B]</code></td>
+</tr>
+<tr>
+<td><code>A</code></td>
+<td>operand</td>
+<td><code>[(C-D),B]</code></td>
+<td>push</td>
+<td><code>[(C-D),B,A]</code></td>
+</tr>
+<tr>
+<td><code>+</code></td>
+<td>operator</td>
+<td><code>[(C-D),B,A]</code></td>
+<td>pop <code>A</code>(left), pop <code>B</code>(right) → <code>&quot;(A+B)&quot;</code></td>
+<td><code>[(C-D),(A+B)]</code></td>
+</tr>
+<tr>
+<td><code>*</code></td>
+<td>operator</td>
+<td><code>[(C-D),(A+B)]</code></td>
+<td>pop <code>(A+B)</code>(left), pop <code>(C-D)</code>(right) → <code>&quot;((A+B)*(C-D))&quot;</code></td>
+<td><code>[((A+B)*(C-D))]</code></td>
+</tr>
+</tbody></table>
+<p>Result: <strong><code>((A+B)*(C-D))</code></strong>.</p>
+<h3>9. Why Does It Work?</h3>
+<p>Prefix notation places an operator <em>immediately before</em> its full sub-expression pair. Scanning backwards means we always meet the <em>pieces</em> of a sub-expression before we meet the operator that combines them — so by the time any operator is reached, both halves it needs are already sitting, fully resolved, at the top of the stack, ready in exactly the right order (left operand pushed last, so popped first).</p>
+<h3>10. Java Code</h3>
+<pre><code class="language-java">String prefixToInfix(String s) {
+    Deque&lt;String&gt; stack = new ArrayDeque&lt;&gt;();
+    for (int i = s.length() - 1; i &gt;= 0; i--) {
+        char c = s.charAt(i);
+        if (Character.isLetterOrDigit(c)) {
+            stack.push(String.valueOf(c));
+        } else { // operator
+            String left = stack.pop();
+            String right = stack.pop();
+            stack.push(&quot;(&quot; + left + c + right + &quot;)&quot;);
+        }
+    }
+    return stack.pop();
+}
+</code></pre>
+<h3>11. Complexity</h3>
+<p><strong>Time:</strong> O(n) single pass — but note: each <code>push</code> here is O(k) where <code>k</code> is the length of the (growing) sub-expression string, not O(1) like an integer push, because Java strings are immutable and concatenation copies. For a purely academic worst-case bound this makes the true cost closer to O(n²) in string-copying work for very large expressions; in interview terms, this is universally accepted as &quot;O(n)&quot; referring to the number of <em>tokens</em> processed, with the caveat worth mentioning if asked to optimize further (a <code>StringBuilder</code>-based tree structure avoids the repeated copying).
+<strong>Space:</strong> O(n) for the stack of sub-expression strings.</p>
+<h3>12. Edge Cases</h3>
+<ul>
+<li>Single operand, no operators.</li>
+<li>Deeply nested expressions (recursion-depth risk in the brute-force recursive version — not a concern for the iterative stack version).</li>
+<li>Right-to-left scanning off the start of the string correctly (loop bound <code>i &gt;= 0</code>).</li>
+</ul>
+<h3>13. Common Mistakes</h3>
+<ul>
+<li><strong>Swapping which pop is the left vs. right operand</strong> — this is the single most common bug in this whole family of problems. Scanning right to left, the <strong>first</strong> pop is always the <strong>left</strong> operand, the <strong>second</strong> pop is always the <strong>right</strong> operand. Getting this backwards silently produces a plausible-looking but wrong expression (e.g. <code>(D-C)</code> instead of <code>(C-D)</code>), which is easy to miss without testing a non-commutative operator like <code>-</code> or <code>/</code>.</li>
+<li>Scanning left to right out of habit (works for postfix, not prefix).</li>
+<li>Forgetting to convert <code>char</code> to <code>String</code> before pushing operands onto a <code>Deque&lt;String&gt;</code>.</li>
+</ul>
+<h3>14. Pattern to Remember</h3>
+<pre><code class="language-text">Problem clue:  convert FROM prefix notation
+Pattern:       Skeleton A — right-to-left prefix reconstruction
+Data structure: stack of (sub-)expression strings
+Stores:        fully-built pieces, waiting to be combined
+Scan direction: right to left
+On operand:    push
+On operator:   pop TWICE — first pop = LEFT operand, second pop = RIGHT operand
+Invariant:     stack top = most recently completed sub-expression
+Key insight:   reverse the scan so operands always arrive before their operator
+Time / Space:  O(n) tokens / O(n)
+</code></pre>
+<p><strong>Memory trick:</strong> <em>&quot;Prefix: scan backwards. First pop is left, second pop is right — always.&quot;</em></p>
+<h3>15. Interview Trigger</h3>
+<blockquote>
+<p>If asked to convert FROM prefix, I immediately think: scan right to left so operands are always ready before their operator arrives. Push operands; on an operator, pop twice — first pop is the left operand, second is the right — and push the combined result back.</p>
+</blockquote>
+<hr>
+<h1>11. Prefix to Postfix Conversion</h1>
+<h3>1. Problem Understanding</h3>
+<p>Convert prefix (<code>&quot;*+AB-CD&quot;</code>) directly into postfix (<code>&quot;AB+CD-*&quot;</code>) — <strong>without</strong> going through infix as an intermediate step.</p>
+<h3>2. How to Think About the Problem</h3>
+<p>This is <strong>Problem 10&#39;s algorithm, unchanged</strong>, right down to the scan direction and which pop is which operand. The <em>only</em> thing that changes is the very last line: instead of building <code>&quot;(&quot; + left + op + right + &quot;)&quot;</code>, postfix order is simply <code>left + right + op</code> — no parentheses needed at all, because postfix&#39;s <em>position</em> alone (not brackets) is what encodes structure.</p>
+<p><strong>Clue → Observation → Pattern → Data Structure → Algorithm:</strong> identical to Problem 10 — the only difference is the output-combining rule, so if you understand Problem 10, you already understand this one.</p>
+<h3>3. Pattern Recognition</h3>
+<p><strong>Problem clue:</strong> convert FROM prefix, TO postfix.
+<strong>Pattern:</strong> Skeleton A (same as Problem 10) — right-to-left prefix reconstruction, different combine step.
+<strong>Mental model:</strong> identical to Problem 10.
+<strong>Similar problems:</strong> Problem 10, almost verbatim.</p>
+<h3>4. Brute Force</h3>
+<p>Same as Problem 10: recursive parsing with a shared index, then a post-order-style string build instead of a parenthesized one. Same conclusion — O(n) either way; the explicit stack is preferred for the same reasons (no recursion-depth risk, and it makes the underlying stack usage visible instead of hidden inside the language&#39;s call stack).</p>
+<h3>5. Observation</h3>
+<p>Identical to Problem 10&#39;s observation: scanning right to left makes both operands available before the operator that needs them.</p>
+<h3>6. Optimal Approach</h3>
+<p>Same scan, same pop order as Problem 10. Only the combine step changes: <code>stack.push(left + right + op)</code> instead of wrapping in parentheses.</p>
+<h3>7. Invariant</h3>
+<blockquote>
+<p><strong>Invariant:</strong> Identical in spirit to Problem 10 — the stack holds fully-built postfix sub-expressions, with the top always being the most recently completed piece.</p>
+</blockquote>
+<h3>8. Dry Run — <code>&quot;*+AB-CD&quot;</code></h3>
+<table>
+<thead>
+<tr>
+<th>i (right→left)</th>
+<th>token</th>
+<th>stack before</th>
+<th>operation</th>
+<th>stack after</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>D</code></td>
+<td>operand</td>
+<td><code>[]</code></td>
+<td>push</td>
+<td><code>[D]</code></td>
+</tr>
+<tr>
+<td><code>C</code></td>
+<td>operand</td>
+<td><code>[D]</code></td>
+<td>push</td>
+<td><code>[D,C]</code></td>
+</tr>
+<tr>
+<td><code>-</code></td>
+<td>operator</td>
+<td><code>[D,C]</code></td>
+<td>pop <code>C</code>(left), pop <code>D</code>(right) → <code>&quot;CD-&quot;</code></td>
+<td><code>[CD-]</code></td>
+</tr>
+<tr>
+<td><code>B</code></td>
+<td>operand</td>
+<td><code>[CD-]</code></td>
+<td>push</td>
+<td><code>[CD-,B]</code></td>
+</tr>
+<tr>
+<td><code>A</code></td>
+<td>operand</td>
+<td><code>[CD-,B]</code></td>
+<td>push</td>
+<td><code>[CD-,B,A]</code></td>
+</tr>
+<tr>
+<td><code>+</code></td>
+<td>operator</td>
+<td><code>[CD-,B,A]</code></td>
+<td>pop <code>A</code>(left), pop <code>B</code>(right) → <code>&quot;AB+&quot;</code></td>
+<td><code>[CD-,AB+]</code></td>
+</tr>
+<tr>
+<td><code>*</code></td>
+<td>operator</td>
+<td><code>[CD-,AB+]</code></td>
+<td>pop <code>AB+</code>(left), pop <code>CD-</code>(right) → <code>&quot;AB+CD-*&quot;</code></td>
+<td><code>[AB+CD-*]</code></td>
+</tr>
+</tbody></table>
+<p>Result: <strong><code>AB+CD-*</code></strong> — note this is precisely the postfix form of the same expression Problem 10 converted to infix. Same input, same intermediate stack shape, different final assembly.</p>
+<h3>9. Why Does It Work?</h3>
+<p>Same reasoning as Problem 10: reversing the scan direction guarantees both operands of any operator are already fully resolved by the time the operator is reached. Postfix&#39;s <code>left + right + op</code> ordering is simply a direct readout of &quot;the two most recently completed pieces, followed by what combines them&quot; — no parentheses are needed because in postfix, <em>position</em> alone (not brackets) tells a reader unambiguously where each sub-expression starts and ends.</p>
+<h3>10. Java Code</h3>
+<pre><code class="language-java">String prefixToPostfix(String s) {
+    Deque&lt;String&gt; stack = new ArrayDeque&lt;&gt;();
+    for (int i = s.length() - 1; i &gt;= 0; i--) {
+        char c = s.charAt(i);
+        if (Character.isLetterOrDigit(c)) {
+            stack.push(String.valueOf(c));
+        } else { // operator
+            String left = stack.pop();
+            String right = stack.pop();
+            stack.push(left + right + c); // &lt;-- the only line that differs from Problem 10
+        }
+    }
+    return stack.pop();
+}
+</code></pre>
+<h3>11. Complexity</h3>
+<p>Same as Problem 10: <strong>Time</strong> O(n) tokens (with the same string-concatenation caveat). <strong>Space</strong> O(n).</p>
+<h3>12. Edge Cases</h3>
+<p>Identical to Problem 10.</p>
+<h3>13. Common Mistakes</h3>
+<p>Identical to Problem 10 — swapping left/right pop order is still the #1 bug. One postfix-specific extra: <strong>forgetting there&#39;s no parenthesis step to &quot;save you&quot;</strong> — in Problem 10, a swapped-operand bug still produces syntactically valid (if wrong) parenthesized infix; here, a swapped-operand bug produces postfix that&#39;s easy to misread as correct if you don&#39;t mentally re-evaluate it.</p>
+<h3>14. Pattern to Remember</h3>
+<pre><code class="language-text">Problem clue:  convert FROM prefix, TO postfix
+Pattern:       Skeleton A (identical to Problem 10)
+Data structure: stack of sub-expression strings
+Scan direction: right to left
+On operator:   pop LEFT then RIGHT; push left + right + operator (no parens)
+Key insight:   same as Problem 10 — only the combine step changed
+Time / Space:  O(n) tokens / O(n)
+</code></pre>
+<p><strong>Memory trick:</strong> <em>&quot;Same walk as Problem 10 — just drop the parentheses and put the operator last.&quot;</em></p>
+<h3>15. Interview Trigger</h3>
+<blockquote>
+<p>This is Problem 10 with a one-line change. I scan prefix right to left, push operands, and on an operator pop left-then-right — but instead of wrapping in parentheses, I just concatenate <code>left + right + operator</code>, since postfix doesn&#39;t need brackets to be unambiguous.</p>
+</blockquote>
+<hr>
+<h1>12. Postfix to Prefix Conversion</h1>
+<h3>1. Problem Understanding</h3>
+<p>Convert postfix (<code>&quot;AB+CD-*&quot;</code>) into prefix (<code>&quot;*+AB-CD&quot;</code>).</p>
+<h3>2. How to Think About the Problem</h3>
+<p>Postfix places the operator <strong>after</strong> its operands — the mirror image of prefix. So the mirror-image fix applies: instead of reversing the scan direction (like we did going the other way in Problems 10–11), here we can scan <strong>left to right</strong> directly, because by the time we reach an operator, both its operands have already appeared and are sitting ready on the stack.</p>
+<p><strong>What&#39;s different from Problem 10&#39;s pop order?</strong> Scanning left to right, the operand that appears <em>second</em> (more recently, closer to the operator) is pushed <em>last</em>, so it&#39;s popped <em>first</em> — and in postfix <code>&quot;A B op&quot;</code>, <code>A</code> is the left operand and <code>B</code> is the right operand, with <code>B</code> appearing second. So: <strong>the first pop is the right operand, the second pop is the left operand</strong> — the exact reverse of Problems 10–11&#39;s pop order. This flip is the one new thing to internalize in this half of the file.</p>
+<p><strong>Clue → Observation → Pattern → Data Structure → Algorithm:</strong>
+<code>operator comes after its operands</code> → <code>scanning forward already gives us both operands before the operator</code> → <code>left-to-right reconstruction</code> → <code>stack of built-up sub-expressions</code> → <code>push operands; on an operator, pop twice (right first, then left) and combine</code>.</p>
+<h3>3. Pattern Recognition</h3>
+<p><strong>Problem clue:</strong> convert <em>from</em> postfix notation.
+<strong>Pattern:</strong> Skeleton B — left-to-right postfix reconstruction.
+<strong>Mental model:</strong> same &quot;stack of completed pieces&quot; idea as Problems 10–11, but built forward instead of backward, with pop order flipped accordingly.
+<strong>Similar problems:</strong> Problem 13 (Postfix→Infix) uses the <em>identical</em> scan and pop order — only the final combine step differs, exactly as Problems 10 and 11 relate to each other.
+<strong>Recognizing this elsewhere:</strong> whenever a token&#39;s &quot;arguments&quot; appear <em>before</em> it in the input (postfix, or Reverse Polish Notation calculators), a plain left-to-right scan already has everything it needs the moment it&#39;s needed — no direction reversal required.</p>
+<h3>4. Brute Force</h3>
+<p>Recursive parsing again, this time naturally working from the <strong>end</strong> of the string backward: &quot;the last token is an operator or operand; if operator, recursively parse the operand ending just before it, twice.&quot; Also O(n) — same trade-off discussion as Problem 10: correct and linear, but the explicit stack avoids recursion-depth risk and makes the pattern visible rather than implicit in the call stack.</p>
+<h3>5. Observation</h3>
+<p>No reversal needed at all here — postfix already presents operands before their operator in natural reading order, so a single forward pass suffices. The only adjustment versus Problems 10–11 is which popped value is &quot;left&quot; and which is &quot;right.&quot;</p>
+<h3>6. Optimal Approach</h3>
+<p>Scan left to right. Operand → push. Operator → pop twice: first pop = right operand, second pop = left operand; push <code>operator + left + right</code>.</p>
+<h3>7. Invariant</h3>
+<blockquote>
+<p><strong>Invariant:</strong> At every point in the left-to-right scan, the stack (bottom→top) holds fully-formed prefix sub-expressions for every postfix &quot;chunk&quot; fully consumed so far, top always being the most recently completed piece.</p>
+</blockquote>
+<h3>8. Dry Run — <code>&quot;AB+CD-*&quot;</code> <em>(the postfix result from Problem 11 — this section undoes it, round-trip)</em></h3>
+<table>
+<thead>
+<tr>
+<th>i (left→right)</th>
+<th>token</th>
+<th>stack before</th>
+<th>operation</th>
+<th>stack after</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>A</code></td>
+<td>operand</td>
+<td><code>[]</code></td>
+<td>push</td>
+<td><code>[A]</code></td>
+</tr>
+<tr>
+<td><code>B</code></td>
+<td>operand</td>
+<td><code>[A]</code></td>
+<td>push</td>
+<td><code>[A,B]</code></td>
+</tr>
+<tr>
+<td><code>+</code></td>
+<td>operator</td>
+<td><code>[A,B]</code></td>
+<td>pop <code>B</code>(right), pop <code>A</code>(left) → <code>&quot;+AB&quot;</code></td>
+<td><code>[+AB]</code></td>
+</tr>
+<tr>
+<td><code>C</code></td>
+<td>operand</td>
+<td><code>[+AB]</code></td>
+<td>push</td>
+<td><code>[+AB,C]</code></td>
+</tr>
+<tr>
+<td><code>D</code></td>
+<td>operand</td>
+<td><code>[+AB,C]</code></td>
+<td>push</td>
+<td><code>[+AB,C,D]</code></td>
+</tr>
+<tr>
+<td><code>-</code></td>
+<td>operator</td>
+<td><code>[+AB,C,D]</code></td>
+<td>pop <code>D</code>(right), pop <code>C</code>(left) → <code>&quot;-CD&quot;</code></td>
+<td><code>[+AB,-CD]</code></td>
+</tr>
+<tr>
+<td><code>*</code></td>
+<td>operator</td>
+<td><code>[+AB,-CD]</code></td>
+<td>pop <code>-CD</code>(right), pop <code>+AB</code>(left) → <code>&quot;*+AB-CD&quot;</code></td>
+<td><code>[*+AB-CD]</code></td>
+</tr>
+</tbody></table>
+<p>Result: <strong><code>*+AB-CD</code></strong> — exactly the original prefix expression from Problem 10, confirming the round trip.</p>
+<h3>9. Why Does It Work?</h3>
+<p>Postfix places an operator immediately <em>after</em> the full sub-expression pair it combines. A left-to-right scan therefore always meets both pieces of any sub-expression <em>before</em> meeting the operator that needs them — the mirror image of why Problem 10 needed to scan backward. Because the second (right) operand is always the more-recently-pushed one, it&#39;s necessarily the one popped first.</p>
+<h3>10. Java Code</h3>
+<pre><code class="language-java">String postfixToPrefix(String s) {
+    Deque&lt;String&gt; stack = new ArrayDeque&lt;&gt;();
+    for (char c : s.toCharArray()) {
+        if (Character.isLetterOrDigit(c)) {
+            stack.push(String.valueOf(c));
+        } else { // operator
+            String right = stack.pop();  // &lt;-- popped FIRST this time
+            String left = stack.pop();   // &lt;-- popped SECOND this time
+            stack.push(c + left + right);
+        }
+    }
+    return stack.pop();
+}
+</code></pre>
+<h3>11. Complexity</h3>
+<p><strong>Time:</strong> O(n) tokens (same string-concatenation caveat as Problem 10). <strong>Space:</strong> O(n).</p>
+<h3>12. Edge Cases</h3>
+<p>Same family as Problem 10: single operand, deeply nested expressions, left-to-right scan bounds.</p>
+<h3>13. Common Mistakes</h3>
+<ul>
+<li><strong>Using the SAME pop order as Problems 10–11 out of habit</strong> — this is the single most common cross-problem mistake in this entire section. Scanning postfix left to right, it&#39;s <code>right</code> first, <code>left</code> second — the reverse of scanning prefix right to left. Mixing these up silently produces a plausible-but-wrong answer (e.g. <code>-DC</code> instead of <code>-CD</code>).</li>
+<li>Forgetting the operator itself goes at the <em>front</em> of the combined string for prefix (<code>c + left + right</code>), not somewhere in the middle.</li>
+</ul>
+<h3>14. Pattern to Remember</h3>
+<pre><code class="language-text">Problem clue:  convert FROM postfix, TO prefix
+Pattern:       Skeleton B — left-to-right postfix reconstruction
+Data structure: stack of sub-expression strings
+Scan direction: left to right
+On operator:   pop RIGHT first, then LEFT; push operator + left + right
+Invariant:     stack top = most recently completed sub-expression
+Key insight:   postfix already gives operands before their operator — no reversal needed;
+               but the pop order flips versus the prefix-family problems
+Time / Space:  O(n) tokens / O(n)
+</code></pre>
+<p><strong>Memory trick:</strong> <em>&quot;Postfix: scan forwards. First pop is right, second pop is left — the mirror of the prefix family.&quot;</em></p>
+<h3>15. Interview Trigger</h3>
+<blockquote>
+<p>If asked to convert FROM postfix, I think: left to right works directly, no reversal — postfix already puts operands before their operator. Push operands; on an operator, pop twice, but remember it&#39;s flipped from the prefix problems: first pop is the <em>right</em> operand, second is the <em>left</em>. Push <code>operator + left + right</code>.</p>
+</blockquote>
+<hr>
+<h1>13. Postfix to Infix Conversion</h1>
+<h3>1. Problem Understanding</h3>
+<p>Convert postfix (<code>&quot;AB+CD-*&quot;</code>) into fully-parenthesized infix (<code>&quot;((A+B)*(C-D))&quot;</code>).</p>
+<h3>2. How to Think About the Problem</h3>
+<p><strong>This is Problem 12&#39;s algorithm, unchanged</strong> — same scan direction, same pop order (right first, then left). The only difference is the final combine step: wrap in parentheses with the operator in the middle, exactly the same relationship Problem 11 has to Problem 10.</p>
+<h3>3. Pattern Recognition</h3>
+<p><strong>Problem clue:</strong> convert FROM postfix, TO infix.
+<strong>Pattern:</strong> Skeleton B (same as Problem 12) — left-to-right postfix reconstruction, different combine step.
+<strong>Similar problems:</strong> Problem 12, almost verbatim — and note the four-way symmetry across Problems 10–13:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Scan direction</th>
+<th>1st pop</th>
+<th>2nd pop</th>
+<th>Combine</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>10.</strong> Prefix→Infix</td>
+<td>right→left</td>
+<td>left</td>
+<td>right</td>
+<td><code>(left op right)</code></td>
+</tr>
+<tr>
+<td><strong>11.</strong> Prefix→Postfix</td>
+<td>right→left</td>
+<td>left</td>
+<td>right</td>
+<td><code>left right op</code></td>
+</tr>
+<tr>
+<td><strong>12.</strong> Postfix→Prefix</td>
+<td>left→right</td>
+<td>right</td>
+<td>left</td>
+<td><code>op left right</code></td>
+</tr>
+<tr>
+<td><strong>13.</strong> Postfix→Infix</td>
+<td>left→right</td>
+<td>right</td>
+<td>left</td>
+<td><code>(left op right)</code></td>
+</tr>
+</tbody></table>
+<h3>4. Brute Force</h3>
+<p>Same recursive-from-the-end idea as Problem 12, same O(n) vs. explicit-stack trade-off discussion.</p>
+<h3>5. Observation</h3>
+<p>Identical to Problem 12&#39;s observation.</p>
+<h3>6. Optimal Approach</h3>
+<p>Same scan and pop order as Problem 12. Combine step: <code>&quot;(&quot; + left + operator + right + &quot;)&quot;</code>.</p>
+<h3>7. Invariant</h3>
+<blockquote>
+<p><strong>Invariant:</strong> Identical in spirit to Problem 12 — the stack holds fully-built infix sub-expressions, top always the most recently completed piece.</p>
+</blockquote>
+<h3>8. Dry Run — <code>&quot;AB+CD-*&quot;</code></h3>
+<table>
+<thead>
+<tr>
+<th>i (left→right)</th>
+<th>token</th>
+<th>stack before</th>
+<th>operation</th>
+<th>stack after</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>A</code></td>
+<td>operand</td>
+<td><code>[]</code></td>
+<td>push</td>
+<td><code>[A]</code></td>
+</tr>
+<tr>
+<td><code>B</code></td>
+<td>operand</td>
+<td><code>[A]</code></td>
+<td>push</td>
+<td><code>[A,B]</code></td>
+</tr>
+<tr>
+<td><code>+</code></td>
+<td>operator</td>
+<td><code>[A,B]</code></td>
+<td>pop <code>B</code>(right), pop <code>A</code>(left) → <code>&quot;(A+B)&quot;</code></td>
+<td><code>[(A+B)]</code></td>
+</tr>
+<tr>
+<td><code>C</code></td>
+<td>operand</td>
+<td><code>[(A+B)]</code></td>
+<td>push</td>
+<td><code>[(A+B),C]</code></td>
+</tr>
+<tr>
+<td><code>D</code></td>
+<td>operand</td>
+<td><code>[(A+B),C]</code></td>
+<td>push</td>
+<td><code>[(A+B),C,D]</code></td>
+</tr>
+<tr>
+<td><code>-</code></td>
+<td>operator</td>
+<td><code>[(A+B),C,D]</code></td>
+<td>pop <code>D</code>(right), pop <code>C</code>(left) → <code>&quot;(C-D)&quot;</code></td>
+<td><code>[(A+B),(C-D)]</code></td>
+</tr>
+<tr>
+<td><code>*</code></td>
+<td>operator</td>
+<td><code>[(A+B),(C-D)]</code></td>
+<td>pop <code>(C-D)</code>(right), pop <code>(A+B)</code>(left) → <code>&quot;((A+B)*(C-D))&quot;</code></td>
+<td><code>[((A+B)*(C-D))]</code></td>
+</tr>
+</tbody></table>
+<p>Result: <strong><code>((A+B)*(C-D))</code></strong> — the same infix expression Problem 10 produced from the equivalent prefix form. Problems 10–13 form two clean round-trip pairs.</p>
+<h3>9. Why Does It Work?</h3>
+<p>Same reasoning as Problem 12: a forward scan meets both operands before their operator, so both are always ready when needed. Wrapping in parentheses with the operator placed between the two operands is just infix&#39;s positional convention for the same structural information postfix and prefix encode purely through token order.</p>
+<h3>10. Java Code</h3>
+<pre><code class="language-java">String postfixToInfix(String s) {
+    Deque&lt;String&gt; stack = new ArrayDeque&lt;&gt;();
+    for (char c : s.toCharArray()) {
+        if (Character.isLetterOrDigit(c)) {
+            stack.push(String.valueOf(c));
+        } else { // operator
+            String right = stack.pop();
+            String left = stack.pop();
+            stack.push(&quot;(&quot; + left + c + right + &quot;)&quot;);
+        }
+    }
+    return stack.pop();
+}
+</code></pre>
+<h3>11. Complexity</h3>
+<p><strong>Time:</strong> O(n) tokens. <strong>Space:</strong> O(n).</p>
+<h3>12. Edge Cases</h3>
+<p>Same family as Problem 12.</p>
+<h3>13. Common Mistakes</h3>
+<p>Same #1 mistake as Problem 12 (pop-order mix-up with the prefix family) — plus, specifically here, putting the operator in the wrong position when building the parenthesized string (it must sit <em>between</em> <code>left</code> and <code>right</code>, not at the front like Problem 12&#39;s prefix output).</p>
+<h3>14. Pattern to Remember</h3>
+<pre><code class="language-text">Problem clue:  convert FROM postfix, TO infix
+Pattern:       Skeleton B (identical to Problem 12)
+Data structure: stack of sub-expression strings
+Scan direction: left to right
+On operator:   pop RIGHT then LEFT; push &quot;(&quot; + left + operator + right + &quot;)&quot;
+Key insight:   same as Problem 12 — only the combine step changed
+Time / Space:  O(n) tokens / O(n)
+</code></pre>
+<p><strong>Memory trick:</strong> <em>&quot;Same walk as Problem 12 — just add parentheses and put the operator in the middle.&quot;</em></p>
+<h3>15. Interview Trigger</h3>
+<blockquote>
+<p>This is Problem 12 with a one-line change. Left-to-right scan, pop right-then-left on an operator — but instead of <code>operator + left + right</code>, I wrap it as <code>&quot;(&quot; + left + operator + right + &quot;)&quot;</code>.</p>
+</blockquote>
+<hr>
+<h1>14. Infix to Prefix Conversion</h1>
+<h3>1. Problem Understanding</h3>
+<p>Convert infix (<code>&quot;(A+B)*(C-D)&quot;</code>) directly into prefix (<code>&quot;*+AB-CD&quot;</code>).</p>
+<p>This is the hardest of the six, because — unlike Problems 10–13, which had no precedence reasoning to do — infix genuinely needs Problem 9&#39;s precedence logic. The twist: we need it running in the <strong>opposite reading direction</strong>, and that changes one rule in a way that&#39;s easy to get wrong.</p>
+<h3>2. How to Think About the Problem</h3>
+<p><strong>What would I try first?</strong> &quot;I already know how to do Infix→Postfix (Problem 9). What if I just reverse the input, swap <code>(</code>/<code>)</code>, run the <em>same</em> Problem 9 algorithm, then reverse the output?&quot; This is a very natural instinct — and it&#39;s <em>almost</em> right.</p>
+<p><strong>Why does the naive version of this fail?</strong> Let&#39;s actually try it on <code>&quot;A-B-C&quot;</code> (which means <code>(A-B)-C</code>, and should become prefix <code>&quot;--ABC&quot;</code>). Reverse + swap brackets → <code>&quot;C-B-A&quot;</code>. Now run the <strong>unmodified</strong> Problem 9 algorithm (pop on greater-<strong>or-equal</strong> precedence, since <code>-</code> is left-associative):</p>
+<pre><code class="language-text">C -&gt; output &quot;C&quot;
+&#39;-&#39; -&gt; stack empty, push               stack: [-]
+B -&gt; output &quot;CB&quot;
+&#39;-&#39; -&gt; top is &#39;-&#39;, SAME precedence, left-assoc rule says POP -&gt; output &quot;CB-&quot;, push new &#39;-&#39;   stack: [-]
+A -&gt; output &quot;CB-A&quot;
+end -&gt; pop remaining &#39;-&#39;  -&gt; output &quot;CB-A-&quot;
+</code></pre>
+<p>Reversing <code>&quot;CB-A-&quot;</code> gives <code>&quot;-A-BC&quot;</code> — <strong>not</strong> <code>&quot;--ABC&quot;</code>. Wrong!</p>
+<p><strong>What went wrong?</strong> Reversing the string also silently reverses the <em>effective handedness</em> of left-associativity. The standard &quot;pop on equal precedence&quot; rule is specifically correct for evaluating left-to-right ties in the <em>forward</em> direction — running it on a <em>reversed</em> string evaluates ties in the wrong effective order.</p>
+<p><strong>The fix:</strong> in this specific reversed pass, do <strong>not</strong> pop on equal precedence at all — only pop when the waiting operator&#39;s precedence is <em>strictly</em> greater. This one change correctly compensates for the reversal.</p>
+<p><strong>Clue → Observation → Pattern → Data Structure → Algorithm:</strong>
+<code>need prefix, only know infix-&gt;postfix</code> → <code>reversing the string also reverses associativity&#39;s effect, so the equal-precedence tie-break must be suppressed in this direction</code> → <code>Expression Conversion, reversed</code> → <code>reverse input + swap brackets, run a MODIFIED Problem-9 pass (strict </code>&gt;<code> only), then reverse the result</code>.</p>
+<h3>3. Pattern Recognition</h3>
+<p><strong>Problem clue:</strong> convert infix → prefix.
+<strong>Pattern:</strong> Expression Conversion, run backward (reuses Problem 9&#39;s core, with one rule suppressed).
+<strong>Why this pattern:</strong> prefix is infix &quot;read as if standing at the other end&quot; — literally reverse the reading direction, but precedence ties need special handling because handedness flips too.
+<strong>Mental model:</strong> &quot;Problem 9, but blindfolded to equal-precedence ties, because the string is facing the wrong way.&quot;
+<strong>Similar problems:</strong> Problem 9 directly — same precedence table, same stack mechanics, only the equal-precedence pop rule and the reverse/swap wrapper are new.</p>
+<h3>4. Brute Force</h3>
+<p>The &quot;obvious&quot; idea — reverse, swap brackets, run the <strong>unmodified</strong> Problem 9 algorithm, reverse the result — demonstrated above on <code>&quot;A-B-C&quot;</code>. It&#39;s not a <em>speed</em> problem (it&#39;s still one O(n) pass); it&#39;s a <strong>correctness</strong> trap: it silently produces a wrong-but-plausible-looking answer whenever an expression has two or more same-precedence, left-associative operators in a row. That&#39;s exactly the kind of bug that slips past a quick test with a single operator and only shows up on a chained expression — worth explicitly testing for.</p>
+<h3>5. Observation</h3>
+<p>The reversal already handles <em>structure</em> correctly (which operators are inside which parentheses, overall operator-vs-operand order). The <strong>only</strong> thing it gets wrong is same-precedence tie-breaking, because reversing a string reverses the effective reading order that left-associativity depends on. So: keep everything else from Problem 9 exactly as-is, and change exactly one condition — drop the &quot;or equal precedence, if left-associative&quot; clause, popping <em>only</em> on strictly-greater precedence.</p>
+<h3>6. Optimal Approach</h3>
+<ol>
+<li>Reverse the infix string, and swap every <code>(</code> for <code>)</code> and vice versa.</li>
+<li>Run a modified version of Problem 9&#39;s infix-to-postfix algorithm on this reversed-and-swapped string: identical in every way, <strong>except</strong> the operator-popping condition becomes strict <code>precedence(stack.top()) &gt; precedence(current)</code> only — never pop on equal precedence, regardless of associativity.</li>
+<li>Reverse the resulting string. That&#39;s the prefix expression.</li>
+</ol>
+<h3>7. Invariant</h3>
+<blockquote>
+<p><strong>Invariant:</strong> Steps 1 and 3 (reverse + bracket-swap) are pure structural mirroring and preserve full correctness on their own. Step 2 maintains exactly Problem 9&#39;s invariant (the stack holds operators not yet proven safe to output) but with a redefined notion of &quot;proven safe&quot;: in this reversed pass, only strictly-lower-precedence status proves an operator safe to keep waiting — equality is no longer sufficient, because ties need to resolve in the <em>original</em> string&#39;s left-to-right order, which this reversed pass cannot see directly.</p>
+</blockquote>
+<h3>8. Dry Run — <code>&quot;A-B-C&quot;</code> (correct version)</h3>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Original</td>
+<td><code>A-B-C</code></td>
+</tr>
+<tr>
+<td>1. Reverse + swap brackets</td>
+<td><code>C-B-A</code></td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th>i</th>
+<th>token</th>
+<th>stack before</th>
+<th>modified rule: pop only if strictly greater</th>
+<th>stack after</th>
+<th>output</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td><code>C</code></td>
+<td><code>[]</code></td>
+<td>→ output</td>
+<td><code>[]</code></td>
+<td><code>C</code></td>
+</tr>
+<tr>
+<td>1</td>
+<td><code>-</code></td>
+<td><code>[]</code></td>
+<td>push (nothing to compare)</td>
+<td><code>[-]</code></td>
+<td><code>C</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>B</code></td>
+<td><code>[-]</code></td>
+<td>→ output</td>
+<td><code>[-]</code></td>
+<td><code>CB</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>-</code></td>
+<td><code>[-]</code></td>
+<td>top <code>-</code> has EQUAL precedence, not strictly greater → do <strong>not</strong> pop; push</td>
+<td><code>[-,-]</code></td>
+<td><code>CB</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>A</code></td>
+<td><code>[-,-]</code></td>
+<td>→ output</td>
+<td><code>[-,-]</code></td>
+<td><code>CBA</code></td>
+</tr>
+<tr>
+<td>end</td>
+<td>—</td>
+<td><code>[-,-]</code></td>
+<td>pop both remaining</td>
+<td><code>[]</code></td>
+<td><code>CBA--</code></td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>2. Modified postfix of reversed string</td>
+<td><code>CBA--</code></td>
+</tr>
+<tr>
+<td>3. Reverse the result</td>
+<td><strong><code>--ABC</code></strong> ✓</td>
+</tr>
+</tbody></table>
+<p>Matches the expected prefix form exactly.</p>
+<h3>9. Why Does It Work?</h3>
+<p>Reversing a string and swapping its brackets is a <em>perfect structural mirror</em> — every parenthesis still bounds exactly the same sub-expression, just approached from the other side, so the &quot;which operators can see which operands&quot; structure survives completely intact. The only casualty of mirroring is tie-breaking order for equal-precedence operators, and suppressing the equal-precedence pop is precisely the correction needed: it forces same-precedence operators encountered in the reversed pass to stack up <em>without</em> prematurely resolving each other, so their final relative order — once the whole result is reversed back — comes out matching the <em>original</em> string&#39;s left-to-right resolution order.</p>
+<h3>10. Java Code</h3>
+<pre><code class="language-java">String reverseAndSwapBrackets(String s) {
+    StringBuilder sb = new StringBuilder();
+    for (int i = s.length() - 1; i &gt;= 0; i--) {
+        char c = s.charAt(i);
+        if (c == &#39;(&#39;) sb.append(&#39;)&#39;);
+        else if (c == &#39;)&#39;) sb.append(&#39;(&#39;);
+        else sb.append(c);
+    }
+    return sb.toString();
+}
+
+// Same as infixToPostfix (Problem 9), EXCEPT: pop only on STRICTLY greater precedence — never on equal.
+String modifiedPostfixForPrefix(String s) {
+    StringBuilder output = new StringBuilder();
+    Deque&lt;Character&gt; stack = new ArrayDeque&lt;&gt;();
+    for (char c : s.toCharArray()) {
+        if (Character.isLetterOrDigit(c)) {
+            output.append(c);
+        } else if (c == &#39;(&#39;) {
+            stack.push(c);
+        } else if (c == &#39;)&#39;) {
+            while (!stack.isEmpty() &amp;&amp; stack.peek() != &#39;(&#39;) output.append(stack.pop());
+            stack.pop();
+        } else { // operator
+            while (!stack.isEmpty() &amp;&amp; stack.peek() != &#39;(&#39; &amp;&amp; precedence(stack.peek()) &gt; precedence(c)) {
+                output.append(stack.pop());   // &lt;-- strictly-greater ONLY, no equal-precedence clause
+            }
+            stack.push(c);
+        }
+    }
+    while (!stack.isEmpty()) output.append(stack.pop());
+    return output.toString();
+}
+
+String infixToPrefix(String s) {
+    String reversed = reverseAndSwapBrackets(s);
+    String modifiedPostfix = modifiedPostfixForPrefix(reversed);
+    return new StringBuilder(modifiedPostfix).reverse().toString();
+}
+</code></pre>
+<h3>11. Complexity</h3>
+<p><strong>Time:</strong> O(n) — three linear passes (reverse+swap, modified conversion, final reverse), each O(n), so O(n) total.
+<strong>Space:</strong> O(n) for the stack plus the intermediate strings.</p>
+<h3>12. Edge Cases</h3>
+<ul>
+<li>Chains of same-precedence, left-associative operators (<code>&quot;A-B-C-D&quot;</code>) — exactly the case the naive version gets wrong; always test this specifically.</li>
+<li>Right-associative chains (<code>&quot;A^B^C&quot;</code>) — worth double-checking these still come out correctly under the modified (strict <code>&gt;</code> only) rule too, since the <em>reason</em> <code>^</code> needed special handling in Problem 9 (right-associativity) is a different reason than why the equal-precedence rule changed here; the two corrections don&#39;t cancel each other out, they&#39;re independent and both apply.</li>
+<li>Fully parenthesized and redundantly parenthesized input.</li>
+<li>Single operand.</li>
+</ul>
+<h3>13. Common Mistakes</h3>
+<ul>
+<li><strong>Reusing Problem 9&#39;s UNMODIFIED popping condition</strong> — this is the defining mistake of this entire problem, demonstrated concretely above. It passes simple single-operator test cases and fails silently on chained same-precedence operators.</li>
+<li>Forgetting to swap brackets along with reversing the string (reversing alone inverts which paren means &quot;open&quot; without this fix).</li>
+<li>Reversing the <em>final</em> output but forgetting the <em>input</em> also needed reversing (or vice versa) — both reversals are required, one at the start and one at the end.</li>
+<li>Trying to &quot;shortcut&quot; by reusing the exact <code>infixToPostfix</code> function from Problem 9 unchanged — it looks like it should work, and that&#39;s exactly the trap.</li>
+</ul>
+<h3>14. Pattern to Remember</h3>
+<pre><code class="language-text">Problem clue:  infix expression -&gt; prefix
+Pattern:       Expression Conversion, reversed (builds on Problem 9)
+Data structure: stack of pending operators (same as Problem 9)
+Algorithm:     reverse input + swap brackets -&gt; modified Problem-9 pass
+               (pop ONLY on strictly greater precedence, never on equal) -&gt; reverse result
+Invariant:     reversal preserves structure; suppressing equal-precedence pops
+               corrects the tie-break direction that reversal flips
+Key insight:   reversing a string reverses left-associativity&#39;s effective direction —
+               so equal-precedence ties must NOT resolve during the reversed pass
+Time / Space:  O(n) / O(n)
+</code></pre>
+<p><strong>Memory trick:</strong> <em>&quot;Reverse, swap, convert blindfolded-to-ties, reverse again.&quot;</em></p>
+<h3>15. Interview Trigger</h3>
+<blockquote>
+<p>If asked to convert infix to prefix, I think: reverse the string, swap the brackets, and run Problem 9&#39;s algorithm — but with one deliberate change: never pop on equal precedence, only strictly greater. Then reverse the result. I specifically test a chain like <code>A-B-C</code> to make sure I actually applied that change, because skipping it produces a wrong answer that still <em>looks</em> plausible.</p>
+</blockquote>
+<hr>
+<h2>Pattern Connections Recap (Problems 9–14)</h2>
+<ul>
+<li><strong>Problem 9</strong> is the only one of the six that does <em>live</em> precedence reasoning character-by-character — everything else in this file either reuses its logic (Problem 14) or sidesteps precedence entirely because prefix/postfix already encode structure positionally (Problems 10–13).</li>
+<li><strong>Problems 10 &amp; 11</strong> are one algorithm (scan prefix right→left, pop left-then-right) wearing two output formats.</li>
+<li><strong>Problems 12 &amp; 13</strong> are one algorithm (scan postfix left→right, pop right-then-left) wearing two output formats — and note this pop order is the exact <em>mirror</em> of Problems 10–11&#39;s, which is the single most common mix-up across this whole family.</li>
+<li><strong>Problem 14</strong> is Problem 9 wrapped in a reversal, with exactly one rule suppressed (no popping on equal precedence) to correct for the fact that reversing a string reverses left-associativity&#39;s effective direction.</li>
+<li>Problems 10↔12 and 11↔13 are inverses of each other — round-tripping one into the other and back is a great way to sanity-check your own implementation.</li>
+</ul>
+<hr>
+<p><strong>Next:</strong> <a href="05_problems_15to18_monotonic_stack_core.md"><code>05_problems_15to18_monotonic_stack_core.md</code></a> — Next Greater Element and its three closest relatives: the core monotonic-stack family flagged as most important back in Part 1.</p>
+</div>
+    <script>
+        const vscode = acquireVsCodeApi();
+        function exportFile(format) { vscode.postMessage({ command: 'export', format: format }); }
+        mermaid.initialize({ startOnLoad: true, theme: 'default', securityLevel: 'loose' });
+        // Help Puppeteer know when we are done
+        window.addEventListener('load', () => {
+            mermaid.run().then(() => {
+                document.body.classList.add('mermaid-rendered');
+            });
+        });
+    </script>
+</body>
+</html>

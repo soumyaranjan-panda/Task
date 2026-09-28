@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>02_universal_thinking_framework</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        :root {
+            --bg-color: var(--vscode-editor-background, #ffffff);
+            --text-color: var(--vscode-editor-foreground, #1a1a1b);
+            --heading-color: var(--vscode-editor-foreground, #0f172a);
+            --secondary-text: var(--vscode-descriptionForeground, #64748b);
+            --accent-color: var(--vscode-textLink-foreground, #3b82f6);
+            --code-bg: var(--vscode-textCodeBlock-background, rgba(241, 245, 249, 0.4));
+            --border-color: var(--vscode-widget-border, #e2e8f0);
+            --header-bg: var(--vscode-editor-background, #ffffff);
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            line-height: 1.75;
+            color: var(--text-color);
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 5rem 2rem 3rem;
+            background-color: var(--bg-color);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .export-header {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            padding: 0.75rem 2rem; background: var(--header-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: flex-end; gap: 0.75rem;
+            backdrop-filter: blur(8px); display: none;
+        }
+
+        .btn {
+            background: var(--accent-color); color: white; border: none;
+            padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.85rem;
+            font-weight: 500; cursor: pointer; transition: opacity 0.2s;
+            font-family: 'Outfit', sans-serif;
+        }
+        .btn:hover { opacity: 0.9; }
+
+        h1, h2, h3 { font-family: 'Outfit', sans-serif; color: var(--heading-color); font-weight: 700; margin-top: 2rem; }
+        h1 { font-size: 2.25rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; }
+        
+        pre { background: var(--code-bg); padding: 1.25rem; border-radius: 12px; border: 1px solid var(--border-color); overflow-x: auto; margin: 1.5rem 0; }
+        code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.9em; padding: 0.2rem 0.4rem; border-radius: 6px; background-color: var(--code-bg); }
+        
+        .mermaid { background: white; padding: 1rem; border-radius: 12px; margin: 1.5rem 0; display: flex; justify-content: center; border: 1px solid var(--border-color); }
+        svg { max-width: 100% !important; height: auto !important; }
+
+        @media print { .export-header { display: none; } body { padding: 0; } }
+    </style>
+</head>
+<body>
+    <div class="export-header">
+        <button class="btn" onclick="exportFile('html')">Export HTML</button>
+        <button class="btn" onclick="exportFile('pdf')">Export PDF</button>
+        <button class="btn" onclick="exportFile('docx')">Export DOCX</button>
+    </div>
+    <div class="content"><h1>Stack &amp; Queue Interview Guide — Part 2: Universal Thinking Framework</h1>
+<p><strong>Guide map:</strong> <code>00_START_HERE.md</code> → <code>01_foundation...md</code> → <strong><code>02_universal_thinking_framework.md</code></strong> (you are here) → <code>03_problems_01to08...md</code> → <code>04_problems_09to14...md</code> → (more coming)</p>
+<p>This is the checklist to run through on <strong>any</strong> new Stack/Queue problem, before writing code — including ones you&#39;ve never seen. Every problem in this guide is solved by explicitly walking through these questions; watching that happen 30 times is how the pattern stops being memorized and starts being <em>derived</em>.</p>
+<hr>
+<h2>The checklist</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Question</th>
+<th>Why it matters</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td><strong>What exactly is being asked?</strong></td>
+<td>Restate the output in your own words. Half of wrong solutions come from solving a slightly different problem than the one asked.</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Is this about order?</strong></td>
+<td>Stack/Queue problems are fundamentally about the <em>order</em> things happen in or get processed in — not about their values in isolation.</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Is it LIFO or FIFO?</strong></td>
+<td>If order matters, which direction does it matter in — most-recent-first, or first-come-first-served?</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Do I need to remember unresolved elements?</strong></td>
+<td>If you&#39;re holding onto things because you don&#39;t have enough information <em>yet</em> to finish with them, that&#39;s the core stack/queue signal.</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Am I looking for previous/next greater/smaller?</strong></td>
+<td>This specific phrasing is the monotonic-stack trigger — see Part 1 §3.</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>Is there a nested structure?</strong></td>
+<td>Nesting (parentheses, tags, recursive structures) almost always means stack.</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>Is there a window?</strong></td>
+<td>A contiguous range that slides — could be a plain queue (windowed sum) or a monotonic deque (windowed max/min).</td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong>Can elements be eliminated permanently?</strong></td>
+<td>If, once beaten, an element can <em>never</em> matter again (e.g. a smaller bar can never be the tallest again once a taller one appears), that permanent elimination is what makes a stack-based solution O(n) instead of O(n²).</td>
+</tr>
+<tr>
+<td>9</td>
+<td><strong>Can I process each element once?</strong></td>
+<td>If yes, you&#39;re looking at an O(n) or O(n log n) solution — a strong hint the answer involves a stack/queue/deque rather than nested loops.</td>
+</tr>
+<tr>
+<td>10</td>
+<td><strong>Is there a monotonic property?</strong></td>
+<td>Would keeping the stack/deque sorted (increasing or decreasing) let you answer the question in O(1) at each step?</td>
+</tr>
+<tr>
+<td>11</td>
+<td><strong>What should the stack/queue contain?</strong></td>
+<td>Values, or indices? (Usually indices — see Part 1 §3.)</td>
+</tr>
+<tr>
+<td>12</td>
+<td><strong>What does the top/front represent?</strong></td>
+<td>Name it in plain English before coding: &quot;the most recent day whose price hasn&#39;t been beaten yet,&quot; etc.</td>
+</tr>
+<tr>
+<td>13</td>
+<td><strong>When should I push?</strong></td>
+<td>Almost always: after all necessary pops are done for the current element.</td>
+</tr>
+<tr>
+<td>14</td>
+<td><strong>When should I pop/remove?</strong></td>
+<td>Precisely when the current element gives new information that answers an open question for the stack/queue&#39;s top/front.</td>
+</tr>
+<tr>
+<td>15</td>
+<td><strong>What does a popped element mean?</strong></td>
+<td>Its answer was <em>just</em> found — say out loud what that answer is.</td>
+</tr>
+<tr>
+<td>16</td>
+<td><strong>What is the invariant?</strong></td>
+<td>The property that&#39;s true <em>before</em> and <em>after</em> every single operation, without exception. If you can&#39;t state it, you don&#39;t yet understand the solution — you&#39;ve just pattern-matched to a template.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>How to actually use this in an interview</h2>
+<p>You don&#39;t recite all 16 questions out loud — that would be slow and stilted. Instead, internalize the <strong>flow</strong> they represent:</p>
+<pre><code>1-3:  Understand the ask, and its order-property (LIFO or FIFO?)
+4-7:  Look for the specific trigger phrases / structural clues
+8-10: Confirm WHY a stack/queue actually helps here (not just &quot;it&#39;s the topic of this chapter&quot;)
+11-12: Decide what&#39;s stored, and what it represents
+13-15: Decide exactly when to push/pop, and what popping means
+16:    State the invariant — this is your correctness proof, and your safety net while coding
+</code></pre>
+<p>Every problem in Parts 3+ is explicitly walked through this exact flow in its <strong>&quot;How to Think About the Problem&quot;</strong> section, so you can watch the checklist in action before trying it cold yourself.</p>
+<hr>
+<p><strong>Next:</strong> <a href="03_problems_01to08_implementations_and_matching.md"><code>03_problems_01to08_implementations_and_matching.md</code></a> — the first batch of fully-worked problems.</p>
+</div>
+    <script>
+        const vscode = acquireVsCodeApi();
+        function exportFile(format) { vscode.postMessage({ command: 'export', format: format }); }
+        mermaid.initialize({ startOnLoad: true, theme: 'default', securityLevel: 'loose' });
+        // Help Puppeteer know when we are done
+        window.addEventListener('load', () => {
+            mermaid.run().then(() => {
+                document.body.classList.add('mermaid-rendered');
+            });
+        });
+    </script>
+</body>
+</html>

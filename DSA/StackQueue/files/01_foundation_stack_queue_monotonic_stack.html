@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>01_foundation_stack_queue_monotonic_stack</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        :root {
+            --bg-color: var(--vscode-editor-background, #ffffff);
+            --text-color: var(--vscode-editor-foreground, #1a1a1b);
+            --heading-color: var(--vscode-editor-foreground, #0f172a);
+            --secondary-text: var(--vscode-descriptionForeground, #64748b);
+            --accent-color: var(--vscode-textLink-foreground, #3b82f6);
+            --code-bg: var(--vscode-textCodeBlock-background, rgba(241, 245, 249, 0.4));
+            --border-color: var(--vscode-widget-border, #e2e8f0);
+            --header-bg: var(--vscode-editor-background, #ffffff);
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            line-height: 1.75;
+            color: var(--text-color);
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 5rem 2rem 3rem;
+            background-color: var(--bg-color);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .export-header {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            padding: 0.75rem 2rem; background: var(--header-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: flex-end; gap: 0.75rem;
+            backdrop-filter: blur(8px); display: none;
+        }
+
+        .btn {
+            background: var(--accent-color); color: white; border: none;
+            padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.85rem;
+            font-weight: 500; cursor: pointer; transition: opacity 0.2s;
+            font-family: 'Outfit', sans-serif;
+        }
+        .btn:hover { opacity: 0.9; }
+
+        h1, h2, h3 { font-family: 'Outfit', sans-serif; color: var(--heading-color); font-weight: 700; margin-top: 2rem; }
+        h1 { font-size: 2.25rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; }
+        
+        pre { background: var(--code-bg); padding: 1.25rem; border-radius: 12px; border: 1px solid var(--border-color); overflow-x: auto; margin: 1.5rem 0; }
+        code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.9em; padding: 0.2rem 0.4rem; border-radius: 6px; background-color: var(--code-bg); }
+        
+        .mermaid { background: white; padding: 1rem; border-radius: 12px; margin: 1.5rem 0; display: flex; justify-content: center; border: 1px solid var(--border-color); }
+        svg { max-width: 100% !important; height: auto !important; }
+
+        @media print { .export-header { display: none; } body { padding: 0; } }
+    </style>
+</head>
+<body>
+    <div class="export-header">
+        <button class="btn" onclick="exportFile('html')">Export HTML</button>
+        <button class="btn" onclick="exportFile('pdf')">Export PDF</button>
+        <button class="btn" onclick="exportFile('docx')">Export DOCX</button>
+    </div>
+    <div class="content"><h1>Stack &amp; Queue Interview Guide — Part 1: Foundations</h1>
+<p><strong>Guide map:</strong> <code>00_START_HERE.md</code> → <strong><code>01_foundation...md</code></strong> (you are here) → <code>02_universal_thinking_framework.md</code> → <code>03_problems_01to08...md</code> → <code>04_problems_09to14...md</code> → (more coming)</p>
+<p>This file builds the mental toolkit you&#39;ll reuse for every problem in this guide. Read it once, properly — everything else leans on it.</p>
+<hr>
+<h2>1. Stack — One Page</h2>
+<h3>What a stack actually is</h3>
+<p>A stack is a data structure where you can only add or remove elements from <strong>one end</strong>, called the <strong>top</strong>. Picture a stack of plates: you place a new plate on top, and when you need a plate, you take the top one. You never pull one from the middle without first removing everything above it.</p>
+<p>That one rule — &quot;only touch the top&quot; — is the entire definition. Everything else follows from it.</p>
+<h3>LIFO — Last In, First Out</h3>
+<p>Because you can only add/remove at the top, whatever you placed most recently is the first thing you get back. This is called <strong>LIFO</strong>.</p>
+<pre><code>push(1)  push(2)  push(3)      pop() → 3      pop() → 2      pop() → 1
+
+  [3]                           
+  [2]        [3] out             [2] out          [1] out
+  [1]        [2]                  [1]               [ ]
+  ---        [1]                  ---
+             ---
+</code></pre>
+<h3>Why LIFO is useful</h3>
+<p>LIFO is exactly the behavior you need whenever <strong>&quot;the most recent thing must be dealt with first.&quot;</strong></p>
+<ul>
+<li><strong>Undo</strong> in an editor — the last edit you made is the first one undo reverses.</li>
+<li><strong>Function calls</strong> — if <code>A()</code> calls <code>B()</code> calls <code>C()</code>, then <code>C</code> finishes first, then <code>B</code>, then <code>A</code>. This &quot;reverse order of entry&quot; unwinding is literally how your program&#39;s call stack works.</li>
+<li><strong>Backtracking</strong> — when a path fails, you back up to the <em>most recent</em> decision point, not the first one.</li>
+<li><strong>Anything nested</strong> — the innermost layer must close before the outer layer can.</li>
+</ul>
+<h3>Core operations</h3>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>What it does</th>
+<th>Time</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>push(x)</code></td>
+<td>add <code>x</code> to the top</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td><code>pop()</code></td>
+<td>remove and return the top element</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td><code>peek()</code> / <code>top()</code></td>
+<td>look at the top element without removing it</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td><code>isEmpty()</code></td>
+<td>check if the stack has no elements</td>
+<td>O(1)</td>
+</tr>
+</tbody></table>
+<p>All four are O(1) because they only ever touch the top — nothing needs to shift or search.</p>
+<h3>Typical implementation</h3>
+<ul>
+<li><strong>Resizable array</strong>: <code>push</code> writes at <code>arr[top+1]</code> then increments <code>top</code>; <code>pop</code> reads <code>arr[top]</code> then decrements. Occasionally the array must be resized (doubled), which is O(n) but happens rarely enough that push is still O(1) <em>amortized</em>.</li>
+<li><strong>Singly linked list</strong>: <code>push</code> = insert at head; <code>pop</code> = remove head. Always O(1), no resizing ever needed, but each element carries pointer overhead.</li>
+</ul>
+<h3>Java: <code>Stack</code> vs <code>ArrayDeque</code></h3>
+<p>Java gives you two ways to get stack behavior — interviewers expect you to know which to reach for.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><code>java.util.Stack</code></th>
+<th><code>ArrayDeque</code> (recommended)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Extends</td>
+<td><code>Vector</code> (legacy, from Java 1.0)</td>
+<td><code>AbstractCollection</code>, implements <code>Deque</code></td>
+</tr>
+<tr>
+<td>Thread-safety</td>
+<td>Synchronized — every method locks, even single-threaded use</td>
+<td>Not synchronized — faster</td>
+</tr>
+<tr>
+<td>Recommended by the Java docs themselves</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Nulls allowed</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+</tbody></table>
+<p>Use this in interviews:</p>
+<pre><code class="language-java">Deque&lt;Integer&gt; stack = new ArrayDeque&lt;&gt;();
+stack.push(10);       // add to top
+int x = stack.pop();  // remove &amp; return top
+int y = stack.peek(); // look at top, don&#39;t remove
+stack.isEmpty();       // check empty
+</code></pre>
+<p><code>Deque</code> (double-ended queue) has built-in <code>push</code>/<code>pop</code>/<code>peek</code>, which operate on its &quot;head&quot; — exactly stack behavior. You&#39;ll see the <em>same</em> <code>ArrayDeque</code> used as a queue later in this page, just using different method names on the <em>other</em> end.</p>
+<h3>Real-world intuition</h3>
+<p>Stack of plates/books · the undo button (Ctrl+Z) · the call stack running your own recursive function right now · a browser&#39;s &quot;back&quot; history.</p>
+<hr>
+<h3>When should I think &quot;STACK&quot;?</h3>
+<p>This is the part that actually matters in an interview — recognizing the <em>signal</em>.</p>
+<table>
+<thead>
+<tr>
+<th>Clue in the problem</th>
+<th>Why it signals &quot;stack&quot;</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>&quot;Last in, first out&quot; / most recent first</td>
+<td>That&#39;s the literal definition — no reasoning needed, it&#39;s handed to you.</td>
+</tr>
+<tr>
+<td>Matching / open–close pairs (parentheses, tags, brackets)</td>
+<td>To check something closes correctly, you need to know what was opened <strong>most recently</strong> — the innermost open thing must close first. &quot;Most recent unclosed thing&quot; is exactly a stack&#39;s top.</td>
+</tr>
+<tr>
+<td>Nested structures</td>
+<td>Nesting means &quot;this is inside that.&quot; Unwinding nesting correctly means resolving the innermost layer before the outer one — LIFO again.</td>
+</tr>
+<tr>
+<td>Undo</td>
+<td>The last action taken is the first one reversed.</td>
+</tr>
+<tr>
+<td>Previous/next greater or smaller element</td>
+<td>You need to hold a list of &quot;unresolved&quot; elements and cancel them out in the <em>reverse</em> order you met them. This is the monotonic stack pattern — its own section below.</td>
+</tr>
+<tr>
+<td>Removing elements while maintaining an order (e.g. greedy digit removal)</td>
+<td>When a new element invalidates some of your <em>most recently</em> added elements, you undo your most recent decisions first.</td>
+</tr>
+<tr>
+<td>Expression conversion/evaluation</td>
+<td>An operator must wait for its operands, and the operator that was opened most recently (innermost, or highest precedence) must be applied first.</td>
+</tr>
+<tr>
+<td>&quot;I need to remember unresolved elements until something resolves them&quot;</td>
+<td>The deepest signal of all. Any time you&#39;re holding things because you don&#39;t have enough information <em>yet</em>, and whatever resolves them will resolve the most recent one first — that&#39;s a stack.</td>
+</tr>
+</tbody></table>
+<p><strong>One sentence to internalize:</strong> <em>A stack is for when the order you must undo/resolve/close things in is the reverse of the order you opened/started them in.</em></p>
+<hr>
+<h2>2. Queue — One Page</h2>
+<h3>What a queue actually is</h3>
+<p>A queue is a data structure where you add elements at one end (the <strong>back</strong>/<strong>rear</strong>) and remove them from the <em>other</em> end (the <strong>front</strong>). Think of a checkout line: whoever joined first gets served first.</p>
+<h3>FIFO — First In, First Out</h3>
+<pre><code>enqueue(1) enqueue(2) enqueue(3)     dequeue() → 1
+
+front → [1][2][3] ← rear             front → [2][3] ← rear
+</code></pre>
+<h3>Core operations</h3>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>What it does</th>
+<th>Time</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>enqueue(x)</code> / <code>offer(x)</code></td>
+<td>add <code>x</code> to the back</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td><code>dequeue()</code> / <code>poll()</code></td>
+<td>remove and return the front element</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td><code>front()</code> / <code>peek()</code></td>
+<td>look at the front without removing it</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td><code>isEmpty()</code></td>
+<td>check if empty</td>
+<td>O(1)</td>
+</tr>
+</tbody></table>
+<h3>Typical implementation</h3>
+<ul>
+<li><strong>Circular array</strong> (fixed-size array with wraparound <code>front</code>/<code>rear</code> pointers): gives O(1) for everything. A <em>non-circular</em> array queue is a trap — see Problem 2, it&#39;s the &quot;why is my brute force slow&quot; example for this whole guide.</li>
+<li><strong>Doubly linked list</strong> with head and tail pointers: O(1) add-to-tail, O(1) remove-from-head, no wraparound bookkeeping needed.</li>
+</ul>
+<h3>Java: <code>ArrayDeque</code> for queues</h3>
+<pre><code class="language-java">Deque&lt;Integer&gt; queue = new ArrayDeque&lt;&gt;();
+queue.offer(10);      // add to back
+int x = queue.poll(); // remove &amp; return front
+int y = queue.peek(); // look at front
+queue.isEmpty();
+</code></pre>
+<p><code>ArrayDeque</code> beats <code>LinkedList</code> for queue use too — it&#39;s backed by a resizable circular array, has better cache locality, and skips the per-node object overhead a linked list pays. (The <em>same</em> <code>ArrayDeque</code> class gives you stack behavior via <code>push</code>/<code>pop</code> and queue behavior via <code>offer</code>/<code>poll</code> — the difference is purely which end you&#39;re told to use.)</p>
+<h3>Real-world intuition</h3>
+<p>A checkout line · a printer&#39;s job queue · support tickets handled in arrival order · BFS, visiting nodes level by level in discovery order.</p>
+<hr>
+<h3>When should I think &quot;QUEUE&quot;?</h3>
+<table>
+<thead>
+<tr>
+<th>Clue in the problem</th>
+<th>Why it signals &quot;queue&quot;</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>&quot;First in, first out&quot; / arrival order</td>
+<td>Literal definition.</td>
+</tr>
+<tr>
+<td>Processing things in the order they arrived</td>
+<td>Fairness / arrival-order guarantee = FIFO.</td>
+</tr>
+<tr>
+<td>BFS / level-order traversal</td>
+<td>You must finish everything at the current &quot;distance&quot; before going further out — process nodes in exactly the order you discovered them.</td>
+</tr>
+<tr>
+<td>Sliding window</td>
+<td>As the window slides forward, the <em>oldest</em> element must leave before newer ones matter — first-added, first-removed. <em>(Careful: sliding-window <strong>maximum/minimum</strong> problems need a monotonic <strong>deque</strong>, not a plain queue — see Pattern 9, coming in a later file. Plain FIFO queues fit simpler windowed problems like windowed sums.)</em></td>
+</tr>
+<tr>
+<td>Maintaining &quot;candidates&quot; in discovery order</td>
+<td>Same reasoning as BFS.</td>
+</tr>
+<tr>
+<td>Scheduling / round robin</td>
+<td>Everyone gets a turn in the order they queued up.</td>
+</tr>
+</tbody></table>
+<p><strong>One sentence to internalize:</strong> <em>A queue is for when the order you must process things in is the same order you received them in.</em></p>
+<hr>
+<h2>3. Monotonic Stack — MOST IMPORTANT</h2>
+<p>This is the single idea that unlocks roughly half the problems in this guide. Slow down here.</p>
+<h3>What is a monotonic stack?</h3>
+<p>A monotonic stack is a <strong>regular stack</strong> — still LIFO, still only <code>push</code>/<code>pop</code>/<code>peek</code> at the top — with one extra rule <em>you</em> enforce: <strong>the values in the stack are always kept sorted, from bottom to top.</strong></p>
+<ul>
+<li>Values get bigger as you go from bottom to top → <strong>increasing monotonic stack</strong>.</li>
+<li>Values get smaller as you go from bottom to top → <strong>decreasing monotonic stack</strong>.</li>
+</ul>
+<p>You enforce this by <strong>popping</strong> whatever would break the order, <em>before</em> you push the new element.</p>
+<h3>What exactly is stored in the stack?</h3>
+<p>Almost always <strong>indices</strong>, not values. You store the index so that once an element&#39;s answer is found, you know exactly which slot of the original array/output to write it into. (Storing raw values instead of indices is one of the most common mistakes in this whole topic — you&#39;ll see it flagged in nearly every problem&#39;s &quot;Common Mistakes&quot; section.)</p>
+<h3>Why do we pop? What does a popped element represent? What does the current element represent?</h3>
+<p>Every index sitting in the stack is <strong>waiting</strong> — it has a question that hasn&#39;t been answered yet (&quot;what&#39;s my next greater element?&quot;, &quot;how far left can I extend?&quot;, etc.).</p>
+<p>The <strong>current element</strong> is new information arriving from the input. It does exactly two things:</p>
+<ol>
+<li>It may <strong>resolve</strong> — and pop — one or more elements already waiting in the stack, because it finally answers their open question.</li>
+<li>After it&#39;s done resolving others, it either gets discarded (if something already in the stack answers <em>its</em> question), or it gets <strong>pushed</strong> itself, becoming a new &quot;unresolved&quot; element waiting for some <em>future</em> element to resolve it.</li>
+</ol>
+<p>So: <strong>a popped element is one whose answer was <em>just</em> found</strong>, and the element that triggered the pop is what answers it.</p>
+<h3>Why does each element get pushed and popped at most once? How does this produce O(n)?</h3>
+<p>Every index enters the stack exactly once (when the loop reaches it) and leaves at most once (when something resolves it — or never, if nothing ever does, in which case it just sits there until the loop ends). No index is ever pushed a second time.</p>
+<p>That&#39;s the whole reason a monotonic-stack loop is O(n) even though it <em>looks</em> like a <code>while</code> loop nested inside a <code>for</code> loop (which usually screams O(n²)): total pushes = n (exactly once each), and total pops ≤ n (at most once each, ever, across the <em>entire</em> run — not per iteration). Total work = O(n) + O(n) = O(n). This reasoning style is called <strong>amortized analysis</strong> — you&#39;re not bounding the cost of one iteration, you&#39;re bounding the total cost across all iterations combined.</p>
+<h3>The most important mental model</h3>
+<blockquote>
+<p><strong>The stack contains elements whose answer has NOT been found yet.</strong></p>
+</blockquote>
+<p>Everything sitting in the stack right now is &quot;still waiting.&quot; The moment the array hands us the information that resolves one of them, it leaves the stack — answer now known — and we move on.</p>
+<h3>Small example — Next Greater Element</h3>
+<p><code>arr = [2, 1, 2, 4, 3, 1]</code>. We want, for each index, the first value to its <em>right</em> that&#39;s bigger.</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Looking at</th>
+<th>Stack before (bottom→top, <strong>values</strong> shown)</th>
+<th>What happens</th>
+<th>Stack after</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>i=0</td>
+<td>2</td>
+<td><code>[]</code></td>
+<td>nothing to compare — push</td>
+<td><code>[2]</code></td>
+</tr>
+<tr>
+<td>i=1</td>
+<td>1</td>
+<td><code>[2]</code></td>
+<td>1 isn&#39;t bigger than 2, so 2 keeps waiting — push 1</td>
+<td><code>[2, 1]</code></td>
+</tr>
+<tr>
+<td>i=2</td>
+<td>2</td>
+<td><code>[2, 1]</code></td>
+<td>2 &gt; 1 → <strong>1&#39;s answer found: next greater = 2</strong>, pop it. Now top is 2; new 2 isn&#39;t <em>strictly</em> bigger, so old 2 keeps waiting — push new 2</td>
+<td><code>[2, 2]</code></td>
+</tr>
+<tr>
+<td>i=3</td>
+<td>4</td>
+<td><code>[2, 2]</code></td>
+<td>4 &gt; 2 → pop, that 2&#39;s answer = 4. Still 4 &gt; 2 (the other one) → pop, its answer = 4 too. Stack empty — push 4</td>
+<td><code>[4]</code></td>
+</tr>
+<tr>
+<td>i=4</td>
+<td>3</td>
+<td><code>[4]</code></td>
+<td>3 isn&#39;t bigger than 4, so 4 keeps waiting — push 3</td>
+<td><code>[4, 3]</code></td>
+</tr>
+<tr>
+<td>i=5</td>
+<td>1</td>
+<td><code>[4, 3]</code></td>
+<td>1 isn&#39;t bigger than 3 — push 1</td>
+<td><code>[4, 3, 1]</code></td>
+</tr>
+<tr>
+<td>End</td>
+<td>—</td>
+<td><code>[4, 3, 1]</code></td>
+<td>nothing left ever resolves them → answer = <strong>-1</strong> for all three</td>
+<td>—</td>
+</tr>
+</tbody></table>
+<p>Result: <code>[4, 2, 4, -1, -1, -1]</code>.</p>
+<p>Notice: every popped element&#39;s answer was decided by whatever <em>caused</em> the pop. Every element still in the stack at the end never met a bigger element to its right, so it gets &quot;none&quot; (-1).</p>
+<p><em>(This exact algorithm — and the full worked walkthrough — is Problem 15 in a later file. This is just the concept.)</em></p>
+<h3>Increasing vs. decreasing — which one do I need?</h3>
+<p>This is the part people memorize instead of understand. Here&#39;s the actual reasoning, not just the rule:</p>
+<ul>
+<li>Looking for the <strong>next greater</strong> element (something bigger, to the right)? Every element in the stack is waiting to be beaten by something <em>bigger</em>. So the stack should hold elements that <strong>haven&#39;t been beaten yet</strong> — meaning every element above a given one in the stack must be <em>smaller</em> than it (otherwise it would already have been popped by that bigger element). That&#39;s a <strong>decreasing</strong> stack (bottom→top).</li>
+<li>Looking for the <strong>next smaller</strong> element? By the same logic, mirrored: a <strong>increasing</strong> stack (bottom→top).</li>
+<li><strong>Previous</strong> greater/smaller (looking left instead of right) uses the <em>same</em> stack direction as the matching &quot;next&quot; problem — you&#39;re just reading the answer for the <em>current</em> element from whatever&#39;s left in the stack after popping, instead of writing the answer for the <em>popped</em> element. (Problems 15–18 make this concrete side-by-side.)</li>
+</ul>
+<h3>How to recognize monotonic-stack problems</h3>
+<table>
+<thead>
+<tr>
+<th>Problem clue</th>
+<th>Pattern</th>
+<th>Stack type (bottom→top)</th>
+<th>What the stack stores</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>&quot;Next greater element&quot;</td>
+<td>Nearest greater to the right</td>
+<td>Decreasing</td>
+<td>Indices still waiting for something bigger on their right</td>
+</tr>
+<tr>
+<td>&quot;Next smaller element&quot;</td>
+<td>Nearest smaller to the right</td>
+<td>Increasing</td>
+<td>Indices still waiting for something smaller on their right</td>
+</tr>
+<tr>
+<td>&quot;Previous greater element&quot;</td>
+<td>Nearest greater to the left</td>
+<td>Decreasing</td>
+<td>Indices that are &quot;the biggest so far, unbeaten&quot;</td>
+</tr>
+<tr>
+<td>&quot;Previous smaller element&quot;</td>
+<td>Nearest smaller to the left</td>
+<td>Increasing</td>
+<td>Indices that are &quot;the smallest so far, unbeaten&quot;</td>
+</tr>
+<tr>
+<td>&quot;Stock span&quot;</td>
+<td>Distance to previous greater</td>
+<td>Decreasing</td>
+<td>Days not yet beaten by a higher price</td>
+</tr>
+<tr>
+<td>&quot;Largest rectangle in histogram&quot;</td>
+<td>Nearest smaller on both sides</td>
+<td>Increasing</td>
+<td>Bars that haven&#39;t yet found a shorter bar to their right</td>
+</tr>
+<tr>
+<td>&quot;Sum of subarray minimum/maximum&quot;</td>
+<td>Contribution technique (boundary distances)</td>
+<td>Increasing (for min) / Decreasing (for max)</td>
+<td>Indices whose full &quot;range of influence&quot; isn&#39;t known yet</td>
+</tr>
+<tr>
+<td>&quot;Remove k digits for smallest number&quot;</td>
+<td>Greedy monotonic construction</td>
+<td>Increasing</td>
+<td>Digits kept so far, still improvable by popping</td>
+</tr>
+<tr>
+<td>&quot;Next greater element II&quot; (circular array)</td>
+<td>Next greater, but the array wraps</td>
+<td>Decreasing</td>
+<td>Same as next greater — just traverse the array twice</td>
+</tr>
+<tr>
+<td>&quot;Asteroid collision&quot;</td>
+<td>LIFO pairwise-elimination simulation</td>
+<td>Not strictly monotonic — but stack, because only the <em>most recent survivor</em> can ever collide with a new element</td>
+<td>Surviving asteroids so far</td>
+</tr>
+<tr>
+<td>&quot;Trapping rain water&quot;</td>
+<td>Boundary technique (min of two walls)</td>
+<td>Decreasing</td>
+<td>Bars waiting for a taller bar to trap water above them</td>
+</tr>
+</tbody></table>
+<p>You&#39;ll meet every row of this table as its own fully-worked problem later in the guide.</p>
+<hr>
+<p><strong>Next:</strong> <a href="02_universal_thinking_framework.md"><code>02_universal_thinking_framework.md</code></a> — the checklist you run through for <em>every</em> Stack/Queue problem, before you write a line of code.</p>
+</div>
+    <script>
+        const vscode = acquireVsCodeApi();
+        function exportFile(format) { vscode.postMessage({ command: 'export', format: format }); }
+        mermaid.initialize({ startOnLoad: true, theme: 'default', securityLevel: 'loose' });
+        // Help Puppeteer know when we are done
+        window.addEventListener('load', () => {
+            mermaid.run().then(() => {
+                document.body.classList.add('mermaid-rendered');
+            });
+        });
+    </script>
+</body>
+</html>
