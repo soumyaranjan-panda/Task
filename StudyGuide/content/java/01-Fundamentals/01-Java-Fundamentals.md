@@ -16,7 +16,7 @@ garbage collection, thread semantics — is a consequence of that separation.
 > Most Java surprises are a confusion between the two.
 
 Related reading: [OOP Concepts](02-OOP-Concepts.md), [JVM Architecture](03-JVM-Architecture.md),
-[Java Memory Areas](04-Java-Memory.md), [Class Loading](05-Class-Loading.md),
+[Java Memory Areas](04-Java-Memory-Areas.md), [Class Loading](05-Class-Loading.md),
 [Exception Handling](06-Exception-Handling.md), [Generics](07-Generics.md).
 
 ---
@@ -938,7 +938,7 @@ int[] range = Arrays.copyOfRange(x, 0, 2);        // [1, 5]
 **Memory layout:** a 1-D array is a contiguous block. A 2-D array is an array of references to row
 arrays, so rows are not guaranteed contiguous (cache-unfriendly). For performance-sensitive numeric
 code, prefer a flat `int[]` indexed as `row * cols + col`, which also avoids per-row object headers.
-See [Java Memory Areas](04-Java-Memory.md).
+See [Java Memory Areas](04-Java-Memory-Areas.md).
 
 ---
 
@@ -1446,7 +1446,7 @@ Fields are laid out by the JVM with the object header and reference fields arran
 padding; primitives are inlined in the object; references are 64-bit (compressed to 32-bit with
 `-XX:+UseCompressedOops` on heaps < 32 GB). Local primitives live in the stack frame; local
 references are pointers. Accessing an array of values is cache-friendly if contiguous; an array of
-objects is not (pointer chasing). See [Java Memory Areas](04-Java-Memory.md).
+objects is not (pointer chasing). See [Java Memory Areas](04-Java-Memory-Areas.md).
 
 **Q5. Why is `finalize()` deprecated for removal and what replaces it?**
 It is unpredictable, may never run, can resurrect objects (forcing extra GC passes), and executes on

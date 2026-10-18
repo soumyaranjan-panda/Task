@@ -398,7 +398,7 @@ public class SafePublisher {
 }
 ```
 
-> See [Java Memory Model](../08-Advanced/23-Java-Memory-Model.md) for formal JMM rules, causality, and advanced barriers.
+> See [Java Memory Model](23-Java-Memory-Model.md) for formal JMM rules, causality, and advanced barriers.
 
 ### Happens-Before Edges Visualization
 

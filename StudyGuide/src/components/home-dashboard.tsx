@@ -59,8 +59,8 @@ export function HomeDashboard() {
   const totalUnits = topics.reduce((sum, topic) => sum + (knownUnitCount(topic) ?? 0), 0);
 
   return (
-    <main className="flex-1 min-h-0 overflow-y-auto">
-      <div className="mx-auto w-full max-w-5xl px-5 py-10 sm:px-8 sm:py-14">
+    <main className="flex-1 min-h-0 overflow-x-hidden overflow-y-auto">
+      <div className="mx-auto w-full max-w-full max-w-5xl px-5 py-10 sm:px-8 sm:py-14">
         <section className="max-w-2xl">
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{APP.name}</h1>
           <p className="mt-3 text-[15px] text-pretty text-muted">{APP.description}</p>
@@ -68,9 +68,9 @@ export function HomeDashboard() {
           <button
             type="button"
             onClick={openSearch}
-            className="mt-6 inline-flex h-12 w-full items-center gap-3 rounded-lg border border-border bg-surface px-4 text-muted hover:bg-surface-2 hover:text-fg sm:w-auto"
+            className="mt-6 inline-flex w-full flex-wrap items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2.5 text-muted hover:bg-surface-2 hover:text-fg sm:w-auto sm:px-4 sm:py-3"
           >
-            <Search size={18} />
+            <Search size={17} />
             <span className="text-sm">Search every problem, section and page</span>
             <kbd className="ml-auto rounded border border-border px-1.5 py-0.5 text-[10px] text-faint sm:ml-2">
               ⌘K

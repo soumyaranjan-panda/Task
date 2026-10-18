@@ -303,11 +303,16 @@ export function TopicReader({ topic, search }: { topic: TopicMeta; search: Topic
         <div className="flex items-center gap-2 px-4 sm:px-6 lg:px-10 h-14 shrink-0 border-b border-border/70">
           <button
             type="button"
-            className="lg:hidden size-9 grid place-items-center rounded-md hover:bg-surface-2 shrink-0 -ml-1.5"
+            className="lg:hidden h-9 min-w-[42px] grid place-items-center rounded-md hover:bg-surface-2 shrink-0 -ml-1.5 px-2"
             aria-label={navOpen ? "Close contents" : "Open contents"}
             onClick={() => setNavOpen((v) => !v)}
           >
-            {navOpen ? <X size={18} /> : <List size={18} />}
+            <span className="flex flex-col items-center gap-0.5">
+              {navOpen ? <X size={16} /> : <List size={16} />}
+              <span className="text-[10px] leading-none">
+                {navOpen ? "Close" : "Contents"}
+              </span>
+            </span>
           </button>
 
           <Breadcrumbs
@@ -325,20 +330,26 @@ export function TopicReader({ topic, search }: { topic: TopicMeta; search: Topic
                 type="button"
                 onClick={() => setTocOpen((v) => !v)}
                 aria-expanded={tocOpen}
-                className="xl:hidden size-9 grid place-items-center rounded-md hover:bg-surface-2 text-muted"
+                className="xl:hidden h-9 min-w-[44px] grid place-items-center rounded-md hover:bg-surface-2 text-muted shrink-0 px-2"
                 aria-label="On this page"
               >
-                <ListTree size={17} />
+                <span className="flex flex-col items-center gap-0.5">
+                  <ListTree size={16} />
+                  <span className="text-[10px] leading-none">On this page</span>
+                </span>
               </button>
             ) : null}
             {downloadHref ? (
               <a
                 href={downloadHref}
                 download
-                className="size-9 grid place-items-center rounded-md hover:bg-surface-2 text-muted shrink-0"
+                className="h-9 min-w-[44px] grid place-items-center rounded-md hover:bg-surface-2 text-muted shrink-0 px-2"
                 aria-label={`Download ${topic.title} source`}
               >
-                <Download size={17} />
+                <span className="flex flex-col items-center gap-0.5">
+                  <Download size={16} />
+                  <span className="text-[10px] leading-none">Download</span>
+                </span>
               </a>
             ) : null}
           </div>
@@ -395,7 +406,7 @@ export function TopicReader({ topic, search }: { topic: TopicMeta; search: Topic
                       ].join(" ")}
                     >
                       <Check size={15} />
-                      {activeDone ? "Studied" : "Mark studied"}
+                      {activeDone ? "Complete" : "Mark complete"}
                     </button>
                   ) : null}
                 </div>
@@ -484,8 +495,8 @@ function Breadcrumbs({
           <span className="hidden sm:block shrink-0 text-muted truncate max-w-[16ch]">{part}</span>
         </>
       ) : null}
-      <ChevronRight size={13} className="shrink-0 text-faint hidden md:block" aria-hidden />
-      <span className="hidden md:block min-w-0 truncate font-medium text-fg">{title}</span>
+      <ChevronRight size={13} className="shrink-0 text-faint hidden sm:block" aria-hidden />
+      <span className="hidden sm:block min-w-0 truncate max-w-[22ch] font-medium text-fg">{title}</span>
     </nav>
   );
 }

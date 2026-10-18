@@ -21,7 +21,7 @@ Two axes matter throughout:
 This module covers both in depth, plus the four "hard" areas interviewers love: initialization order,
 parent delegation, custom loaders and class identity, and unloading/leaks. Execution engine, JIT,
 runtime memory areas, and the JPMS module system proper are covered in
-[JVM Architecture](03-JVM-Architecture.md), [Java Memory](04-Java-Memory.md), and
+[JVM Architecture](03-JVM-Architecture.md), [Java Memory](04-Java-Memory-Areas.md), and
 [Modules](../07-Modern-Java/31-Modules.md); here we only cross-reference them.
 
 ---

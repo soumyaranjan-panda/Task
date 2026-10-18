@@ -829,11 +829,11 @@ try {
 
 ## Cross-References
 
-- [Synchronization](../17-Synchronization.md) — intrinsic locks, `synchronized` basics
+- [Synchronization](17-Synchronization.md) — intrinsic locks, `synchronized` basics
 - [Concurrency Utilities](19-Concurrency-Utilities.md) — `Semaphore`, `CountDownLatch`, `CyclicBarrier`, `Phaser`
-- [Java Memory Model](../23-Java-Memory-Model.md) — happens-before, visibility, reordering
-- [Virtual Threads](../22-Virtual-Threads.md) — interaction with locks (pinning)
-- [Concurrent Collections](../11-Concurrent-Collections.md) — `ConcurrentHashMap`, `ConcurrentLinkedQueue`
+- [Java Memory Model](23-Java-Memory-Model.md) — happens-before, visibility, reordering
+- [Virtual Threads](22-Virtual-Threads.md) — interaction with locks (pinning)
+- [Concurrent Collections](../02-Collections/11-Concurrent-Collections.md) — `ConcurrentHashMap`, `ConcurrentLinkedQueue`
 
 ---
 

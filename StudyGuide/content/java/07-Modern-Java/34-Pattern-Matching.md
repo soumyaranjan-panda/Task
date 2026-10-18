@@ -67,6 +67,31 @@ Representative bytecode (conceptual, `javap -c` output):
 
 HotSpot performs the `instanceof` by comparing the object's klass against the target class and its superclasses/interfaces (an instanceof check walks the klass hierarchy; for arrays it checks component type compatibility). No reflection is involved and no `Class.isInstance` call is made at runtime.
 
+A real `javap -c` of a type-pattern method confirms the shape is identical to the manual idiom, with the compiler handling the binding slot:
+
+```java
+static void m(Object obj) {
+    if (obj instanceof String s) {
+        System.out.println(s.length());
+    }
+}
+```
+
+```
+  public static void m(java.lang.Object);
+    Code:
+       0: aload_0
+       1: instanceof #2                  // class java/lang/String
+       4: ifeq          13
+       7: aload_0
+       8: checkcast     #2                  // class java/lang/String
+      11: astore_1
+      12: aload_1
+      13: ... println(s.length()) ...
+```
+
+The pattern variable `s` lives in local variable slot 1 and is marked in the `LocalVariableTable` with `synthetic`/`effective final` attributes where applicable. The JIT can inline the `instanceof` check and, when the selector's type is proven (e.g. after a prior check), eliminate the redundant `checkcast`, making pattern matching as fast as — and sometimes faster than — hand-written casts because the compiler can prove the cast is redundant.
+
 ### Pattern matching for switch compilation
 
 For a pattern `switch`, `javac` can emit either a lookupswitch/tiptable-based dispatch or a chain of `instanceof` checks depending on the number and density of cases. For type patterns over `Object`, the compiler typically emits a cascade of `instanceof` checks in source order, with the first matching branch winning. Arrow branches (`->`) prevent fall-through by construction; each branch ends with an implicit break/return.
@@ -90,6 +115,16 @@ public static void inspect(Object obj) {
 ```
 
 `String s` binds `s` only inside the first true branch; `Integer i` binds `i` only inside the second. Neither leaks into the `else` block.
+
+```mermaid
+flowchart TD
+    A["Start: obj instanceof String s"] --> B["instanceof check"]
+    B -->|false| C["False branch: s not bound<br/>s out of scope"]
+    B -->|true| D["Implicit checkcast + bind s"]
+    D --> E["True branch: s in scope<br/>effectively final"]
+    C --> F["Continue after if"]
+    E --> F
+```
 
 ### Null safety
 
@@ -163,6 +198,17 @@ public static String describe(Object obj) {
 }
 ```
 
+```mermaid
+flowchart TD
+    A["switch selector"] --> B["Evaluate cases in source order"]
+    B -->|match + guard true| C["Execute arrow branch<br/>pattern variable bound"]
+    B -->|match + guard false| N["Try next case"]
+    N --> B
+    B -->|no match| E["default / case null"]
+    C --> F["Return value / continue"]
+    E --> F
+```
+
 - `case String s ->` binds `s` on the right-hand side only when the case matches.
 - Arrow branches do **not** fall through.
 - The branch body can be a single expression or a block; a block must end with `yield` if the switch is an expression (see below).
@@ -204,16 +250,25 @@ return switch (obj) {
 
 ### `case var v ->` (matches anything, binds)
 
-`case var v ->` matches any value including null and binds it to `v`. Use sparingly; it is effectively a typed `default` with a binding.
+`case var v ->` matches any value including null and binds it to `v`. Use sparingly; it is effectively a typed `default` with a binding. (On plain Java 21 the equivalent runnable form is `case Object o ->`, which matches any non-null reference.)
 
 ```java
 return switch (obj) {
     case String s -> "string: " + s;
-    case var v -> "other: " + v;   // matches Integer, null, anything else
+    case Object o -> "other: " + o;   // matches any non-null reference, binds to o
 };
 ```
 
 ## 5 Exhaustiveness
+
+```mermaid
+flowchart TD
+    A["Switch selector type"] --> B["Sealed type or enum?"]
+    B -->|yes| C["Compiler verifies all permitted<br/>constants or subclasses covered"]
+    B -->|no| D["Object / String / non-sealed<br/>default required"]
+    C -->|missing case| E["Compile error: not exhaustive"]
+    D -->|missing default| E
+```
 
 ### enum switches
 
@@ -345,6 +400,19 @@ return switch (obj) {
 };
 ```
 
+### Wrong: switching on null without `case null ->`
+
+```java
+return switch (obj) {   // throws NullPointerException when obj is null
+    case String s -> s;
+    case Integer i -> i.toString();
+    default -> "other";
+};
+```
+
+A `switch` on a `null` selector throws `NullPointerException` unless a `case null ->` branch is present. Always add `case null ->` when null is a legal input.
+
+
 ### Guard placement
 
 The guard is part of the case label and is evaluated after the pattern match. Put the most specific guarded cases first; a later unguarded `case String s` catches everything the guarded `case String s when ...` did not.
@@ -373,6 +441,8 @@ case String s -> "non-empty";      // catches remaining strings
 - Pattern variables are locals; they do not escape and are JIT-friendly. The JIT can eliminate redundant checks when the compiler proves the type.
 - `sealed`-based exhaustiveness is a compile-time check with zero runtime cost.
 - `when` guards add a boolean branch per candidate case; order guards from most to least selective.
+- Branch prediction: type-pattern `switch` cases are checked in source order, so put the most frequent types first to help the CPU branch predictor.
+- Escape analysis: pattern variables are stack locals that never escape the branch, so the JIT treats them like any other local — no allocation, no heap churn.
 
 ## 10 Flow analysis / definite assignment example
 
@@ -402,6 +472,22 @@ public static void definiteAssignment(Object obj) {
 
 The compiler tracks the pattern variable through control flow: assigned on success, unassigned on failure, and out of scope after the statement.
 
+## 11 Java version compatibility
+
+| Feature | Java 8 | Java 11 | Java 17 | Java 21 |
+|---------|--------|---------|---------|---------|
+| `instanceof` + cast | Yes | Yes | Yes | Yes |
+| Type pattern `instanceof T v` | No | No | Preview | Final |
+| Pattern matching for `switch` | No | No | Preview | Final |
+| Arrow `case ... ->` | No | No | Preview | Final |
+| `case null ->` | No | No | No | Final |
+| Guard `case T v when ...` | No | No | Preview | Final |
+| `switch` expression (`yield`) | No | Preview | Final | Final |
+| Record patterns | No | No | Preview | Preview |
+| `sealed` classes | No | No | Preview | Final |
+
+Pattern matching for `instanceof` (JEP 394) was preview in Java 16/17 and final in Java 21. Pattern matching for `switch` (JEP 441) was preview in Java 17–20 and final in Java 21. On Java 17 you must compile/run with `--enable-preview`; on Java 21 no flag is needed. Java 8 and 11 have no pattern matching at all — use the classic `instanceof` + cast idiom.
+
 ### Relationship to other modules
 
 - [Records](32-Records.md): record patterns (destructuring, `case Point(int x, int y)`) preview in Java 21; covered in module 32.
@@ -413,6 +499,17 @@ The compiler tracks the pattern variable through control flow: assigned on succe
 - Sealed class exhaustiveness internals beyond compiler behavior (module 33).
 - Record patterns / destructuring in depth (module 32).
 - Switch expression deep semantics beyond pattern interaction (module 35).
+
+## 12 Quick migration checklist (Java 8/11 → 21)
+
+- Replace `if (obj instanceof T) { T v = (T) obj; ... }` with `if (obj instanceof T v) { ... }`.
+- Replace `switch` colon cases with fall-through risk by arrow `case ... ->` branches.
+- Add `case null ->` when null is a legal selector input; otherwise a bare `switch(null)` throws `NullPointerException`.
+- Add `default` for switches over `Object`/non-sealed types; rely on compiler exhaustiveness for `sealed`/`enum`.
+- Use `yield` only inside switch expression blocks, never in switch statements.
+- Compile with `--enable-preview` on Java 17; no flag needed on Java 21.
+- Do not use `instanceof var v` — it is illegal; declare the explicit type.
+- Prefer `case ... ->` over `case ... :` to eliminate fall-through bugs entirely.
 
 # Interview Questions
 
@@ -479,6 +576,26 @@ Since either side may have matched, neither variable is definitely assigned afte
 
 **Q:** What bytecode does a type pattern compile to?
 **A:** An `instanceof` check, then on success an implicit `checkcast` and store into the pattern-variable local slot; on failure a jump past the branch. No reflection is involved.
+
+## Expert
+
+**Q:** How does definite-assignment analysis treat a pattern variable across `&&`, `||`, and nested `if`?
+**A:** With `&&`, the pattern variable is definitely assigned on the true path (short-circuit means the right operand only runs when the left matched). With `||`, neither pattern variable is definitely assigned after the condition because either side may have matched. In nested `if`s, each pattern variable is scoped to its own true branch; the compiler tracks assignment per control-flow path and rejects any use on a path where the variable is not definitely assigned.
+
+**Q:** Can a pattern match a subtype, and how does the JVM resolve which case wins for overlapping types?
+**A:** A type pattern `case String s` matches `String` and any subclass. In a `switch`, cases are evaluated in source order and the first matching case wins, so more specific types must be ordered before more general ones (e.g. `case ArrayList<String> a` before `case List l`). For unrelated types the order does not matter.
+
+**Q:** Why can't a `switch` on `Object` be exhaustive without `default`, even if you list every wrapper type?
+**A:** `Object` is not `sealed`, so the compiler cannot know the complete set of possible runtime classes. New classes can be loaded at any time by the class loader, so exhaustiveness is impossible to prove statically; `default` is mandatory for switch expressions and statements.
+
+**Q:** How does pattern matching interact with `null` and `NullPointerException`?
+**A:** `null instanceof T p` is false and never throws. A bare `switch (null)` without `case null ->` throws `NullPointerException` at the dispatch point. Always add `case null ->` when null is a legal input, or guard the selector before switching.
+
+**Q:** What is the difference between a type pattern and a record pattern, and which module covers record patterns?
+**A:** A type pattern (`case String s`) tests the top-level type and binds one variable. A record pattern (`case Point(int x, int y)`) additionally destructures the record's components. Record patterns are preview in Java 21 and covered in module 32 (Records).
+
+**Q:** Can pattern variables escape the switch or if statement they are declared in?
+**A:** No. Pattern variables are block-scoped to the branch in which they are bound and are not accessible after the statement. Attempting to use them outside is a compile error ("cannot find symbol").
 
 ## Scenario Based
 
@@ -548,13 +665,13 @@ public static void main(String[] args) {
     Object obj = 42;
     System.out.println(switch (obj) {
         case String s -> "str";
-        case var v -> "var:" + v;
+        case Object o -> "obj:" + o;
         default -> "def";
     });
 }
 ```
 
-**Output:** `var:42`. `case var v ->` matches the `Integer` and binds it.
+**Output:** `obj:42`. `case Object o ->` matches the `Integer` (a non-null reference) and binds it.
 
 ## Internal Working
 

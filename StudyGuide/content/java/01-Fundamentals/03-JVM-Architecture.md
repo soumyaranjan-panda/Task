@@ -113,7 +113,7 @@ The **class loader** reads `.class` files, verifies them, and materializes them 
 data areas**. The **execution engine** consumes bytecode from the method area, interprets and
 JIT-compiles it, and delegates garbage collection. The **native interface** bridges to C/C++
 libraries. The class loader is covered in depth in [Class Loading](05-Class-Loading.md); the memory
-areas in [Java Memory Areas & Memory Management](04-Java-Memory.md). This module focuses on *how the
+areas in [Java Memory Areas & Memory Management](04-Java-Memory-Areas.md). This module focuses on *how the
 engine executes* and *how the parts fit*.
 
 ---
@@ -289,7 +289,7 @@ the same physical structure, but the JVMS treats them as distinct areas.
 See [JNI (Java Native Interface)](../08-Advanced/41-JNI-Native-Interface.md).
 
 > Boundary: the *internals* of these areas (TLABs, card tables, object headers, OOM analysis) belong
-> to [Java Memory Areas & Memory Management](04-Java-Memory.md) and
+> to [Java Memory Areas & Memory Management](04-Java-Memory-Areas.md) and
 > [Garbage Collection](../08-Advanced/39-Garbage-Collection.md).
 
 ---

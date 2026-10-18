@@ -1501,7 +1501,7 @@ For modern Java (21+), **virtual threads + blocking I/O** often simplify code th
 
 - [File I/O (Streams & Readers/Writers)](24-File-IO.md) — blocking I/O basics
 - [Networking](26-Networking.md) — `SocketChannel`, `Selector` in network context
-- [Java Memory Model](23-Java-Memory-Model.md) — visibility guarantees for buffer sharing
-- [Virtual Threads](22-Virtual-Threads.md) — alternative to selector/async for scalability
-- [JVM Performance](38-JVM-Performance.md) — direct buffer tuning, GC impact
-- [sun.misc.Unsafe](42-Unsafe.md) — direct memory allocation internals
+- [Java Memory Model](../04-Multithreading/23-Java-Memory-Model.md) — visibility guarantees for buffer sharing
+- [Virtual Threads](../04-Multithreading/22-Virtual-Threads.md) — alternative to selector/async for scalability
+- [JVM Performance](../08-Advanced/38-JVM-Performance.md) — direct buffer tuning, GC impact
+- [sun.misc.Unsafe](../08-Advanced/42-Unsafe.md) — direct memory allocation internals

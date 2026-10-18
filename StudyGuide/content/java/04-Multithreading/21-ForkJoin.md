@@ -1,6 +1,6 @@
 # Fork/Join Framework
 
-The Fork/Join Framework is Java's built-in implementation of the **divide-and-conquer** parallelism pattern, designed for CPU-bound recursive workloads that can be split into independent subtasks. Introduced in Java 7 and significantly improved in Java 8+, it uses **work-stealing** to keep all cores busy without central coordination bottlenecks. Unlike `ExecutorService` ([Concurrency Utilities](../19-Concurrency-Utilities.md)) which uses a shared queue, each worker thread owns a **double-ended queue (deque)**: it pushes/pops its own tasks **LIFO** (cache-friendly) but steals from others **FIFO** (maximizes parallelism). The framework lives in `java.util.concurrent` and centers on `ForkJoinPool`, `ForkJoinTask`, `RecursiveAction` (void), and `RecursiveTask<V>` (returns a value).
+The Fork/Join Framework is Java's built-in implementation of the **divide-and-conquer** parallelism pattern, designed for CPU-bound recursive workloads that can be split into independent subtasks. Introduced in Java 7 and significantly improved in Java 8+, it uses **work-stealing** to keep all cores busy without central coordination bottlenecks. Unlike `ExecutorService` ([Concurrency Utilities](19-Concurrency-Utilities.md)) which uses a shared queue, each worker thread owns a **double-ended queue (deque)**: it pushes/pops its own tasks **LIFO** (cache-friendly) but steals from others **FIFO** (maximizes parallelism). The framework lives in `java.util.concurrent` and centers on `ForkJoinPool`, `ForkJoinTask`, `RecursiveAction` (void), and `RecursiveTask<V>` (returns a value).
 
 ---
 
@@ -29,7 +29,7 @@ Result solve(Problem p) {
 - Work per task >> framework overhead (aim for 10K–100K instructions per leaf)
 
 **When it does NOT fit:**
-- I/O-bound or blocking operations (use [Virtual Threads](../22-Virtual-Threads.md) or `ExecutorService` with `ManagedBlocker`)
+- I/O-bound or blocking operations (use [Virtual Threads](22-Virtual-Threads.md) or `ExecutorService` with `ManagedBlocker`)
 - Fine-grained tasks where splitting overhead dominates
 - Tasks with heavy shared-state synchronization
 - Irregular recursion where work distribution is unpredictable
@@ -125,7 +125,7 @@ try {
 ForkJoinPool asyncPool = new ForkJoinPool(4, factory, handler, true);
 ```
 
-Use `asyncMode` for **event-driven** tasks (e.g., [CompletableFuture](../20-CompletableFuture.md) completions) where fairness matters more than cache locality. Avoid for divide-and-conquer.
+Use `asyncMode` for **event-driven** tasks (e.g., [CompletableFuture](20-CompletableFuture.md) completions) where fairness matters more than cache locality. Avoid for divide-and-conquer.
 
 ---
 
@@ -321,11 +321,11 @@ class BadTask extends RecursiveTask<Void> {
    custom.invoke(() -> data.parallelStream().forEach(...));
    ```
 2. **Sequential stream** inside FJ task: `data.stream().forEach(...)`
-3. **Virtual threads** (Java 21+, [Virtual Threads](../22-Virtual-Threads.md)) for blocking/stream work: `Executors.newVirtualThreadPerTaskExecutor()`
+3. **Virtual threads** (Java 21+, [Virtual Threads](22-Virtual-Threads.md)) for blocking/stream work: `Executors.newVirtualThreadPerTaskExecutor()`
 
 ### Parallel Stream Internals
 
-`parallelStream()` splits via `Spliterator` ([Streams](../13-Streams.md)):
+`parallelStream()` splits via `Spliterator` ([Streams](../03-Functional/13-Streams.md)):
 - `trySplit()` divides the source (array: midpoint; `ArrayList`: range; custom: your logic)
 - Terminal op submits leaf tasks to common pool
 - `ForkJoinTask.invokeAll()` drives the computation
@@ -497,7 +497,7 @@ ForkJoinPool.commonPool().submit(() -> {
     Files.readAllLines(path); // blocks worker
 });
 
-// RIGHT: virtual threads ([Virtual Threads](../22-Virtual-Threads.md)) or fixed thread pool
+// RIGHT: virtual threads ([Virtual Threads](22-Virtual-Threads.md)) or fixed thread pool
 Executors.newVirtualThreadPerTaskExecutor().submit(() -> Files.readAllLines(path));
 ```
 
@@ -859,7 +859,7 @@ The pool maintains a target `parallelism` (config at construction). When `manage
 
 **Q19. What are the memory visibility guarantees for `fork()`/`join()`?**
 
-`fork()` has **release semantics** (publishes task reference to deque). `join()` has **acquire semantics** (reads task status/result). The `status` field uses `VarHandle` with `RELEASE`/`ACQUIRE` modes. This establishes a happens-before edge: all writes in `compute()` are visible after `join()` returns. No additional synchronization needed. See [Java Memory Model](../23-Java-Memory-Model.md) for details.
+`fork()` has **release semantics** (publishes task reference to deque). `join()` has **acquire semantics** (reads task status/result). The `status` field uses `VarHandle` with `RELEASE`/`ACQUIRE` modes. This establishes a happens-before edge: all writes in `compute()` are visible after `join()` returns. No additional synchronization needed. See [Java Memory Model](23-Java-Memory-Model.md) for details.
 
 **Q20. How would you implement a parallel prefix sum (scan) using ForkJoin?**
 

@@ -20,3 +20,5 @@ public/content/
 # Logs / editor / OS
 *.log
 .DS_Store
+.audit-screenshots/
+UI_AUDIT.md
