@@ -1,0 +1,127 @@
+{
+  "defaultTopic": "graphs",
+  "rootGroupTitle": "Reference",
+  "topics": [
+    {
+      "slug": "graphs",
+      "kind": "markdown-doc",
+      "title": "Graphs 53",
+      "subtitle": "Striver A2Z · Java study guide",
+      "summary": "53 graph problems, problem-first: observations, dry runs, patterns, Java 21.",
+      "icon": "git-branch",
+      "source": "content/graphs/guide.md",
+      "fileName": "guide.md",
+      "units": "problems",
+      "parse": {
+        "splitLevel": 2,
+        "introTitle": "How to read this",
+        "idPrefix": "p",
+        "numberMin": 1,
+        "defaultPart": "Foundation",
+        "partRanges": [
+          { "max": 0, "name": "Foundation" },
+          { "max": 6, "name": "A · Traversal" },
+          { "max": 20, "name": "B · BFS / DFS" },
+          { "max": 27, "name": "C · Topo" },
+          { "max": 40, "name": "D · Shortest Path" },
+          { "max": 50, "name": "E · MST / DSU" },
+          { "max": 53, "name": "F · Tarjan / SCC" }
+        ]
+      }
+    },
+    {
+      "slug": "binary-search",
+      "kind": "markdown-doc",
+      "title": "Binary Search",
+      "subtitle": "31 problems · one way of thinking",
+      "summary": "Six binary-search patterns across 31 problems: boundaries, rotation, search-on-answer, matrices.",
+      "icon": "binary",
+      "source": "content/binary-search/guide.md",
+      "fileName": "guide.md",
+      "units": "problems",
+      "parse": {
+        "splitLevel": 2,
+        "introTitle": "How to Use This Guide",
+        "idPrefix": "p",
+        "numberMin": 1,
+        "defaultPart": "Overview"
+      }
+    },
+    {
+      "slug": "sliding-window",
+      "kind": "markdown-doc",
+      "title": "Sliding Window",
+      "subtitle": "Two pointers · 12 problems, 4 patterns",
+      "summary": "All 12 sliding-window problems from Striver’s A2Z sheet, each mapped to the pattern behind it, with C++ / Java / Python solutions.",
+      "icon": "move-horizontal",
+      "source": "content/sliding-window/guide.md",
+      "fileName": "guide.md",
+      "units": "problems",
+      "parse": {
+        "splitLevel": 2,
+        "introTitle": "Overview",
+        "idPrefix": "p",
+        "numberMin": 1,
+        "defaultPart": "Overview"
+      }
+    },
+    {
+      "slug": "sql",
+      "kind": "markdown-book",
+      "title": "SQL Handbook",
+      "subtitle": "Fundamentals → interview scenarios",
+      "summary": "SQL in 12 chapters — from SELECT fundamentals to window functions, tuning, and 100 interview questions.",
+      "icon": "database",
+      "source": "content/sql",
+      "units": "pages"
+    },
+    {
+      "slug": "contract-testing",
+      "kind": "markdown-book",
+      "title": "Contract Testing",
+      "subtitle": "Foundations → Pact → hands-on → CI/CD",
+      "summary": "Learn contract testing thoroughly: consumer-driven contracts with Pact JVM, provider verification, the broker, message pacts, Spring Cloud Contract, anti-patterns and interview prep.",
+      "icon": "network",
+      "source": "content/contract-testing",
+      "units": "pages"
+    },
+    {
+      "slug": "stack-queue",
+      "kind": "markdown-book",
+      "title": "Stack & Queue",
+      "subtitle": "30 problems · Java · pattern-first",
+      "summary": "30 Stack & Queue interview problems in Java, each with the full 15-section treatment (understanding → brute force → optimal → dry run → code), plus foundations, a thinking framework, pattern grouping, templates and a decision tree.",
+      "icon": "braces",
+      "source": "content/stack-queue",
+      "units": "pages"
+    },
+    {
+      "slug": "english",
+      "kind": "markdown-doc",
+      "title": "English Grammar",
+      "subtitle": "Complete notes · speak & write correctly",
+      "summary": "Complete English grammar notes — sentence types and clauses, parts of speech, conjunctions, active vs passive voice, reported speech, modals, confusing concepts, common mistakes, plus a quick revision sheet and practice with an answer key.",
+      "icon": "languages",
+      "source": "content/english/guide.md",
+      "fileName": "guide.md",
+      "units": "lessons",
+      "parse": {
+        "splitLevel": 2,
+        "introTitle": "How to read this",
+        "idPrefix": "l",
+        "numberMin": 1,
+        "defaultPart": "Grammar"
+      }
+    },
+    {
+      "slug": "java",
+      "kind": "markdown-book",
+      "title": "Java Interview Handbook",
+      "subtitle": "Core Java → Spring Boot backend interviews",
+      "summary": "A deep, interview-focused Java handbook for Spring Boot backend engineers: language semantics, OOP, equality contracts, collections internals, generics, exceptions, streams, modern Java (9–21), multithreading, the JVM, garbage collection, reflection, performance debugging, coding problems, a P1–P3 question bank, output-prediction traps, cheat sheets and mock interviews.",
+      "icon": "cpu",
+      "source": "content/java",
+      "units": "pages"
+    }
+  ]
+}

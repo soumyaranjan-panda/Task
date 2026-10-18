@@ -1,0 +1,19 @@
+{
+  "name": "Study Hub",
+  "short_name": "Study Hub",
+  "description": "A single home for my DSA and SQL notes — graphs, binary search, sliding window and a 114-file SQL handbook.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#10110f",
+  "theme_color": "#10110f",
+  "icons": [
+    {
+      "src": "/icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
+

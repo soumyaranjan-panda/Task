@@ -1,0 +1,10 @@
+# Generated / vendored — prettier should leave these alone
+node_modules
+dist
+.output
+.vercel
+.nitro
+.vite
+public/content
+src/routeTree.gen.ts
+package-lock.json

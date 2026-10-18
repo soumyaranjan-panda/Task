@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+.output/
+.vercel/
+.nitro/
+.tanstack/
+.vite/
+
+# Generated from content.config.json by scripts/sync-content.mjs
+public/content/
+
+# Local env
+.env
+.env.*
+!.env.example
+
+# Logs / editor / OS
+*.log
+.DS_Store

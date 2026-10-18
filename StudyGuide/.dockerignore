@@ -1,0 +1,13 @@
+node_modules
+dist
+.output
+.nitro
+.tanstack
+.vercel
+.vite
+.git
+.gitignore
+*.log
+.DS_Store
+.env
+public/content
