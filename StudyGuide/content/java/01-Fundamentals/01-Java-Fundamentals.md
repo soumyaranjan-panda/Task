@@ -28,7 +28,6 @@ Related reading: [OOP Concepts](02-OOP-Concepts.md), [JVM Architecture](03-JVM-A
 | Layer | Full name | Contents | Used by |
 |-------|-----------|----------|---------|
 | **JVM** | Java Virtual Machine | Specification + a concrete implementation (HotSpot, OpenJ9, GraalVM). Bytecode interpreter, JIT compilers (C1/C2), garbage collectors, runtime data areas, class loading subsystem. | Runs `.class` files |
-
 | **JRE** | Java Runtime Environment | JVM + the standard class libraries (`java.base`, etc.) needed to *run* applications. Historically a separate downloadable bundle. | End users running apps |
 | **JDK** | Java Development Kit | JRE + development tools: `javac`, `javadoc`, `jar`, `jlink`, `jshell`, `javap`, `jcmd`, `jmap`, `jstack`, `jconsole`. | Developers |
 

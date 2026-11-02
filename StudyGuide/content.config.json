@@ -122,6 +122,31 @@
       "icon": "cpu",
       "source": "content/java",
       "units": "pages"
+    },
+    {
+      "slug": "speckit-sdd",
+      "kind": "markdown-doc",
+      "title": "Speckit & SDD",
+      "subtitle": "Specification-Driven Development · Contract Testing · API Design",
+      "summary": "Complete guide to Specification-Driven Development with Speckit: spec-first workflow, contract testing (consumer-driven & provider-driven), OpenAPI/AsyncAPI patterns, CLI tricks, CI/CD integration, breaking change detection, mock generation, and interview reference.",
+      "icon": "code",
+      "source": "content/speckit-sdd/guide.md",
+      "fileName": "guide.md",
+      "units": "sections",
+      "parse": {
+        "splitLevel": 2,
+        "introTitle": "How to read this",
+        "idPrefix": "s",
+        "numberMin": 1,
+        "defaultPart": "Core Concepts",
+        "partRanges": [
+          { "max": 3, "name": "A · Foundations" },
+          { "max": 6, "name": "B · Workflow & CLI" },
+          { "max": 8, "name": "C · Specs & Contracts" },
+          { "max": 10, "name": "D · Testing & Patterns" },
+          { "max": 12, "name": "E · Tricks & Reference" }
+        ]
+      }
     }
   ]
 }
