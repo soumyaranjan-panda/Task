@@ -10,6 +10,7 @@ import {
   LayoutGrid,
   MoveHorizontal,
   Network,
+  Server,
   Sigma,
   type LucideIcon,
 } from "lucide-react";
@@ -30,9 +31,15 @@ const ICONS: Record<string, LucideIcon> = {
   grid: LayoutGrid,
   "move-horizontal": MoveHorizontal,
   network: Network,
+  server: Server,
   sigma: Sigma,
+  "book-open": BookOpen,
 };
 
 export function topicIcon(name: string | null | undefined): LucideIcon {
+  return (name && ICONS[name]) || BookOpen;
+}
+
+export function subjectIcon(name: string | null | undefined): LucideIcon {
   return (name && ICONS[name]) || BookOpen;
 }

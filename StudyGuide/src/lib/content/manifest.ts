@@ -27,8 +27,17 @@ export type DocParseOptions = {
 export type PageMeta = { id: string; title: string; file: string };
 export type ChapterMeta = { id: string; title: string; pages: PageMeta[] };
 
+export type SubjectMeta = {
+  slug: string;
+  title: string;
+  subtitle: string;
+  icon: string;
+  summary: string;
+};
+
 export type TopicMeta = {
   slug: string;
+  subject?: string;
   kind: TopicKind;
   title: string;
   subtitle: string | null;
@@ -49,6 +58,7 @@ export type TopicMeta = {
 export type Manifest = {
   generatedAt: string;
   defaultTopic: string | null;
+  subjects: SubjectMeta[];
   topics: TopicMeta[];
 };
 

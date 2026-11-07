@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, BookOpen, FileCode2, History, Search } from "lucide-react";
+import { ArrowRight, BookOpen, FileCode2, History, Search, ChevronRight } from "lucide-react";
 import { APP } from "@/lib/app-config";
 import {
   findPage,
@@ -8,10 +8,11 @@ import {
   unitNoun,
   useManifest,
   type TopicMeta,
+  type SubjectMeta,
 } from "@/lib/content/manifest";
 import { loadAllStudied, loadRecentTopics, type RecentTopic } from "@/lib/progress";
 import { useOpenSearch } from "@/lib/search-context";
-import { topicIcon } from "./topic-icon";
+import { topicIcon, subjectIcon } from "./topic-icon";
 
 const KIND_LABEL: Record<TopicMeta["kind"], string> = {
   "markdown-doc": "Guide",
@@ -25,11 +26,12 @@ function resumeLabel(topic: TopicMeta, id: string): string {
   return "Continue reading";
 }
 
-/** Landing page: resume what you were reading, then browse every topic. */
+/** Landing page: resume what you were reading, then browse every topic grouped by subject. */
 export function HomeDashboard() {
   const { manifest, error } = useManifest();
   const [studiedByTopic, setStudiedByTopic] = useState<Record<string, string[]>>({});
   const [recent, setRecent] = useState<RecentTopic[]>([]);
+  const [expandedSubjects, setExpandedSubjects] = useState<Set<string>>(new Set());
   const openSearch = useOpenSearch();
 
   // Progress and recents live in localStorage, so they are only readable client-side.
@@ -38,11 +40,22 @@ export function HomeDashboard() {
     setRecent(loadRecentTopics());
   }, []);
 
+  const subjects = useMemo(() => manifest?.subjects ?? [], [manifest]);
   const topics = useMemo(() => manifest?.topics ?? [], [manifest]);
   const topicBySlug = useMemo(
     () => new Map(topics.map((topic) => [topic.slug, topic])),
     [topics],
   );
+  const topicsBySubject = useMemo(() => {
+    const map = new Map<string, TopicMeta[]>();
+    for (const topic of topics) {
+      const subjectSlug = topic.subject ?? "general";
+      if (!map.has(subjectSlug)) map.set(subjectSlug, []);
+      map.get(subjectSlug)!.push(topic);
+    }
+    return map;
+  }, [topics]);
+
   const continuing = useMemo(
     () =>
       recent
@@ -57,6 +70,15 @@ export function HomeDashboard() {
     0,
   );
   const totalUnits = topics.reduce((sum, topic) => sum + (knownUnitCount(topic) ?? 0), 0);
+
+  const toggleSubject = (slug: string) => {
+    setExpandedSubjects((prev) => {
+      const next = new Set(prev);
+      if (next.has(slug)) next.delete(slug);
+      else next.add(slug);
+      return next;
+    });
+  };
 
   return (
     <main className="flex-1 min-h-0 overflow-x-hidden overflow-y-auto">
@@ -79,7 +101,8 @@ export function HomeDashboard() {
 
           {topics.length > 0 ? (
             <dl className="mt-7 flex flex-wrap gap-x-8 gap-y-3">
-              <Stat label="Subjects" value={topics.length} />
+              <Stat label="Subjects" value={subjects.length} />
+              <Stat label="Topics" value={topics.length} />
               {totalUnits > 0 ? <Stat label="Total items" value={totalUnits} /> : null}
               <Stat label="Ticked off" value={totalStudied} />
             </dl>
@@ -135,14 +158,47 @@ export function HomeDashboard() {
           </section>
         ) : null}
 
-        <section className="mt-12 grid gap-4 sm:grid-cols-2">
-          {topics.map((topic) => (
-            <TopicCard
-              key={topic.slug}
-              topic={topic}
-              studiedCount={studiedByTopic[topic.slug]?.length ?? 0}
-            />
-          ))}
+        <section className="mt-12 space-y-8">
+          {subjects.map((subject) => {
+            const subjectTopics = topicsBySubject.get(subject.slug) ?? [];
+            const isExpanded = expandedSubjects.has(subject.slug);
+            const Icon = subjectIcon(subject.icon);
+            return (
+              <div key={subject.slug} className="rounded-xl border border-border bg-surface overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => toggleSubject(subject.slug)}
+                  className="w-full flex items-center gap-3 p-4 hover:bg-surface-2 transition-colors"
+                  aria-expanded={isExpanded}
+                >
+                  <span className="grid size-10 shrink-0 place-items-center rounded-lg border border-border bg-bg text-primary">
+                    <Icon size={20} />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <h2 className="truncate font-medium leading-tight">{subject.title}</h2>
+                    <p className="truncate text-xs text-muted">{subject.subtitle}</p>
+                  </div>
+                  <span className="text-[11px] text-faint">{subjectTopics.length} topic{subjectTopics.length !== 1 ? "s" : ""}</span>
+                  <ChevronRight
+                    size={18}
+                    className={`shrink-0 text-faint transition-transform ${isExpanded ? "rotate-90" : ""}`}
+                  />
+                </button>
+
+                {isExpanded && (
+                  <div className="border-t border-border px-4 py-4 grid gap-4 sm:grid-cols-2">
+                    {subjectTopics.map((topic) => (
+                      <TopicCard
+                        key={topic.slug}
+                        topic={topic}
+                        studiedCount={studiedByTopic[topic.slug]?.length ?? 0}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </section>
 
         <p className="mt-14 text-xs text-faint">

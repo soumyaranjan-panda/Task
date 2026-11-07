@@ -283,6 +283,7 @@ async function buildMarkdownDoc(topic, index) {
   return {
     meta: {
       slug: topic.slug,
+      subject: topic.subject,
       kind: topic.kind,
       title: topic.title,
       subtitle: topic.subtitle ?? null,
@@ -311,6 +312,7 @@ async function buildHtmlDoc(topic) {
   return {
     meta: {
       slug: topic.slug,
+      subject: topic.subject,
       kind: topic.kind,
       title: topic.title,
       subtitle: topic.subtitle ?? null,
@@ -379,6 +381,7 @@ async function buildMarkdownBook(topic, rootGroupTitle, index) {
   return {
     meta: {
       slug: topic.slug,
+      subject: topic.subject,
       kind: topic.kind,
       title: topic.title,
       subtitle: topic.subtitle ?? null,
@@ -397,6 +400,7 @@ async function buildMarkdownBook(topic, rootGroupTitle, index) {
 async function main() {
   const config = JSON.parse(await readFile(CONFIG_FILE, "utf8"));
   const rootGroupTitle = config.rootGroupTitle ?? "Reference";
+  const subjects = config.subjects ?? [];
   const topics = [];
   const slugs = new Set();
   const index = [];
@@ -440,6 +444,7 @@ async function main() {
   const manifest = {
     generatedAt: new Date().toISOString(),
     defaultTopic: config.defaultTopic ?? topics[0]?.slug ?? null,
+    subjects,
     topics,
   };
 
